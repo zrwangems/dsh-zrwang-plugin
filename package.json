@@ -1,6 +1,6 @@
 {
   "name": "dsh-zrwang-plugin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "My DSH：DSH Desktop 右侧栏技能管理插件（北航版），按会话启用技能，内置北航学校访问配置。",
   "main": "./host/index.mjs",

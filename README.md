@@ -16,23 +16,23 @@ My DSH 是一个 DSH Desktop 右侧栏插件，用来按会话选择要启用的
 
 ## 安装
 
-需要 DSH Desktop `0.2.1-rc.1` 或更高版本，以及右侧栏插件 `dsh-better-sidebar`。
+需要 DSH Desktop `0.2.1-rc.1` 或更高版本。
 
-从 GitHub Release 安装：
+在 DSH 里打开「设置 → 插件 → 安装插件」，搜索并安装：
 
-```powershell
-dsh plugin --profile desktop add https://github.com/zrwangems/dsh-zrwang-plugin/releases/download/v0.0.1/dsh-zrwang-plugin-0.0.1.tgz
+```text
+dsh-zrwang-plugin
 ```
 
-也可以直接从 GitHub 仓库安装：
+也可以直接用命令行安装到当前 profile：
 
 ```powershell
-dsh plugin --profile desktop add github:zrwangems/dsh-zrwang-plugin
+dsh plugin --profile desktop add dsh-zrwang-plugin
 ```
 
 安装完成后重启 DSH，刷新页面，右侧栏的 `+` 里会出现「My DSH」。
 
-> npm 包暂未上架；请以上面的 GitHub 方式安装。
+> 右侧栏依赖 `dsh-better-sidebar`；如果没有，先安装它。
 
 ## 使用
 
