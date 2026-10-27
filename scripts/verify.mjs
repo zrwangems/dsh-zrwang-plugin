@@ -28,7 +28,7 @@ function readJson(file) {
 // ---- 1 包清单 ----
 const pkg = readJson(join(ROOT, 'package.json'))
 check('package.name', pkg.name === 'dsh-zrwang-plugin')
-check('package.version=0.0.1', pkg.version === '0.0.1', pkg.version)
+check('package.version=0.0.2', pkg.version === '0.0.2', pkg.version)
 check('package.main 存在', typeof pkg.main === 'string' && existsSync(join(ROOT, pkg.main)))
 check('exports["./client"]', pkg.exports?.['./client'] === './lib/client.js')
 check('dsh.bundle.patch', pkg.dsh?.bundle?.patch === './cordis.patch.yml')
