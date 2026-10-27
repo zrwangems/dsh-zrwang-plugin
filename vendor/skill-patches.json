@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "note": "vendor-skills.mjs 拷完技能后应用这些字面替换；find 必须命中，否则视为上游结构变化并失败。",
+  "patches": [
+    {
+      "id": "nature-downloader-config-dir",
+      "reason": "把下载器的配置目录从 ~/.config/lit-dl 收到 DSH 家目录 zrwang-plugin-config/nature-downloader",
+      "files": [
+        {
+          "path": "research/nature-skills/nature-downloader/src/config.py",
+          "replace": [
+            {
+              "find": "配置路径：~/.config/lit-dl/school.json",
+              "to": "配置路径：~/.dsh/zrwang-plugin-config/nature-downloader/school.json"
+            },
+            {
+              "find": "Path.home() / \".config\" / \"lit-dl\"",
+              "to": "Path.home() / \".dsh\" / \"zrwang-plugin-config\" / \"nature-downloader\""
+            }
+          ]
+        },
+        {
+          "path": "research/nature-skills/nature-downloader/scripts/configure_credentials.py",
+          "replace": [
+            {
+              "find": "Path.home() / \".config\" / \"lit-dl\"",
+              "to": "Path.home() / \".dsh\" / \"zrwang-plugin-config\" / \"nature-downloader\""
+            }
+          ]
+        },
+        {
+          "path": "research/nature-skills/nature-downloader/scripts/lib/credentials.mjs",
+          "replace": [
+            {
+              "find": "path.join(os.homedir(), \".config\", \"lit-dl\")",
+              "to": "path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\")"
+            }
+          ]
+        },
+        {
+          "path": "research/nature-skills/nature-downloader/scripts/lib/school-config.mjs",
+          "replace": [
+            {
+              "find": "path.join(os.homedir(), \".config\", \"lit-dl\")",
+              "to": "path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\")"
+            }
+          ]
+        },
+        {
+          "path": "research/nature-skills/nature-downloader/scripts/lib/settings.mjs",
+          "replace": [
+            {
+              "find": "path.join(os.homedir(), \".config\", \"lit-dl\")",
+              "to": "path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\")"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

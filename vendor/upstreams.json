@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "note": "技能上游清单。vendor-skills.mjs 按 layout 从 tarball 里取技能目录，落到 target 下；SHA 由 git ls-remote 解析并写入 upstreams.lock.json。",
+  "repos": [
+    {
+      "id": "matlab-agentic",
+      "repo": "matlab/matlab-agentic-toolkit",
+      "ref": "main",
+      "layout": "catalog",
+      "source": "skills-catalog",
+      "target": "engineering/matlab",
+      "label": "MATLAB Agentic Toolkit",
+      "order": [
+        "matlab-core",
+        "matlab-app-building",
+        "matlab-data-import-and-analysis",
+        "matlab-external-language-interfaces",
+        "matlab-programming",
+        "matlab-software-development",
+        "aerospace",
+        "ai-and-statistics",
+        "automotive",
+        "cloud-solutions",
+        "code-generation",
+        "computational-biology",
+        "computational-finance",
+        "control-systems",
+        "image-processing-and-computer-vision",
+        "math-and-optimization",
+        "parallel-computing",
+        "radar",
+        "reporting-and-database-access",
+        "rf-and-mixed-signal",
+        "robotics-and-autonomous-systems",
+        "signal-processing",
+        "test-and-measurement",
+        "wireless-communications"
+      ]
+    },
+    {
+      "id": "simulink",
+      "repo": "matlab/simulink-agentic-toolkit",
+      "ref": "main",
+      "layout": "catalog",
+      "source": "skills-catalog",
+      "target": "engineering/simulink",
+      "label": "Simulink Agentic Toolkit",
+      "order": [
+        "code-generation",
+        "control-systems",
+        "model-based-design-core",
+        "model-based-system-engineering",
+        "physical-modeling",
+        "real-time-simulation-and-testing",
+        "signal-processing",
+        "simulink-environment-fundamentals",
+        "simulink-modeling",
+        "simulink-simulation",
+        "verification-validation-and-test"
+      ]
+    },
+    {
+      "id": "polyspace",
+      "repo": "mathworks/polyspace-agentic-toolkit",
+      "ref": "main",
+      "layout": "catalog-flat",
+      "source": "skills-catalog",
+      "target": "engineering/polyspace",
+      "label": "Polyspace Agentic Toolkit"
+    },
+    {
+      "id": "playground",
+      "repo": "matlab/agent-skills-playground",
+      "ref": "main",
+      "layout": "skills",
+      "source": "skills",
+      "target": "engineering/playground",
+      "label": "MATLAB Agent Skills Playground"
+    },
+    {
+      "id": "nature",
+      "repo": "yuan1z0825/nature-skills",
+      "ref": "main",
+      "layout": "skills",
+      "source": "skills",
+      "target": "research/nature-skills",
+      "label": "Nature Skills",
+      "download": "git"
+    },
+    {
+      "id": "officecli",
+      "repo": "iOfficeAI/OfficeCLI",
+      "ref": "main",
+      "layout": "skills",
+      "source": "skills",
+      "target": "office/officecli",
+      "label": "OfficeCLI",
+      "download": "git"
+    },
+    {
+      "id": "ppt-master",
+      "repo": "hugohe3/ppt-master",
+      "ref": "main",
+      "layout": "dir",
+      "source": "skills/ppt-master",
+      "target": "office/ppt-master",
+      "label": "PPT Master",
+      "download": "git"
+    },
+    {
+      "id": "html-ppt",
+      "repo": "lewislulu/html-ppt-skill",
+      "ref": "main",
+      "layout": "root",
+      "target": "office/html-ppt",
+      "label": "HTML PPT Skill",
+      "download": "git"
+    },
+    {
+      "id": "zotero",
+      "repo": "local",
+      "layout": "local",
+      "source": "vendor/local/zotero-cli",
+      "target": "research/zotero-cli",
+      "label": "zotero-cli",
+      "note": "上游 54yyyu/zotero-mcp 仓库没有 skills/ 目录，使用仓库内 vendor/local/zotero-cli 的本地副本。"
+    }
+  ]
+}

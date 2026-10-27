@@ -1,0 +1,63 @@
+# Copyright 2026 The MathWorks, Inc.
+# optimization_preferences.yaml
+# Guides the optimization workflow. All entries are plain English.
+#
+# Usage:
+#   Copy this file to <your-project>/.custom_optimizations/optimization_preferences.yaml
+#   and edit the copy. The agent reads preferences from that project-level location.
+
+# ─── NEVER ──────────────────────────────────────────────────────────
+# Hard rules the agent MUST obey. If a candidate violates any of these,
+# it is blocked immediately. These are non-negotiable constraints.
+#
+# Examples:
+#   - "Do not inline any subsystem with 'Safety' in the name"
+#   - "Do not change data types on signals connected to CAN blocks"
+#   - "Never exceed 5% ROM increase in a single change"
+#   - "Do not modify the MotorControl subsystem"
+never: []
+
+# ─── SKIP ───────────────────────────────────────────────────────────
+# Categories of optimization the agent should not suggest at all.
+# These suppress entire technique areas (not gates — gates always run).
+#
+# Examples:
+#   - "Do not suggest data type changes"
+#   - "Skip lookup table optimizations"
+#   - "Do not suggest SIMD or parallel changes"
+skip: []
+
+# ─── KNOW ───────────────────────────────────────────────────────────
+# Domain knowledge and soft guidance. The agent considers these when
+# ranking suggestions and explaining rationale, but may proceed
+# differently if a better option exists.
+#
+# Examples:
+#   - "ControlLoop subsystem is the hot path — prioritize optimizations there"
+#   - "We compile with -Os on this target, speed flags may not help"
+#   - "Our models heavily use For Each subsystems"
+#   - "The CAN_Rx and CAN_Tx blocks must keep their exact signal types"
+know: []
+
+# ─── TOLERANCE ──────────────────────────────────────────────────────
+# Numerical correctness tolerance for the SIL/PIL verification gate.
+# The agent uses these to decide whether an optimization preserves the
+# model's numerical behavior. Both absolute and relative thresholds apply;
+# a signal passes if its error is within EITHER threshold.
+#
+# absolute: Maximum allowable absolute error on any signal (default: 1e-6)
+# relative: Maximum allowable relative error as a fraction of the golden
+#           reference signal's peak magnitude (default: 0.01 = 1%)
+#
+# Pass criterion per signal:
+#   effectiveTol = max(absolute, relative * signalRange)
+#   signalPasses = (absErr <= effectiveTol)
+#
+# Examples:
+#   Safety-critical control: { absolute: 1e-10, relative: 0.001 }
+#   Consumer electronics:    { absolute: 1e-4,  relative: 0.05 }
+#   Default (balanced):      { absolute: 1e-6,  relative: 0.01 }
+#
+# A scalar value is also accepted for backward compatibility
+# (treated as pure absolute tolerance with relative = 0).
+tolerance: {}

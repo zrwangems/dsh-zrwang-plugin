@@ -1,0 +1,40 @@
+# 新技能中文说明（旧 skills.zh.txt 没覆盖的 29 个）。
+# 格式同旧表：每行 `技能名<TAB>中文说明`。
+# 说明写给使用者看，用来判断「这个技能要不要开」。
+
+# ---- Polyspace（19）----
+generate-polyspace-test-xunit-tests	为 Polyspace Test 的 PSTUnit 框架生成 C/C++ 单元测试（测试计划 + 测试源码）
+polyspace-agentic-toolkit-setup	安装并配置 Polyspace Agentic Toolkit 与 MCP Server
+polyspace-configure-build-options	由编译命令或编译数据库生成 Polyspace 构建选项文件
+polyspace-configure-checkers	生成 Polyspace 检查器配置（MISRA/CWE 等编码标准）
+polyspace-documentation-entry-points	给出 Polyspace 文档入口与链接
+polyspace-find-checker-documentation	查找 Polyspace 检查器与编码规则的文档
+polyspace-find-option-documentation	查找 Polyspace 选项（-c、-target 等）的文档页
+polyspace-fix-findings	修复或给出 Polyspace 分析发现的处置理由
+polyspace-justify-in-code	在 C/C++ 源码里用注释标注 Polyspace 偏差理由
+polyspace-justify-in-database	在 Polyspace 结果数据库里记录审查状态与理由
+polyspace-query-justification-catalog	查询 Polyspace 预先批准的偏差理由库
+polyspace-review-findings	读取、解释并按严重性排序 Polyspace 缺陷与规范违规
+resolve-polyspace-root	解析 Polyspace 安装根目录路径
+review-polyspace-code-prover-results	读取并解释 Polyspace Code Prover 的检查结果（红/橙/绿/灰）
+run-polyspace-as-you-code-analysis	对单个 C/C++ 文件跑 Polyspace as You Code 静态分析
+run-polyspace-bug-finder-analysis	对多文件或整个组件跑 Polyspace Bug Finder 静态分析
+run-polyspace-code-prover-analysis	跑 Polyspace Code Prover，证明代码无运行时错误
+run-polyspace-test-xunit-tests	编译并运行 Polyspace Test 的 PSTUnit 测试，可收集覆盖率
+triage-orange-checks	分诊 Code Prover 橙色（未证明）检查，区分真问题与分析误差
+
+# ---- Simulink 实时仿真 / SLCI ----
+simulink-check-rapid-accelerator-compatibility	检查模型能否用 Rapid Accelerator 模式仿真，标出阻塞项
+simulink-collect-metrics	用 metric.Engine 采集并评估 Simulink 模型质量指标
+simulink-configure-real-time-model	把 Simulink 模型配置成 Simulink Real-Time 代码生成与部署
+simulink-configure-real-time-target	管理 Simulink Real-Time 目标机（连接、状态、IP、凭据）
+simulink-instrument-real-time-application	用 slrealtime.Instrument 配置实时应用的信号采集
+simulink-run-real-time-application	构建、部署、运行、调参与停止 Simulink Real-Time 应用
+slci-compatibility-analysis	检查模型是否兼容 SLCI 代码检查，并修复不兼容项
+slci-inspection-incompatibility-analysis	诊断 SLCI 代码检查失败，追溯不兼容的根因
+
+# ---- Nature 新增 ----
+nature-paper-xray	精读单篇论文，还原作者的设计思路、关键公式与证据边界
+nature-social-science	社科选题、文献梳理、论证组织与学术表达
+nature-paper2word	把 Markdown 论文导出为期刊/学位论文规范的 Word（公式、三线表、交叉引用、参考文献）
+researchwrite	研究计划、开题报告与科研项目申请书写作

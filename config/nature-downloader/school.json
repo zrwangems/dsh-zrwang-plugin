@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "school": {
+    "name": "北京航空航天大学",
+    "code": "buaa",
+    "configured_at": "",
+    "source": "plugin-default"
+  },
+  "auth": {
+    "type": "sso",
+    "sso_domain": "sso.buaa.edu.cn",
+    "carsi_entry": "https://idp.buaa.edu.cn/idp/shibboleth",
+    "carsi_sp_entity_id": null
+  },
+  "proxy": {
+    "type": null,
+    "ezproxy_url": null
+  },
+  "libraries": [
+    "Web of Science",
+    "ScienceDirect",
+    "Springer",
+    "IEEE Xplore",
+    "知网",
+    "ACS"
+  ],
+  "discovery": {
+    "resource_entry_url": "https://lib.buaa.edu.cn/",
+    "resource_portal_url": "https://lib.buaa.edu.cn/",
+    "carsi_idp": "https://idp.buaa.edu.cn/idp/shibboleth",
+    "cnki_url": "https://kns.cnki.net/"
+  },
+  "notes": "北京航空航天大学图书馆：统一身份认证 https://sso.buaa.edu.cn/；CARSI IdP https://idp.buaa.edu.cn/idp/shibboleth；图书馆资源入口 https://lib.buaa.edu.cn/"
+}

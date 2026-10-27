@@ -1,0 +1,17 @@
+# manifest.yaml — matlab-convert-aerospace-coordinates
+#
+# Copyright 2026 The MathWorks, Inc.
+
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "1.2"
+human-description: Convert aerospace coordinate frames, rotations, time, and units.
+matlab-release: ">=R2022a"
+required-tools:
+  - evaluate_matlab_code
+required-skills: []
+required-products:
+  - Aerospace Toolbox
+optional-products: []
+toolkit: matlab-agentic-toolkit

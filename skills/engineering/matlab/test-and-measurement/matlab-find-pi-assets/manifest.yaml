@@ -1,0 +1,15 @@
+# manifest.yaml — matlab-find-pi-assets
+# Copyright 2026 The MathWorks, Inc.
+
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "1.0"
+matlab-release: ">=R2022a"
+human-description: Find and query PI Data Archive tags and Asset Framework elements using piclient and afclient.
+required-tools:
+  - evaluate_matlab_code
+required-skills: []
+required-products:
+  - Industrial Communication Toolbox
+toolkit: matlab-agentic-toolkit

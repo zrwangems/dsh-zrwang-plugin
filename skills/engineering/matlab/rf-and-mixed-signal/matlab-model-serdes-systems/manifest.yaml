@@ -1,0 +1,22 @@
+# Copyright 2026 The MathWorks, Inc.
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "1.0"
+human-description: Model, simulate, and optimize Serializer/Deserializer (SerDes) systems — serial and parallel links — using MATLAB SerDes Toolbox.
+matlab-release: ">=R2024a"
+required-tools:
+  - evaluate_matlab_code
+  - check_matlab_code
+  - run_matlab_file
+required-skills: []
+required-products:
+  - SerDes Toolbox
+recommended-products:
+  - Simulink  # Required for time-domain simulation and IBIS-AMI model generation
+  - Signal Integrity Toolbox  # Required for AMI validation (serdes.AMI runner and AMI Simulink block)
+  - Simulink Coder  # Required for slbuild DLL generation (R2025b and earlier); optional in R2026a+ (serdes.AMIExport)
+  - Embedded Coder  # Required for slbuild DLL generation (R2025b and earlier); optional in R2026a+ (serdes.AMIExport)
+metadata:
+  author: MathWorks
+toolkit: matlab-agentic-toolkit

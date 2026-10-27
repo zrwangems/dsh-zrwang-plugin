@@ -1,0 +1,26 @@
+# 运行态：选择、会话、链接清单、备份、事件日志，不入库
+state/
+
+# 环境与密钥
+**/.env
+**/.env.local
+!**/.env.example
+!**/config.example.*
+
+# 技能运行产物
+**/projects/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.venv/
+**/node_modules/
+**/.DS_Store
+**/Thumbs.db
+
+# 过程文件
+*.log
+*.tmp
+
+# 由设置生成、可能含用户参数的技能运行时文件
+skills/research/nature-skills/nature-academic-search/mcp-server/config.toml
+skills/research/nature-skills/nature-image2ppt/config.yaml

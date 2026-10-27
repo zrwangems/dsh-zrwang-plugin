@@ -1,0 +1,18 @@
+# Copyright 2026 The MathWorks, Inc.
+# manifest.yaml — Tooling metadata for specifying-plant-models
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "1.1"
+human-description: "Specify plant models for closed-loop simulation: system specs, architecture, build plans, validation plans."
+matlab-release: ">=R2023a"
+required-tools:
+  - model_overview
+  - model_read
+  - model_query_params
+  - model_test
+required-skills: []
+required-products:
+  - Simulink
+optional-products: []
+toolkit: simulink-agentic-toolkit

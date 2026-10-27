@@ -1,0 +1,27 @@
+# Copyright 2026 The MathWorks, Inc.
+# manifest.yaml — Tooling metadata for inject-faults
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "1.0"
+human-description: "Add, configure, and simulate faults on Simulink model signals for robustness analysis and safety validation."
+matlab-release: ">=R2023b"
+required-tools:
+  - evaluate_matlab_code
+  - model_overview
+  - model_read
+  - model_edit
+required-skills: []
+reference-files:
+  - references/advanced-operations.md
+  - references/fault-behaviors.md
+  - references/preflight-and-adding-faults.md
+  - references/simulation-workflows.md
+  - references/test-case-integration.md
+  - references/triggers-and-conditionals.md
+required-products:
+  - Simulink
+  - Simulink Fault Analyzer
+optional-products: []
+toolkit: simulink-agentic-toolkit
+# Copyright 2026 The MathWorks, Inc.

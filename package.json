@@ -1,0 +1,63 @@
+{
+  "name": "dsh-zrwang-plugin",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "My DSH：按会话管理技能注入的 DSH 插件；右侧栏逐级选择扩展，选中后才把插件仓库里的技能以目录联接挂到项目 .agents/skills。",
+  "main": "./host/index.mjs",
+  "exports": {
+    ".": "./host/index.mjs",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "host",
+    "client",
+    "lib",
+    "catalog",
+    "config",
+    "skills",
+    "vendor",
+    "scripts",
+    "locale",
+    "docs",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "icon.png"
+  ],
+  "scripts": {
+    "vendor": "node scripts/vendor-skills.mjs",
+    "catalog": "node scripts/gen-catalog.mjs",
+    "build": "node scripts/build-client.mjs",
+    "verify": "node scripts/verify.mjs",
+    "smoke": "node scripts/smoke-host.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "bundle",
+    "skills",
+    "better-sidebar"
+  ],
+  "license": "MIT",
+  "icon": "./icon.svg",
+  "dsh": {
+    "manifestVersion": 1,
+    "engines": {
+      "dsh": ">=0.2.1-rc.1"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "dsh-better-sidebar"
+      ]
+    }
+  }
+}

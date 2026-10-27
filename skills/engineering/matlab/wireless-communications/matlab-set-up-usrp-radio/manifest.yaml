@@ -1,0 +1,15 @@
+# Copyright 2026 The MathWorks, Inc.
+# manifest.yaml — Tooling metadata for matlab-set-up-usrp-radio
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "1.0"
+human-description: Set up and verify NI USRP radios for use with Wireless Testbench.
+matlab-release: ">=R2026a"
+required-tools:
+  - evaluate_matlab_code
+required-skills: []
+required-products:
+  - Wireless Testbench
+  - Wireless Testbench Support Package for NI USRP Radios
+toolkit: matlab-agentic-toolkit

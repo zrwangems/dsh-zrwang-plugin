@@ -1,0 +1,5 @@
+* text=auto
+# 技能实体按上游原样保存，禁止换行转换，保证可重复比对
+skills/** -text
+vendor/** -text
+lib/client.js text eol=lf

@@ -1,0 +1,1953 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-27T03:29:48.266Z",
+  "repos": [
+    {
+      "id": "matlab-agentic",
+      "repo": "matlab/matlab-agentic-toolkit",
+      "ref": "main",
+      "sha": "7c28d73f275d98c00c21adab6577d6113264472e",
+      "label": "MATLAB Agentic Toolkit",
+      "target": "engineering/matlab",
+      "count": 156,
+      "skills": [
+        {
+          "dir": "matlab-compute-aerospace-environment",
+          "name": "matlab-compute-aerospace-environment",
+          "category": "aerospace",
+          "path": "engineering/matlab/aerospace/matlab-compute-aerospace-environment",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-convert-aerospace-coordinates",
+          "name": "matlab-convert-aerospace-coordinates",
+          "category": "aerospace",
+          "path": "engineering/matlab/aerospace/matlab-convert-aerospace-coordinates",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-analyze-reliability",
+          "name": "matlab-analyze-reliability",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-analyze-reliability",
+          "description": "Use this skill when fitting accelerated life models, computing mean time to failure (MTTF), B10 life and similar quantities, fitting life distributions like Weibull for reliability analysis, comparing distribution fits, computing confidence intervals on reliability quantities with bootstrapping, performing lifetime prediction, computing failure rates, plotting Kaplan-Meier curves, computing survival functions, or doing reliability analysis."
+        },
+        {
+          "dir": "matlab-classify-tabular-data",
+          "name": "matlab-classify-tabular-data",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-classify-tabular-data",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-deploy-embedded-ai",
+          "name": "matlab-deploy-embedded-ai",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-deploy-embedded-ai",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-engineer-tabular-features",
+          "name": "matlab-engineer-tabular-features",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-engineer-tabular-features",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-fit-curve",
+          "name": "matlab-fit-curve",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-fit-curve",
+          "description": "Fit curves and surfaces interactively with the Curve Fitter app for a complete no-code fitting workflow. Invoke this skill when the Curve Fitter app, cftool, curveFitter, or \"curve fitting tool/app\" is mentioned in any way. Also use when exploring or comparing fit types (regression, interpolation, smoothing, splines, custom equations); excluding outliers interactively; iterating on a fitting workflow; help choosing a fit type; and exporting to a figure, generating MATLAB code, fits to the workspace, and to Simulink Lookup Tables."
+        },
+        {
+          "dir": "matlab-import-external-ai-model",
+          "name": "matlab-import-external-ai-model",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-import-external-ai-model",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-interpret-machine-learning-model",
+          "name": "matlab-interpret-machine-learning-model",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-interpret-machine-learning-model",
+          "description": "Interpret and explain a trained tabular machine-learning model (classification or regression) in MATLAB. Find which predictors, features, or columns matter most; explain why the model made a specific prediction, including diagnosing predictions it got wrong; show how a predictor affects the output; and compare how the model behaves across cohorts or subgroups. Uses model-agnostic techniques and model-native measures, and works on custom models (such as a dlnetwork) through a prediction function handle. Use for model interpretability, explainability, and feature-importance questions on tabular data, not for training, tuning, feature selection, deploying models, or models trained on image, text, signal, or other non-tabular data."
+        },
+        {
+          "dir": "matlab-train-network",
+          "name": "matlab-train-network",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-train-network",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-experiment-manager",
+          "name": "matlab-use-experiment-manager",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-use-experiment-manager",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-machine-learning-apps",
+          "name": "matlab-use-machine-learning-apps",
+          "category": "ai-and-statistics",
+          "path": "engineering/matlab/ai-and-statistics/matlab-use-machine-learning-apps",
+          "description": "Use when the user wants to train, compare, or export machine learning models using Classification Learner or Regression Learner — including opening the app, loading data, training models, evaluating metrics, comparing results, visualizing plots, testing on held-out data, exploring model interpretability, and exporting trained models. Programmatic access to Classification Learner and Regression Learner apps via AppController."
+        },
+        {
+          "dir": "matlab-cosimulate-sumo-simulink",
+          "name": "matlab-cosimulate-sumo-simulink",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/matlab-cosimulate-sumo-simulink",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-import-driving-data",
+          "name": "matlab-import-driving-data",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/matlab-import-driving-data",
+          "description": "Import recorded driving sensor data (GPS, camera, lidar, actor tracks, lanes) into scenariobuilder.* objects (GPSData, CameraData, LidarData, ActorTrackData, Trajectory, laneData) and run preprocessing — synchronize, offset correction, crop, normalizeTimestamps, convertTimestamps. Also: compute actor tracks from lidar when no annotations exist, attach camera/lidar mounting + intrinsics, export to MAT/workspace/timetable/script. Use for raw driving dataset files (KITTI, nuScenes, Waymo, Pandaset, ROS/ROS2 bags, .mat, .csv, .mp4) or driving/vehicle/sensor logs that need wrapping. drivingLogAnalyzer (DLA) is OPT-IN ONLY — invoke only on explicit user request ('DLA', 'open in DLA', 'inspect/explore/analyze the recording') or reported sensor problem (sync drift, timestamp mismatch, overlay misalignment). NEVER auto-launch DLA after wrapping (Rule 0). For 'build scenario / export to RoadRunner / drivingScenario / OpenSCENARIO / Unreal / simulate', hand off to matlab-use-scenario-builder."
+        },
+        {
+          "dir": "matlab-use-ncap-protocol",
+          "name": "matlab-use-ncap-protocol",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/matlab-use-ncap-protocol",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-scenario-builder",
+          "name": "matlab-use-scenario-builder",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/matlab-use-scenario-builder",
+          "description": "Generate driving scenes, scenarios, road surfaces, and 3D content from scenariobuilder.* sensor data (GPS, camera, lidar, actor tracks) using Scenario Builder for Automated Driving Toolbox. BUILD, EXPORT, or AUGMENT a virtual scenario/scene/map: ego or actor trajectories, trajectory smoothing, OpenCRG road-surface extraction, 3D asset generation, static-object placement, point-cloud georeferencing + elevation, lane-based ego localization, sensor-fusion tracking, scenario-event extraction (cut-ins, hard brakes, near-misses, ADAS disengagements), or export to RoadRunner, drivingScenario, OpenDRIVE, OpenCRG, OpenSCENARIO, or Unreal Engine. Also: log-to-scenario, scenario harvesting, accident/near-miss reconstruction, SOTIF (ISO 21448) and ISO 26262 scenario coverage, USGS-aerial-lidar augmentation, traffic-sign placement, vision-based vehicle classification for actor assets. NOT for raw-data import or multi-sensor sync/crop/offset/timestamp normalization — route those to matlab-import-driving-data."
+        },
+        {
+          "dir": "roadrunner-asset-mapping",
+          "name": "roadrunner-asset-mapping",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-asset-mapping",
+          "description": ">"
+        },
+        {
+          "dir": "roadrunner-build-scenario-from-osc",
+          "name": "roadrunner-build-scenario-from-osc",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-build-scenario-from-osc",
+          "description": ">"
+        },
+        {
+          "dir": "roadrunner-convert-lanelet2-to-rrhd",
+          "name": "roadrunner-convert-lanelet2-to-rrhd",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-convert-lanelet2-to-rrhd",
+          "description": ">"
+        },
+        {
+          "dir": "roadrunner-core",
+          "name": "roadrunner-core",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-core",
+          "description": "Foundation skill for all RoadRunner workflows: MATLAB path setup, connection, project/scene/scenario lifecycle, world settings, handle management, status, and close. Use when connecting to RoadRunner, managing projects/scenes/scenarios, setting world origin, checking status, closing RoadRunner, or when any downstream RoadRunner skill needs initialization."
+        },
+        {
+          "dir": "roadrunner-import-scene",
+          "name": "roadrunner-import-scene",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-import-scene",
+          "description": ">"
+        },
+        {
+          "dir": "roadrunner-rrhd-authoring",
+          "name": "roadrunner-rrhd-authoring",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-rrhd-authoring",
+          "description": ">"
+        },
+        {
+          "dir": "roadrunner-scenario-authoring",
+          "name": "roadrunner-scenario-authoring",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-scenario-authoring",
+          "description": ">"
+        },
+        {
+          "dir": "roadrunner-scenario-simulating",
+          "name": "roadrunner-scenario-simulating",
+          "category": "automotive",
+          "path": "engineering/matlab/automotive/roadrunner-scenario-simulating",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-share-content",
+          "name": "matlab-share-content",
+          "category": "cloud-solutions",
+          "path": "engineering/matlab/cloud-solutions/matlab-share-content",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-deploy-ai-model",
+          "name": "matlab-deploy-ai-model",
+          "category": "code-generation",
+          "path": "engineering/matlab/code-generation/matlab-deploy-ai-model",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-deploy-embedded-code",
+          "name": "matlab-deploy-embedded-code",
+          "category": "code-generation",
+          "path": "engineering/matlab/code-generation/matlab-deploy-embedded-code",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-generate-code",
+          "name": "matlab-generate-code",
+          "category": "code-generation",
+          "path": "engineering/matlab/code-generation/matlab-generate-code",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-optimize-gpu-codegen",
+          "name": "matlab-optimize-gpu-codegen",
+          "category": "code-generation",
+          "path": "engineering/matlab/code-generation/matlab-optimize-gpu-codegen",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-review-fi-object-code",
+          "name": "matlab-review-fi-object-code",
+          "category": "code-generation",
+          "path": "engineering/matlab/code-generation/matlab-review-fi-object-code",
+          "description": "Reviews MATLAB fixed-point (fi) code for performance, code generation efficiency, and correctness. Identifies antipatterns and suggests idiomatic improvements. Use when reviewing fi, fimath, numerictype, or quantizenumeric code."
+        },
+        {
+          "dir": "simbiology-build-model",
+          "name": "simbiology-build-model",
+          "category": "computational-biology",
+          "path": "engineering/matlab/computational-biology/simbiology-build-model",
+          "description": "Build, modify, and diagram SimBiology models — API reference, helper functions, and layout patterns. Use when constructing or editing models programmatically or visually."
+        },
+        {
+          "dir": "simbiology-fit-model",
+          "name": "simbiology-fit-model",
+          "category": "computational-biology",
+          "path": "engineering/matlab/computational-biology/simbiology-fit-model",
+          "description": "Fit SimBiology model parameters to data — fitproblem, population NLME, virtual patients, and NCA. Use when asked to fit, estimate, calibrate, or compute PK metrics."
+        },
+        {
+          "dir": "simbiology-simulate-model",
+          "name": "simbiology-simulate-model",
+          "category": "computational-biology",
+          "path": "engineering/matlab/computational-biology/simbiology-simulate-model",
+          "description": "Simulate SimBiology models — ODE, stochastic (SSA), scenarios, and sensitivity analysis. Use when asked to run, simulate, predict, explore what-if, or identify influential parameters."
+        },
+        {
+          "dir": "matlab-access-datafeed",
+          "name": "matlab-access-datafeed",
+          "category": "computational-finance",
+          "path": "engineering/matlab/computational-finance/matlab-access-datafeed",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-optimize-portfolio",
+          "name": "matlab-optimize-portfolio",
+          "category": "computational-finance",
+          "path": "engineering/matlab/computational-finance/matlab-optimize-portfolio",
+          "description": "Help users formulate and solve portfolio optimization problems using Financial Toolbox's Portfolio object. Covers mean-variance (Markowitz), maximum Sharpe ratio (tangency), and efficient frontier workflows. Use when users ask about portfolio optimization, Markowitz, efficient frontier, Sharpe ratio, or attempt to use generic solvers (quadprog, fmincon, ga, problem-based optimize) for portfolio problems."
+        },
+        {
+          "dir": "matlab-price-instrument",
+          "name": "matlab-price-instrument",
+          "category": "computational-finance",
+          "path": "engineering/matlab/computational-finance/matlab-price-instrument",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-spreadsheet-link",
+          "name": "matlab-use-spreadsheet-link",
+          "category": "computational-finance",
+          "path": "engineering/matlab/computational-finance/matlab-use-spreadsheet-link",
+          "description": "Exchange data between Excel and MATLAB using Spreadsheet Link VBA macros and worksheet functions. Use when writing Excel VBA macros that call MLPutMatrix, MLGetMatrix, MLPutVar, MLGetVar, MLPutRanges, MLEvalString, MLGetFigure, or MatlabRequest."
+        },
+        {
+          "dir": "matlab-extract-battery-features",
+          "name": "matlab-extract-battery-features",
+          "category": "control-systems",
+          "path": "engineering/matlab/control-systems/matlab-extract-battery-features",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-extract-rotating-machinery-features",
+          "name": "matlab-extract-rotating-machinery-features",
+          "category": "control-systems",
+          "path": "engineering/matlab/control-systems/matlab-extract-rotating-machinery-features",
+          "description": "Extract features from signals collected on rotating machinery components, including motors, pumps, fans, gears, bearings, and shafts. Signals can include vibration, electrical, or environmental sensor measurements. Use when developing and deploying condition monitoring and fault detection applications for rotating machinery, including industrial machines, electrical vehicles, internal combustion engines, turbines, and drive trains."
+        },
+        {
+          "dir": "matlab-identify-linear-system",
+          "name": "matlab-identify-linear-system",
+          "category": "control-systems",
+          "path": "engineering/matlab/control-systems/matlab-identify-linear-system",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-analyze-spectral-images",
+          "name": "matlab-analyze-spectral-images",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-analyze-spectral-images",
+          "description": ">-"
+        },
+        {
+          "dir": "matlab-display-image",
+          "name": "matlab-display-image",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-display-image",
+          "description": "Display images and annotations for image processing, computer vision, and visual inspection. Use when displaying images with imageshow, creating image viewers with viewer2d, adding Regions of Interest (ROI) or annotations, overlaying masks or segmentations, streaming video frames, or building apps with image display."
+        },
+        {
+          "dir": "matlab-display-volume",
+          "name": "matlab-display-volume",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-display-volume",
+          "description": "Display 3-D image volumes, medical image volumes, surface meshes, and annotations for 3-D image processing. Use when displaying 3-D images or isosurfaces with volshow, creating volume viewers with viewer3d, adding Regions of Interest (ROI) or annotations, overlaying masks or segmentations, streaming volumetric data, or building apps with volume display."
+        },
+        {
+          "dir": "matlab-integrate-pytorch-vision",
+          "name": "matlab-integrate-pytorch-vision",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-integrate-pytorch-vision",
+          "description": ">-"
+        },
+        {
+          "dir": "matlab-model-optics",
+          "name": "matlab-model-optics",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-model-optics",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-process-images",
+          "name": "matlab-process-images",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-process-images",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-read-write-point-cloud-file",
+          "name": "matlab-read-write-point-cloud-file",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-read-write-point-cloud-file",
+          "description": "Read and write 3-D point cloud data using Lidar Toolbox file I/O. Covers PLY, PCD, LAS/LAZ, PCAP (Velodyne/Ouster/Hesai), E57, and IDC (Ibeo) formats. Use when loading point clouds from disk, saving to disk, choosing the correct reader or writer for a file format, extracting or preserving lidar point attributes, reading Ibeo IDC sensor recordings, or converting between formats."
+        },
+        {
+          "dir": "matlab-recognize-text",
+          "name": "matlab-recognize-text",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-recognize-text",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-register-point-clouds",
+          "name": "matlab-register-point-clouds",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-register-point-clouds",
+          "description": "Register 3-D point clouds using ICP, NDT, LOAM, FGR, phase correlation, and CPD algorithms. Use when registering or aligning 3-D point clouds, choosing a registration algorithm, tuning registration parameters, preprocessing point clouds for registration or combining point clouds after registration."
+        },
+        {
+          "dir": "matlab-use-visual-inspection",
+          "name": "matlab-use-visual-inspection",
+          "category": "image-processing-and-computer-vision",
+          "path": "engineering/matlab/image-processing-and-computer-vision/matlab-use-visual-inspection",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-solve-optimization",
+          "name": "matlab-solve-optimization",
+          "category": "math-and-optimization",
+          "path": "engineering/matlab/math-and-optimization/matlab-solve-optimization",
+          "description": ">-"
+        },
+        {
+          "dir": "matlab-solve-pde",
+          "name": "matlab-solve-pde",
+          "category": "math-and-optimization",
+          "path": "engineering/matlab/math-and-optimization/matlab-solve-pde",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-symbolic-math",
+          "name": "matlab-use-symbolic-math",
+          "category": "math-and-optimization",
+          "path": "engineering/matlab/math-and-optimization/matlab-use-symbolic-math",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-apply-theme",
+          "name": "matlab-apply-theme",
+          "category": "matlab-app-building",
+          "path": "engineering/matlab/matlab-app-building/matlab-apply-theme",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-build-app",
+          "name": "matlab-build-app",
+          "category": "matlab-app-building",
+          "path": "engineering/matlab/matlab-app-building/matlab-build-app",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-build-chart",
+          "name": "matlab-build-chart",
+          "category": "matlab-app-building",
+          "path": "engineering/matlab/matlab-app-building/matlab-build-chart",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-create-live-script",
+          "name": "matlab-create-live-script",
+          "category": "matlab-core",
+          "path": "engineering/matlab/matlab-core/matlab-create-live-script",
+          "description": "Create, edit, and run plain-text MATLAB live scripts (.m files) with rich text formatting, LaTeX equations, section breaks, and inline figures. Use when generating tutorials, analysis notebooks, reports, documentation, or educational content, when modifying existing live scripts, or when converting existing binary .mlx files to .m for version control. Requires R2025a+."
+        },
+        {
+          "dir": "matlab-debug-code",
+          "name": "matlab-debug-code",
+          "category": "matlab-core",
+          "path": "engineering/matlab/matlab-core/matlab-debug-code",
+          "description": "Diagnose MATLAB errors and unexpected behavior. Breakpoints, workspace inspection, try-catch diagnostics, and common error patterns. Use when debugging functions, tracing errors, inspecting variables, or diagnosing runtime failures."
+        },
+        {
+          "dir": "matlab-install-products",
+          "name": "matlab-install-products",
+          "category": "matlab-core",
+          "path": "engineering/matlab/matlab-core/matlab-install-products",
+          "description": "Deterministic workflow to download MATLAB Package Manager (mpm) and install MathWorks products from the OS command line with consistent, repeatable behavior. Use when installing MATLAB, Simulink, toolboxes, or support packages via command line, or setting up scripted installations for CI/CD, containers, or fleet provisioning."
+        },
+        {
+          "dir": "matlab-list-products",
+          "name": "matlab-list-products",
+          "category": "matlab-core",
+          "path": "engineering/matlab/matlab-core/matlab-list-products",
+          "description": "Show all installed MATLAB products and support packages for a given MATLAB installation folder. Use when listing, checking, or verifying what products or support packages are in a MATLAB installation."
+        },
+        {
+          "dir": "matlab-read-documentation",
+          "name": "matlab-read-documentation",
+          "category": "matlab-core",
+          "path": "engineering/matlab/matlab-core/matlab-read-documentation",
+          "description": "Guides the agent to reference official MathWorks Documentation and Help. Determine correct function syntax and workflows from user guides when deeper context is needed. Minimize iterations and repetitive trial and error.  Use this skill to: Identify correct syntax and configuration details. Retrieve relevant, version-specific (or release-specific) information from official documentation. Consult user guides when conceptual or workflow context is needed. Apply best practices."
+        },
+        {
+          "dir": "matlab-review-code",
+          "name": "matlab-review-code",
+          "category": "matlab-core",
+          "path": "engineering/matlab/matlab-core/matlab-review-code",
+          "description": "Review MATLAB code for quality, performance, maintainability, and adherence to MathWorks coding standards. Uses check_matlab_code and matlab_coding_guidelines. Use when reviewing code, checking style, finding code smells, assessing quality, or preparing code for handoff or publication."
+        },
+        {
+          "dir": "matlab-analyze-data",
+          "name": "matlab-analyze-data",
+          "category": "matlab-data-import-and-analysis",
+          "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-analyze-data",
+          "description": "Analyze data using MATLAB. Use when the task involves tables, timetables, time-series data, numeric arrays, sensor matrices, or gridded data — including but not limited to exploring, row filtering, sorting, cleaning, transforming, aggregating, smoothing, padding, trimming, and answering questions about data. MATLAB provides extensive, easy-to-use built-in functions for these workflows with no additional products required."
+        },
+        {
+          "dir": "matlab-choose-big-data-solution",
+          "name": "matlab-choose-big-data-solution",
+          "category": "matlab-data-import-and-analysis",
+          "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-choose-big-data-solution",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-import-export-data",
+          "name": "matlab-import-export-data",
+          "category": "matlab-data-import-and-analysis",
+          "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-import-export-data",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-secure-credentials",
+          "name": "matlab-secure-credentials",
+          "category": "matlab-data-import-and-analysis",
+          "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-secure-credentials",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-call-python",
+          "name": "matlab-call-python",
+          "category": "matlab-external-language-interfaces",
+          "path": "engineering/matlab/matlab-external-language-interfaces/matlab-call-python",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-upgrade-mex-ic",
+          "name": "matlab-upgrade-mex-ic",
+          "category": "matlab-external-language-interfaces",
+          "path": "engineering/matlab/matlab-external-language-interfaces/matlab-upgrade-mex-ic",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-validate-function-arguments",
+          "name": "matlab-validate-function-arguments",
+          "category": "matlab-programming",
+          "path": "engineering/matlab/matlab-programming/matlab-validate-function-arguments",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-configure-toml-project",
+          "name": "matlab-configure-toml-project",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-configure-toml-project",
+          "description": "|"
+        },
+        {
+          "dir": "matlab-instrument-opentelemetry-tracing",
+          "name": "matlab-instrument-opentelemetry-tracing",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-instrument-opentelemetry-tracing",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-modernize-code",
+          "name": "matlab-modernize-code",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-modernize-code",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-optimize-memory",
+          "name": "matlab-optimize-memory",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-optimize-memory",
+          "description": "Guides the 7-step MATLAB memory optimization workflow: baseline, profile, identify, optimize, measure, verify, report. Use when asked to reduce MATLAB memory usage, find memory bottlenecks, fix out-of-memory errors, or optimize memory-intensive code."
+        },
+        {
+          "dir": "matlab-optimize-performance",
+          "name": "matlab-optimize-performance",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-optimize-performance",
+          "description": "Read BEFORE optimizing any MATLAB code for speed. Without this workflow, agents commonly optimize the wrong target, fabricate speedup claims without measurement, or introduce regressions. Guides the 7-step workflow: baseline, profile, identify, optimize, measure, verify, report."
+        },
+        {
+          "dir": "matlab-package-toolbox",
+          "name": "matlab-package-toolbox",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-package-toolbox",
+          "description": "Turn raw MATLAB code into a published .mltbx toolbox — full pipeline from scope definition through packaging and release. Drives 8 phases with human checkpoints, enforcing ordering and dependencies. Use when asked to package, create a toolbox, or run the files-to-package pipeline."
+        },
+        {
+          "dir": "matlab-run-tests",
+          "name": "matlab-run-tests",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-run-tests",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-package-manager",
+          "name": "matlab-use-package-manager",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-use-package-manager",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-write-help",
+          "name": "matlab-write-help",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-write-help",
+          "description": "Generate or improve MATLAB help text (documentation comments) for a function, class, or script file following MathWorks standards (H1 line, syntax paragraphs, See Also, 75-char lines). Read BEFORE writing MATLAB help — default patterns (Inputs:/Outputs: lists, block comments, uppercase See Also) produce non-conforming output. Use when writing, rewriting, fixing, or reviewing MATLAB help comments or function documentation."
+        },
+        {
+          "dir": "matlab-write-performance-tests",
+          "name": "matlab-write-performance-tests",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-write-performance-tests",
+          "description": "Writes MATLAB performance tests using the matlab.perftest.TestCase framework. Use when asked to write, create, or add performance tests for MATLAB code, benchmark functions, measure execution time with statistical rigor, or use runperf."
+        },
+        {
+          "dir": "matlab-write-tests",
+          "name": "matlab-write-tests",
+          "category": "matlab-software-development",
+          "path": "engineering/matlab/matlab-software-development/matlab-write-tests",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-diagnose-parfor",
+          "name": "matlab-diagnose-parfor",
+          "category": "parallel-computing",
+          "path": "engineering/matlab/parallel-computing/matlab-diagnose-parfor",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-discover-clusters",
+          "name": "matlab-discover-clusters",
+          "category": "parallel-computing",
+          "path": "engineering/matlab/parallel-computing/matlab-discover-clusters",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-set-up-worker-state",
+          "name": "matlab-set-up-worker-state",
+          "category": "parallel-computing",
+          "path": "engineering/matlab/parallel-computing/matlab-set-up-worker-state",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-setup-gpu",
+          "name": "matlab-setup-gpu",
+          "category": "parallel-computing",
+          "path": "engineering/matlab/parallel-computing/matlab-setup-gpu",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-thread-pool",
+          "name": "matlab-use-thread-pool",
+          "category": "parallel-computing",
+          "path": "engineering/matlab/parallel-computing/matlab-use-thread-pool",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-design-radar",
+          "name": "matlab-design-radar",
+          "category": "radar",
+          "path": "engineering/matlab/radar/matlab-design-radar",
+          "description": "Launch and control the MATLAB Radar Designer app programmatically via MCP. Use when designing radar systems, configuring parameters, comparing radar types, analyzing performance metrics, or managing radar design sessions."
+        },
+        {
+          "dir": "matlab-design-radar-waveform",
+          "name": "matlab-design-radar-waveform",
+          "category": "radar",
+          "path": "engineering/matlab/radar/matlab-design-radar-waveform",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-import-tracking-data",
+          "name": "matlab-import-tracking-data",
+          "category": "radar",
+          "path": "engineering/matlab/radar/matlab-import-tracking-data",
+          "description": "Import raw data (CSV, XLSX, TXT, or MATLAB tables) into formats used by Sensor Fusion and Tracking Toolbox. Handles both ground truth trajectories and sensor detection data. For truth: builds trackingScenarioRecording, tuning timetable, truthlog, or converted table. For sensor data: builds task-oriented dataFormat structs (preferred) or objectDetection arrays (legacy). Use when importing flight logs, GPS logs, radar detections, IR measurements, lidar/camera bounding boxes, ADS-B data, AIS ship tracks, or any recorded data for use with trackers, filter tuning, or tracker evaluation."
+        },
+        {
+          "dir": "matlab-simulate-radar-detections",
+          "name": "matlab-simulate-radar-detections",
+          "category": "radar",
+          "path": "engineering/matlab/radar/matlab-simulate-radar-detections",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-connect-databricks",
+          "name": "matlab-connect-databricks",
+          "category": "reporting-and-database-access",
+          "path": "engineering/matlab/reporting-and-database-access/matlab-connect-databricks",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-generate-report",
+          "name": "matlab-generate-report",
+          "category": "reporting-and-database-access",
+          "path": "engineering/matlab/reporting-and-database-access/matlab-generate-report",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-database",
+          "name": "matlab-use-database",
+          "category": "reporting-and-database-access",
+          "path": "engineering/matlab/reporting-and-database-access/matlab-use-database",
+          "description": "Reads from, writes to, and manages relational databases using MATLAB Database Toolbox. Use when connecting to databases, reading data with sqlread or fetch, filtering with rowfilter, writing with sqlwrite, updating with sqlupdate, executing SQL statements, managing transactions with commit and rollback, mapping MATLAB classes to tables with ORM (Mappable, ormread, ormwrite, ormupdate), or performing any database operation from MATLAB. Triggers on: database, SQL, sqlread, sqlwrite, sqlupdate, fetch, execute, rowfilter, RowFilter, ORM, Mappable, ormread, ormwrite, ormupdate, orm2sql, transaction, commit, rollback, Database Toolbox, PostgreSQL, MySQL, SQLite, SQL Server, Oracle, database connection, database table, query database, insert data, update rows, delete rows, stored procedure, prepared statement, odbc, databaseConnectionOptions, datasource, data source, DSN, connection string, multithreaded, parallel."
+        },
+        {
+          "dir": "matlab-use-duckdb",
+          "name": "matlab-use-duckdb",
+          "category": "reporting-and-database-access",
+          "path": "engineering/matlab/reporting-and-database-access/matlab-use-duckdb",
+          "description": "Use DuckDB from MATLAB via Database Toolbox (R2026a+) as a non-math operations engine on large tabular files (CSV/Parquet/JSON) and as a zero-config embedded database. Use when connecting to DuckDB, querying CSV, Parquet, and JSON files directly with SQL, reducing or profiling large data before MATLAB analysis, creating portable development databases, or installing DuckDB extensions. Triggers on: DuckDB, duckdb(), large CSV/Parquet/JSON, file too large for readtable, filter/aggregate at source, deduplicate, reduce before analysis, profile large file, persistent file import, analytical engine, SQL on CSV, SQL on Parquet, SQL on JSON, query CSV with SQL, query Parquet with SQL, run SQL on files, SQL queries on files, query files directly, SQL without database, in-process SQL."
+        },
+        {
+          "dir": "matlab-analyze-ams-waveform",
+          "name": "matlab-analyze-ams-waveform",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-ams-waveform",
+          "description": "Analyze AMS waveform data using Mixed-Signal Blockset utilities: phase noise measurement, clock jitter, anti-aliased resampling, timing measurements, lock time, INL/DNL, ADC/DAC calibration, HSpice import. Use when analyzing time-domain voltage from PLL/VCO/clock simulations, measuring phase noise from variable-step solver output, computing jitter, or resampling non-uniform data."
+        },
+        {
+          "dir": "matlab-analyze-antenna-structures",
+          "name": "matlab-analyze-antenna-structures",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-antenna-structures",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-analyze-em",
+          "name": "matlab-analyze-em",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-em",
+          "description": "S-parameters, insertion loss, fields, currents, mesh control, and solver selection for RF PCB performance validation. TRIGGER: user asks to compute S-parameters, analyze insertion/return loss, extract fields or currents, compare MoM vs FEM, or control mesh for any RF PCB component. Invoke BEFORE writing sparameters() or solver code — API is non-obvious. SKIP: designing or creating components (use the specific matlab-design-pcb-* skill), material/stackup setup only (use matlab-manage-pcb-material), optimization sweeps (use matlab-optimize-pcb-design), PDN/IR-drop analysis (use matlab-analyze-pcb-pdn)."
+        },
+        {
+          "dir": "matlab-analyze-pcb-pdn",
+          "name": "matlab-analyze-pcb-pdn",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-pcb-pdn",
+          "description": "PDN DC voltage/current analysis, IR drop, design rule checking, and multi-net batch analysis on imported PCB layouts. TRIGGER: user asks about power integrity, PDN analysis, IR drop, voltage distribution, current density, power nets, or design rule checking on a PCB. Invoke BEFORE writing code — the PDN API chain is specialized and non-obvious. SKIP: importing a PCB file (use matlab-read-pcb-layout), EM field/S-parameter extraction (use matlab-analyze-em), material/stackup setup only (use matlab-manage-pcb-material), transmission line design (use matlab-design-pcb-transmission-line)."
+        },
+        {
+          "dir": "matlab-assemble-pcb-layout",
+          "name": "matlab-assemble-pcb-layout",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-assemble-pcb-layout",
+          "description": "Build custom PCB structures with pcbComponent, shapes, Boolean ops, feeds, and multi-layer stackups for non-catalog geometries. TRIGGER: user asks to build, modify, or customize a pcbComponent — add/remove shapes, edit polygons, place feeds, add metal layers, cut slots, or create non-catalog RF structures. Also when modifying geometry of an existing catalog-designed component (e.g., adding pads, removing elements, editing vertices). Invoke BEFORE writing pcbComponent code — layer/shape/feed API is non-obvious. SKIP: designing catalog components like filters/couplers/txlines (use the specific matlab-design-pcb-* skill), material/stackup definition only (use matlab-manage-pcb-material), EM analysis (use matlab-analyze-em), importing PCB files (use matlab-read-pcb-layout)."
+        },
+        {
+          "dir": "matlab-design-antenna",
+          "name": "matlab-design-antenna",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-antenna",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-design-pcb-coupler",
+          "name": "matlab-design-pcb-coupler",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-coupler",
+          "description": "Wilkinson, branchline, ratrace, directional couplers, corporate dividers, Rotman lenses for power splitting and beam-forming. TRIGGER: user asks to design, create, or analyze any coupler, splitter, power divider, combiner, or Rotman lens. Invoke BEFORE writing code — class names and design() availability vary per coupler type. SKIP: EM simulation/S-parameter extraction of an existing component (use matlab-analyze-em), building custom non-catalog geometry (use matlab-assemble-pcb-layout), material/stackup setup only (use matlab-manage-pcb-material), cascading multiple components (use matlab-integrate-pcb-circuit)."
+        },
+        {
+          "dir": "matlab-design-pcb-filter",
+          "name": "matlab-design-pcb-filter",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-filter",
+          "description": "Bandpass, lowpass, bandstop filter design — hairpin, coupled-line, combline, stub, SIW for frequency selection and harmonic rejection. TRIGGER: user asks to design, create, or analyze any RF filter (bandpass, lowpass, highpass, bandstop, hairpin, coupled-line, combline, stub, SIW). Invoke BEFORE writing code — filter class names differ from what you would guess. SKIP: EM simulation/S-parameter extraction of an existing filter (use matlab-analyze-em), general PCB layout assembly (use matlab-assemble-pcb-layout), material/stackup setup only (use matlab-manage-pcb-material), optimization sweeps (use matlab-optimize-pcb-design)."
+        },
+        {
+          "dir": "matlab-design-pcb-passive",
+          "name": "matlab-design-pcb-passive",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-passive",
+          "description": "Spiral inductors, interdigital capacitors, baluns, resonators, phase shifters for impedance matching, DC blocking, and bias tees. TRIGGER: user asks to design or create a spiral inductor, interdigital capacitor, balun, resonator, phase shifter, or other passive RF component. Invoke BEFORE writing code — class names and property patterns are non-obvious. SKIP: filter design (use matlab-design-pcb-filter), coupler/splitter design (use matlab-design-pcb-coupler), transmission line design (use matlab-design-pcb-transmission-line), EM analysis (use matlab-analyze-em), material setup only (use matlab-manage-pcb-material)."
+        },
+        {
+          "dir": "matlab-design-pcb-transmission-line",
+          "name": "matlab-design-pcb-transmission-line",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-transmission-line",
+          "description": "Microstrip, stripline, CPW, differential pairs, and crosstalk analysis for impedance-controlled PCB interconnects. TRIGGER: user asks to design or analyze a transmission line (microstrip, stripline, CPW, coplanar, differential pair), extract RLGC or per-unit-length parameters, compute trace impedance, analyze a PCB trace cross-section, or perform crosstalk/coupling analysis. Invoke BEFORE writing code — preferred over RF Toolbox analytical functions (txlineMicrostrip, txlineStripline, txlineCPW). SKIP: EM simulation/S-parameter extraction of an existing component (use matlab-analyze-em), material/stackup definition only (use matlab-manage-pcb-material), building custom non-catalog geometry (use matlab-assemble-pcb-layout), optimization sweeps (use matlab-optimize-pcb-design)."
+        },
+        {
+          "dir": "matlab-export-session-script",
+          "name": "matlab-export-session-script",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-export-session-script",
+          "description": "Export conversation MATLAB code to a clean, runnable .m script. Use when asked to save or export session work. TRIGGER: user asks to save, export, or generate a script from the current session's MATLAB code. Also when asked for a reproducible script or clean version of what was run."
+        },
+        {
+          "dir": "matlab-integrate-antenna",
+          "name": "matlab-integrate-antenna",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-integrate-antenna",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-integrate-pcb-circuit",
+          "name": "matlab-integrate-pcb-circuit",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-integrate-pcb-circuit",
+          "description": "Cascade PCB components, add lumped elements, export Touchstone, and bridge to eye diagram or antenna array workflows. TRIGGER: user asks to cascade or connect multiple RF PCB components, add lumped R/L/C, export S-parameters to Touchstone, or combine PCB elements into a circuit. Invoke BEFORE writing pcbcascade or circuit code — cascade rules and port matching are non-obvious. SKIP: designing individual components (use the specific matlab-design-pcb-* skill), EM analysis of a single component (use matlab-analyze-em), material/stackup setup only (use matlab-manage-pcb-material), optimization (use matlab-optimize-pcb-design)."
+        },
+        {
+          "dir": "matlab-manage-pcb-material",
+          "name": "matlab-manage-pcb-material",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-manage-pcb-material",
+          "description": "Dielectric substrates, metal conductors, multi-layer stackups, and loss models (FR4, Rogers, Teflon) for RF PCB simulation. TRIGGER: user asks to set up a substrate, define dielectric properties, create a stackup, select a PCB material (FR4, Rogers, Teflon, etc.), or configure metal conductors. Invoke BEFORE writing dielectric() or metal() code — the API for named vs custom materials differs significantly. SKIP: PCB layout assembly (use matlab-assemble-pcb-layout), transmission line design (use matlab-design-pcb-transmission-line), EM analysis (use matlab-analyze-em), importing a PCB file (use matlab-read-pcb-layout)."
+        },
+        {
+          "dir": "matlab-model-ams-systems",
+          "name": "matlab-model-ams-systems",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-ams-systems",
+          "description": "Model a Phase-Locked Loop (PLL) IC from its datasheet or system specs using Mixed-Signal Blockset. Without this skill, agents universally select the wrong solver and produce non-functional PLL models — 100% of unguided attempts fail. Covers Integer-N, Fractional-N, Dual Modulus architectures, loop filter design, lock time optimization, VCO phase noise configuration, and msbPllArchitectures/msbPllFoundation block assembly. Use when: PLL modeling, frequency synthesizer design, phase noise simulation, lock time analysis, charge pump design, loop filter tuning, datasheet-to-model, Mixed-Signal Blockset PLL, msbPllArchitectures."
+        },
+        {
+          "dir": "matlab-model-rf",
+          "name": "matlab-model-rf",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-rf",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-model-serdes-systems",
+          "name": "matlab-model-serdes-systems",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-serdes-systems",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-model-via",
+          "name": "matlab-model-via",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-via",
+          "description": "Via modeling: pads, antipads, ground return vias, GRV placement, and signal integrity for high-speed layer transitions. TRIGGER: user asks to model a via, design a via transition, place ground return vias, analyze via performance, or check signal integrity through layer transitions. Invoke BEFORE writing code — only viaSingleEnded exists (no viaDifferential), and the location format is non-obvious. SKIP: general signal integrity without vias (use matlab-analyze-em), transmission line design (use matlab-design-pcb-transmission-line), PDN analysis (use matlab-analyze-pcb-pdn), material/stackup setup only (use matlab-manage-pcb-material)."
+        },
+        {
+          "dir": "matlab-optimize-pcb-design",
+          "name": "matlab-optimize-pcb-design",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-optimize-pcb-design",
+          "description": "Optimize RF PCB dimensions for bandwidth, return loss, or area via patternsearch and surrogateopt with constraints. TRIGGER: user asks to optimize an RF PCB component for performance (bandwidth, return loss, insertion loss, area) or apply constraints to a design. Invoke BEFORE writing optimization code — RF PCB Toolbox has a built-in optimize() function that differs from generic fmincon/ga approaches. SKIP: designing a component from scratch without an optimization objective (use the specific matlab-design-pcb-* skill), EM analysis without optimization (use matlab-analyze-em), material/stackup setup only (use matlab-manage-pcb-material)."
+        },
+        {
+          "dir": "matlab-read-pcb-layout",
+          "name": "matlab-read-pcb-layout",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-read-pcb-layout",
+          "description": "Import Gerber, ODB++, Allegro .brd, .mcm files for PCB boards and IC packages. Inspect nets, layers, shapes, and stackups. TRIGGER: user asks to import, read, or open a PCB layout file. Gerber files use gerberRead or PCBReader; ODB++, Allegro .brd, .mcm, and native formats use pcbFileRead. Also when inspecting nets, layers, components, or stackups from an imported board. Invoke BEFORE writing import code — the query API (cadnet, cadnetList, componentList) is specialized. SKIP: EM analysis or S-parameter extraction (use matlab-analyze-em), PDN/IR-drop analysis (use matlab-analyze-pcb-pdn), building custom geometry (use matlab-assemble-pcb-layout), material/stackup definition only (use matlab-manage-pcb-material)."
+        },
+        {
+          "dir": "matlab-write-pcb-layout",
+          "name": "matlab-write-pcb-layout",
+          "category": "rf-and-mixed-signal",
+          "path": "engineering/matlab/rf-and-mixed-signal/matlab-write-pcb-layout",
+          "description": "Export pcbComponent designs to Gerber files with RF connectors and fab service formatting for PCB manufacturing. TRIGGER: user asks to export a PCB design to Gerber, generate manufacturing files, or write out a pcbComponent for fabrication. Invoke BEFORE writing export code — gerberWrite signature (pcbComponent, connectors, filename) is non-obvious. SKIP: importing/reading PCB files (use matlab-read-pcb-layout), building PCB geometry (use matlab-assemble-pcb-layout), EM analysis (use matlab-analyze-em), material/stackup setup (use matlab-manage-pcb-material)."
+        },
+        {
+          "dir": "matlab-compute-gnss-position",
+          "name": "matlab-compute-gnss-position",
+          "category": "robotics-and-autonomous-systems",
+          "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-compute-gnss-position",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-connect-mavlink",
+          "name": "matlab-connect-mavlink",
+          "category": "robotics-and-autonomous-systems",
+          "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-connect-mavlink",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-create-uav-scenario",
+          "name": "matlab-create-uav-scenario",
+          "category": "robotics-and-autonomous-systems",
+          "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-create-uav-scenario",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-fuse-inertial-sensors",
+          "name": "matlab-fuse-inertial-sensors",
+          "category": "robotics-and-autonomous-systems",
+          "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-fuse-inertial-sensors",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-model-robot-kinematics",
+          "name": "matlab-model-robot-kinematics",
+          "category": "robotics-and-autonomous-systems",
+          "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-model-robot-kinematics",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-plan-robot-motion",
+          "name": "matlab-plan-robot-motion",
+          "category": "robotics-and-autonomous-systems",
+          "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-plan-robot-motion",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-analyze-spectrum",
+          "name": "matlab-analyze-spectrum",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-analyze-spectrum",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-analyze-time-frequency-content",
+          "name": "matlab-analyze-time-frequency-content",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-analyze-time-frequency-content",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-configure-scope-object",
+          "name": "matlab-configure-scope-object",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-configure-scope-object",
+          "description": "Prevents crashes due to problematic scope-related API misuse caused by agent escalation into internal scope framework objects. Use when configuring properties of scope-related Simulink blocks or MATLAB objects — constrains the agent to documented APIs and directs users to the scope UI when a property is not programmatically accessible."
+        },
+        {
+          "dir": "matlab-design-adaptive-filter",
+          "name": "matlab-design-adaptive-filter",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-design-adaptive-filter",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-design-digital-filter",
+          "name": "matlab-design-digital-filter",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-design-digital-filter",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-design-dsphdl-ddc",
+          "name": "matlab-design-dsphdl-ddc",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-design-dsphdl-ddc",
+          "description": "Use when designing a Digital Down Converter (DDC) using dsphdl System objects. Triggers on requests involving DDC design, frequency down-conversion for FPGA/ASIC, NCO + mixer + decimation filter chains, fractional/non-integer sample rate conversion, or HDL-optimized receiver front-end signal processing."
+        },
+        {
+          "dir": "matlab-evaluate-acoustic-metrics",
+          "name": "matlab-evaluate-acoustic-metrics",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-evaluate-acoustic-metrics",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-extract-signal-features",
+          "name": "matlab-extract-signal-features",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-extract-signal-features",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-play-record-audio",
+          "name": "matlab-play-record-audio",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-play-record-audio",
+          "description": "Reference for MATLAB audiostreamer (Audio Toolbox R2025a+). Without this skill, agents consistently default to legacy audioDeviceWriter/audioDeviceReader or base MATLAB sound(), producing less capable code. Use when writing code for audio playback, recording, full-duplex device I/O, real-time audio measurements, or audio I/O processing with callbacks. Also use when debugging audiostreamer errors, dropouts, or latency issues, or migrating from audioDeviceReader, audioDeviceWriter, audioPlayerRecorder, or audioplayer/audiorecorder."
+        },
+        {
+          "dir": "matlab-prepare-signal-data",
+          "name": "matlab-prepare-signal-data",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-prepare-signal-data",
+          "description": "|"
+        },
+        {
+          "dir": "matlab-process-streaming-audio",
+          "name": "matlab-process-streaming-audio",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-process-streaming-audio",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-write-audio-plugin",
+          "name": "matlab-write-audio-plugin",
+          "category": "signal-processing",
+          "path": "engineering/matlab/signal-processing/matlab-write-audio-plugin",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-build-industrial-hmi",
+          "name": "matlab-build-industrial-hmi",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-build-industrial-hmi",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-call-nidaqmx",
+          "name": "matlab-call-nidaqmx",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-call-nidaqmx",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-connect-arduino",
+          "name": "matlab-connect-arduino",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-connect-arduino",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-connect-bluetooth-low-energy-device",
+          "name": "matlab-connect-bluetooth-low-energy-device",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-connect-bluetooth-low-energy-device",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-create-custom-arduino-library",
+          "name": "matlab-create-custom-arduino-library",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-create-custom-arduino-library",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-discover-hardware",
+          "name": "matlab-discover-hardware",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-discover-hardware",
+          "description": "Discovers connected MATLAB-supported hardware devices, searches by capability, and checks required support packages and add-ons. Use when the user asks what hardware is connected, finds a device that supports a capability (e.g., CAN, analog input), or checks if required support packages or add-ons are installed. Does NOT connect to, configure, or acquire data from devices — defers to device-specific skills for usage workflows."
+        },
+        {
+          "dir": "matlab-enhance-camera-image",
+          "name": "matlab-enhance-camera-image",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-enhance-camera-image",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-find-pi-assets",
+          "name": "matlab-find-pi-assets",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-find-pi-assets",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-import-export-vehicle-data",
+          "name": "matlab-import-export-vehicle-data",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-import-export-vehicle-data",
+          "description": "Use when importing or exporting vehicle data from/to log files (MDF/MF4/DAT, BLF, ASC/TXT), decoding CAN/CAN FD/LIN messages to signals via DBC, ARXML, or LDF databases, writing timetable data to MDF or BLF files, or calling blfread, blfinfo, blfwrite, mdfRead, mdfWrite, mdfCreate, mdfInfo, canSignalImport, canMessageImport, canMessageTimetable, canFDMessageTimetable, canSignalTimetable, or linMessageTimetable."
+        },
+        {
+          "dir": "matlab-modernize-daq",
+          "name": "matlab-modernize-daq",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-modernize-daq",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-cameras",
+          "name": "matlab-use-cameras",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-use-cameras",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-opcua-client",
+          "name": "matlab-use-opcua-client",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-use-opcua-client",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-use-vehicle-network",
+          "name": "matlab-use-vehicle-network",
+          "category": "test-and-measurement",
+          "path": "engineering/matlab/test-and-measurement/matlab-use-vehicle-network",
+          "description": "Use when setting up vehicle network communication in MATLAB using Vehicle Network Toolbox. Covers CAN/CAN FD (fully implemented), with architecture for J1939, XCP, and future protocols. Handles hardware discovery, channel creation, bus configuration, message exchange, signal encoding/decoding, and analysis across all supported vendors. (Vector, Kvaser, PEAK-System, NI, SocketCAN, MathWorks Virtual)."
+        },
+        {
+          "dir": "matlab-add-awgn",
+          "name": "matlab-add-awgn",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-add-awgn",
+          "description": "Read BEFORE writing any code that adds Additive White Gaussian Noise (AWGN) to signals and converts between SNR, Eb/No, Es/No, and per-subcarrier SNR for communications simulations, using awgn(), convertSNR(), berawgn(). The default MATLAB patterns for AWGN (e.g., 'measured' option, manual SNR formulas) produce subtly incorrect results. This skill specifies the correct calling conventions, required function usage, and critical anti-patterns that must be avoided."
+        },
+        {
+          "dir": "matlab-design-ofdm-system",
+          "name": "matlab-design-ofdm-system",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-design-ofdm-system",
+          "description": "Read BEFORE writing any code that builds or simulates OFDM systems. The default MATLAB patterns for OFDM (e.g., direct ifft/fft, awgn with 0 dBW power, missing symOffset) produce subtly incorrect results — always use ofdmmod/ofdmdemod instead of direct IFFT/FFT. This skill specifies the correct calling conventions for ofdmmod, ofdmdemod, ofdmChannelResponse, ofdmEqualize, and critical anti-patterns that must be avoided. Use when building OFDM transmitters or receivers, allocating subcarriers and guard bands, inserting pilots, computing SNR for OFDM, configuring fading channels (Rayleigh/Rician), estimating and equalizing channels, implementing timing and frequency synchronization, adding LDPC coding, designing resource grids, or setting up OFDM link simulations."
+        },
+        {
+          "dir": "matlab-detect-capture-usrp",
+          "name": "matlab-detect-capture-usrp",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-detect-capture-usrp",
+          "description": "Smart triggered RF capture on NI USRP radios with Wireless Testbench — record only when a signal of interest appears, not continuously (triggered spectrum sensing). Use energy detection to capture when signal power rises above the noise floor, or preamble detection to cross-correlate against a known sequence (WLAN L-LTF, 5G NR PSS/SSS, LTE PSS, Zadoff-Chu, custom protocols) and capture only when that protocol's preamble is detected. Use when implementing triggered (wake-on-signal) capture or spectrum sensing, capturing protocol-based signals via cross-correlation, calibrating detection thresholds (plotDetectionSignals / plotThreshold), scanning frequency bands for activity, or building transmit-then-detect workflows."
+        },
+        {
+          "dir": "matlab-generate-5g-waveform",
+          "name": "matlab-generate-5g-waveform",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-generate-5g-waveform",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-generate-ble-waveform",
+          "name": "matlab-generate-ble-waveform",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-generate-ble-waveform",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-generate-gnss-waveform",
+          "name": "matlab-generate-gnss-waveform",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-generate-gnss-waveform",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-generate-wlan-waveform",
+          "name": "matlab-generate-wlan-waveform",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-generate-wlan-waveform",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-set-up-usrp-radio",
+          "name": "matlab-set-up-usrp-radio",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-set-up-usrp-radio",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-simulate-bluetooth-network",
+          "name": "matlab-simulate-bluetooth-network",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-simulate-bluetooth-network",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-simulate-wireless-network",
+          "name": "matlab-simulate-wireless-network",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-simulate-wireless-network",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-transmit-capture-usrp",
+          "name": "matlab-transmit-capture-usrp",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-transmit-capture-usrp",
+          "description": ">"
+        }
+      ]
+    },
+    {
+      "id": "simulink",
+      "repo": "matlab/simulink-agentic-toolkit",
+      "ref": "main",
+      "sha": "ef5d5f8faeca13d8c66e94828bf6a44aadaa8b3f",
+      "label": "Simulink Agentic Toolkit",
+      "target": "engineering/simulink",
+      "count": 44,
+      "skills": [
+        {
+          "dir": "simulink-author-classic-autosar-swc",
+          "name": "simulink-author-classic-autosar-swc",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/simulink-author-classic-autosar-swc",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-configure-code-interfaces",
+          "name": "simulink-configure-code-interfaces",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/simulink-configure-code-interfaces",
+          "description": "Use the skill to control and verify the code interface configuration of your model — how Simulink® model elements are represented in the generated C or C++ code."
+        },
+        {
+          "dir": "simulink-configure-model-for-code-generation",
+          "name": "simulink-configure-model-for-code-generation",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/simulink-configure-model-for-code-generation",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-customize-a2l",
+          "name": "simulink-customize-a2l",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/simulink-customize-a2l",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-optimizing-embedded-code",
+          "name": "simulink-optimizing-embedded-code",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/simulink-optimizing-embedded-code",
+          "description": "Optimizes Simulink models for Embedded Coder generated code. Use when asked to optimize or improve generated code, or reduce code metrics for a Simulink model. Targets: execution time, memory footprint (RAM, ROM, stack, data copies), code size, MISRA compliance, or any semantically similar generated-code metric. Works iteratively — measures baseline, suggests changes, applies, and re-measures to confirm improvement. Triggers can be prompts similar to: optimize generated code runtime, reduce runtime, shrink code size, improve code efficiency, reduce memory usage, speed up generated code, follow MISRA compliance and so on. CAUTION: Do NOT attempt to optimize Simulink models for generated code efficiency without following this skill — the iterative measurement, gating, and rollback workflow is essential for safe optimization."
+        },
+        {
+          "dir": "simulink-single-precision-conversion",
+          "name": "simulink-single-precision-conversion",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/simulink-single-precision-conversion",
+          "description": "Converts a double-precision Simulink system or subsystem to single precision using DataTypeWorkflow.Single (Fixed-Point Designer). The single conversion replaces all user-specified double-precision data types, as well as output data types that compile to double precision, with single-precision data types. Use this skill when converting Simulink systems to single precision, reducing memory usage of a Simulink system, optimizing for embedded targets. Do NOT use for standalone MATLAB .m code single conversion."
+        },
+        {
+          "dir": "slci-compatibility-analysis",
+          "name": "slci-compatibility-analysis",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/slci-compatibility-analysis",
+          "description": ">"
+        },
+        {
+          "dir": "slci-inspection-incompatibility-analysis",
+          "name": "slci-inspection-incompatibility-analysis",
+          "category": "code-generation",
+          "path": "engineering/simulink/code-generation/slci-inspection-incompatibility-analysis",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-control-motors",
+          "name": "simulink-control-motors",
+          "category": "control-systems",
+          "path": "engineering/simulink/control-systems/simulink-control-motors",
+          "description": "Build motor control solutions using Motor Control Blockset for PMSM, induction motors, BLDC, and SynRM. Implement field oriented control, sensorless FOC, six-step control, speed control, current control, and torque control. Configure SVPWM, flux weakening, MTPA, MTPV, control of non-linear motors, inverter control, and motor parameter estimation. Compose motor drive models, tune gains, and generate embedded code."
+        },
+        {
+          "dir": "simulink-frequency-response",
+          "name": "simulink-frequency-response",
+          "category": "control-systems",
+          "path": "engineering/simulink/control-systems/simulink-frequency-response",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-linearize",
+          "name": "simulink-linearize",
+          "category": "control-systems",
+          "path": "engineering/simulink/control-systems/simulink-linearize",
+          "description": ">"
+        },
+        {
+          "dir": "building-simulink-models",
+          "name": "building-simulink-models",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/building-simulink-models",
+          "description": "Builds and edits Simulink, System Composer, Stateflow, and Simscape models. Use when modifying model structure, parameters, ports, connections, or Stateflow chart internals."
+        },
+        {
+          "dir": "configuring-block-policy",
+          "name": "configuring-block-policy",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/configuring-block-policy",
+          "description": "Guide users through creating and managing .satk/block-policy.json for controlling which blocks the agent can use, which are excluded, and which block parameters the agent should not modify. Use when setting up block usage policy for a project."
+        },
+        {
+          "dir": "filing-bug-reports",
+          "name": "filing-bug-reports",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/filing-bug-reports",
+          "description": "Generate a standalone bug report that another developer can use to reproduce, investigate, and fix an issue. Use when the user says 'file a bug', 'write a bug report', 'report this issue', or asks to document a defect for handoff."
+        },
+        {
+          "dir": "generate-requirement-drafts",
+          "name": "generate-requirement-drafts",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/generate-requirement-drafts",
+          "description": "Generates draft requirements from Simulink models. Use when drafting or updating requirement artifacts from a model. Prefers Requirements Toolbox (.slreqx) when available; falls back to structured YAML."
+        },
+        {
+          "dir": "managing-simulink-projects",
+          "name": "managing-simulink-projects",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/managing-simulink-projects",
+          "description": ">-"
+        },
+        {
+          "dir": "setup-custom-libraries",
+          "name": "setup-custom-libraries",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/setup-custom-libraries",
+          "description": "Register, add, or update existing custom Simulink block libraries and configure block policy and knowledge index. Use when a user wants to register, set up, configure, or add existing .slx library files for agent-assisted model building. Do NOT use when the user wants to create or author a new library from scratch — that requires building-simulink-models."
+        },
+        {
+          "dir": "simulating-simulink-models",
+          "name": "simulating-simulink-models",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/simulating-simulink-models",
+          "description": "Configures Simulink simulations non-destructively using SimulationInput objects — parameter overrides without modifying the model, batch sweeps via parsim, custom input signals via Dataset, and simulation data retrieval via logsout. Use when running sim()/parsim() with setVariable, setBlockParameter, setExternalInput, or when performing parameter sweeps and multi-run analysis. Not needed for one-shot simulations without configuration."
+        },
+        {
+          "dir": "simulink-curating-library-kg",
+          "name": "simulink-curating-library-kg",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/simulink-curating-library-kg",
+          "description": "Use this skill when the user wants to curate the SATK library knowledge index for a Simulink project — mark commonly used blocks, correct auto-assigned block categories, or improve block descriptions so the model-building agent picks better blocks from custom libraries. Triggered by phrases like \"mark blocks common\", \"improve block descriptions\", \"correct block category\", \"make the agent prefer certain blocks\", and from Gate 3 of building-simulink-models."
+        },
+        {
+          "dir": "simulink-sanitize-model",
+          "name": "simulink-sanitize-model",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/simulink-sanitize-model",
+          "description": "Sanitize and anonymize a Simulink model for external sharing. Use when stripping proprietary content, anonymizing block/signal names, removing metadata, or creating a shareable reproduction model for bug reports. Do NOT use for simply copying or sharing a model internally."
+        },
+        {
+          "dir": "specifying-mbd-algorithms",
+          "name": "specifying-mbd-algorithms",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/specifying-mbd-algorithms",
+          "description": "Specify algorithms for Model-Based Design: system specs, architecture specs, implementation plans, test plans. Use when creating specifications for controllers, signal processing, diagnostics, estimators, or other algorithms authored in Simulink, Stateflow, System Composer, or MATLAB Function blocks."
+        },
+        {
+          "dir": "specifying-plant-models",
+          "name": "specifying-plant-models",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/specifying-plant-models",
+          "description": "Specify plant models for closed-loop simulation: system specs, architecture, build plans, validation plans. Use when creating, updating, or reviewing plant model specifications, planning plant model architecture, or planning plant model validation."
+        },
+        {
+          "dir": "building-architecture-models",
+          "name": "building-architecture-models",
+          "category": "model-based-system-engineering",
+          "path": "engineering/simulink/model-based-system-engineering/building-architecture-models",
+          "description": "Build and refine multi-layer (functional/logical/physical) system architecture models with System Composer. Use when building or restructuring architecture models, or when working with interface dictionaries and port interfaces (including composite boundary ports), stereotypes and profiles, architecture views, sequence diagrams, allocation sets, roll-up analysis, or requirements traceability for architecture components."
+        },
+        {
+          "dir": "simscape-write-ssc",
+          "name": "simscape-write-ssc",
+          "category": "physical-modeling",
+          "path": "engineering/simulink/physical-modeling/simscape-write-ssc",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-configure-real-time-model",
+          "name": "simulink-configure-real-time-model",
+          "category": "real-time-simulation-and-testing",
+          "path": "engineering/simulink/real-time-simulation-and-testing/simulink-configure-real-time-model",
+          "description": "Configure a Simulink model for Simulink Real-Time code generation and deployment. Use when setting up a model for Simulink Real-Time, selecting the correct system target file, fixing TLC/STF mismatches, applying fixed-step solver settings, validating target-platform compatibility, or configuring Simulink Real-Time build options before model build."
+        },
+        {
+          "dir": "simulink-configure-real-time-target",
+          "name": "simulink-configure-real-time-target",
+          "category": "real-time-simulation-and-testing",
+          "path": "engineering/simulink/real-time-simulation-and-testing/simulink-configure-real-time-target",
+          "description": "Manage Simulink Real-Time target computers from MATLAB — list available targets, check whether a target is connected, read its lifecycle status, add/remove/rename targets, set IP addresses and credentials, choose the default target, install TLS material, configure a startup application, and run target lifecycle ops (connect, reboot, RTOS update). Use whenever the user asks \"which targets are available\", \"is my target connected\", \"what's the status of the target\", \"add a Speedgoat\", \"switch default target\", \"change the target IP\", \"reboot the box\", \"update the target\", or works with `slrealtime.Targets`, `tg = slrealtime`, `addTarget`, `removeTarget`, `getTargetNames`, `getDefaultTargetName`, `setDefaultTargetName`, `connect`, `isConnected`, `status(tg)`, `setipaddr`, `setupTLSCertificate`, `setStartupApp`, `reboot`, `update`, or `slrealtime.testSetup`. Covers Speedgoat target computers and Simulink Real-Time Linux devices."
+        },
+        {
+          "dir": "simulink-instrument-real-time-application",
+          "name": "simulink-instrument-real-time-application",
+          "category": "real-time-simulation-and-testing",
+          "path": "engineering/simulink/real-time-simulation-and-testing/simulink-instrument-real-time-application",
+          "description": "Set up signal capture for a Simulink Real-Time application using `slrealtime.Instrument`. Use when choosing which signals a real-time application captures and where the data goes — test-pointing or canvas-badging a signal before build (`TestPoint`, `DataLogging`), constructing an Instrument from an `.mldatx`, calling `addSignal`, `addInstrumentedSignals`, `addFileLogSignals`, `validate`, `connectCallback`, `copy`, or `generateScript`, attaching an instrument to `tg.Instruments` via `addForFileLog`, `addForSDI`, or `addForMATLAB`, setting up live-streaming signals, dynamic file-log workflows, or persisting an instrument as M-code. Selects and routes signals only — not for configuring, building, running, or connecting applications onto targets."
+        },
+        {
+          "dir": "simulink-run-real-time-application",
+          "name": "simulink-run-real-time-application",
+          "category": "real-time-simulation-and-testing",
+          "path": "engineering/simulink/real-time-simulation-and-testing/simulink-run-real-time-application",
+          "description": "Build, deploy, run, monitor, tune, and stop Simulink Real-Time applications. Use when the user wants to build a Simulink Real-Time model, load/start/stop an `.mldatx` on a target, set stop time or start options, drive root inports/playback/parameter stimulation, inspect installed or running apps, tune parameters with `getparam`/`setparam`, read ad hoc signal values with `getsignal`, manage parameter sets, control recording, or choose between file logging, live streaming, and file-log import. Covers `slbuild`, `install`, `load`, `start`, `stop`, `setStopTime`, `tg.Stimulation`, `startRecording`/`stopRecording`, `tg.FileLog.import`, `slrealtime.exportRun`, `getparam`/`setparam`, `getsignal`, and installed app management for Speedgoat targets and Simulink Real-Time Linux devices."
+        },
+        {
+          "dir": "simulink-streaming-dsp",
+          "name": "simulink-streaming-dsp",
+          "category": "signal-processing",
+          "path": "engineering/simulink/signal-processing/simulink-streaming-dsp",
+          "description": ">"
+        },
+        {
+          "dir": "finding-simulink-examples",
+          "name": "finding-simulink-examples",
+          "category": "simulink-environment-fundamentals",
+          "path": "engineering/simulink/simulink-environment-fundamentals/finding-simulink-examples",
+          "description": "Find, show, open, or identify shipped MathWorks example models that demonstrate a concept, block, or application domain, and return the command to open them."
+        },
+        {
+          "dir": "simulink-use-c-function-block",
+          "name": "simulink-use-c-function-block",
+          "category": "simulink-modeling",
+          "path": "engineering/simulink/simulink-modeling/simulink-use-c-function-block",
+          "description": "|"
+        },
+        {
+          "dir": "authoring-simulink-inputs",
+          "name": "authoring-simulink-inputs",
+          "category": "simulink-simulation",
+          "path": "engineering/simulink/simulink-simulation/authoring-simulink-inputs",
+          "description": ">"
+        },
+        {
+          "dir": "create-sdi-run",
+          "name": "create-sdi-run",
+          "category": "simulink-simulation",
+          "path": "engineering/simulink/simulink-simulation/create-sdi-run",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-check-rapid-accelerator-compatibility",
+          "name": "simulink-check-rapid-accelerator-compatibility",
+          "category": "simulink-simulation",
+          "path": "engineering/simulink/simulink-simulation/simulink-check-rapid-accelerator-compatibility",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-run-parallel-simulations",
+          "name": "simulink-run-parallel-simulations",
+          "category": "simulink-simulation",
+          "path": "engineering/simulink/simulink-simulation/simulink-run-parallel-simulations",
+          "description": ">-"
+        },
+        {
+          "dir": "author-modeladvisor-checks",
+          "name": "author-modeladvisor-checks",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/author-modeladvisor-checks",
+          "description": ">"
+        },
+        {
+          "dir": "checking-model-compliance",
+          "name": "checking-model-compliance",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/checking-model-compliance",
+          "description": "Use this skill when the user asks to check Simulink model compliance against a standard (MISRA, MAB, JMAAB, ISO, DO, IEC, EN, CERT C/CWE, AUTOSAR, Simulink Code Inspector (SLCI)), wants to run Model Advisor checks, or needs a compliance report with fix suggestions. For JMAAB/MAB, supplement deterministic checks with agentic review of uncheckable guidelines."
+        },
+        {
+          "dir": "fix-sldv-incompatibility",
+          "name": "fix-sldv-incompatibility",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/fix-sldv-incompatibility",
+          "description": "Use when a Simulink model is incompatible with Simulink Design Verifier (sldvcompat returns false, or an SLDV analysis errors out on an unsupported construct) and needs to be made analyzable. Diagnoses the incompatibility, applies the matching fix to a copy, and confirms the copy is compatible; optionally raises confidence the fix preserved behavior via a back-to-back consistency replay (agreement on the generated tests, not a proof of equivalence). Do NOT use for running test generation, design error detection, or requirement verification themselves — only for making a model compatible so those can proceed."
+        },
+        {
+          "dir": "inject-faults",
+          "name": "inject-faults",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/inject-faults",
+          "description": "Add, configure, and manage faults on Simulink, Simscape, and System Composer model signals for robustness analysis and safety validation. Use when injecting faults (stuck, noise, gain, offset) onto block inports/outports, enabling fault simulation, or analyzing fault effects. Covers sensor failures, signal corruptions, actuator faults, FMEA validation, and robustness testing. Requires Simulink Fault Analyzer."
+        },
+        {
+          "dir": "manage-safety-analysis",
+          "name": "manage-safety-analysis",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/manage-safety-analysis",
+          "description": "Create, populate, and manage safety analysis spreadsheets (FMEA, FHA, HARA, custom) and fault trees (FTA) in Safety Analysis Manager. Use when the user asks to perform FMEA, hazard analysis, fault tree analysis, safety analysis, or work with Safety Analysis Manager documents. Requires Simulink Fault Analyzer."
+        },
+        {
+          "dir": "resolve-design-errors",
+          "name": "resolve-design-errors",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/resolve-design-errors",
+          "description": "Use when asked to run Design Error Detection (quick defect scan), find design errors in a Simulink model, perform root cause analysis on DED findings, fix division-by-zero, overflow, dead logic or out-of-bounds defects detected by SLDV, or diagnose why missing coverage cannot be achieved (dead logic blocking coverage objectives). Do NOT use for requirement verification, test generation, Inf/NaN detection, active logic analysis, or coverage measurement."
+        },
+        {
+          "dir": "simulink-collect-metrics",
+          "name": "simulink-collect-metrics",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/simulink-collect-metrics",
+          "description": ">"
+        },
+        {
+          "dir": "simulink-explain-missing-coverage",
+          "name": "simulink-explain-missing-coverage",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/simulink-explain-missing-coverage",
+          "description": "Use this skill when the user asks to summarize, or asks why Simulink Coverage objectives are missing, unsatisfied, or uncovered on a coverage result they already have — why specific decision, condition, MCDC, relational-boundary, or saturation/overflow outcomes weren't exercised, whether uncovered logic is dead code, or how to close the gap (a test, a coverage filter, or a design change). It reads an existing cvdata, .cvt file, sim-with-coverage output, or Simulink Test result; it never runs cvsim to collect coverage."
+        },
+        {
+          "dir": "testing-simulink-models",
+          "name": "testing-simulink-models",
+          "category": "verification-validation-and-test",
+          "path": "engineering/simulink/verification-validation-and-test/testing-simulink-models",
+          "description": "Tests Simulink models using either ephemeral Gherkin-based tests (model_test) for quick validation or persistent tests (Simulink Test API) authored from requirements or behavioral specs. Requires Simulink Test."
+        }
+      ]
+    },
+    {
+      "id": "polyspace",
+      "repo": "mathworks/polyspace-agentic-toolkit",
+      "ref": "main",
+      "sha": "0a495193f2a1614fa545c19a6716b3ada22e83db",
+      "label": "Polyspace Agentic Toolkit",
+      "target": "engineering/polyspace",
+      "count": 19,
+      "skills": [
+        {
+          "dir": "generate-polyspace-test-xunit-tests",
+          "name": "generate-polyspace-test-xunit-tests",
+          "category": null,
+          "path": "engineering/polyspace/generate-polyspace-test-xunit-tests",
+          "description": "Authors new C/C++ unit tests for the Polyspace Test XUnit framework (PSTUnit) — creates a test plan and writes the test source code. Use when the user asks to \"generate PSTUnit tests\", \"write Polyspace Test xUnit tests\", \"author PSTUnit tests\", \"create PSTUnit tests for this function\", or wants to design a PSTUnit test plan. For BUILDING or RUNNING already-authored tests, use `run-polyspace-test-xunit-tests` instead."
+        },
+        {
+          "dir": "polyspace-agentic-toolkit-setup",
+          "name": "polyspace-agentic-toolkit-setup",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-agentic-toolkit-setup",
+          "description": "Sets up the Polyspace Agentic Toolkit for any supported AI agent. Use when the user asks to \"set up Polyspace\", \"set up the Polyspace Agentic Toolkit\", \"install the Polyspace MCP Server\", \"configure Polyspace for my agent\", or wants to get Polyspace working with their AI application."
+        },
+        {
+          "dir": "polyspace-configure-build-options",
+          "name": "polyspace-configure-build-options",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-configure-build-options",
+          "description": "Creates Polyspace build options files from build commands or compilation databases. Use when the user asks to \"configure build options\", \"create build options file\", \"set up Polyspace build\", or needs to configure compiler settings for Polyspace analysis."
+        },
+        {
+          "dir": "polyspace-configure-checkers",
+          "name": "polyspace-configure-checkers",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-configure-checkers",
+          "description": "Creates or modifies Polyspace checkers configuration files. Use when the user asks to \"configure checkers\", \"set up MISRA checking\", \"enable CWE\", \"create checkers file\", or needs to select coding standards for Polyspace analysis."
+        },
+        {
+          "dir": "polyspace-documentation-entry-points",
+          "name": "polyspace-documentation-entry-points",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-documentation-entry-points",
+          "description": "Provides Polyspace documentation entry points and links. Use when the user asks about \"Polyspace documentation\", \"where is the Polyspace docs\", \"documentation links\", or needs to find general Polyspace documentation."
+        },
+        {
+          "dir": "polyspace-find-checker-documentation",
+          "name": "polyspace-find-checker-documentation",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-find-checker-documentation",
+          "description": "Finds documentation for Polyspace checkers and coding rules. Use when the user asks \"what does this checker do\", \"find checker documentation\", \"explain this Polyspace rule\", or wants to understand a specific Polyspace finding."
+        },
+        {
+          "dir": "polyspace-find-option-documentation",
+          "name": "polyspace-find-option-documentation",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-find-option-documentation",
+          "description": "REQUIRED before searching for any Polyspace option documentation page. Use when the user asks about a Polyspace option (-c, -target, -sources, -boolean-types, -misra3, etc.), wants to find an option's doc page, or asks 'what does this option do'. This skill contains the only reliable method to locate option reference pages — URLs cannot be guessed from the flag name."
+        },
+        {
+          "dir": "polyspace-fix-findings",
+          "name": "polyspace-fix-findings",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-fix-findings",
+          "description": "Fixes or justifies Polyspace findings after analysis. Use when the user asks to \"fix this finding\", \"fix these defects\", \"fix violations\", \"address Polyspace results\", or wants to resolve static analysis findings."
+        },
+        {
+          "dir": "polyspace-justify-in-code",
+          "name": "polyspace-justify-in-code",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-justify-in-code",
+          "description": "Justifies Polyspace findings by adding annotation comments in the C/C++ source code. Use when the user asks to \"add a Polyspace annotation\", \"justify a finding in the source/in code\", \"mark as false positive in the code\", \"suppress a finding with a comment\", or wants an in-source justification the next analysis will read. For recording a review status in the results database instead, use polyspace-justify-in-database."
+        },
+        {
+          "dir": "polyspace-justify-in-database",
+          "name": "polyspace-justify-in-database",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-justify-in-database",
+          "description": "Records a review status and rationale on Polyspace findings directly in the results database (.psbf for Bug Finder, .pscp for Code Prover) and carries that review across re-runs. Use when the user asks to \"set the status to Justified\", \"mark this as acceptable in the results\", \"record a rationale in the results database\", or wants review decisions to survive re-running the analysis without editing the source. For justifying by annotating the source code instead, use polyspace-justify-in-code."
+        },
+        {
+          "dir": "polyspace-query-justification-catalog",
+          "name": "polyspace-query-justification-catalog",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-query-justification-catalog",
+          "description": "Queries a Polyspace justification catalog for pre-approved texts. Use when the user asks to \"query justification catalog\", \"find pre-approved justification\", \"look up catalog\", or needs to find pre-approved justification texts for Polyspace findings."
+        },
+        {
+          "dir": "polyspace-review-findings",
+          "name": "polyspace-review-findings",
+          "category": null,
+          "path": "engineering/polyspace/polyspace-review-findings",
+          "description": "Reads, explains, and prioritizes Polyspace findings — defects and coding-standard violations — from a results database (.psbf for Bug Finder, .payc for Polyspace as You Code). Use when the user asks \"what did Bug Finder find\", \"what did the analysis find\", \"explain this defect/violation\", \"which findings are serious\", \"prioritize my findings\", or wants the root cause of a defect. For Code Prover red/orange/green/gray checks use review-polyspace-code-prover-results instead."
+        },
+        {
+          "dir": "resolve-polyspace-root",
+          "name": "resolve-polyspace-root",
+          "category": null,
+          "path": "engineering/polyspace/resolve-polyspace-root",
+          "description": ">"
+        },
+        {
+          "dir": "review-polyspace-code-prover-results",
+          "name": "review-polyspace-code-prover-results",
+          "category": null,
+          "path": "engineering/polyspace/review-polyspace-code-prover-results",
+          "description": "Reads, explains, and prioritizes Polyspace Code Prover results from a .pscp database. Use when the user asks \"what did Code Prover find\", \"explain this red/orange/green/gray check\", \"why is this check orange\", \"was most of my code analyzed\", \"what are the most critical run-time errors\", or wants the root cause of a check."
+        },
+        {
+          "dir": "run-polyspace-as-you-code-analysis",
+          "name": "run-polyspace-as-you-code-analysis",
+          "category": null,
+          "path": "engineering/polyspace/run-polyspace-as-you-code-analysis",
+          "description": "Runs Polyspace as You Code (PAYC) static analysis on a single C/C++ file — the file you are editing — to find defects and coding-standard violations. The default when the request targets one file, e.g. \"run Polyspace analysis on source.c\", \"check my code\"/\"check this file\", \"check that my change is MISRA/CERT compliant\", \"find or fix the defects in this file\". For several files or a whole component use run-polyspace-bug-finder-analysis; to prove absence of run-time errors use run-polyspace-code-prover-analysis. Requires the Polyspace as You Code product."
+        },
+        {
+          "dir": "run-polyspace-bug-finder-analysis",
+          "name": "run-polyspace-bug-finder-analysis",
+          "category": null,
+          "path": "engineering/polyspace/run-polyspace-bug-finder-analysis",
+          "description": "Runs Polyspace Bug Finder on C/C++ code — static analysis that finds defects and coding-standard violations across several files / a whole component (interprocedural, cross-file) — producing a results database (.psbf). Use when the request targets multiple files, a component, or a project, or names Bug Finder, e.g. \"run Bug Finder\", \"find defects across my component\", \"check this project for defects and MISRA/CERT violations\". For a single file or the change you are editing use run-polyspace-as-you-code-analysis; to prove absence of run-time errors use run-polyspace-code-prover-analysis. Requires the Polyspace Bug Finder product."
+        },
+        {
+          "dir": "run-polyspace-code-prover-analysis",
+          "name": "run-polyspace-code-prover-analysis",
+          "category": null,
+          "path": "engineering/polyspace/run-polyspace-code-prover-analysis",
+          "description": "Runs Polyspace Code Prover on C/C++ code, producing a results database (.pscp). Use when the user asks to \"run Code Prover\", \"prove absence of run-time errors\", \"formally verify this code\", wants proof-backed guarantees or memory safety, or wants red/orange/green/gray run-time error checks."
+        },
+        {
+          "dir": "run-polyspace-test-xunit-tests",
+          "name": "run-polyspace-test-xunit-tests",
+          "category": null,
+          "path": "engineering/polyspace/run-polyspace-test-xunit-tests",
+          "description": "Builds and runs C/C++ PSTUnit (Polyspace Test xUnit) tests, on host or target, optionally collecting coverage/profiling. A test is PSTUnit when its sources include `<pstunit.h>` or `PST_*` macros."
+        },
+        {
+          "dir": "triage-orange-checks",
+          "name": "triage-orange-checks",
+          "category": null,
+          "path": "engineering/polyspace/triage-orange-checks",
+          "description": "Triages Polyspace Code Prover orange (unproven) checks and decides what to do about them. Use when the user asks to \"reduce orange\", \"which oranges are real bugs\", \"which oranges can I justify\", \"find defects hidden in orange\", \"what should I do about this orange\", \"is this orange in dead/unreachable code\", or wants to separate genuine potential run-time errors from analysis imprecision. For merely explaining what a check's color means (without deciding what to do), use review-polyspace-code-prover-results."
+        }
+      ]
+    },
+    {
+      "id": "playground",
+      "repo": "matlab/agent-skills-playground",
+      "ref": "main",
+      "sha": "f93265a6477ea05028927530f02cd1e847c73d7e",
+      "label": "MATLAB Agent Skills Playground",
+      "target": "engineering/playground",
+      "count": 4,
+      "skills": [
+        {
+          "dir": "matlab-performance-optimizer",
+          "name": "matlab-performance-optimizer",
+          "category": null,
+          "path": "engineering/playground/matlab-performance-optimizer",
+          "description": "Optimize MATLAB code for better performance through vectorization, memory management, and profiling. Use when user requests optimization, mentions slow code, performance issues, speed improvements, or asks to make code faster or more efficient."
+        },
+        {
+          "dir": "matlab-uihtml-app-builder",
+          "name": "matlab-uihtml-app-builder",
+          "category": null,
+          "path": "engineering/playground/matlab-uihtml-app-builder",
+          "description": "Build interactive web applications using HTML/JavaScript interfaces with MATLAB computational backends via the uihtml component. Use when creating HTML-based MATLAB apps, JavaScript MATLAB interfaces, web UIs with MATLAB, interactive MATLAB GUIs, or when user mentions uihtml, HTML, JavaScript, web apps, or web interfaces."
+        },
+        {
+          "dir": "matlab-uihtml-design",
+          "name": "matlab-uihtml-design",
+          "category": null,
+          "path": "engineering/playground/matlab-uihtml-design",
+          "description": "Generate beautiful, distinctive HTML/CSS/JS control panels for MATLAB uihtml components. 8 built-in styles (Clean, Material, Cosmic Dark, Neumorphic Dark, Dashboard Light, Midnight Gradient, Minimal Mono, Warm Dark) plus custom aesthetics. Produces production-grade UI with sliders, buttons, toggles, and panels. Use when building visually polished MATLAB app UIs with uihtml."
+        },
+        {
+          "dir": "simulink-test-sequence-from-ears",
+          "name": "simulink-test-sequence-from-ears",
+          "category": null,
+          "path": "engineering/playground/simulink-test-sequence-from-ears",
+          "description": "Generate Simulink Test Sequence blocks and harnesses from EARS requirements. Use when asked to create a test case from a requirement, generate tests from a .slreqx file, or verify a Simulink model with requirement-based tests."
+        }
+      ]
+    },
+    {
+      "id": "nature",
+      "repo": "yuan1z0825/nature-skills",
+      "ref": "main",
+      "sha": "c1637a89c7097d486ba1c6e755e34d01cbb24998",
+      "label": "Nature Skills",
+      "target": "research/nature-skills",
+      "count": 24,
+      "skills": [
+        {
+          "dir": "nature-academic-search",
+          "name": "nature-academic-search",
+          "category": null,
+          "path": "research/nature-skills/nature-academic-search",
+          "description": "Search literature across sources, verify or manage citations, and build MeSH strategies or citation-impact audits. Use for 文献检索、引文核对、参考文献管理、严格他引 and evidence-backed citer profiles; not for translating a paper or drafting manuscript prose."
+        },
+        {
+          "dir": "nature-citation",
+          "name": "nature-citation",
+          "category": null,
+          "path": "research/nature-skills/nature-citation",
+          "description": "Find and verify Nature/CNS-family literature supporting manuscript claims, with claim-to-source mapping and reference-manager export. Use for Nature系列引用、CNS支撑文献、分段补引用 when this journal scope is requested; use broader literature search for unrestricted sources."
+        },
+        {
+          "dir": "nature-data",
+          "name": "nature-data",
+          "category": null,
+          "path": "research/nature-skills/nature-data",
+          "description": "Draft or audit manuscript Data/Code Availability statements, dataset access routes, repository plans, and FAIR metadata. Use for 数据可用性声明、数据共享、数据仓库选择 and dataset citations; not general data cleaning or statistical analysis."
+        },
+        {
+          "dir": "nature-downloader",
+          "name": "nature-downloader",
+          "category": null,
+          "path": "research/nature-skills/nature-downloader",
+          "description": "Use when a user needs lawful academic full text, CNKI institutional access, English OA retrieval, publisher API access, institutional browser fallback, or supporting information downloads."
+        },
+        {
+          "dir": "nature-experiment-log",
+          "name": "nature-experiment-log",
+          "category": null,
+          "path": "research/nature-skills/nature-experiment-log",
+          "description": "标准化实验日志记录——直接上传或读取本地图片、语音和文字，产出带 YAML frontmatter 的 Markdown；可选集成飞书 CLI 与 Obsidian。"
+        },
+        {
+          "dir": "nature-figure",
+          "name": "nature-figure",
+          "category": null,
+          "path": "research/nature-skills/nature-figure",
+          "description": ">-"
+        },
+        {
+          "dir": "nature-image2ppt",
+          "name": "nature-image2ppt",
+          "category": null,
+          "path": "research/nature-skills/nature-image2ppt",
+          "description": "Reconstruct slide images, screenshots, scanned PDFs, or image-only PPTX files as object-level editable PowerPoint. Use for 图片转可编辑PPT、截图还原PPT and diagram reconstruction; not authoring a new deck from research notes."
+        },
+        {
+          "dir": "nature-literature-pipeline",
+          "name": "nature-literature-pipeline",
+          "category": null,
+          "path": "research/nature-skills/nature-literature-pipeline",
+          "description": "|"
+        },
+        {
+          "dir": "nature-paper-card",
+          "name": "nature-paper-card",
+          "category": null,
+          "path": "research/nature-skills/nature-paper-card",
+          "description": "Build a structured deep-reading Paper Card for one scientific paper, analysing methods, experiment-to-claim evidence, limitations, and research ideas. Use for 论文精读卡、方法拆解、证据链分析; not full-paper bilingual translation or formal peer review."
+        },
+        {
+          "dir": "nature-paper-to-patent",
+          "name": "nature-paper-to-patent",
+          "category": null,
+          "path": "research/nature-skills/nature-paper-to-patent",
+          "description": "Turn research papers or inventor materials into evidence-grounded Chinese invention patent drafts and technical disclosures. Use for 技术交底书、专利撰写、现有技术对比 and Chinese DOCX patent packages; not general manuscript writing."
+        },
+        {
+          "dir": "nature-paper-trans",
+          "name": "nature-paper-trans",
+          "category": null,
+          "path": "research/nature-skills/nature-paper-trans",
+          "description": "将英文论文 PDF 的指定页面或全文逐页翻译为简体中文图片型 PDF，尽量保留原文的版式、分栏、图表和公式；最终仅交付中文 PDF。用于论文阅读翻译，不用于可编辑 Word 重建或逐字审校。"
+        },
+        {
+          "dir": "nature-paper-xray",
+          "name": "nature-paper-xray",
+          "category": null,
+          "path": "research/nature-skills/nature-paper-xray",
+          "description": ">-"
+        },
+        {
+          "dir": "nature-paper2ppt",
+          "name": "nature-paper2ppt",
+          "category": null,
+          "path": "research/nature-skills/nature-paper2ppt",
+          "description": "Create or improve a Chinese academic PPTX from a scientific paper or research reading notes, with source figures and speaker notes. Use for 论文做PPT、文献汇报、组会PPT and paper-based conference or defense presentations."
+        },
+        {
+          "dir": "nature-paper2word",
+          "name": "nature-paper2word",
+          "category": null,
+          "path": "research/nature-skills/nature-paper2word",
+          "description": "Compile an academic Markdown manuscript into a journal- or school-compliant Word (.docx): declared typography, native OMML equations, three-line tables, cross-references, per-section page numbers, CSL bibliographies (GB/T 7714, APA, Nature, IEEE), and pre/post-export quality gates. 把学术论文的 Markdown 稿件导出为符合期刊或学位论文规范的 Word：摘要、公式编号、三线表、题注、交叉引用、目录域、参考文献。Use when the user wants a submission-ready .docx — 论文转 Word、学位论文排版、期刊投稿排版、prepare submission docx — or a readable copy of a manuscript. Not for PDF, HTML or LaTeX output, and not for slide decks or grant forms."
+        },
+        {
+          "dir": "nature-polishing",
+          "name": "nature-polishing",
+          "category": null,
+          "path": "research/nature-skills/nature-polishing",
+          "description": "Polish, translate, or tighten existing academic prose while preserving facts, terminology, and evidence boundaries. Use for 论文润色、学术翻译、正文精简, or manuscript LaTeX layout fixes. Use nature-writing when the main task is drafting new sections or rebuilding the manuscript argument."
+        },
+        {
+          "dir": "nature-proposal-writer",
+          "name": "researchwrite",
+          "category": null,
+          "path": "research/nature-skills/nature-proposal-writer",
+          "description": "Compose, revise, or audit research proposals, opening reports, and research plans from supporting evidence. Use for 研究计划、开题报告、科研项目申请书. Invoked as researchwrite for compatibility; use nature-writing for general manuscript sections."
+        },
+        {
+          "dir": "nature-reader",
+          "name": "nature-reader",
+          "category": null,
+          "path": "research/nature-skills/nature-reader",
+          "description": "Create source-grounded Chinese-English paper readers with aligned text, figures, tables, and equations. Use for 全文翻译、中英文对照、论文精读 or source-linked questions about a paper; respect a requested excerpt or question without generating a full reader."
+        },
+        {
+          "dir": "nature-ref-verifier",
+          "name": "nature-ref-verifier",
+          "category": null,
+          "path": "research/nature-skills/nature-ref-verifier",
+          "description": ">-"
+        },
+        {
+          "dir": "nature-response",
+          "name": "nature-response",
+          "category": null,
+          "path": "research/nature-skills/nature-response",
+          "description": ">-"
+        },
+        {
+          "dir": "nature-reviewer",
+          "name": "nature-reviewer",
+          "category": null,
+          "path": "research/nature-skills/nature-reviewer",
+          "description": "Provide evidence-grounded mock peer review of scientific manuscripts or excerpts, covering significance, validity, and major/minor concerns. Use for 模拟审稿、投稿前自审、审稿人视角评估; not author rebuttal drafting."
+        },
+        {
+          "dir": "nature-shared",
+          "name": "nature-shared",
+          "category": null,
+          "path": "research/nature-skills/nature-shared",
+          "description": "Internal shared-reference support package for installed Nature Skills, including nature-writing, nature-polishing, nature-response, nature-reader, and nature-paper2ppt. Do not invoke it as a standalone user workflow. Load only the specific core or journal-format file requested by another Nature skill."
+        },
+        {
+          "dir": "nature-social-science",
+          "name": "nature-social-science",
+          "category": null,
+          "path": "research/nature-skills/nature-social-science",
+          "description": "社会科学及相邻学科学术写作与选题论证工作台，覆盖选题构思、文献梳理、论证组织、学术表达四大要素。Use for 找论文题目/研究问题、把兴趣或宽泛主题变成可讨论的研究方向、文献综述与领域版图、区分\"研究少\"与真正未决的知识问题、设计证据路线与主张边界、新颖性审计与\"审稿人2\"式攻击、博士/论文可行性评估、导师沟通话术、或检查论文中的过度断言与概念混用。也适用于开题报告、研究计划书、学位论文的选题阶段与论证自检。"
+        },
+        {
+          "dir": "nature-statistics",
+          "name": "nature-statistics",
+          "category": null,
+          "path": "research/nature-skills/nature-statistics",
+          "description": "Audit or improve manuscript statistical reporting, including experimental units, replication, uncertainty, tests, and figure statistics. Use for 统计审查、统计方法小节、图注统计 and reviewer concerns; compute new analyses only when requested with data."
+        },
+        {
+          "dir": "nature-writing",
+          "name": "nature-writing",
+          "category": null,
+          "path": "research/nature-skills/nature-writing",
+          "description": "Draft or restructure scientific manuscript arguments, sections, and initial-submission materials from author-provided evidence. Use for 论文写作、章节起草、论证重构、正文压缩、首次投稿材料. Use nature-polishing for language-only edits to existing prose and nature-response for post-decision correspondence."
+        }
+      ]
+    },
+    {
+      "id": "officecli",
+      "repo": "iOfficeAI/OfficeCLI",
+      "ref": "main",
+      "sha": "d6444a846ac32df0932f18ccc336997944947d58",
+      "label": "OfficeCLI",
+      "target": "office/officecli",
+      "count": 11,
+      "skills": [
+        {
+          "dir": "morph-ppt",
+          "name": "morph-ppt",
+          "category": null,
+          "path": "office/officecli/morph-ppt",
+          "description": "Use this skill when the user wants a .pptx with smooth cross-slide animation — PowerPoint Morph transitions, Keynote-style continuous motion, shapes that grow / move / rotate as the slide advances. Trigger on: 'morph', 'morph transition', 'smooth transition', 'continuous animation across slides', 'Keynote-style transition', 'animated slide sequence', 'shape continuity across slides'. Output is a single .pptx. This skill is a scene layer on top of officecli-pptx — inherits every pptx v2 rule (visual floor, grid, palettes, connector canon, Delivery Gate 1–5a). DO NOT invoke for a generic deck, pitch deck, or board review without cross-slide motion — route those to officecli-pptx base or officecli-pitch-deck."
+        },
+        {
+          "dir": "morph-ppt-3d",
+          "name": "morph-ppt-3d",
+          "category": null,
+          "path": "office/officecli/morph-ppt-3d",
+          "description": "3D Morph PPT — extends morph-ppt with GLB model insertion, cinematographic camera, model-content layout, and enriched visual design system."
+        },
+        {
+          "dir": "officecli",
+          "name": "officecli",
+          "category": null,
+          "path": "office/officecli/officecli",
+          "description": "Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents."
+        },
+        {
+          "dir": "officecli-academic-paper",
+          "name": "officecli-academic-paper",
+          "category": null,
+          "path": "office/officecli/officecli-academic-paper",
+          "description": "Use this skill to build academic-style .docx output: journal / conference / thesis chapters carrying formal citation style (APA, Chicago, IEEE, MLA), numbered equations, figure & table cross-references, footnotes/endnotes, bibliography, or multi-column journal layout. Trigger on: 'research paper', 'journal paper', 'conference paper', 'manuscript', 'thesis', 'APA', 'MLA', 'Chicago', 'IEEE two-column', 'bibliography', 'hanging indent', 'citation style', 'abstract + keywords', 'equation numbering', 'cross-reference', paper with footnotes/endnotes. Output is a single .docx."
+        },
+        {
+          "dir": "officecli-data-dashboard",
+          "name": "officecli-data-dashboard",
+          "category": null,
+          "path": "office/officecli/officecli-data-dashboard",
+          "description": "Use this skill to build a multi-element Excel dashboard — Dashboard sheet on open, multiple formula-driven KPI cards, multiple charts, sparklines, and conditional formatting — from CSV or tabular input. Trigger on: 'dashboard', 'KPI dashboard', 'analytics dashboard', 'executive dashboard', 'metrics dashboard', 'CSV to dashboard', 'data visualization'. Output is a single .xlsx. Scene-layer on officecli-xlsx: inherits every xlsx hard rule. DO NOT invoke for: a single budget tracker / one-sheet CSV-with-formatting (use xlsx), a 3-statement / DCF / LBO financial model (use financial-model), a weekly report with at most 1 chart and fewer than 10 rows (use xlsx)."
+        },
+        {
+          "dir": "officecli-docx",
+          "name": "officecli-docx",
+          "category": null,
+          "path": "office/officecli/officecli-docx",
+          "description": "Use this skill any time a .docx file is involved -- as input, output, or both. This includes: creating Word documents, reports, letters, memos, or proposals; reading, parsing, or extracting text from any .docx file; editing, modifying, or updating existing documents; working with templates, tracked changes, comments, headers/footers, or tables of contents. Trigger whenever the user mentions 'Word doc', 'document', 'report', 'letter', 'memo', or references a .docx filename."
+        },
+        {
+          "dir": "officecli-financial-model",
+          "name": "officecli-financial-model",
+          "category": null,
+          "path": "office/officecli/officecli-financial-model",
+          "description": "Use this skill when the user wants to build a financial model — 3-statement model, DCF valuation, LBO, SaaS unit economics, sensitivity / scenario analysis, debt schedule, or fundraising projections — in Excel. Trigger on: 'financial model', '3-statement model', 'P&L + BS + CF', 'DCF', 'WACC', 'NPV', 'terminal value', 'LBO', 'debt schedule', 'cash sweep', 'MOIC', 'IRR / XIRR', 'sensitivity table', 'scenario analysis', 'ARR model', 'unit economics', 'CAC / LTV', 'cap table forecast'. Output is a single formula-driven .xlsx. This skill is a scene layer on top of officecli-xlsx — it inherits every xlsx v2 rule (4-color code, visual floor, number formats, cache-drift, Known Issues, Delivery Gate minimum cycle). DO NOT invoke for a simple budget tracker, CSV dump, or operational KPI sheet — route those to officecli-xlsx base."
+        },
+        {
+          "dir": "officecli-pitch-deck",
+          "name": "officecli-pitch-deck",
+          "category": null,
+          "path": "office/officecli/officecli-pitch-deck",
+          "description": "Use this skill when the user is building a fundraising / investor pitch deck — seed, Series A / B / C, convertible note, SAFE round, strategic raise. Trigger on: 'pitch deck', 'investor deck', 'Series A deck', 'Series B deck', 'Series C deck', 'fundraising deck', 'seed pitch', 'VC deck', 'raising capital', 'term sheet presentation'. Output is a single .pptx. This skill is a scene layer on top of officecli-pptx — inherits every pptx v2 rule (visual floor, grid, palettes, connector canon, Delivery Gate). DO NOT invoke for a generic board review, sales deck, all-hands, or product launch — route those to officecli-pptx base."
+        },
+        {
+          "dir": "officecli-pptx",
+          "name": "officecli-pptx",
+          "category": null,
+          "path": "office/officecli/officecli-pptx",
+          "description": "Use this skill any time a .pptx file is involved -- as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx file; editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates, layouts, speaker notes, or comments. Trigger whenever the user mentions 'deck', 'slides', 'presentation', 'pitch', or references a .pptx filename."
+        },
+        {
+          "dir": "officecli-word-form",
+          "name": "officecli-word-form",
+          "category": null,
+          "path": "office/officecli/officecli-word-form",
+          "description": "Use this skill to create fillable Word forms (.docx) with real Content Controls (SDT) + legacy FormField checkboxes + MERGEFIELD mail-merge placeholders + document protection. Trigger on: 'fillable form', 'form fields', 'content controls', 'SDT', 'word form', 'fill in', 'only editable fields', 'protect document', 'onboarding form', 'HR intake', 'survey template', 'contract / SOW template', 'mail-merge template', 'compliance checklist', 'medical intake questionnaire'. Output is a single .docx where specific fields are editable and the rest is locked. This skill is INDEPENDENT, not a scene layer on docx — payload is `w:sdt` + `w:ffData` + `w:fldChar` + `documentProtection`, none of which docx base skill covers. Do NOT trigger for regular reports, letters, memos, academic papers, pitch decks, or any document with no user-fillable fields — route those to officecli-docx or its scene layers."
+        },
+        {
+          "dir": "officecli-xlsx",
+          "name": "officecli-xlsx",
+          "category": null,
+          "path": "office/officecli/officecli-xlsx",
+          "description": "Use this skill any time a .xlsx file is involved -- as input, output, or both. This includes: creating spreadsheets, financial models, dashboards, or trackers; reading, parsing, or extracting data from any .xlsx file; editing, modifying, or updating existing workbooks; working with formulas, charts, pivot tables, or templates; importing CSV/TSV data into Excel format. Trigger whenever the user mentions 'spreadsheet', 'workbook', 'Excel', 'financial model', 'tracker', 'dashboard', or references a .xlsx/.csv filename."
+        }
+      ]
+    },
+    {
+      "id": "ppt-master",
+      "repo": "hugohe3/ppt-master",
+      "ref": "main",
+      "sha": "78759bf62e9a1ef43e926ff9e50afa4cfe9a63cb",
+      "label": "PPT Master",
+      "target": "office/ppt-master",
+      "count": 1,
+      "skills": [
+        {
+          "dir": "ppt-master",
+          "name": "ppt-master",
+          "category": null,
+          "path": "office/ppt-master",
+          "description": ">"
+        }
+      ]
+    },
+    {
+      "id": "html-ppt",
+      "repo": "lewislulu/html-ppt-skill",
+      "ref": "main",
+      "sha": "fd1629067909ff55b36b905476de4e5f26062a1f",
+      "label": "HTML PPT Skill",
+      "target": "office/html-ppt",
+      "count": 1,
+      "skills": [
+        {
+          "dir": "html-ppt",
+          "name": "html-ppt",
+          "category": null,
+          "path": "office/html-ppt",
+          "description": "HTML PPT Studio — author professional static HTML presentations in many styles, layouts, and animations, all driven by templates. Use when the user asks for a presentation, PPT, slides, keynote, deck, slideshow, \"幻灯片\", \"演讲稿\", \"做一份 PPT\", \"做一份 slides\", a reveal-style HTML deck, a 小红书 图文, or any kind of multi-slide pitch/report/sharing document that should look tasteful and be usable with keyboard navigation. Triggers include keywords like \"presentation\", \"ppt\", \"slides\", \"deck\", \"keynote\", \"reveal\", \"slideshow\", \"幻灯片\", \"演讲稿\", \"分享稿\", \"小红书图文\", \"talk slides\", \"pitch deck\", \"tech sharing\", \"technical presentation\"."
+        }
+      ]
+    },
+    {
+      "id": "zotero",
+      "repo": "local",
+      "ref": "main",
+      "sha": "local",
+      "label": "zotero-cli",
+      "target": "research/zotero-cli",
+      "count": 1,
+      "skills": [
+        {
+          "dir": "zotero-cli",
+          "name": "zotero-cli",
+          "category": null,
+          "path": "research/zotero-cli",
+          "description": "Read and write a Zotero library from the shell with the `zotero-cli` command - search papers by keyword or meaning, read PDF full text and page ranges, get and set metadata, manage collections, tags, notes and annotations, add items by DOI/URL/ISBN, and export bibliographies. Use whenever the user asks about their Zotero library, references, citations, papers they have saved, or their reading notes."
+        }
+      ]
+    },
+    {
+      "id": "archify",
+      "repo": "local",
+      "ref": "local",
+      "sha": "local",
+      "label": "Archify",
+      "target": "office/archify",
+      "count": 1,
+      "skills": [
+        {
+          "dir": "archify",
+          "name": "archify",
+          "category": null,
+          "path": "office/archify",
+          "description": "Architecture and workflow diagrams as standalone HTML"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "skills": 262
+  }
+}

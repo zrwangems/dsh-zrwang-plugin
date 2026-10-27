@@ -1,0 +1,265 @@
+{
+  "version": 1,
+  "note": "目录树的中文名称与描述。技能叶子由 gen-catalog.mjs 从 skills/ 目录扫描后挂到对应节点下。",
+  "groups": [
+    {
+      "id": "engineering",
+      "title": "工程",
+      "desc": "MATLAB/Simulink 建模、仿真、代码生成与工程实现",
+      "children": [
+        {
+          "id": "matlab",
+          "title": "MATLAB",
+          "desc": "MathWorks MATLAB 官方技能，按工具箱与领域分类",
+          "children": [
+            {
+              "id": "matlab-core",
+              "title": "MATLAB 核心",
+              "desc": "创建、调试、审查和管理 MATLAB 代码及安装产品"
+            },
+            {
+              "id": "matlab-app-building",
+              "title": "MATLAB App 构建",
+              "desc": "用 UI 组件、布局、回调与 Web 集成以编程方式构建 MATLAB App"
+            },
+            {
+              "id": "matlab-data-import-and-analysis",
+              "title": "MATLAB 数据导入与分析",
+              "desc": "用表、时间表、筛选、聚合和时间序列操作导入、导出与分析数据"
+            },
+            {
+              "id": "matlab-external-language-interfaces",
+              "title": "MATLAB 外部语言接口",
+              "desc": "从 MATLAB 调用 Python 库，并把 MEX 文件升级到交错误复数 API"
+            },
+            {
+              "id": "matlab-programming",
+              "title": "MATLAB 编程",
+              "desc": "编写带参数校验、稳健可靠的 MATLAB 函数"
+            },
+            {
+              "id": "matlab-software-development",
+              "title": "MATLAB 软件开发",
+              "desc": "测试、遗留代码现代化、性能与内存优化、文档、工具箱打包、工程与依赖管理"
+            },
+            {
+              "id": "aerospace",
+              "title": "航空航天",
+              "desc": "Aerospace Toolbox：飞行环境、坐标转换与气动计算"
+            },
+            {
+              "id": "ai-and-statistics",
+              "title": "AI 与统计",
+              "desc": "分类/回归/深度学习、曲线拟合、优化、实验管理与模型部署"
+            },
+            {
+              "id": "automotive",
+              "title": "汽车",
+              "desc": "自动驾驶、场景构建、SUMO 联合仿真、雷达与传感器融合"
+            },
+            {
+              "id": "cloud-solutions",
+              "title": "云解决方案",
+              "desc": "在 MATLAB Drive、GitHub 等平台共享 MATLAB 内容"
+            },
+            {
+              "id": "code-generation",
+              "title": "代码生成",
+              "desc": "从 MATLAB 生成 C/C++/CUDA 代码，含定点、GPU 与嵌入式部署"
+            },
+            {
+              "id": "computational-biology",
+              "title": "计算生物学",
+              "desc": "SimBiology 建模、参数拟合与动力学仿真"
+            },
+            {
+              "id": "computational-finance",
+              "title": "计算金融",
+              "desc": "行情接入、金融工具定价与投资组合优化"
+            },
+            {
+              "id": "control-systems",
+              "title": "控制系统",
+              "desc": "系统辨识、线性化、频域分析、预测性维护与电池/旋转机械特征"
+            },
+            {
+              "id": "image-processing-and-computer-vision",
+              "title": "图像处理与计算机视觉",
+              "desc": "图像/体数据/医学影像、点云、光学设计与工业视觉检测"
+            },
+            {
+              "id": "math-and-optimization",
+              "title": "数学与优化",
+              "desc": "优化问题求解、偏微分方程与符号数学"
+            },
+            {
+              "id": "parallel-computing",
+              "title": "并行计算",
+              "desc": "parfor、线程池、集群发现与 GPU 计算配置"
+            },
+            {
+              "id": "radar",
+              "title": "雷达",
+              "desc": "雷达系统、波形设计、探测仿真与航迹数据处理"
+            },
+            {
+              "id": "reporting-and-database-access",
+              "title": "报告与数据库访问",
+              "desc": "生成 PDF/Word/HTML 报告，连接关系数据库与 DuckDB"
+            },
+            {
+              "id": "rf-and-mixed-signal",
+              "title": "射频与混合信号",
+              "desc": "天线、RF 电路、PCB 无源器件、SerDes 与 AMS 系统建模"
+            },
+            {
+              "id": "robotics-and-autonomous-systems",
+              "title": "机器人与自主系统",
+              "desc": "运动学、运动规划、传感器融合、GNSS 与 UAV 场景"
+            },
+            {
+              "id": "signal-processing",
+              "title": "信号处理",
+              "desc": "频谱与时频分析、滤波器设计、音频与流式 DSP"
+            },
+            {
+              "id": "test-and-measurement",
+              "title": "测试与测量",
+              "desc": "数据采集、相机、Arduino、车载网络、OPC UA 与工业 HMI"
+            },
+            {
+              "id": "wireless-communications",
+              "title": "无线通信",
+              "desc": "5G/BLE/WLAN/GNSS 波形生成、OFDM 设计与无线网络仿真"
+            }
+          ]
+        },
+        {
+          "id": "simulink",
+          "title": "Simulink",
+          "desc": "Simulink/Simscape 官方技能，按建模、仿真与验证阶段分类",
+          "children": [
+            {
+              "id": "code-generation",
+              "title": "代码生成",
+              "desc": "从 Simulink 模型生成 C/C++、AUTOSAR、定点与嵌入式代码"
+            },
+            {
+              "id": "control-systems",
+              "title": "控制系统",
+              "desc": "模型线性化、频域响应分析与电机控制"
+            },
+            {
+              "id": "model-based-design-core",
+              "title": "基于模型的设计核心",
+              "desc": "建模、仿真、工程管理、库管理与建模规范"
+            },
+            {
+              "id": "model-based-system-engineering",
+              "title": "基于模型的系统工程",
+              "desc": "系统架构模型、需求与系统级设计"
+            },
+            {
+              "id": "physical-modeling",
+              "title": "物理建模",
+              "desc": "Simscape 物理网络建模与自定义组件"
+            },
+            {
+              "id": "real-time-simulation-and-testing",
+              "title": "实时仿真与测试",
+              "desc": "Simulink Real-Time 模型配置、目标机管理与应用部署"
+            },
+            {
+              "id": "signal-processing",
+              "title": "信号处理",
+              "desc": "流式 DSP 与信号处理模型搭建"
+            },
+            {
+              "id": "simulink-environment-fundamentals",
+              "title": "Simulink 环境基础",
+              "desc": "Simulink 环境设置与示例模型查找"
+            },
+            {
+              "id": "simulink-modeling",
+              "title": "Simulink 建模",
+              "desc": "模型搭建、C Function 模块与库管理"
+            },
+            {
+              "id": "simulink-simulation",
+              "title": "Simulink 仿真",
+              "desc": "仿真配置、SDI 数据记录与并行仿真"
+            },
+            {
+              "id": "verification-validation-and-test",
+              "title": "验证、确认与测试",
+              "desc": "模型检查、测试、覆盖率、故障注入、安全分析与 SLCI"
+            }
+          ]
+        },
+        {
+          "id": "polyspace",
+          "title": "Polyspace 代码分析",
+          "desc": "静态分析、Code Prover、Bug Finder、PSTUnit 测试与结果审查"
+        },
+        {
+          "id": "playground",
+          "title": "示例与演示",
+          "desc": "MathWorks 官方 playground 示例技能（uifigure/HTML 等）"
+        }
+      ]
+    },
+    {
+      "id": "research",
+      "title": "科研",
+      "desc": "文献检索、论文写作、数据分析与学术绘图",
+      "children": [
+        {
+          "id": "nature-skill",
+          "title": "Nature Skill",
+          "desc": "Nature 学术写作与科研工作流全套技能"
+        },
+        {
+          "id": "zotero-cli",
+          "title": "Zotero CLI",
+          "desc": "用命令行读写本机 Zotero 文献库"
+        }
+      ]
+    },
+    {
+      "id": "office",
+      "title": "办公",
+      "desc": "Word/Excel/PPT/PDF 文档生成与演示制作",
+      "children": [
+        {
+          "id": "officecli",
+          "title": "OfficeCLI",
+          "desc": "OfficeCLI 命令行，处理 Word/Excel/PPT/PDF"
+        },
+        {
+          "id": "ppt-master",
+          "title": "PPT Master",
+          "desc": "PPT 全流程：生成、重建、填模板、美化"
+        },
+        {
+          "id": "html-ppt",
+          "title": "HTML PPT",
+          "desc": "用 HTML 制作演示文稿"
+        },
+        {
+          "id": "archify",
+          "title": "Archify 架构图",
+          "desc": "把系统架构、工作流、时序、数据流和状态机生成为可交互 HTML 图表"
+        }
+      ]
+    }
+  ],
+  "vendorNodes": {
+    "engineering/matlab": "matlab",
+    "engineering/simulink": "simulink",
+    "research/nature-skills": "nature-skill",
+    "research/zotero-cli": "zotero-cli",
+    "office/officecli": "officecli",
+    "office/ppt-master": "ppt-master",
+    "office/html-ppt": "html-ppt"
+  }
+}

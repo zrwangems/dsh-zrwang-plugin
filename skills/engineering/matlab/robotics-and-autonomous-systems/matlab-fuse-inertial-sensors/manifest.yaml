@@ -1,0 +1,15 @@
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "1.1"
+human-description: Analyzes sensor configurations and creates inertial fusion filters in MATLAB Navigation Toolbox.
+matlab-release: ">=R2022a"
+required-tools:
+  - evaluate_matlab_code
+  - run_matlab_file
+required-skills: []
+required-products:
+  - Navigation Toolbox
+toolkit: matlab-agentic-toolkit
+
+# Copyright 2026 The MathWorks, Inc.

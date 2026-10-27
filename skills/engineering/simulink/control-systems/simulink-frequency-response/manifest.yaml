@@ -1,0 +1,18 @@
+# Copyright 2026 The MathWorks, Inc.
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: product-specific
+version: "1.0"
+human-description: Estimate frequency response from Simulink models using frestimate.
+matlab-release: ">=R2023a"
+toolkit: simulink-agentic-toolkit
+required-products:
+  - Simulink Control Design
+  - Control System Toolbox
+optional-products:
+  - System Identification Toolbox
+required-tools:
+  - evaluate_matlab_code
+  - model_read
+required-skills:
+  - simulink-linearize

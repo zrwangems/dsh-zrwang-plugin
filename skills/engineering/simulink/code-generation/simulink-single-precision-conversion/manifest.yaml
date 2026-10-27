@@ -1,0 +1,17 @@
+# Copyright 2026 The MathWorks, Inc.
+# manifest.yaml — Tooling metadata for simulink-single-precision-conversion
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: product-specific
+version: "1.8"
+human-description: "Convert a double-precision Simulink system to single precision to reduce memory use for embedded targets."
+matlab-release: ">=R2023a"
+required-tools:
+  - evaluate_matlab_code
+required-skills: []
+required-products:
+  - Fixed-Point Designer
+  - Simulink
+optional-products:
+  - Embedded Coder
+toolkit: simulink-agentic-toolkit

@@ -1,0 +1,14 @@
+# Copyright 2026 The MathWorks, Inc.
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "2.0"
+human-description: Extract battery features from cycling, pulse, EIS, and in-field measurement data.
+matlab-release: ">=R2026a"
+toolkit: matlab-agentic-toolkit
+required-products:
+  - Predictive Maintenance Toolbox
+optional-products: []
+required-tools:
+  - evaluate_matlab_code
+required-skills: []

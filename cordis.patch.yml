@@ -1,0 +1,11 @@
+# dsh-zrwang-plugin 组合包补丁层。
+#
+# 只挂载本插件的一行宿主条目；MATLAB MCP 由 DSH profile 补丁单独注入，
+# 使用 D:\AgentRelated\AgenticToolkits 下的文件。插件设置写在
+# DSH 家目录的 zrwang-plugin-config/settings.json。
+# 技能实体只在本包 skills/ 里，勾选后才以目录联接挂到 <项目根>/.agents/skills/。
+
+- insert:
+    - id: dsh-zrwang-plugin
+      name: 'dsh-zrwang-plugin'
+      config: {}

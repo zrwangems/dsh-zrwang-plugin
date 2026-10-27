@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<demos>
+    <name>Toolbox Name</name>
+    <type>toolbox</type>
+    <icon>HelpIcon.DEMOS</icon>
+    <description>Brief toolbox description.</description>
+
+    <demosection>
+        <label>Getting Started</label>
+        <demoitem>
+            <label>Introduction to Toolbox Name</label>
+            <type>M-file</type>
+            <source>GettingStarted</source>
+        </demoitem>
+    </demosection>
+
+    <demosection>
+        <label>Category Name</label>
+        <demoitem>
+            <label>Descriptive Example Title (functionName)</label>
+            <type>M-file</type>
+            <source>usingAdd</source>
+        </demoitem>
+    </demosection>
+</demos>
+
+<!--
+Rules for demos.xml:
+- <source> is the filename WITHOUT the .m/.mlx extension
+- Group examples into logical <demosection> categories
+- Use descriptive <label> text (include the function name in parentheses)
+- Order sections: Getting Started first, then fundamental → advanced
+- Include the GettingStarted guide as the first demo item
+
+Copyright 2026 The MathWorks, Inc.
+-->

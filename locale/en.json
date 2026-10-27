@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Skill Manager",
+    "description": "Pick this conversation's skills from the right sidebar (engineering / research / office). A selected skill is linked into the project's .agents/skills."
+  }
+}

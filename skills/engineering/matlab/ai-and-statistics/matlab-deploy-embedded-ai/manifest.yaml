@@ -1,0 +1,21 @@
+schema-version: 1
+license: https://www.mathworks.com/content/dam/mathworks/license/pmrl/license.md
+scope: cross-product
+version: "2.1"
+human-description: Deploy AI models to embedded hardware using MATLAB and Simulink.
+matlab-release: ">=R2026a"
+required-tools:
+  - evaluate_matlab_code
+  - run_matlab_file
+  - detect_matlab_toolboxes
+required-skills: []
+required-products:
+  - Deep Learning Toolbox
+  - Statistics and Machine Learning Toolbox
+  - MATLAB Coder
+  - Embedded Coder
+  - Simulink
+  - Fixed-Point Designer
+toolkit: matlab-agentic-toolkit
+
+# Copyright 2026 The MathWorks, Inc.
