@@ -11,7 +11,7 @@
   ├─ sessions.mjs  每个会话的一级勾选（新会话三类全关）
   ├─ selection.mjs 全局技能勾选（初值=旧插件启用集合）
   ├─ farm.mjs      按目标集合建/摘目录联接；ppt-master 的 projects 也走链接
-  ├─ skill-config.mjs  .env / TOML / YAML 表单读写
+  ├─ skill-settings.mjs  .env / TOML / YAML 表单读写与技能配置卡片
   └─ routes.mjs    同源栅栏 + JSON 接口
         │
         ▼
@@ -54,14 +54,16 @@ html-ppt 是独立技能，直接作为二级技能叶子；任何只剩一个�
 | 文件 | 内容 |
 | --- | --- |
 | `state/selection.json` | 技能勾选（全局） |
+| `state/gates.json` | 目录级注入开关 |
 | `state/sessions.json` | 会话一级开关（最多保留 300 个） |
 | `state/links.json` | 每个项目由本插件建立的链接清单 |
-| `state/events.jsonl` | 客户端 apply/打开页签/设置保存事件，用于无浏览器控制时排查 |
+| `state/ui.json` | 右侧栏展开状态 |
+| `state/events.jsonl` | 客户端 apply/打开页签/设置保存事件，用于排查 |
 | `state/backups/` | 写技能配置前的原文件备份 |
 
 ## 3.1 技能配置
 
-插件设置（供应商、URL/模型/API Key、nature 检索与图片转 PPT 参数）只放在固定配置目录的 `settings.json`（`~/.dsh/zrwang-plugin-config/settings.json`），设置界面保存时写回这里；插件包与 profile 的 `cordis.patch.yml` 都不含设置。
+插件设置（供应商、URL/模型/API Key、nature 检索与图片转 PPT 参数）只放在固定配置目录的 `settings.json`（`~/.dsh/zrwang-plugin-config/settings.json`），设置界面保存时写回这里；插件包与 profile 的 `cordis.patch.yml` 都不含设置或密钥。
 `<configDir>`（默认 `~/.dsh/zrwang-plugin-config`）只放“文件类”内容：
 
 | 文件 | 内容 |
@@ -76,12 +78,9 @@ html-ppt 是独立技能，直接作为二级技能叶子；任何只剩一个�
 保存时同时镜像到技能目录里的同名文件，技能本体照常读取；密钥只回 `hasValue`，保存时留空表示沿用旧值。
 设置界面只有插件详情页的 `plugins.bundle.config` 一个入口，侧栏页签只负责勾选。
 
-## 4 上游与更新
+## 4 技能版本
 
-`vendor/upstreams.json` 声明 9 个来源及布局，`vendor-skills.mjs` 解析 SHA、下载 tarball
-（失败时回退 `git clone --depth 1`）、只拷技能目录、重建前把旧 `skills/` 移到
-`AgentsDo/skill-management-*/trash/`，并保留旧树里的 `.env` 等用户配置。
-`upstreams.lock.json` 记录每个技能的仓库与提交，`catalog.json` 带同样的溯源字段。
+技能实体随插件版本固定发布，普通安装和日常使用不会自动更新技能。只有维护者在进行项目级升级时，才统一更新 `skills/`、`catalog/` 和上游锁文件；这些操作不属于面向用户的安装流程。`vendor/upstreams.lock.json` 记录每个技能的来源仓库与提交，`catalog.json` 保留同样的溯源字段。
 
 ## 5 明确不做
 

@@ -1,9 +1,8 @@
 {
   "name": "dsh-zrwang-plugin",
   "version": "0.0.1",
-  "private": true,
   "type": "module",
-  "description": "My DSH：按会话管理技能注入的 DSH 插件；右侧栏逐级选择扩展，选中后才把插件仓库里的技能以目录联接挂到项目 .agents/skills。",
+  "description": "My DSH：DSH Desktop 右侧栏技能管理插件（北航版），按会话启用技能，内置北航学校访问配置。",
   "main": "./host/index.mjs",
   "exports": {
     ".": "./host/index.mjs",
@@ -59,5 +58,20 @@
         "dsh-better-sidebar"
       ]
     }
+  },
+  "author": "Zhanran Wang",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zrwangems/dsh-zrwang-plugin.git"
+  },
+  "homepage": "https://github.com/zrwangems/dsh-zrwang-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/zrwangems/dsh-zrwang-plugin/issues"
+  },
+  "dependencies": {
+    "dsh-better-sidebar": "^0.28.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

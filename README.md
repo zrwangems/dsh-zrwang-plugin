@@ -1,79 +1,75 @@
-# dsh-zrwang-plugin
+# My DSH
 
-DSH 右侧栏My DSH插件：把 262 个技能收在插件仓库里，按**会话**选择要注入的技能。
-一级目录（工程/科研/办公）默认都不勾；勾选后才把该一级下已选技能以目录联接挂到
-`<项目根>/.agents/skills/`，取消即摘除。技能实体始终只有插件里一份。
+My DSH 是一个 DSH Desktop 右侧栏插件，用来按会话选择要启用的技能。勾选后插件会把对应技能接到当前项目里，取消勾选就收回；同一份技能只保存在插件包中，不会在每个项目里重复复制。
 
-## 装什么、怎么生效
+本版本面向北京航空航天大学：Nature 论文下载的学校访问入口已按北航预置，安装后不需要再填写学校配置。
 
-| 内容 | 位置 |
-| --- | --- |
-| 宿主半侧 | `host/`：项目根解析、勾选状态、目录联接、配置读写、HTTP 接口 |
-| 浏览器半侧 | `client/` → `lib/client.js`：注册到 `dsh-better-sidebar` 的「My DSH」页签 |
-| 组合包补丁 | `cordis.patch.yml`：只插入本插件一行；插件级配置（`configDir`）写在这一行的 `config` 里 |
-| 技能实体 | `skills/`：262 个，按工程/科研/办公与官方类别分层 |
-| 目录树 | `catalog/catalog.json` + `catalog/defaults.json`：构建种子；运行时读 `<configDir>` 下的同名文件 |
-| 上游锁定 | `vendor/upstreams.lock.json`：每个技能的仓库与提交 |
-| 插件设置 | `<configDir>/settings.json`：供应商、URL/模型/API Key、nature 检索与图片转 PPT 参数 |
-| 目录开关 | 插件自己的 `state/gates.json`：每一级目录的开启/关闭，重开侧栏、换会话都保持 |
-| 配置根 | `<configDir>`（固定 `~/.dsh/zrwang-plugin-config`）：`settings.json`、`catalog.json`（目录树）、`defaults.json`（默认启用）、`nature-downloader/`（学校信息与凭据） |
+![My DSH 技能面板](docs/images/my-dsh-panel.png)
 
-技能可见性完全由项目里的链接决定：未勾选时 DSH 看不到，勾选后由
-`dsh-skill-filesystem` 的 watcher 自动刷新，下一步即可用。
+## 功能
+
+- 右侧栏新增「My DSH」页签，按工程、科研、办公分组浏览技能。
+- 支持逐级开关：打开父目录后，该目录下已选技能才会注入；关闭父目录只影响它下面的技能。
+- 技能详情可直接在侧栏查看中文说明。
+- 设置页可配置图片服务、Nature 检索和图片转 PPT 参数，密钥不会回显。
+- 北航图书馆、统一认证、CARSI 和知网入口开箱可用。
 
 ## 安装
 
-```powershell
-# 桌面端用 plugin_manager / 插件管理界面安装本目录；命令行只对非 desktop profile 生效
-dsh plugin --profile web add D:\AgentRelated\DSHRelated\dsh-zrwang-plugin
+需要 DSH Desktop `0.2.1-rc.1` 或更高版本，以及右侧栏插件 `dsh-better-sidebar`。
+
+在 DSH 里打开：
+
+> 设置 → 插件 → 安装插件
+
+搜索并安装：
+
+```text
+dsh-zrwang-plugin
 ```
 
-安装后刷新页面，右侧栏 `+` 菜单里出现「My DSH」。
+如果还没有右侧栏插件，先安装 `dsh-better-sidebar`。安装完成后重启 DSH，刷新页面，右侧栏的 `+` 里会出现「My DSH」。
 
-## 用法
-
-1. 新建或打开会话，打开右侧栏「My DSH」。
-2. 展开 工程/科研/办公，勾选一级目录 → 该目录下已勾选的技能立即注入。
-3. 每一级目录都是开关：点目录只开关这一级的注入，不会改下一级技能的勾选；下层选了哪些、上层关掉就都不注入，重新打开上层恢复原来的下层选择。
-4. 技能参数只在「设置 → 插件 → My DSH」详情页的「My DSH 设置」里改（侧栏页签不再放设置）：保存时写回 `<configDir>/settings.json`；密钥填过之后只显示“留空使用已保存凭据”。
-5. 没有配置好的技能（例如未填 OCR Token、未配置学校访问信息）在树里置灰、不能勾选，也不会被注入。
-
-默认勾选沿用旧插件的启用集合（170 项）；Polyspace、playground 与新增技能默认关。配置未完成的技能即使默认勾着也不会注入。
-
-## 更新技能
+也可以用命令行安装到当前 profile：
 
 ```powershell
-node scripts/vendor-skills.mjs   # 重新下载上游、保留 .env 等用户配置
-node scripts/gen-catalog.mjs     # 重新生成中文目录树
-node scripts/build-client.mjs    # 改了 client/ 才需要
-node scripts/verify.mjs          # 262 个技能、中文覆盖、默认集合、语法全检
-node scripts/smoke-host.mjs      # 宿主冒烟（不装 DSH）
+dsh plugin --profile desktop add dsh-zrwang-plugin
 ```
 
-## 目录联接的边界
+## 使用
 
-- 链接是**项目级**的：同一项目里的多个会话共用一套链接，以最近一次同步的会话为准；
-  页签底部常显当前项目根。
-- 只接管指向本插件 `skills/` 的链接；项目里同名的真实目录不会被覆盖，会作为冲突显示。
-- ppt-master 的 `projects` 也以链接方式指向 `<项目根>/.agents/ppt-master/projects`；换项目时重指。
-- 设置全部在 `~/.dsh/zrwang-plugin-config/settings.json`；插件源码与 profile 补丁都不含设置。技能运行时需要的 `.env`/TOML/YAML 由设置生成。
+1. 打开右侧栏「My DSH」。
+2. 展开「工程 / 科研 / 办公」，打开需要的一级目录。
+3. 勾选该目录下的技能；勾选后当前项目马上可以使用，取消后立即移除。
+4. 在 DSH 的「设置 → 插件 → My DSH」里修改技能参数。
 
-## 回滚
+默认只选中一部分常用技能；Polyspace、playground 和新增技能默认关闭。未配置完成必备参数的技能会置灰，不能勾选。
 
-`plugin_manager remove_bundle dsh-zrwang-plugin` 卸载；技能实体留在本仓库，
-项目里的链接可手动删除（只删链接，不影响插件里的实体）。
+## 北航论文下载
 
-## 在 dsh web 里本地测试（不动 desktop）
+插件内置了北航的学校访问配置：图书馆入口、统一身份认证、CARSI IdP、知网和常用数据库清单。安装后无需再点“配置学校访问”；如果本机已有学校配置，插件不会覆盖。
+
+使用前请确保浏览器已登录北航统一认证，或处于校园网环境。
+
+## 常见问题
+
+**右侧栏没有「My DSH」**  
+确认已安装并启用 `dsh-better-sidebar`，然后重启 DSH 并刷新页面。
+
+**勾选后项目里没有技能**  
+确认打开的是技能所在的一级目录；父目录关闭时，下级技能不会注入。
+
+**论文下载没有权限**  
+检查浏览器是否已登录北航账号，或当前网络是否能访问学校资源。
+
+## 卸载
 
 ```powershell
-dsh plugin --profile web add dsh-better-sidebar@0.28.1
-dsh plugin --profile web add "D:\AgentRelated\DSHRelated\dsh-zrwang-plugin"
-dsh --profile web --no-open --port 5080
+dsh plugin --profile desktop remove dsh-zrwang-plugin
 ```
 
-打开终端里打印的 `?token=` 链接。右侧栏 `+` 里是「My DSH」页签（只做勾选）；
-「设置 → 插件 → My DSH」详情页里是「My DSH 设置」（ppt-master / nature 系列）。
+项目里的技能链接会在取消勾选后自动移除，插件包本身不会被删除。
 
-## 技能详情中文
+## 更多
 
-技能详情的简体中文来自 `catalog/skill-details.zh.json`，是用 Google 翻译预生成并随插件保存的静态内容；运行时**不联网、不调用翻译工具**，详情卡直接读取。
+- 架构和实现说明见 [docs/architecture.md](docs/architecture.md)。
