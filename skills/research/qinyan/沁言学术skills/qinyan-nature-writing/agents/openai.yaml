@@ -1,0 +1,4 @@
+interface:
+  display_name: "沁言 Nature 写作"
+  short_description: "Evidence-led Nature manuscript planning and drafting"
+  default_prompt: "Use $qinyan-nature-writing to build a Nature-calibre manuscript section from my verified evidence."

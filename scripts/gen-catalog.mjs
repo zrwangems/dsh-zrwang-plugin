@@ -36,6 +36,19 @@ const SOURCES = [
   // PPT Master / HTML PPT 是独立技能，直接作为办公下的技能叶子，不再套一层目录
   { nodeId: 'ppt-master', dir: 'office/ppt-master', direct: true },
   { nodeId: 'html-ppt', dir: 'office/html-ppt', direct: true },
+  // 2026-10 新增：科研 5 个仓库、办公 5 个仓库，默认全部关闭
+  { nodeId: 'academic-humanizer', dir: 'research/academic-humanizer', direct: true },
+  { nodeId: 'lieflat-less-ai-tone', dir: 'research/lieflat-less-ai-tone', direct: true },
+  { nodeId: 'qinyan', dir: 'research/qinyan', categories: true },
+  { nodeId: 'nsfc', dir: 'research/nsfc' },
+  { nodeId: 'supervisor', dir: 'research/supervisor-skills' },
+  { nodeId: 'lieflat-charts', dir: 'office/lieflat-charts', direct: true },
+  { nodeId: 'writing-dna-skill', dir: 'office/writing-dna-skill', direct: true },
+  { nodeId: 'lieflat-gongwen', dir: 'office/lieflat-gongwen', direct: true },
+  { nodeId: 'guizang-ppt-skill', dir: 'office/guizang-ppt-skill', direct: true },
+  { nodeId: 'frontend-slides', dir: 'office/frontend-slides', direct: true },
+  { nodeId: 'patent', dir: 'research/patent' },
+  // ARS 不进技能树：它是固定功能区块，由 catalog/ars.json 描述、默认全量注入。
 ]
 
 function fail(message) {
@@ -186,7 +199,7 @@ function main() {
       rootNode.dir = relDir
       skills[name] = {
         name,
-        dir: subDir,
+        dir: relDir,
         zh,
         en: frontValue(readFileSync(join(skillRoot, 'SKILL.md'), 'utf8'), 'description').slice(0, 400),
         group: ancestors(rootNode).map(n => n.id).join('/'),
@@ -229,10 +242,13 @@ function main() {
     group.children = (group.children ?? []).map(flattenNode)
   }
 
-  // 校验技能数与 lock 一致
+  // 校验技能数与 lock 一致：只统计进技能树的上游（ARS 是独立功能区块，不在树里）。
   const total = Object.keys(skills).length
-  if (lock.totals?.skills !== undefined && total !== lock.totals.skills) {
-    fail(`技能数不一致：目录 ${total}，lock ${lock.totals.skills}`)
+  const expected = (lock.repos ?? [])
+    .filter(repo => repo.outsideCatalog !== true)
+    .reduce((sum, repo) => sum + (repo.count ?? 0) + (repo.aliases ?? 0), 0)
+  if (lock.totals?.skills !== undefined && expected > 0 && total !== expected) {
+    fail(`技能数不一致：目录 ${total}，lock ${expected}`)
   }
 
   // 排序：只有全是技能叶子的节点按技能名排；类别节点保持 nodes.zh.json 里的官方顺序

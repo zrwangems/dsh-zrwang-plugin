@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "label": "学术研究（ARS）",
+  "upstream": "Imbad0202/academic-research-skills",
+  "license": "CC-BY-NC-4.0",
+  "root": "ars",
+  "doc": "docs/ars-usage.md",
+  "skills": [
+    {
+      "name": "academic-paper",
+      "dir": "ars/skills/academic-paper",
+      "root": "package"
+    },
+    {
+      "name": "academic-paper-reviewer",
+      "dir": "ars/skills/academic-paper-reviewer",
+      "root": "package"
+    },
+    {
+      "name": "academic-pipeline",
+      "dir": "ars/skills/academic-pipeline",
+      "root": "package"
+    },
+    {
+      "name": "deep-research",
+      "dir": "ars/skills/deep-research",
+      "root": "package"
+    },
+    {
+      "name": "sr-screener",
+      "dir": "ars/skills/sr-screener",
+      "root": "package"
+    }
+  ],
+  "commands": [
+    {
+      "name": "ars-3w",
+      "description": "按 WHY/HOW/WHAT 三向扫描一批论文，出短名单与跨论文综合",
+      "hint": "<主题或论文列表>",
+      "source": "ars/commands/ars-3w/SKILL.md"
+    },
+    {
+      "name": "ars-abstract",
+      "description": "生成中英双语摘要与关键词",
+      "hint": "<论文路径或正文>",
+      "source": "ars/commands/ars-abstract/SKILL.md"
+    },
+    {
+      "name": "ars-cache-invalidate",
+      "description": "清掉某条引用的核验缓存，下次重新联网核验（可在输入里填 DOI）",
+      "hint": "<引用标识或 DOI>",
+      "source": "ars/commands/ars-cache-invalidate/SKILL.md"
+    },
+    {
+      "name": "ars-citation-check",
+      "description": "核对引用是否真实存在、书目字段是否完整、格式是否合规",
+      "hint": "<论文路径或参考文献列表>",
+      "source": "ars/commands/ars-citation-check/SKILL.md"
+    },
+    {
+      "name": "ars-disclosure",
+      "description": "生成投稿需要的 AI 使用声明",
+      "hint": "<目标期刊或会议>",
+      "source": "ars/commands/ars-disclosure/SKILL.md"
+    },
+    {
+      "name": "ars-format-convert",
+      "description": "转换输出格式或引用格式（MD/DOCX/LaTeX/PDF）",
+      "hint": "<目标格式，如 LaTeX / DOCX / IEEE / APA>",
+      "source": "ars/commands/ars-format-convert/SKILL.md"
+    },
+    {
+      "name": "ars-full",
+      "description": "一次跑完整流水线：研究→写作→诚信检查→评审→返修→定稿",
+      "hint": "<研究主题>",
+      "source": "ars/commands/ars-full/SKILL.md"
+    },
+    {
+      "name": "ars-lit-review",
+      "description": "单次产出文献综述（含注释书目与综合）",
+      "hint": "<主题>",
+      "source": "ars/commands/ars-lit-review/SKILL.md"
+    },
+    {
+      "name": "ars-mark-read",
+      "description": "把某条引用标记为已人工读阅，后续核验放行",
+      "hint": "<引用标识或 DOI>",
+      "source": "ars/commands/ars-mark-read/SKILL.md"
+    },
+    {
+      "name": "ars-outline",
+      "description": "只生成详细大纲与证据地图，不写正文",
+      "hint": "<论文主题>",
+      "source": "ars/commands/ars-outline/SKILL.md"
+    },
+    {
+      "name": "ars-plan",
+      "description": "用苏格拉底对话规划论文的章节结构",
+      "hint": "<论文题目或章节需求>",
+      "source": "ars/commands/ars-plan/SKILL.md"
+    },
+    {
+      "name": "ars-rebuttal-audit",
+      "description": "审计已有 rebuttal 草稿，检查是否漏答审稿意见",
+      "hint": "<rebuttal 草稿路径或正文>",
+      "source": "ars/commands/ars-rebuttal-audit/SKILL.md"
+    },
+    {
+      "name": "ars-reviewer",
+      "description": "评审一篇已有论文：五席评审报告 + 编辑决定 + 返修路线图",
+      "hint": "<论文路径或正文>",
+      "source": "ars/commands/ars-reviewer/SKILL.md"
+    },
+    {
+      "name": "ars-revision",
+      "description": "按审稿意见返修论文并生成逐条回复",
+      "hint": "<论文与审稿意见>",
+      "source": "ars/commands/ars-revision/SKILL.md"
+    },
+    {
+      "name": "ars-revision-coach",
+      "description": "把审稿意见拆成返修路线图与回复信骨架",
+      "hint": "<审稿意见>",
+      "source": "ars/commands/ars-revision-coach/SKILL.md"
+    },
+    {
+      "name": "ars-unmark-read",
+      "description": "取消 ars-mark-read 做的标记",
+      "hint": "<引用标识或 DOI>",
+      "source": "ars/commands/ars-unmark-read/SKILL.md"
+    }
+  ]
+}

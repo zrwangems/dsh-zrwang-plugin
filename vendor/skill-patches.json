@@ -3,6 +3,18 @@
   "note": "vendor-skills.mjs 拷完技能后应用这些字面替换；find 必须命中，否则视为上游结构变化并失败。",
   "patches": [
     {
+      "id": "supervisor-deep-research-rename",
+      "reason": "Supervisor-Skills 的 deep-research 与 ARS 的 deep-research 重名，落盘目录已改名为 supervisor-deep-research，这里同步改 frontmatter name。",
+      "files": [
+        {
+          "path": "research/supervisor-skills/supervisor-deep-research/SKILL.md",
+          "replace": [
+            { "find": "name: deep-research", "to": "name: supervisor-deep-research" }
+          ]
+        }
+      ]
+    },
+    {
       "id": "nature-downloader-config-dir",
       "reason": "把下载器的配置目录从 ~/.config/lit-dl 收到 DSH 家目录 zrwang-plugin-config/nature-downloader",
       "files": [

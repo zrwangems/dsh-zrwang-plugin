@@ -1,0 +1,4 @@
+interface:
+  display_name: "沁言 Nature 绘图"
+  short_description: "Evidence-driven publication figures with rigorous QA"
+  default_prompt: "Use $qinyan-nature-figures to design and validate a submission-ready scientific figure from my data."

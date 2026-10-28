@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "note": "ARS 五个技能的 DSH 目录描述（覆盖上游 frontmatter 的 description，原文留档在各自 _shared/description-original.md）。DSH 技能目录对描述只显示前 500 字，上游原文 2–3 KB 且触发词在末尾，不换会丢触发能力。每条必须 ≤480 字、含中英文触发词。",
+  "skills": {
+    "deep-research": "学术研究前置：把模糊想法收敛成可研究的问题，并做文献综述、事实核查、系统综述（PRISMA）与三向文献扫描。Triggers: research, deep research, literature review, systematic review, meta-analysis, PRISMA, fact-check, guide my research | 研究, 文献综述, 系统性文献回顾, 事实核查, 引导我研究, 帮我确定研究问题。输出 RQ Brief、方法论蓝图、带核验的注释书目。",
+    "academic-paper": "学术论文写作：按 IMRaD 或领域结构成稿，含大纲、论证地图、双语摘要、图表与题注、引用格式转换、返修与逐条回复、AI 使用声明。Triggers: write a paper, academic paper, paper outline, revise paper, reviewer comments, rebuttal, citation check, abstract | 写论文, 论文大纲, 修改论文, 审稿意见, 返修, 审稿回复, 引文核对, 写摘要。",
+    "academic-paper-reviewer": "模拟同行评审：期刊匹配审稿人 + 3 位动态领域审稿人 + 魔鬼代言人，输出编辑决定（接收/小修/大修/拒稿）与返修路线图，可做方法论专项评审与再审核验。Triggers: review paper, peer review, manuscript review, check methodology, re-review | 审稿, 同行评审, 评审论文, 检查方法, 复审。只做评审，不改写稿件。",
+    "academic-pipeline": "学术研究总编排：研究→写作→诚信检查→评审→返修→复审→终检→定稿的十阶段流水线，每阶段停在用户确认点，含材料护照与 7 类 AI 研究失败模式检查。Triggers: academic pipeline, research to paper, full paper workflow, end-to-end paper | 完整论文流程, 从研究到论文, 端到端写论文, 论文流水线。",
+    "sr-screener": "系统综述文献筛选：把方案或 PROSPERO 协议转成资格规则，双盲筛选标题摘要与全文，第三人裁决冲突，输出 PRISMA 2020 计数、EndNote/Zotero RIS 分组与可交付给论文技能的 literature_corpus。Triggers: systematic review screening, screen papers, PRISMA counts, pilot screening, adjudicate conflicts | 文献筛选, 系统综述筛选, PRISMA 计数, 筛选冲突裁决。"
+  },
+  "commands": {
+    "ars-3w": {
+      "description": "按 WHY/HOW/WHAT 三向扫描一批论文，出短名单与跨论文综合",
+      "hint": "<主题或论文列表>"
+    },
+    "ars-abstract": {
+      "description": "生成中英双语摘要与关键词",
+      "hint": "<论文路径或正文>"
+    },
+    "ars-cache-invalidate": {
+      "description": "清掉某条引用的核验缓存，下次重新联网核验（可在输入里填 DOI）",
+      "hint": "<引用标识或 DOI>"
+    },
+    "ars-citation-check": {
+      "description": "核对引用是否真实存在、书目字段是否完整、格式是否合规",
+      "hint": "<论文路径或参考文献列表>"
+    },
+    "ars-disclosure": {
+      "description": "生成投稿需要的 AI 使用声明",
+      "hint": "<目标期刊或会议>"
+    },
+    "ars-format-convert": {
+      "description": "转换输出格式或引用格式（MD/DOCX/LaTeX/PDF）",
+      "hint": "<目标格式，如 LaTeX / DOCX / IEEE / APA>"
+    },
+    "ars-full": {
+      "description": "一次跑完整流水线：研究→写作→诚信检查→评审→返修→定稿",
+      "hint": "<研究主题>"
+    },
+    "ars-lit-review": {
+      "description": "单次产出文献综述（含注释书目与综合）",
+      "hint": "<主题>"
+    },
+    "ars-mark-read": {
+      "description": "把某条引用标记为已人工读阅，后续核验放行",
+      "hint": "<引用标识或 DOI>"
+    },
+    "ars-outline": {
+      "description": "只生成详细大纲与证据地图，不写正文",
+      "hint": "<论文主题>"
+    },
+    "ars-plan": {
+      "description": "用苏格拉底对话规划论文的章节结构",
+      "hint": "<论文题目或章节需求>"
+    },
+    "ars-rebuttal-audit": {
+      "description": "审计已有 rebuttal 草稿，检查是否漏答审稿意见",
+      "hint": "<rebuttal 草稿路径或正文>"
+    },
+    "ars-reviewer": {
+      "description": "评审一篇已有论文：五席评审报告 + 编辑决定 + 返修路线图",
+      "hint": "<论文路径或正文>"
+    },
+    "ars-revision": {
+      "description": "按审稿意见返修论文并生成逐条回复",
+      "hint": "<论文与审稿意见>"
+    },
+    "ars-revision-coach": {
+      "description": "把审稿意见拆成返修路线图与回复信骨架",
+      "hint": "<审稿意见>"
+    },
+    "ars-unmark-read": {
+      "description": "取消 ars-mark-read 做的标记",
+      "hint": "<引用标识或 DOI>"
+    }
+  }
+}

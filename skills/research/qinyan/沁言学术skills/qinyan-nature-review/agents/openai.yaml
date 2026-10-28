@@ -1,0 +1,4 @@
+interface:
+  display_name: "沁言 Nature 预审"
+  short_description: "Traceable pre-submission peer review and risk triage"
+  default_prompt: "Use $qinyan-nature-review to conduct a traceable pre-submission review of this manuscript."

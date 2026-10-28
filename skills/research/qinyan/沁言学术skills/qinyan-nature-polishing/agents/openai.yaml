@@ -1,0 +1,4 @@
+interface:
+  display_name: "沁言 Nature 润色"
+  short_description: "Faithful Nature-level academic editing and translation"
+  default_prompt: "Use $qinyan-nature-polishing to revise this academic passage without changing its scientific meaning."

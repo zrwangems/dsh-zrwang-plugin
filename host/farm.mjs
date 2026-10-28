@@ -8,7 +8,7 @@
 import { existsSync } from 'node:fs'
 import { lstat, mkdir, readdir, realpath, rmdir, symlink, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
-import { SKILLS_DIR } from './config.mjs'
+import { PKG_DIR, SKILLS_DIR } from './config.mjs'
 import { isInside, pptProjectsRootOf, samePath, skillsRootOf } from './project.mjs'
 import { readJson, stateFile, writeJson } from './state.mjs'
 
@@ -106,7 +106,10 @@ export async function scanLinks(projectRoot) {
     } catch {
       return undefined
     }
-    if (isInside(SKILLS_DIR, target)) return { name: entry.name, target }
+    // 本包管理的链接有两种来源：skills/ 下的技能实体，和 ars/ 下的功能区块实体。
+    if (isInside(SKILLS_DIR, target) || (isInside(PKG_DIR, target) && isInside(join(PKG_DIR, 'ars'), target))) {
+      return { name: entry.name, target }
+    }
     return { conflict: { name: entry.name, reason: '同名外部链接' } }
   })
   for (const result of results) {
@@ -139,7 +142,9 @@ export async function reconcile({ projectRoot, desired, pptTarget }) {
 
     const created = []
     for (const [name, node] of desired) {
-      const target = join(SKILLS_DIR, ...String(node.dir).split('/'))
+      // ARS 这类功能区块的实体放在包根的 ars/ 下（root: 'package'），不在 skills/ 里。
+      const base = node.root === 'package' ? PKG_DIR : SKILLS_DIR
+      const target = join(base, ...String(node.dir).split('/'))
       const link = join(skillsDir, name)
       const existing = scan.links.get(name)
       const conflict = conflicts.find(item => item.name === name)

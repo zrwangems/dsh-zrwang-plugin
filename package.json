@@ -1,6 +1,6 @@
 {
   "name": "dsh-zrwang-plugin",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "type": "module",
   "description": "王湛然的 DSH 管理插件：DSH Desktop 右侧栏技能管理，按会话启用技能。",
   "main": "./host/index.mjs",
@@ -18,6 +18,7 @@
     "catalog",
     "config",
     "skills",
+    "ars",
     "vendor",
     "scripts",
     "locale",

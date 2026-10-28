@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-27T03:29:48.266Z",
+  "generatedAt": "2026-10-28T09:02:22.970Z",
   "repos": [
     {
       "id": "matlab-agentic",
@@ -1945,9 +1945,1733 @@
           "description": "Architecture and workflow diagrams as standalone HTML"
         }
       ]
+    },
+    {
+      "id": "ars",
+      "repo": "Imbad0202/academic-research-skills",
+      "ref": "main",
+      "sha": "b8d050f24f2e1c465c4410eace8634ea3af15930",
+      "label": "Academic Research Skills (ARS)",
+      "target": "ars/skills",
+      "count": 5,
+      "aliases": 16,
+      "outsideCatalog": true,
+      "skills": [
+        {
+          "dir": "academic-paper",
+          "name": "academic-paper",
+          "category": null,
+          "path": "ars/skills/academic-paper",
+          "description": "学术论文写作：按 IMRaD 或领域结构成稿，含大纲、论证地图、双语摘要、图表与题注、引用格式转换、返修与逐条回复、AI 使用声明。Triggers: write a paper, academic paper, paper outline, revise paper, reviewer comments, rebuttal, citation check, abstract | 写论文, 论文大纲, 修改论文, 审稿意见, 返修, 审稿回复, 引文核对, 写摘要。"
+        },
+        {
+          "dir": "academic-paper-reviewer",
+          "name": "academic-paper-reviewer",
+          "category": null,
+          "path": "ars/skills/academic-paper-reviewer",
+          "description": "模拟同行评审：期刊匹配审稿人 + 3 位动态领域审稿人 + 魔鬼代言人，输出编辑决定（接收/小修/大修/拒稿）与返修路线图，可做方法论专项评审与再审核验。Triggers: review paper, peer review, manuscript review, check methodology, re-review | 审稿, 同行评审, 评审论文, 检查方法, 复审。只做评审，不改写稿件。"
+        },
+        {
+          "dir": "academic-pipeline",
+          "name": "academic-pipeline",
+          "category": null,
+          "path": "ars/skills/academic-pipeline",
+          "description": "学术研究总编排：研究→写作→诚信检查→评审→返修→复审→终检→定稿的十阶段流水线，每阶段停在用户确认点，含材料护照与 7 类 AI 研究失败模式检查。Triggers: academic pipeline, research to paper, full paper workflow, end-to-end paper | 完整论文流程, 从研究到论文, 端到端写论文, 论文流水线。"
+        },
+        {
+          "dir": "deep-research",
+          "name": "deep-research",
+          "category": null,
+          "path": "ars/skills/deep-research",
+          "description": "学术研究前置：把模糊想法收敛成可研究的问题，并做文献综述、事实核查、系统综述（PRISMA）与三向文献扫描。Triggers: research, deep research, literature review, systematic review, meta-analysis, PRISMA, fact-check, guide my research | 研究, 文献综述, 系统性文献回顾, 事实核查, 引导我研究, 帮我确定研究问题。输出 RQ Brief、方法论蓝图、带核验的注释书目。"
+        },
+        {
+          "dir": "sr-screener",
+          "name": "sr-screener",
+          "category": null,
+          "path": "ars/skills/sr-screener",
+          "description": "系统综述文献筛选：把方案或 PROSPERO 协议转成资格规则，双盲筛选标题摘要与全文，第三人裁决冲突，输出 PRISMA 2020 计数、EndNote/Zotero RIS 分组与可交付给论文技能的 literature_corpus。Triggers: systematic review screening, screen papers, PRISMA counts, pilot screening, adjudicate conflicts | 文献筛选, 系统综述筛选, PRISMA 计数, 筛选冲突裁决。"
+        }
+      ]
+    },
+    {
+      "id": "supervisor",
+      "repo": "HKUSTDial/Supervisor-Skills",
+      "ref": "main",
+      "sha": "a20d76ef3979b804d7dbf599d577826957e0a8a9",
+      "label": "Supervisor Skills",
+      "target": "research/supervisor-skills",
+      "count": 12,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "benchmark-paper-template",
+          "name": "benchmark-paper-template",
+          "category": null,
+          "path": "research/supervisor-skills/benchmark-paper-template",
+          "description": "Structures Benchmark and Evaluation papers using the five-pillar framework (Research Gap, Construction Pipeline, Evaluation Framework, Empirical Findings, optional Companion Method). Returns a completeness audit, a six-part Introduction logic chain, a Section 2-7 skeleton, and a pre-submission checklist. Use when writing a benchmark paper, structuring a benchmark paper, checking whether a benchmark idea is substantive, drafting a benchmark Introduction, or planning the data-construction pipeline or experiments."
+        },
+        {
+          "dir": "drawio-reconstruction",
+          "name": "drawio-reconstruction",
+          "category": null,
+          "path": "research/supervisor-skills/drawio-reconstruction",
+          "description": "Reconstructs reference images into high-fidelity, editable Draw.io files with rendered previews: native Draw.io elements carry text and structure, SVG covers simple icons that match the reference, and cropped or transparent PNGs preserve complex visuals. Use when the user wants a diagram image, research figure, architecture diagram, slide, UI screenshot, or image folder turned into `.drawio` XML; batch requests use a manifest with bounded parallelism when available and a full-fidelity serial fallback otherwise."
+        },
+        {
+          "dir": "figure-designer",
+          "name": "figure-designer",
+          "category": null,
+          "path": "research/supervisor-skills/figure-designer",
+          "description": ">-"
+        },
+        {
+          "dir": "idea-evaluator",
+          "name": "idea-evaluator",
+          "category": null,
+          "path": "research/supervisor-skills/idea-evaluator",
+          "description": ">-"
+        },
+        {
+          "dir": "intro-drafter",
+          "name": "intro-drafter",
+          "category": null,
+          "path": "research/supervisor-skills/intro-drafter",
+          "description": ">-"
+        },
+        {
+          "dir": "paper-polish",
+          "name": "paper-polish",
+          "category": null,
+          "path": "research/supervisor-skills/paper-polish",
+          "description": ">-"
+        },
+        {
+          "dir": "paper-writer",
+          "name": "paper-writer",
+          "category": null,
+          "path": "research/supervisor-skills/paper-writer",
+          "description": ">-"
+        },
+        {
+          "dir": "pre-submission-reviewer",
+          "name": "pre-submission-reviewer",
+          "category": null,
+          "path": "research/supervisor-skills/pre-submission-reviewer",
+          "description": ">-"
+        },
+        {
+          "dir": "rebuttal-guidance",
+          "name": "rebuttal-guidance",
+          "category": null,
+          "path": "research/supervisor-skills/rebuttal-guidance",
+          "description": ">-"
+        },
+        {
+          "dir": "supervisor-deep-research",
+          "name": "supervisor-deep-research",
+          "category": null,
+          "path": "research/supervisor-skills/supervisor-deep-research",
+          "description": ">-"
+        },
+        {
+          "dir": "tech-paper-template",
+          "name": "tech-paper-template",
+          "category": null,
+          "path": "research/supervisor-skills/tech-paper-template",
+          "description": ">-"
+        },
+        {
+          "dir": "vibe-research-workflow",
+          "name": "vibe-research-workflow",
+          "category": null,
+          "path": "research/supervisor-skills/vibe-research-workflow",
+          "description": ">-"
+        }
+      ]
+    },
+    {
+      "id": "academic-humanizer",
+      "repo": "AIScientists-Dev/academic-humanizer",
+      "ref": "main",
+      "sha": "94b88b23703bed7df507acae7d6d5876209a0cdf",
+      "label": "Academic Humanizer",
+      "target": "research/academic-humanizer",
+      "count": 1,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "academic-humanizer",
+          "name": "academic-humanizer",
+          "category": null,
+          "path": "research/academic-humanizer",
+          "description": "|"
+        }
+      ]
+    },
+    {
+      "id": "lieflat-less-ai-tone",
+      "repo": "larashero3-dotcom/lieflat-less-ai-tone",
+      "ref": "main",
+      "sha": "fe13f1a0712cd2c138b6cdc500a77927d5bf04ec",
+      "label": "Lieflat Less AI Tone",
+      "target": "research/lieflat-less-ai-tone",
+      "count": 1,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "lieflat-less-ai-tone",
+          "name": "lieflat-less-ai-tone",
+          "category": null,
+          "path": "research/lieflat-less-ai-tone",
+          "description": "三层去 AI 味：脚本检测出分级报告（A 机械改/B 建议改/C 只报告/X 已否决/F 指纹）+ 语义层判读（同义重命名/衔接连环/结论冒号/同构三连），先向用户交付专业、可读的改前报告，列出本篇指标、研究显著性、原文例句和具体改法；收到用户回复后按白名单规则改写，复测并生成前后对比报告（默认 Markdown，与文稿同格式）。规则基于两轮实测（629 篇对照 + 270 对同题同事实配对复测）整理。适用于写作完成后的成稿清理。"
+        }
+      ]
+    },
+    {
+      "id": "qinyan",
+      "repo": "LeonChaoX/qinyan-academic-skills",
+      "ref": "main",
+      "sha": "df5a498a81e0f9c8f79d814446dcf9e9b8f68888",
+      "label": "Qinyan Academic Skills",
+      "target": "research/qinyan",
+      "count": 187,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "bgpt-paper-search",
+          "name": "bgpt-paper-search",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/bgpt-paper-search",
+          "description": "Search scientific papers and retrieve structured experimental data extracted from full-text studies via the BGPT MCP server. Returns 25+ fields per paper including methods, results, sample sizes, quality scores, and conclusions. Use for literature reviews, evidence synthesis, and finding experimental details not available in abstracts alone."
+        },
+        {
+          "dir": "biorxiv-database",
+          "name": "biorxiv-database",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/biorxiv-database",
+          "description": "Efficient database search tool for bioRxiv preprint server. Use this skill when searching for life sciences preprints by keywords, authors, date ranges, or categories, retrieving paper metadata, downloading PDFs, or conducting literature reviews."
+        },
+        {
+          "dir": "citation-management",
+          "name": "citation-management",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/citation-management",
+          "description": "Comprehensive citation management for academic research. Search Google Scholar and PubMed for papers, extract accurate metadata, validate citations, and generate properly formatted BibTeX entries. This skill should be used when you need to find papers, verify citation information, convert DOIs to BibTeX, or ensure reference accuracy in scientific writing."
+        },
+        {
+          "dir": "literature-review",
+          "name": "literature-review",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/literature-review",
+          "description": "Conduct comprehensive, systematic literature reviews using multiple academic databases (PubMed, arXiv, bioRxiv, Semantic Scholar, etc.). This skill should be used when conducting systematic literature reviews, meta-analyses, research synthesis, or comprehensive literature searches across biomedical, scientific, and technical domains. Creates professionally formatted markdown documents and PDFs with verified citations in multiple citation styles (APA, Nature, Vancouver, etc.)."
+        },
+        {
+          "dir": "openalex-database",
+          "name": "openalex-database",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/openalex-database",
+          "description": "Query and analyze scholarly literature using the OpenAlex database. This skill should be used when searching for academic papers, analyzing research trends, finding works by authors or institutions, tracking citations, discovering open access publications, or conducting bibliometric analysis across 240M+ scholarly works. Use for literature searches, research output analysis, citation analysis, and academic database queries."
+        },
+        {
+          "dir": "parallel-web",
+          "name": "parallel-web",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/parallel-web",
+          "description": "Search the web, extract URL content, and run deep research using the Parallel Chat API and Extract API. Use for ALL web searches, research queries, and general information gathering. Provides synthesized summaries with citations."
+        },
+        {
+          "dir": "perplexity-search",
+          "name": "perplexity-search",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/perplexity-search",
+          "description": "Perform AI-powered web searches with real-time information using Perplexity models via LiteLLM and OpenRouter. This skill should be used when conducting web searches for current information, finding recent scientific literature, getting grounded answers with source citations, or accessing information beyond the model knowledge cutoff. Provides access to multiple Perplexity models including Sonar Pro, Sonar Pro Search (advanced agentic search), and Sonar Reasoning Pro through a single OpenRouter API key."
+        },
+        {
+          "dir": "pubmed-database",
+          "name": "pubmed-database",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/pubmed-database",
+          "description": "Direct REST API access to PubMed. Advanced Boolean/MeSH queries, E-utilities API, batch processing, citation management. For Python workflows, prefer biopython (Bio.Entrez). Use this for direct HTTP/REST work or custom API implementations."
+        },
+        {
+          "dir": "pyzotero",
+          "name": "pyzotero",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/pyzotero",
+          "description": "Interact with Zotero reference management libraries using the pyzotero Python client. Retrieve, create, update, and delete items, collections, tags, and attachments via the Zotero Web API v3. Use this skill when working with Zotero libraries programmatically, managing bibliographic references, exporting citations, searching library contents, uploading PDF attachments, or building research automation workflows that integrate with Zotero."
+        },
+        {
+          "dir": "research-lookup",
+          "name": "research-lookup",
+          "category": "01-论文检索与文献管理",
+          "path": "research/qinyan/01-论文检索与文献管理/research-lookup",
+          "description": "Look up current research information using the Parallel Chat API (primary) or Perplexity sonar-pro-search (academic paper searches). Automatically routes queries to the best backend. Use for finding papers, gathering research data, and verifying scientific information."
+        },
+        {
+          "dir": "medical-imaging-review",
+          "name": "medical-imaging-review",
+          "category": "02-科学写作与学术交流",
+          "path": "research/qinyan/02-科学写作与学术交流/medical-imaging-review",
+          "description": ">"
+        },
+        {
+          "dir": "paper-2-web",
+          "name": "paper-2-web",
+          "category": "02-科学写作与学术交流",
+          "path": "research/qinyan/02-科学写作与学术交流/paper-2-web",
+          "description": "This skill should be used when converting academic papers into promotional and presentation formats including interactive websites (Paper2Web), presentation videos (Paper2Video), and conference posters (Paper2Poster). Use this skill for tasks involving paper dissemination, conference preparation, creating explorable academic homepages, generating video abstracts, or producing print-ready posters from LaTeX or PDF sources."
+        },
+        {
+          "dir": "peer-review",
+          "name": "peer-review",
+          "category": "02-科学写作与学术交流",
+          "path": "research/qinyan/02-科学写作与学术交流/peer-review",
+          "description": "Structured manuscript/grant review with checklist-based evaluation. Use when writing formal peer reviews with specific criteria methodology assessment, statistical validity, reporting standards compliance (CONSORT/STROBE), and constructive feedback. Best for actual review writing, manuscript revision. For evaluating claims/evidence quality use scientific-critical-thinking; for quantitative scoring frameworks use scholar-evaluation."
+        },
+        {
+          "dir": "research-proposal",
+          "name": "research-proposal",
+          "category": "02-科学写作与学术交流",
+          "path": "research/qinyan/02-科学写作与学术交流/research-proposal",
+          "description": ">"
+        },
+        {
+          "dir": "scientific-writing",
+          "name": "scientific-writing",
+          "category": "02-科学写作与学术交流",
+          "path": "research/qinyan/02-科学写作与学术交流/scientific-writing",
+          "description": "Core skill for the deep research and writing tool. Write scientific manuscripts in full paragraphs (never bullet points). Use two-stage process with (1) section outlines with key points using research-lookup then (2) convert to flowing prose. IMRAD structure, citations (APA/AMA/Vancouver), figures/tables, reporting guidelines (CONSORT/STROBE/PRISMA), for research papers and journal submissions."
+        },
+        {
+          "dir": "venue-templates",
+          "name": "venue-templates",
+          "category": "02-科学写作与学术交流",
+          "path": "research/qinyan/02-科学写作与学术交流/venue-templates",
+          "description": "Access comprehensive LaTeX templates, formatting requirements, and submission guidelines for major scientific publication venues (Nature, Science, PLOS, IEEE, ACM), academic conferences (NeurIPS, ICML, CVPR, CHI), research posters, and grant proposals (NSF, NIH, DOE, DARPA). This skill should be used when preparing manuscripts for journal submission, conference papers, research posters, or grant proposals and need venue-specific formatting requirements and templates."
+        },
+        {
+          "dir": "generate-image",
+          "name": "generate-image",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/generate-image",
+          "description": "Generate or edit images using AI models (FLUX, Nano Banana 2). Use for general-purpose image generation including photos, illustrations, artwork, visual assets, concept art, and any image that is not a technical diagram or schematic. For flowcharts, circuits, pathways, and technical diagrams, use the scientific-schematics skill instead."
+        },
+        {
+          "dir": "infographics",
+          "name": "infographics",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/infographics",
+          "description": "Create professional infographics using Nano Banana Pro AI with smart iterative refinement. Uses Gemini 3 Pro for quality review. Integrates research-lookup and web search for accurate data. Supports 10 infographic types, 8 industry styles, and colorblind-safe palettes."
+        },
+        {
+          "dir": "latex-posters",
+          "name": "latex-posters",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/latex-posters",
+          "description": "Create professional research posters in LaTeX using beamerposter, tikzposter, or baposter. Support for conference presentations, academic posters, and scientific communication. Includes layout design, color schemes, multi-column formats, figure integration, and poster-specific best practices for visual communication."
+        },
+        {
+          "dir": "markdown-mermaid-writing",
+          "name": "markdown-mermaid-writing",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/markdown-mermaid-writing",
+          "description": "Comprehensive markdown and Mermaid diagram writing skill. Use when creating any scientific document, report, analysis, or visualization. Establishes text-based diagrams as the default documentation standard with full style guides (markdown + mermaid), 24 diagram type references, and 9 document templates."
+        },
+        {
+          "dir": "paper-slide-deck",
+          "name": "paper-slide-deck",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/paper-slide-deck",
+          "description": "Generate professional slide deck images from academic papers and content. Creates comprehensive outlines with style instructions, auto-detects figures from PDFs, then generates individual slide images. Use when user asks to \"create slides\", \"make a presentation\", \"generate deck\", or \"slide deck\" for papers."
+        },
+        {
+          "dir": "pptx-posters",
+          "name": "pptx-posters",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/pptx-posters",
+          "description": "Create research posters using HTML/CSS that can be exported to PDF or PPTX. Use this skill ONLY when the user explicitly requests PowerPoint/PPTX poster format. For standard research posters, use latex-posters instead. This skill provides modern web-based poster design with responsive layouts and easy visual integration."
+        },
+        {
+          "dir": "scientific-schematics",
+          "name": "scientific-schematics",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/scientific-schematics",
+          "description": "Create publication-quality scientific diagrams using Nano Banana 2 AI with smart iterative refinement. Uses Gemini 3.1 Pro Preview for quality review. Only regenerates if quality is below threshold for your document type. Specialized in neural network architectures, system diagrams, flowcharts, biological pathways, and complex scientific visualizations."
+        },
+        {
+          "dir": "scientific-slides",
+          "name": "scientific-slides",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/scientific-slides",
+          "description": "Build slide decks and presentations for research talks. Use this for making PowerPoint slides, conference presentations, seminar talks, research presentations, thesis defense slides, or any scientific talk. Provides slide structure, design templates, timing guidance, and visual validation. Works with PowerPoint and LaTeX Beamer."
+        },
+        {
+          "dir": "scientific-visualization",
+          "name": "scientific-visualization",
+          "category": "03-学术演示与可视化",
+          "path": "research/qinyan/03-学术演示与可视化/scientific-visualization",
+          "description": "Meta-skill for publication-ready figures. Use when creating journal submission figures requiring multi-panel layouts, significance annotations, error bars, colorblind-safe palettes, and specific journal formatting (Nature, Science, Cell). Orchestrates matplotlib/seaborn/plotly with publication styles. For quick exploration use seaborn or plotly directly."
+        },
+        {
+          "dir": "consciousness-council",
+          "name": "consciousness-council",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/consciousness-council",
+          "description": "Run a multi-perspective Mind Council deliberation on any question, decision, or creative challenge. Use this skill whenever the user wants diverse viewpoints, needs help making a tough decision, asks for a council/panel/board discussion, wants to explore a problem from multiple angles, requests devil's advocate analysis, or says things like \"what would different experts think about this\", \"help me think through this from all sides\", \"council mode\", \"mind council\", or \"deliberate on this\". Also trigger when the user faces a dilemma, trade-off, or complex choice with no obvious answer."
+        },
+        {
+          "dir": "dhdna-profiler",
+          "name": "dhdna-profiler",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/dhdna-profiler",
+          "description": "Extract cognitive patterns and thinking fingerprints from any text. Use this skill when the user wants to analyze how someone thinks, understand cognitive style, profile writing or speech patterns, compare thinking styles between people, asks \"what's my thinking style\", \"analyze how this person reasons\", \"cognitive profile\", \"thinking pattern\", \"DHDNA\", \"digital DNA\", or wants to understand the mind behind any text. Also trigger when the user provides text and wants deeper insight into the author's reasoning patterns, decision-making style, or cognitive signature."
+        },
+        {
+          "dir": "hypothesis-generation",
+          "name": "hypothesis-generation",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/hypothesis-generation",
+          "description": "Structured hypothesis formulation from observations. Use when you have experimental observations or data and need to formulate testable hypotheses with predictions, propose mechanisms, and design experiments to test them. Follows scientific method framework. For open-ended ideation use scientific-brainstorming; for automated LLM-driven hypothesis testing on datasets use hypogenic."
+        },
+        {
+          "dir": "nsfc-proposal",
+          "name": "nsfc-proposal",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/nsfc-proposal",
+          "description": "撰写国家自然科学基金（NSFC）申请书，覆盖青年科学基金（C类）、优秀青年科学基金（B类）、国家杰出青年科学基金（A类）2026年度最新规范。提供分阶段写作工作流：基本信息、摘要、立项依据、研究内容、研究基础、个人简历、伦理与AI辅助声明等模块；内置文献检索策略与质量自查清单。工具中性，适配 Claude Code / Cursor / Codex / OpenClaw / Gemini CLI。触发词：国家自然科学基金、国自然、NSFC、青基、青年基金、优青、杰青、面上项目、natural science foundation of china、nsfc grant、青年科学基金申报"
+        },
+        {
+          "dir": "nssfc-proposal",
+          "name": "nssfc-proposal",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/nssfc-proposal",
+          "description": "撰写国家社会科学基金（NSSFC）年度项目申请书，依据 2025 年全国哲学社会科学工作办公室官方模板，覆盖重点项目（A）、一般项目（B）、青年项目（C）、西部项目（X）四类。提供分阶段写作工作流：数据表、选题说明（300字）、选题依据、研究内容、创新之处、研究基础、经费概算、活页匿名化等模块；内置社科文献检索策略与质量自查清单。工具中性，适配 Claude Code / Cursor / Codex / OpenClaw / Gemini CLI。触发词：国家社会科学基金、国社科、社科基金、NSSFC、哲学社会科学、重点项目、一般项目、青年项目、西部项目、社科申报、活页"
+        },
+        {
+          "dir": "research-grants",
+          "name": "research-grants",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/research-grants",
+          "description": "Write competitive research proposals for NSF, NIH, DOE, DARPA, and Taiwan NSTC. Agency-specific formatting, review criteria, budget preparation, broader impacts, significance statements, innovation narratives, and compliance with submission requirements."
+        },
+        {
+          "dir": "scholar-evaluation",
+          "name": "scholar-evaluation",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/scholar-evaluation",
+          "description": "Systematically evaluate scholarly work using the ScholarEval framework, providing structured assessment across research quality dimensions including problem formulation, methodology, analysis, and writing with quantitative scoring and actionable feedback."
+        },
+        {
+          "dir": "scientific-brainstorming",
+          "name": "scientific-brainstorming",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/scientific-brainstorming",
+          "description": "Creative research ideation and exploration. Use for open-ended brainstorming sessions, exploring interdisciplinary connections, challenging assumptions, or identifying research gaps. Best for early-stage research planning when you do not have specific observations yet. For formulating testable hypotheses from data use hypothesis-generation."
+        },
+        {
+          "dir": "scientific-critical-thinking",
+          "name": "scientific-critical-thinking",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/scientific-critical-thinking",
+          "description": "Evaluate scientific claims and evidence quality. Use for assessing experimental design validity, identifying biases and confounders, applying evidence grading frameworks (GRADE, Cochrane Risk of Bias), or teaching critical analysis. Best for understanding evidence quality, identifying flaws. For formal peer review writing use peer-review."
+        },
+        {
+          "dir": "what-if-oracle",
+          "name": "what-if-oracle",
+          "category": "04-研究方法与科学思维",
+          "path": "research/qinyan/04-研究方法与科学思维/what-if-oracle",
+          "description": "Run structured What-If scenario analysis with multi-branch possibility exploration. Use this skill when the user asks speculative questions like \"what if...\", \"what would happen if...\", \"what are the possibilities\", \"explore scenarios\", \"scenario analysis\", \"possibility space\", \"what could go wrong\", \"best case / worst case\", \"risk analysis\", \"contingency planning\", \"strategic options\", or any question about uncertain futures. Also trigger when the user faces a fork-in-the-road decision, wants to stress-test an idea, or needs to think through consequences before committing."
+        },
+        {
+          "dir": "anndata",
+          "name": "anndata",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/anndata",
+          "description": "Data structure for annotated matrices in single-cell analysis. Use when working with .h5ad files or integrating with the scverse ecosystem. This is the data format skill—for analysis workflows use scanpy; for probabilistic models use scvi-tools; for population-scale queries use cellxgene-census."
+        },
+        {
+          "dir": "arboreto",
+          "name": "arboreto",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/arboreto",
+          "description": "Infer gene regulatory networks (GRNs) from gene expression data using scalable algorithms (GRNBoost2, GENIE3). Use when analyzing transcriptomics data (bulk RNA-seq, single-cell RNA-seq) to identify transcription factor-target gene relationships and regulatory interactions. Supports distributed computation for large-scale datasets."
+        },
+        {
+          "dir": "biopython",
+          "name": "biopython",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/biopython",
+          "description": "Comprehensive molecular biology toolkit. Use for sequence manipulation, file parsing (FASTA/GenBank/PDB), phylogenetics, and programmatic NCBI/PubMed access (Bio.Entrez). Best for batch processing, custom bioinformatics pipelines, BLAST automation. For quick lookups use gget; for multi-service integration use bioservices."
+        },
+        {
+          "dir": "bioservices",
+          "name": "bioservices",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/bioservices",
+          "description": "Unified Python interface to 40+ bioinformatics services. Use when querying multiple databases (UniProt, KEGG, ChEMBL, Reactome) in a single workflow with consistent API. Best for cross-database analysis, ID mapping across services. For quick single-database lookups use gget; for sequence/file manipulation use biopython."
+        },
+        {
+          "dir": "cellxgene-census",
+          "name": "cellxgene-census",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/cellxgene-census",
+          "description": "Query the CELLxGENE Census (61M+ cells) programmatically. Use when you need expression data across tissues, diseases, or cell types from the largest curated single-cell atlas. Best for population-scale queries, reference atlas comparisons. For analyzing your own data use scanpy or scvi-tools."
+        },
+        {
+          "dir": "deeptools",
+          "name": "deeptools",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/deeptools",
+          "description": "NGS analysis toolkit. BAM to bigWig conversion, QC (correlation, PCA, fingerprints), heatmaps/profiles (TSS, peaks), for ChIP-seq, RNA-seq, ATAC-seq visualization."
+        },
+        {
+          "dir": "etetoolkit",
+          "name": "etetoolkit",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/etetoolkit",
+          "description": "Phylogenetic tree toolkit (ETE). Tree manipulation (Newick/NHX), evolutionary event detection, orthology/paralogy, NCBI taxonomy, visualization (PDF/SVG), for phylogenomics."
+        },
+        {
+          "dir": "flowio",
+          "name": "flowio",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/flowio",
+          "description": "Parse FCS (Flow Cytometry Standard) files v2.0-3.1. Extract events as NumPy arrays, read metadata/channels, convert to CSV/DataFrame, for flow cytometry data preprocessing."
+        },
+        {
+          "dir": "geniml",
+          "name": "geniml",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/geniml",
+          "description": "This skill should be used when working with genomic interval data (BED files) for machine learning tasks. Use for training region embeddings (Region2Vec, BEDspace), single-cell ATAC-seq analysis (scEmbed), building consensus peaks (universes), or any ML-based analysis of genomic regions. Applies to BED file collections, scATAC-seq data, chromatin accessibility datasets, and region-based genomic feature learning."
+        },
+        {
+          "dir": "gget",
+          "name": "gget",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/gget",
+          "description": "Fast CLI/Python queries to 20+ bioinformatics databases. Use for quick lookups: gene info, BLAST searches, AlphaFold structures, enrichment analysis. Best for interactive exploration, simple queries. For batch processing or advanced BLAST use biopython; for multi-database Python workflows use bioservices."
+        },
+        {
+          "dir": "gtars",
+          "name": "gtars",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/gtars",
+          "description": "High-performance toolkit for genomic interval analysis in Rust with Python bindings. Use when working with genomic regions, BED files, coverage tracks, overlap detection, tokenization for ML models, or fragment analysis in computational genomics and machine learning applications."
+        },
+        {
+          "dir": "lamindb",
+          "name": "lamindb",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/lamindb",
+          "description": "This skill should be used when working with LaminDB, an open-source data framework for biology that makes data queryable, traceable, reproducible, and FAIR. Use when managing biological datasets (scRNA-seq, spatial, flow cytometry, etc.), tracking computational workflows, curating and validating data with biological ontologies, building data lakehouses, or ensuring data lineage and reproducibility in biological research. Covers data management, annotation, ontologies (genes, cell types, diseases, tissues), schema validation, integrations with workflow managers (Nextflow, Snakemake) and MLOps platforms (W&B, MLflow), and deployment strategies."
+        },
+        {
+          "dir": "phylogenetics",
+          "name": "phylogenetics",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/phylogenetics",
+          "description": "Build and analyze phylogenetic trees using MAFFT (multiple alignment), IQ-TREE 2 (maximum likelihood), and FastTree (fast NJ/ML). Visualize with ETE3 or FigTree. For evolutionary analysis, microbial genomics, viral phylodynamics, protein family analysis, and molecular clock studies."
+        },
+        {
+          "dir": "pydeseq2",
+          "name": "pydeseq2",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/pydeseq2",
+          "description": "Differential gene expression analysis (Python DESeq2). Identify DE genes from bulk RNA-seq counts, Wald tests, FDR correction, volcano/MA plots, for RNA-seq analysis."
+        },
+        {
+          "dir": "pysam",
+          "name": "pysam",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/pysam",
+          "description": "Genomic file toolkit. Read/write SAM/BAM/CRAM alignments, VCF/BCF variants, FASTA/FASTQ sequences, extract regions, calculate coverage, for NGS data processing pipelines."
+        },
+        {
+          "dir": "scanpy",
+          "name": "scanpy",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/scanpy",
+          "description": "Standard single-cell RNA-seq analysis pipeline. Use for QC, normalization, dimensionality reduction (PCA/UMAP/t-SNE), clustering, differential expression, and visualization. Best for exploratory scRNA-seq analysis with established workflows. For deep learning models use scvi-tools; for data format questions use anndata."
+        },
+        {
+          "dir": "scikit-bio",
+          "name": "scikit-bio",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/scikit-bio",
+          "description": "Biological data toolkit. Sequence analysis, alignments, phylogenetic trees, diversity metrics (alpha/beta, UniFrac), ordination (PCoA), PERMANOVA, FASTA/Newick I/O, for microbiome analysis."
+        },
+        {
+          "dir": "scvelo",
+          "name": "scvelo",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/scvelo",
+          "description": "RNA velocity analysis with scVelo. Estimate cell state transitions from unspliced/spliced mRNA dynamics, infer trajectory directions, compute latent time, and identify driver genes in single-cell RNA-seq data. Complements Scanpy/scVI-tools for trajectory inference."
+        },
+        {
+          "dir": "scvi-tools",
+          "name": "scvi-tools",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/scvi-tools",
+          "description": "Deep generative models for single-cell omics. Use when you need probabilistic batch correction (scVI), transfer learning, differential expression with uncertainty, or multi-modal integration (TOTALVI, MultiVI). Best for advanced modeling, batch effects, multimodal data. For standard analysis pipelines use scanpy."
+        },
+        {
+          "dir": "tiledbvcf",
+          "name": "tiledbvcf",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/tiledbvcf",
+          "description": "Efficient storage and retrieval of genomic variant data using TileDB. Scalable VCF/BCF ingestion, incremental sample addition, compressed storage, parallel queries, and export capabilities for population genomics."
+        },
+        {
+          "dir": "zarr-python",
+          "name": "zarr-python",
+          "category": "05-生物信息与基因组学",
+          "path": "research/qinyan/05-生物信息与基因组学/zarr-python",
+          "description": "Chunked N-D arrays for cloud storage. Compressed arrays, parallel I/O, S3/GCS integration, NumPy/Dask/Xarray compatible, for large-scale scientific computing pipelines."
+        },
+        {
+          "dir": "datamol",
+          "name": "datamol",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/datamol",
+          "description": "Pythonic wrapper around RDKit with simplified interface and sensible defaults. Preferred for standard drug discovery including SMILES parsing, standardization, descriptors, fingerprints, clustering, 3D conformers, parallel processing. Returns native rdkit.Chem.Mol objects. For advanced control or custom parameters, use rdkit directly."
+        },
+        {
+          "dir": "deepchem",
+          "name": "deepchem",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/deepchem",
+          "description": "Molecular ML with diverse featurizers and pre-built datasets. Use for property prediction (ADMET, toxicity) with traditional ML or GNNs when you want extensive featurization options and MoleculeNet benchmarks. Best for quick experiments with pre-trained models, diverse molecular representations. For graph-first PyTorch workflows use torchdrug; for benchmark datasets use pytdc."
+        },
+        {
+          "dir": "diffdock",
+          "name": "diffdock",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/diffdock",
+          "description": "Diffusion-based molecular docking. Predict protein-ligand binding poses from PDB/SMILES, confidence scores, virtual screening, for structure-based drug design. Not for affinity prediction."
+        },
+        {
+          "dir": "matchms",
+          "name": "matchms",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/matchms",
+          "description": "Spectral similarity and compound identification for metabolomics. Use for comparing mass spectra, computing similarity scores (cosine, modified cosine), and identifying unknown compounds from spectral libraries. Best for metabolite identification, spectral matching, library searching. For full LC-MS/MS proteomics pipelines use pyopenms."
+        },
+        {
+          "dir": "medchem",
+          "name": "medchem",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/medchem",
+          "description": "Medicinal chemistry filters. Apply drug-likeness rules (Lipinski, Veber), PAINS filters, structural alerts, complexity metrics, for compound prioritization and library filtering."
+        },
+        {
+          "dir": "molecular-dynamics",
+          "name": "molecular-dynamics",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/molecular-dynamics",
+          "description": "Run and analyze molecular dynamics simulations with OpenMM and MDAnalysis. Set up protein/small molecule systems, define force fields, run energy minimization and production MD, analyze trajectories (RMSD, RMSF, contact maps, free energy surfaces). For structural biology, drug binding, and biophysics."
+        },
+        {
+          "dir": "molfeat",
+          "name": "molfeat",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/molfeat",
+          "description": "Molecular featurization for ML (100+ featurizers). ECFP, MACCS, descriptors, pretrained models (ChemBERTa), convert SMILES to features, for QSAR and molecular ML."
+        },
+        {
+          "dir": "pyopenms",
+          "name": "pyopenms",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/pyopenms",
+          "description": "Complete mass spectrometry analysis platform. Use for proteomics workflows feature detection, peptide identification, protein quantification, and complex LC-MS/MS pipelines. Supports extensive file formats and algorithms. Best for proteomics, comprehensive MS data processing. For simple spectral comparison and metabolite ID use matchms."
+        },
+        {
+          "dir": "pytdc",
+          "name": "pytdc",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/pytdc",
+          "description": "Therapeutics Data Commons. AI-ready drug discovery datasets (ADME, toxicity, DTI), benchmarks, scaffold splits, molecular oracles, for therapeutic ML and pharmacological prediction."
+        },
+        {
+          "dir": "rdkit",
+          "name": "rdkit",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/rdkit",
+          "description": "Cheminformatics toolkit for fine-grained molecular control. SMILES/SDF parsing, descriptors (MW, LogP, TPSA), fingerprints, substructure search, 2D/3D generation, similarity, reactions. For standard workflows with simpler interface, use datamol (wrapper around RDKit). Use rdkit for advanced control, custom sanitization, specialized algorithms."
+        },
+        {
+          "dir": "rowan",
+          "name": "rowan",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/rowan",
+          "description": "Cloud-based quantum chemistry platform with Python API. Preferred for computational chemistry workflows including pKa prediction, geometry optimization, conformer searching, molecular property calculations, protein-ligand docking (AutoDock Vina), and AI protein cofolding (Chai-1, Boltz-1/2). Use when tasks involve quantum chemistry calculations, molecular property prediction, DFT or semiempirical methods, neural network potentials (AIMNet2), protein-ligand binding predictions, or automated computational chemistry pipelines. Provides cloud compute resources with no local setup required."
+        },
+        {
+          "dir": "torchdrug",
+          "name": "torchdrug",
+          "category": "06-化学信息与药物发现",
+          "path": "research/qinyan/06-化学信息与药物发现/torchdrug",
+          "description": "PyTorch-native graph neural networks for molecules and proteins. Use when building custom GNN architectures for drug discovery, protein modeling, or knowledge graph reasoning. Best for custom model development, protein property prediction, retrosynthesis. For pre-trained models and diverse featurizers use deepchem; for benchmark datasets use pytdc."
+        },
+        {
+          "dir": "cbioportal-database",
+          "name": "cbioportal-database",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/cbioportal-database",
+          "description": "Query cBioPortal for cancer genomics data including somatic mutations, copy number alterations, gene expression, and survival data across hundreds of cancer studies. Essential for cancer target validation, oncogene/tumor suppressor analysis, and patient-level genomic profiling."
+        },
+        {
+          "dir": "clinical-decision-support",
+          "name": "clinical-decision-support",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/clinical-decision-support",
+          "description": "Generate professional clinical decision support (CDS) documents for pharmaceutical and clinical research settings, including patient cohort analyses (biomarker-stratified with outcomes) and treatment recommendation reports (evidence-based guidelines with decision algorithms). Supports GRADE evidence grading, statistical analysis (hazard ratios, survival curves, waterfall plots), biomarker integration, and regulatory compliance. Outputs publication-ready LaTeX/PDF format optimized for drug development, clinical research, and evidence synthesis."
+        },
+        {
+          "dir": "clinical-reports",
+          "name": "clinical-reports",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/clinical-reports",
+          "description": "Write comprehensive clinical reports including case reports (CARE guidelines), diagnostic reports (radiology/pathology/lab), clinical trial reports (ICH-E3, SAE, CSR), and patient documentation (SOAP, H&P, discharge summaries). Full support with templates, regulatory compliance (HIPAA, FDA, ICH-GCP), and validation tools."
+        },
+        {
+          "dir": "clinicaltrials-database",
+          "name": "clinicaltrials-database",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/clinicaltrials-database",
+          "description": "Query ClinicalTrials.gov via API v2. Search trials by condition, drug, location, status, or phase. Retrieve trial details by NCT ID, export data, for clinical research and patient matching."
+        },
+        {
+          "dir": "clinpgx-database",
+          "name": "clinpgx-database",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/clinpgx-database",
+          "description": "Access ClinPGx pharmacogenomics data (successor to PharmGKB). Query gene-drug interactions, CPIC guidelines, allele functions, for precision medicine and genotype-guided dosing decisions."
+        },
+        {
+          "dir": "clinvar-database",
+          "name": "clinvar-database",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/clinvar-database",
+          "description": "Query NCBI ClinVar for variant clinical significance. Search by gene/position, interpret pathogenicity classifications, access via E-utilities API or FTP, annotate VCFs, for genomic medicine."
+        },
+        {
+          "dir": "cosmic-database",
+          "name": "cosmic-database",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/cosmic-database",
+          "description": "Access COSMIC cancer mutation database. Query somatic mutations, Cancer Gene Census, mutational signatures, gene fusions, for cancer research and precision oncology. Requires authentication."
+        },
+        {
+          "dir": "depmap",
+          "name": "depmap",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/depmap",
+          "description": "Query the Cancer Dependency Map (DepMap) for cancer cell line gene dependency scores (CRISPR Chronos), drug sensitivity data, and gene effect profiles. Use for identifying cancer-specific vulnerabilities, synthetic lethal interactions, and validating oncology drug targets."
+        },
+        {
+          "dir": "fda-database",
+          "name": "fda-database",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/fda-database",
+          "description": "Query openFDA API for drugs, devices, adverse events, recalls, regulatory submissions (510k, PMA), substance identification (UNII), for FDA regulatory data analysis and safety research."
+        },
+        {
+          "dir": "histolab",
+          "name": "histolab",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/histolab",
+          "description": "Lightweight WSI tile extraction and preprocessing. Use for basic slide processing tissue detection, tile extraction, stain normalization for H&E images. Best for simple pipelines, dataset preparation, quick tile-based analysis. For advanced spatial proteomics, multiplexed imaging, or deep learning pipelines use pathml."
+        },
+        {
+          "dir": "imaging-data-commons",
+          "name": "imaging-data-commons",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/imaging-data-commons",
+          "description": "Query and download public cancer imaging data from NCI Imaging Data Commons using idc-index. Use for accessing large-scale radiology (CT, MR, PET) and pathology datasets for AI training or research. No authentication required. Query by metadata, visualize in browser, check licenses."
+        },
+        {
+          "dir": "monarch-database",
+          "name": "monarch-database",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/monarch-database",
+          "description": "Query the Monarch Initiative knowledge graph for disease-gene-phenotype associations across species. Integrates OMIM, ORPHANET, HPO, ClinVar, and model organism databases. Use for rare disease gene discovery, phenotype-to-gene mapping, cross-species disease modeling, and HPO term lookup."
+        },
+        {
+          "dir": "neurokit2",
+          "name": "neurokit2",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/neurokit2",
+          "description": "Comprehensive biosignal processing toolkit for analyzing physiological data including ECG, EEG, EDA, RSP, PPG, EMG, and EOG signals. Use this skill when processing cardiovascular signals, brain activity, electrodermal responses, respiratory patterns, muscle activity, or eye movements. Applicable for heart rate variability analysis, event-related potentials, complexity measures, autonomic nervous system assessment, psychophysiology research, and multi-modal physiological signal integration."
+        },
+        {
+          "dir": "neuropixels-analysis",
+          "name": "neuropixels-analysis",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/neuropixels-analysis",
+          "description": "Neuropixels neural recording analysis. Load SpikeGLX/OpenEphys data, preprocess, motion correction, Kilosort4 spike sorting, quality metrics, Allen/IBL curation, AI-assisted visual analysis, for Neuropixels 1.0/2.0 extracellular electrophysiology. Use when working with neural recordings, spike sorting, extracellular electrophysiology, or when the user mentions Neuropixels, SpikeGLX, Open Ephys, Kilosort, quality metrics, or unit curation."
+        },
+        {
+          "dir": "pathml",
+          "name": "pathml",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/pathml",
+          "description": "Full-featured computational pathology toolkit. Use for advanced WSI analysis including multiplexed immunofluorescence (CODEX, Vectra), nucleus segmentation, tissue graph construction, and ML model training on pathology data. Supports 160+ slide formats. For simple tile extraction from H&E slides, histolab may be simpler."
+        },
+        {
+          "dir": "pydicom",
+          "name": "pydicom",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/pydicom",
+          "description": "Python library for working with DICOM (Digital Imaging and Communications in Medicine) files. Use this skill when reading, writing, or modifying medical imaging data in DICOM format, extracting pixel data from medical images (CT, MRI, X-ray, ultrasound), anonymizing DICOM files, working with DICOM metadata and tags, converting DICOM images to other formats, handling compressed DICOM data, or processing medical imaging datasets. Applies to tasks involving medical image analysis, PACS systems, radiology workflows, and healthcare imaging applications."
+        },
+        {
+          "dir": "pyhealth",
+          "name": "pyhealth",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/pyhealth",
+          "description": "Comprehensive healthcare AI toolkit for developing, testing, and deploying machine learning models with clinical data. This skill should be used when working with electronic health records (EHR), clinical prediction tasks (mortality, readmission, drug recommendation), medical coding systems (ICD, NDC, ATC), physiological signals (EEG, ECG), healthcare datasets (MIMIC-III/IV, eICU, OMOP), or implementing deep learning models for healthcare applications (RETAIN, SafeDrug, Transformer, GNN)."
+        },
+        {
+          "dir": "treatment-plans",
+          "name": "treatment-plans",
+          "category": "07-临床医学与精准医疗",
+          "path": "research/qinyan/07-临床医学与精准医疗/treatment-plans",
+          "description": "Generate concise (3-4 page), focused medical treatment plans in LaTeX/PDF format for all clinical specialties. Supports general medical treatment, rehabilitation therapy, mental health care, chronic disease management, perioperative care, and pain management. Includes SMART goal frameworks, evidence-based interventions with minimal text citations, regulatory compliance (HIPAA), and professional formatting. Prioritizes brevity and clinical actionability."
+        },
+        {
+          "dir": "adaptyv",
+          "name": "adaptyv",
+          "category": "08-蛋白质工程与结构生物学",
+          "path": "research/qinyan/08-蛋白质工程与结构生物学/adaptyv",
+          "description": "Cloud laboratory platform for automated protein testing and validation. Use when designing proteins and needing experimental validation including binding assays, expression testing, thermostability measurements, enzyme activity assays, or protein sequence optimization. Also use for submitting experiments via API, tracking experiment status, downloading results, optimizing protein sequences for better expression using computational tools (NetSolP, SoluProt, SolubleMPNN, ESM), or managing protein design workflows with wet-lab validation."
+        },
+        {
+          "dir": "alphafold-database",
+          "name": "alphafold-database",
+          "category": "08-蛋白质工程与结构生物学",
+          "path": "research/qinyan/08-蛋白质工程与结构生物学/alphafold-database",
+          "description": "Access AlphaFold 200M+ AI-predicted protein structures. Retrieve structures by UniProt ID, download PDB/mmCIF files, analyze confidence metrics (pLDDT, PAE), for drug discovery and structural biology."
+        },
+        {
+          "dir": "esm",
+          "name": "esm",
+          "category": "08-蛋白质工程与结构生物学",
+          "path": "research/qinyan/08-蛋白质工程与结构生物学/esm",
+          "description": "Comprehensive toolkit for protein language models including ESM3 (generative multimodal protein design across sequence, structure, and function) and ESM C (efficient protein embeddings and representations). Use this skill when working with protein sequences, structures, or function prediction; designing novel proteins; generating protein embeddings; performing inverse folding; or conducting protein engineering tasks. Supports both local model usage and cloud-based Forge API for scalable inference."
+        },
+        {
+          "dir": "glycoengineering",
+          "name": "glycoengineering",
+          "category": "08-蛋白质工程与结构生物学",
+          "path": "research/qinyan/08-蛋白质工程与结构生物学/glycoengineering",
+          "description": "Analyze and engineer protein glycosylation. Scan sequences for N-glycosylation sequons (N-X-S/T), predict O-glycosylation hotspots, and access curated glycoengineering tools (NetOGlyc, GlycoShield, GlycoWorkbench). For glycoprotein engineering, therapeutic antibody optimization, and vaccine design."
+        },
+        {
+          "dir": "interpro-database",
+          "name": "interpro-database",
+          "category": "08-蛋白质工程与结构生物学",
+          "path": "research/qinyan/08-蛋白质工程与结构生物学/interpro-database",
+          "description": "Query InterPro for protein family, domain, and functional site annotations. Integrates Pfam, PANTHER, PRINTS, SMART, SUPERFAMILY, and 11 other member databases. Use for protein function prediction, domain architecture analysis, evolutionary classification, and GO term mapping."
+        },
+        {
+          "dir": "pdb-database",
+          "name": "pdb-database",
+          "category": "08-蛋白质工程与结构生物学",
+          "path": "research/qinyan/08-蛋白质工程与结构生物学/pdb-database",
+          "description": "Access RCSB PDB for 3D protein/nucleic acid structures. Search by text/sequence/structure, download coordinates (PDB/mmCIF), retrieve metadata, for structural biology and drug discovery."
+        },
+        {
+          "dir": "uniprot-database",
+          "name": "uniprot-database",
+          "category": "08-蛋白质工程与结构生物学",
+          "path": "research/qinyan/08-蛋白质工程与结构生物学/uniprot-database",
+          "description": "Direct REST API access to UniProt. Protein searches, FASTA retrieval, ID mapping, Swiss-Prot/TrEMBL. For Python workflows with multiple databases, prefer bioservices (unified interface to 40+ services). Use this for direct HTTP/REST work or UniProt-specific control."
+        },
+        {
+          "dir": "aeon",
+          "name": "aeon",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/aeon",
+          "description": "This skill should be used for time series machine learning tasks including classification, regression, clustering, forecasting, anomaly detection, segmentation, and similarity search. Use when working with temporal data, sequential patterns, or time-indexed observations requiring specialized algorithms beyond standard ML approaches. Particularly suited for univariate and multivariate time series analysis with scikit-learn compatible APIs."
+        },
+        {
+          "dir": "hypogenic",
+          "name": "hypogenic",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/hypogenic",
+          "description": "Automated LLM-driven hypothesis generation and testing on tabular datasets. Use when you want to systematically explore hypotheses about patterns in empirical data (e.g., deception detection, content analysis). Combines literature insights with data-driven hypothesis testing. For manual hypothesis formulation use hypothesis-generation; for creative ideation use scientific-brainstorming."
+        },
+        {
+          "dir": "pufferlib",
+          "name": "pufferlib",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/pufferlib",
+          "description": "High-performance reinforcement learning framework optimized for speed and scale. Use when you need fast parallel training, vectorized environments, multi-agent systems, or integration with game environments (Atari, Procgen, NetHack). Achieves 2-10x speedups over standard implementations. For quick prototyping or standard algorithm implementations with extensive documentation, use stable-baselines3 instead."
+        },
+        {
+          "dir": "pymc",
+          "name": "pymc",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/pymc",
+          "description": "Bayesian modeling with PyMC. Build hierarchical models, MCMC (NUTS), variational inference, LOO/WAIC comparison, posterior checks, for probabilistic programming and inference."
+        },
+        {
+          "dir": "pymoo",
+          "name": "pymoo",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/pymoo",
+          "description": "Multi-objective optimization framework. NSGA-II, NSGA-III, MOEA/D, Pareto fronts, constraint handling, benchmarks (ZDT, DTLZ), for engineering design and optimization problems."
+        },
+        {
+          "dir": "pytorch-lightning",
+          "name": "pytorch-lightning",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/pytorch-lightning",
+          "description": "Deep learning framework (PyTorch Lightning). Organize PyTorch code into LightningModules, configure Trainers for multi-GPU/TPU, implement data pipelines, callbacks, logging (W&B, TensorBoard), distributed training (DDP, FSDP, DeepSpeed), for scalable neural network training."
+        },
+        {
+          "dir": "scikit-learn",
+          "name": "scikit-learn",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/scikit-learn",
+          "description": "Machine learning in Python with scikit-learn. Use when working with supervised learning (classification, regression), unsupervised learning (clustering, dimensionality reduction), model evaluation, hyperparameter tuning, preprocessing, or building ML pipelines. Provides comprehensive reference documentation for algorithms, preprocessing techniques, pipelines, and best practices."
+        },
+        {
+          "dir": "scikit-survival",
+          "name": "scikit-survival",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/scikit-survival",
+          "description": "Comprehensive toolkit for survival analysis and time-to-event modeling in Python using scikit-survival. Use this skill when working with censored survival data, performing time-to-event analysis, fitting Cox models, Random Survival Forests, Gradient Boosting models, or Survival SVMs, evaluating survival predictions with concordance index or Brier score, handling competing risks, or implementing any survival analysis workflow with the scikit-survival library."
+        },
+        {
+          "dir": "shap",
+          "name": "shap",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/shap",
+          "description": "Model interpretability and explainability using SHAP (SHapley Additive exPlanations). Use this skill when explaining machine learning model predictions, computing feature importance, generating SHAP plots (waterfall, beeswarm, bar, scatter, force, heatmap), debugging models, analyzing model bias or fairness, comparing models, or implementing explainable AI. Works with tree-based models (XGBoost, LightGBM, Random Forest), deep learning (TensorFlow, PyTorch), linear models, and any black-box model."
+        },
+        {
+          "dir": "stable-baselines3",
+          "name": "stable-baselines3",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/stable-baselines3",
+          "description": "Production-ready reinforcement learning algorithms (PPO, SAC, DQN, TD3, DDPG, A2C) with scikit-learn-like API. Use for standard RL experiments, quick prototyping, and well-documented algorithm implementations. Best for single-agent RL with Gymnasium environments. For high-performance parallel training, multi-agent systems, or custom vectorized environments, use pufferlib instead."
+        },
+        {
+          "dir": "timesfm-forecasting",
+          "name": "timesfm-forecasting",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/timesfm-forecasting",
+          "description": "Zero-shot time series forecasting with Google's TimesFM foundation model. Use for any univariate time series (sales, sensors, energy, vitals, weather) without training a custom model. Supports CSV/DataFrame/array inputs with point forecasts and prediction intervals. Includes a preflight system checker script to verify RAM/GPU before first use."
+        },
+        {
+          "dir": "torch-geometric",
+          "name": "torch-geometric",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/torch-geometric",
+          "description": "Graph Neural Networks (PyG). Node/graph classification, link prediction, GCN, GAT, GraphSAGE, heterogeneous graphs, molecular property prediction, for geometric deep learning."
+        },
+        {
+          "dir": "transformers",
+          "name": "transformers",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/transformers",
+          "description": "This skill should be used when working with pre-trained transformer models for natural language processing, computer vision, audio, or multimodal tasks. Use for text generation, classification, question answering, translation, summarization, image classification, object detection, speech recognition, and fine-tuning models on custom datasets."
+        },
+        {
+          "dir": "umap-learn",
+          "name": "umap-learn",
+          "category": "09-机器学习与人工智能",
+          "path": "research/qinyan/09-机器学习与人工智能/umap-learn",
+          "description": "UMAP dimensionality reduction. Fast nonlinear manifold learning for 2D/3D visualization, clustering preprocessing (HDBSCAN), supervised/parametric UMAP, for high-dimensional data."
+        },
+        {
+          "dir": "astropy",
+          "name": "astropy",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/astropy",
+          "description": "Comprehensive Python library for astronomy and astrophysics. This skill should be used when working with astronomical data including celestial coordinates, physical units, FITS files, cosmological calculations, time systems, tables, world coordinate systems (WCS), and astronomical data analysis. Use when tasks involve coordinate transformations, unit conversions, FITS file manipulation, cosmological distance calculations, time scale conversions, or astronomical data processing."
+        },
+        {
+          "dir": "cirq",
+          "name": "cirq",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/cirq",
+          "description": "Google quantum computing framework. Use when targeting Google Quantum AI hardware, designing noise-aware circuits, or running quantum characterization experiments. Best for Google hardware, noise modeling, and low-level circuit design. For IBM hardware use qiskit; for quantum ML with autodiff use pennylane; for physics simulations use qutip."
+        },
+        {
+          "dir": "cobrapy",
+          "name": "cobrapy",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/cobrapy",
+          "description": "Constraint-based metabolic modeling (COBRA). FBA, FVA, gene knockouts, flux sampling, SBML models, for systems biology and metabolic engineering analysis."
+        },
+        {
+          "dir": "fluidsim",
+          "name": "fluidsim",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/fluidsim",
+          "description": "Framework for computational fluid dynamics simulations using Python. Use when running fluid dynamics simulations including Navier-Stokes equations (2D/3D), shallow water equations, stratified flows, or when analyzing turbulence, vortex dynamics, or geophysical flows. Provides pseudospectral methods with FFT, HPC support, and comprehensive output analysis."
+        },
+        {
+          "dir": "matlab",
+          "name": "matlab",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/matlab",
+          "description": "MATLAB and GNU Octave numerical computing for matrix operations, data analysis, visualization, and scientific computing. Use when writing MATLAB/Octave scripts for linear algebra, signal processing, image processing, differential equations, optimization, statistics, or creating scientific visualizations. Also use when the user needs help with MATLAB syntax, functions, or wants to convert between MATLAB and Python code. Scripts can be executed with MATLAB or the open-source GNU Octave interpreter."
+        },
+        {
+          "dir": "pennylane",
+          "name": "pennylane",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/pennylane",
+          "description": "Hardware-agnostic quantum ML framework with automatic differentiation. Use when training quantum circuits via gradients, building hybrid quantum-classical models, or needing device portability across IBM/Google/Rigetti/IonQ. Best for variational algorithms (VQE, QAOA), quantum neural networks, and integration with PyTorch/JAX/TensorFlow. For hardware-specific optimizations use qiskit (IBM) or cirq (Google); for open quantum systems use qutip."
+        },
+        {
+          "dir": "pymatgen",
+          "name": "pymatgen",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/pymatgen",
+          "description": "Materials science toolkit. Crystal structures (CIF, POSCAR), phase diagrams, band structure, DOS, Materials Project integration, format conversion, for computational materials science."
+        },
+        {
+          "dir": "qiskit",
+          "name": "qiskit",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/qiskit",
+          "description": "IBM quantum computing framework. Use when targeting IBM Quantum hardware, working with Qiskit Runtime for production workloads, or needing IBM optimization tools. Best for IBM hardware execution, quantum error mitigation, and enterprise quantum computing. For Google hardware use cirq; for gradient-based quantum ML use pennylane; for open quantum system simulations use qutip."
+        },
+        {
+          "dir": "qutip",
+          "name": "qutip",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/qutip",
+          "description": "Quantum physics simulation library for open quantum systems. Use when studying master equations, Lindblad dynamics, decoherence, quantum optics, or cavity QED. Best for physics research, open system dynamics, and educational simulations. NOT for circuit-based quantum computing—use qiskit, cirq, or pennylane for quantum algorithms and hardware execution."
+        },
+        {
+          "dir": "simpy",
+          "name": "simpy",
+          "category": "10-材料科学与物理计算",
+          "path": "research/qinyan/10-材料科学与物理计算/simpy",
+          "description": "Process-based discrete-event simulation framework in Python. Use this skill when building simulations of systems with processes, queues, resources, and time-based events such as manufacturing systems, service operations, network traffic, logistics, or any system where entities interact with shared resources over time."
+        },
+        {
+          "dir": "dask",
+          "name": "dask",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/dask",
+          "description": "Distributed computing for larger-than-RAM pandas/NumPy workflows. Use when you need to scale existing pandas/NumPy code beyond memory or across clusters. Best for parallel file processing, distributed ML, integration with existing pandas code. For out-of-core analytics on single machine use vaex; for in-memory speed use polars."
+        },
+        {
+          "dir": "exploratory-data-analysis",
+          "name": "exploratory-data-analysis",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/exploratory-data-analysis",
+          "description": "Perform comprehensive exploratory data analysis on scientific data files across 200+ file formats. This skill should be used when analyzing any scientific data file to understand its structure, content, quality, and characteristics. Automatically detects file type and generates detailed markdown reports with format-specific analysis, quality metrics, and downstream analysis recommendations. Covers chemistry, bioinformatics, microscopy, spectroscopy, proteomics, metabolomics, and general scientific data formats."
+        },
+        {
+          "dir": "matplotlib",
+          "name": "matplotlib",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/matplotlib",
+          "description": "Low-level plotting library for full customization. Use when you need fine-grained control over every plot element, creating novel plot types, or integrating with specific scientific workflows. Export to PNG/PDF/SVG for publication. For quick statistical plots use seaborn; for interactive plots use plotly; for publication-ready multi-panel figures with journal styling, use scientific-visualization."
+        },
+        {
+          "dir": "networkx",
+          "name": "networkx",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/networkx",
+          "description": "Comprehensive toolkit for creating, analyzing, and visualizing complex networks and graphs in Python. Use when working with network/graph data structures, analyzing relationships between entities, computing graph algorithms (shortest paths, centrality, clustering), detecting communities, generating synthetic networks, or visualizing network topologies. Applicable to social networks, biological networks, transportation systems, citation networks, and any domain involving pairwise relationships."
+        },
+        {
+          "dir": "plotly",
+          "name": "plotly",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/plotly",
+          "description": "Interactive visualization library. Use when you need hover info, zoom, pan, or web-embeddable charts. Best for dashboards, exploratory analysis, and presentations. For static publication figures use matplotlib or scientific-visualization."
+        },
+        {
+          "dir": "polars",
+          "name": "polars",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/polars",
+          "description": "Fast in-memory DataFrame library for datasets that fit in RAM. Use when pandas is too slow but data still fits in memory. Lazy evaluation, parallel execution, Apache Arrow backend. Best for 1-100GB datasets, ETL pipelines, faster pandas replacement. For larger-than-RAM data use dask or vaex."
+        },
+        {
+          "dir": "seaborn",
+          "name": "seaborn",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/seaborn",
+          "description": "Statistical visualization with pandas integration. Use for quick exploration of distributions, relationships, and categorical comparisons with attractive defaults. Best for box plots, violin plots, pair plots, heatmaps. Built on matplotlib. For interactive plots use plotly; for publication styling use scientific-visualization."
+        },
+        {
+          "dir": "statistical-analysis",
+          "name": "statistical-analysis",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/statistical-analysis",
+          "description": "Guided statistical analysis with test selection and reporting. Use when you need help choosing appropriate tests for your data, assumption checking, power analysis, and APA-formatted results. Best for academic research reporting, test selection guidance. For implementing specific models programmatically use statsmodels."
+        },
+        {
+          "dir": "statsmodels",
+          "name": "statsmodels",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/statsmodels",
+          "description": "Statistical models library for Python. Use when you need specific model classes (OLS, GLM, mixed models, ARIMA) with detailed diagnostics, residuals, and inference. Best for econometrics, time series, rigorous inference with coefficient tables. For guided statistical test selection with APA reporting use statistical-analysis."
+        },
+        {
+          "dir": "sympy",
+          "name": "sympy",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/sympy",
+          "description": "Use this skill when working with symbolic mathematics in Python. This skill should be used for symbolic computation tasks including solving equations algebraically, performing calculus operations (derivatives, integrals, limits), manipulating algebraic expressions, working with matrices symbolically, physics calculations, number theory problems, geometry computations, and generating executable code from mathematical expressions. Apply this skill when the user needs exact symbolic results rather than numerical approximations, or when working with mathematical formulas that contain variables and parameters."
+        },
+        {
+          "dir": "vaex",
+          "name": "vaex",
+          "category": "11-数据分析与统计建模",
+          "path": "research/qinyan/11-数据分析与统计建模/vaex",
+          "description": "Use this skill for processing and analyzing large tabular datasets (billions of rows) that exceed available RAM. Vaex excels at out-of-core DataFrame operations, lazy evaluation, fast aggregations, efficient visualization of big data, and machine learning on large datasets. Apply when users need to work with large CSV/HDF5/Arrow/Parquet files, perform fast statistics on massive datasets, create visualizations of big data, or build ML pipelines that do not fit in memory."
+        },
+        {
+          "dir": "bindingdb-database",
+          "name": "bindingdb-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/bindingdb-database",
+          "description": "Query BindingDB for measured drug-target binding affinities (Ki, Kd, IC50, EC50). Search by target (UniProt ID), compound (SMILES/name), or pathogen. Essential for drug discovery, lead optimization, polypharmacology analysis, and structure-activity relationship (SAR) studies."
+        },
+        {
+          "dir": "brenda-database",
+          "name": "brenda-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/brenda-database",
+          "description": "Access BRENDA enzyme database via SOAP API. Retrieve kinetic parameters (Km, kcat), reaction equations, organism data, and substrate-specific enzyme information for biochemical research and metabolic pathway analysis."
+        },
+        {
+          "dir": "chembl-database",
+          "name": "chembl-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/chembl-database",
+          "description": "Query ChEMBL bioactive molecules and drug discovery data. Search compounds by structure/properties, retrieve bioactivity data (IC50, Ki), find inhibitors, perform SAR studies, for medicinal chemistry."
+        },
+        {
+          "dir": "datacommons-client",
+          "name": "datacommons-client",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/datacommons-client",
+          "description": "Work with Data Commons, a platform providing programmatic access to public statistical data from global sources. Use this skill when working with demographic data, economic indicators, health statistics, environmental data, or any public datasets available through Data Commons. Applicable for querying population statistics, GDP figures, unemployment rates, disease prevalence, geographic entity resolution, and exploring relationships between statistical entities."
+        },
+        {
+          "dir": "drugbank-database",
+          "name": "drugbank-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/drugbank-database",
+          "description": "Access and analyze comprehensive drug information from the DrugBank database including drug properties, interactions, targets, pathways, chemical structures, and pharmacology data. This skill should be used when working with pharmaceutical data, drug discovery research, pharmacology studies, drug-drug interaction analysis, target identification, chemical similarity searches, ADMET predictions, or any task requiring detailed drug and drug target information from DrugBank."
+        },
+        {
+          "dir": "ena-database",
+          "name": "ena-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/ena-database",
+          "description": "Access European Nucleotide Archive via API/FTP. Retrieve DNA/RNA sequences, raw reads (FASTQ), genome assemblies by accession, for genomics and bioinformatics pipelines. Supports multiple formats."
+        },
+        {
+          "dir": "ensembl-database",
+          "name": "ensembl-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/ensembl-database",
+          "description": "Query Ensembl genome database REST API for 250+ species. Gene lookups, sequence retrieval, variant analysis, comparative genomics, orthologs, VEP predictions, for genomic research."
+        },
+        {
+          "dir": "gene-database",
+          "name": "gene-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/gene-database",
+          "description": "Query NCBI Gene via E-utilities/Datasets API. Search by symbol/ID, retrieve gene info (RefSeqs, GO, locations, phenotypes), batch lookups, for gene annotation and functional analysis."
+        },
+        {
+          "dir": "geo-database",
+          "name": "geo-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/geo-database",
+          "description": "Access NCBI GEO for gene expression/genomics data. Search/download microarray and RNA-seq datasets (GSE, GSM, GPL), retrieve SOFT/Matrix files, for transcriptomics and expression analysis."
+        },
+        {
+          "dir": "gnomad-database",
+          "name": "gnomad-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/gnomad-database",
+          "description": "Query gnomAD (Genome Aggregation Database) for population allele frequencies, variant constraint scores (pLI, LOEUF), and loss-of-function intolerance. Essential for variant pathogenicity interpretation, rare disease genetics, and identifying loss-of-function intolerant genes."
+        },
+        {
+          "dir": "gtex-database",
+          "name": "gtex-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/gtex-database",
+          "description": "Query GTEx (Genotype-Tissue Expression) portal for tissue-specific gene expression, eQTLs (expression quantitative trait loci), and sQTLs. Essential for linking GWAS variants to gene regulation, understanding tissue-specific expression, and interpreting non-coding variant effects."
+        },
+        {
+          "dir": "gwas-database",
+          "name": "gwas-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/gwas-database",
+          "description": "Query NHGRI-EBI GWAS Catalog for SNP-trait associations. Search variants by rs ID, disease/trait, gene, retrieve p-values and summary statistics, for genetic epidemiology and polygenic risk scores."
+        },
+        {
+          "dir": "hmdb-database",
+          "name": "hmdb-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/hmdb-database",
+          "description": "Access Human Metabolome Database (220K+ metabolites). Search by name/ID/structure, retrieve chemical properties, biomarker data, NMR/MS spectra, pathways, for metabolomics and identification."
+        },
+        {
+          "dir": "jaspar-database",
+          "name": "jaspar-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/jaspar-database",
+          "description": "Query JASPAR for transcription factor binding site (TFBS) profiles (PWMs/PFMs). Search by TF name, species, or class; scan DNA sequences for TF binding sites; compare matrices; essential for regulatory genomics, motif analysis, and GWAS regulatory variant interpretation."
+        },
+        {
+          "dir": "kegg-database",
+          "name": "kegg-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/kegg-database",
+          "description": "Direct REST API access to KEGG (academic use only). Pathway analysis, gene-pathway mapping, metabolic pathways, drug interactions, ID conversion. For Python workflows with multiple databases, prefer bioservices. Use this for direct HTTP/REST work or KEGG-specific control."
+        },
+        {
+          "dir": "metabolomics-workbench-database",
+          "name": "metabolomics-workbench-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/metabolomics-workbench-database",
+          "description": "Access NIH Metabolomics Workbench via REST API (4,200+ studies). Query metabolites, RefMet nomenclature, MS/NMR data, m/z searches, study metadata, for metabolomics and biomarker discovery."
+        },
+        {
+          "dir": "opentargets-database",
+          "name": "opentargets-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/opentargets-database",
+          "description": "Query Open Targets Platform for target-disease associations, drug target discovery, tractability/safety data, genetics/omics evidence, known drugs, for therapeutic target identification."
+        },
+        {
+          "dir": "pubchem-database",
+          "name": "pubchem-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/pubchem-database",
+          "description": "Query PubChem via PUG-REST API/PubChemPy (110M+ compounds). Search by name/CID/SMILES, retrieve properties, similarity/substructure searches, bioactivity, for cheminformatics."
+        },
+        {
+          "dir": "reactome-database",
+          "name": "reactome-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/reactome-database",
+          "description": "Query Reactome REST API for pathway analysis, enrichment, gene-pathway mapping, disease pathways, molecular interactions, expression analysis, for systems biology studies."
+        },
+        {
+          "dir": "string-database",
+          "name": "string-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/string-database",
+          "description": "Query STRING API for protein-protein interactions (59M proteins, 20B interactions). Network analysis, GO/KEGG enrichment, interaction discovery, 5000+ species, for systems biology."
+        },
+        {
+          "dir": "uspto-database",
+          "name": "uspto-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/uspto-database",
+          "description": "Access USPTO APIs for patent/trademark searches, examination history (PEDS), assignments, citations, office actions, TSDR, for IP analysis and prior art searches."
+        },
+        {
+          "dir": "zinc-database",
+          "name": "zinc-database",
+          "category": "12-科学数据库",
+          "path": "research/qinyan/12-科学数据库/zinc-database",
+          "description": "Access ZINC (230M+ purchasable compounds). Search by ZINC ID/SMILES, similarity searches, 3D-ready structures for docking, analog discovery, for virtual screening and drug discovery."
+        },
+        {
+          "dir": "benchling-integration",
+          "name": "benchling-integration",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/benchling-integration",
+          "description": "Benchling R&D platform integration. Access registry (DNA, proteins), inventory, ELN entries, workflows via API, build Benchling Apps, query Data Warehouse, for lab data management automation."
+        },
+        {
+          "dir": "dnanexus-integration",
+          "name": "dnanexus-integration",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/dnanexus-integration",
+          "description": "DNAnexus cloud genomics platform. Build apps/applets, manage data (upload/download), dxpy Python SDK, run workflows, FASTQ/BAM/VCF, for genomics pipeline development and execution."
+        },
+        {
+          "dir": "ginkgo-cloud-lab",
+          "name": "ginkgo-cloud-lab",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/ginkgo-cloud-lab",
+          "description": "Submit and manage protocols on Ginkgo Bioworks Cloud Lab (cloud.ginkgo.bio), a web-based interface for autonomous lab execution on Reconfigurable Automation Carts (RACs). Use when the user wants to run cell-free protein expression (validation or optimization), generate fluorescent pixel art, or interact with Ginkgo Cloud Lab services. Covers protocol selection, input preparation, pricing, and ordering workflows."
+        },
+        {
+          "dir": "labarchive-integration",
+          "name": "labarchive-integration",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/labarchive-integration",
+          "description": "Electronic lab notebook API integration. Access notebooks, manage entries/attachments, backup notebooks, integrate with Protocols.io/Jupyter/REDCap, for programmatic ELN workflows."
+        },
+        {
+          "dir": "latchbio-integration",
+          "name": "latchbio-integration",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/latchbio-integration",
+          "description": "Latch platform for bioinformatics workflows. Build pipelines with Latch SDK, @workflow/@task decorators, deploy serverless workflows, LatchFile/LatchDir, Nextflow/Snakemake integration."
+        },
+        {
+          "dir": "omero-integration",
+          "name": "omero-integration",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/omero-integration",
+          "description": "Microscopy data management platform. Access images via Python, retrieve datasets, analyze pixels, manage ROIs/annotations, batch processing, for high-content screening and microscopy workflows."
+        },
+        {
+          "dir": "opentrons-integration",
+          "name": "opentrons-integration",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/opentrons-integration",
+          "description": "Official Opentrons Protocol API for OT-2 and Flex robots. Use when writing protocols specifically for Opentrons hardware with full access to Protocol API v2 features. Best for production Opentrons protocols, official API compatibility. For multi-vendor automation or broader equipment control use pylabrobot."
+        },
+        {
+          "dir": "protocolsio-integration",
+          "name": "protocolsio-integration",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/protocolsio-integration",
+          "description": "Integration with protocols.io API for managing scientific protocols. This skill should be used when working with protocols.io to search, create, update, or publish protocols; manage protocol steps and materials; handle discussions and comments; organize workspaces; upload and manage files; or integrate protocols.io functionality into workflows. Applicable for protocol discovery, collaborative protocol development, experiment tracking, lab protocol management, and scientific documentation."
+        },
+        {
+          "dir": "pylabrobot",
+          "name": "pylabrobot",
+          "category": "13-实验室自动化与集成",
+          "path": "research/qinyan/13-实验室自动化与集成/pylabrobot",
+          "description": "Vendor-agnostic lab automation framework. Use when controlling multiple equipment types (Hamilton, Tecan, Opentrons, plate readers, pumps) or needing unified programming across different vendors. Best for complex workflows, multi-vendor setups, simulation. For Opentrons-only protocols with official API, opentrons-integration may be simpler."
+        },
+        {
+          "dir": "denario",
+          "name": "denario",
+          "category": "14-文档处理与数据工具",
+          "path": "research/qinyan/14-文档处理与数据工具/denario",
+          "description": "Multiagent AI system for scientific research assistance that automates research workflows from data analysis to publication. This skill should be used when generating research ideas from datasets, developing research methodologies, executing computational experiments, performing literature searches, or generating publication-ready papers in LaTeX format. Supports end-to-end research pipelines with customizable agent orchestration."
+        },
+        {
+          "dir": "docx",
+          "name": "docx",
+          "category": "14-文档处理与数据工具",
+          "path": "research/qinyan/14-文档处理与数据工具/docx",
+          "description": "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx files, inserting or replacing images in documents, performing find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file, use this skill. Do NOT use for PDFs, spreadsheets, Google Docs, or general coding tasks unrelated to document generation."
+        },
+        {
+          "dir": "markitdown",
+          "name": "markitdown",
+          "category": "14-文档处理与数据工具",
+          "path": "research/qinyan/14-文档处理与数据工具/markitdown",
+          "description": "Convert files and office documents to Markdown. Supports PDF, DOCX, PPTX, XLSX, images (with OCR), audio (with transcription), HTML, CSV, JSON, XML, ZIP, YouTube URLs, EPubs and more."
+        },
+        {
+          "dir": "open-notebook",
+          "name": "open-notebook",
+          "category": "14-文档处理与数据工具",
+          "path": "research/qinyan/14-文档处理与数据工具/open-notebook",
+          "description": "Self-hosted, open-source alternative to Google NotebookLM for AI-powered research and document analysis. Use when organizing research materials into notebooks, ingesting diverse content sources (PDFs, videos, audio, web pages, Office documents), generating AI-powered notes and summaries, creating multi-speaker podcasts from research, chatting with documents using context-aware AI, searching across materials with full-text and vector search, or running custom content transformations. Supports 16+ AI providers including OpenAI, Anthropic, Google, Ollama, Groq, and Mistral with complete data privacy through self-hosting."
+        },
+        {
+          "dir": "pdf",
+          "name": "pdf",
+          "category": "14-文档处理与数据工具",
+          "path": "research/qinyan/14-文档处理与数据工具/pdf",
+          "description": "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill."
+        },
+        {
+          "dir": "pptx",
+          "name": "pptx",
+          "category": "14-文档处理与数据工具",
+          "path": "research/qinyan/14-文档处理与数据工具/pptx",
+          "description": "Use this skill any time a .pptx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates, layouts, speaker notes, or comments. Trigger whenever the user mentions \\\"deck,\\\" \\\"slides,\\\" \\\"presentation,\\\" or references a .pptx filename, regardless of what they plan to do with the content afterward. If a .pptx file needs to be opened, created, or touched, use this skill."
+        },
+        {
+          "dir": "xlsx",
+          "name": "xlsx",
+          "category": "14-文档处理与数据工具",
+          "path": "research/qinyan/14-文档处理与数据工具/xlsx",
+          "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \\\"the xlsx in my downloads\\\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved."
+        },
+        {
+          "dir": "alpha-vantage",
+          "name": "alpha-vantage",
+          "category": "15-金融与经济数据",
+          "path": "research/qinyan/15-金融与经济数据/alpha-vantage",
+          "description": "Access real-time and historical stock market data, forex rates, cryptocurrency prices, commodities, economic indicators, and 50+ technical indicators via the Alpha Vantage API. Use when fetching stock prices (OHLCV), company fundamentals (income statement, balance sheet, cash flow), earnings, options data, market news/sentiment, insider transactions, GDP, CPI, treasury yields, gold/silver/oil prices, Bitcoin/crypto prices, forex exchange rates, or calculating technical indicators (SMA, EMA, MACD, RSI, Bollinger Bands). Requires a free API key from alphavantage.co."
+        },
+        {
+          "dir": "edgartools",
+          "name": "edgartools",
+          "category": "15-金融与经济数据",
+          "path": "research/qinyan/15-金融与经济数据/edgartools",
+          "description": "Python library for accessing, analyzing, and extracting data from SEC EDGAR filings. Use when working with SEC filings, financial statements (income statement, balance sheet, cash flow), XBRL financial data, insider trading (Form 4), institutional holdings (13F), company financials, annual/quarterly reports (10-K, 10-Q), proxy statements (DEF 14A), 8-K current events, company screening by ticker/CIK/industry, multi-period financial analysis, or any SEC regulatory filings."
+        },
+        {
+          "dir": "fred-economic-data",
+          "name": "fred-economic-data",
+          "category": "15-金融与经济数据",
+          "path": "research/qinyan/15-金融与经济数据/fred-economic-data",
+          "description": "Query FRED (Federal Reserve Economic Data) API for 800,000+ economic time series from 100+ sources. Access GDP, unemployment, inflation, interest rates, exchange rates, housing, and regional data. Use for macroeconomic analysis, financial research, policy studies, economic forecasting, and academic research requiring U.S. and international economic indicators."
+        },
+        {
+          "dir": "hedgefundmonitor",
+          "name": "hedgefundmonitor",
+          "category": "15-金融与经济数据",
+          "path": "research/qinyan/15-金融与经济数据/hedgefundmonitor",
+          "description": "Query the OFR (Office of Financial Research) Hedge Fund Monitor API for hedge fund data including SEC Form PF aggregated statistics, CFTC Traders in Financial Futures, FICC Sponsored Repo volumes, and FRB SCOOS dealer financing terms. Access time series data on hedge fund size, leverage, counterparties, liquidity, complexity, and risk management. No API key or registration required. Use when working with hedge fund data, systemic risk monitoring, financial stability research, hedge fund leverage or leverage ratios, counterparty concentration, Form PF statistics, repo market data, or OFR financial research data."
+        },
+        {
+          "dir": "market-research-reports",
+          "name": "market-research-reports",
+          "category": "15-金融与经济数据",
+          "path": "research/qinyan/15-金融与经济数据/market-research-reports",
+          "description": "Generate comprehensive market research reports (50+ pages) in the style of top consulting firms (McKinsey, BCG, Gartner). Features professional LaTeX formatting, extensive visual generation with scientific-schematics and generate-image, deep integration with research-lookup for data gathering, and multi-framework strategic analysis including Porter Five Forces, PESTLE, SWOT, TAM/SAM/SOM, and BCG Matrix."
+        },
+        {
+          "dir": "usfiscaldata",
+          "name": "usfiscaldata",
+          "category": "15-金融与经济数据",
+          "path": "research/qinyan/15-金融与经济数据/usfiscaldata",
+          "description": "Query the U.S. Treasury Fiscal Data API for federal financial data including national debt, government spending, revenue, interest rates, exchange rates, and savings bonds. Access 54 datasets and 182 data tables with no API key required. Use when working with U.S. federal fiscal data, national debt tracking (Debt to the Penny), Daily Treasury Statements, Monthly Treasury Statements, Treasury securities auctions, interest rates on Treasury securities, foreign exchange rates, savings bonds, or any U.S. government financial statistics."
+        },
+        {
+          "dir": "geomaster",
+          "name": "geomaster",
+          "category": "16-地理空间与遥感",
+          "path": "research/qinyan/16-地理空间与遥感/geomaster",
+          "description": "Comprehensive geospatial science skill covering remote sensing, GIS, spatial analysis, machine learning for earth observation, and 30+ scientific domains. Supports satellite imagery processing (Sentinel, Landsat, MODIS, SAR, hyperspectral), vector and raster data operations, spatial statistics, point cloud processing, network analysis, cloud-native workflows (STAC, COG, Planetary Computer), and 8 programming languages (Python, R, Julia, JavaScript, C++, Java, Go, Rust) with 500+ code examples. Use for remote sensing workflows, GIS analysis, spatial ML, Earth observation data processing, terrain analysis, hydrological modeling, marine spatial analysis, atmospheric science, and any geospatial computation task."
+        },
+        {
+          "dir": "geopandas",
+          "name": "geopandas",
+          "category": "16-地理空间与遥感",
+          "path": "research/qinyan/16-地理空间与遥感/geopandas",
+          "description": "Python library for working with geospatial vector data including shapefiles, GeoJSON, and GeoPackage files. Use when working with geographic data for spatial analysis, geometric operations, coordinate transformations, spatial joins, overlay operations, choropleth mapping, or any task involving reading/writing/analyzing vector geographic data. Supports PostGIS databases, interactive maps, and integration with matplotlib/folium/cartopy. Use for tasks like buffer analysis, spatial joins between datasets, dissolving boundaries, clipping data, calculating areas/distances, reprojecting coordinate systems, creating maps, or converting between spatial file formats."
+        },
+        {
+          "dir": "get-available-resources",
+          "name": "get-available-resources",
+          "category": "17-平台与基础设施",
+          "path": "research/qinyan/17-平台与基础设施/get-available-resources",
+          "description": "This skill should be used at the start of any computationally intensive scientific task to detect and report available system resources (CPU cores, GPUs, memory, disk space). It creates a JSON file with resource information and strategic recommendations that inform computational approach decisions such as whether to use parallel processing (joblib, multiprocessing), out-of-core computing (Dask, Zarr), GPU acceleration (PyTorch, JAX), or memory-efficient strategies. Use this skill before running analyses, training models, processing large datasets, or any task where resource constraints matter."
+        },
+        {
+          "dir": "iso-13485-certification",
+          "name": "iso-13485-certification",
+          "category": "17-平台与基础设施",
+          "path": "research/qinyan/17-平台与基础设施/iso-13485-certification",
+          "description": "Comprehensive toolkit for preparing ISO 13485 certification documentation for medical device Quality Management Systems. Use when users need help with ISO 13485 QMS documentation, including (1) conducting gap analysis of existing documentation, (2) creating Quality Manuals, (3) developing required procedures and work instructions, (4) preparing Medical Device Files, (5) understanding ISO 13485 requirements, or (6) identifying missing documentation for medical device certification. Also use when users mention medical device regulations, QMS certification, FDA QMSR, EU MDR, or need help with quality system documentation."
+        },
+        {
+          "dir": "modal",
+          "name": "modal",
+          "category": "17-平台与基础设施",
+          "path": "research/qinyan/17-平台与基础设施/modal",
+          "description": "Run Python code in the cloud with serverless containers, GPUs, and autoscaling. Use when deploying ML models, running batch processing jobs, scheduling compute-intensive tasks, or serving APIs that require GPU acceleration or dynamic scaling."
+        },
+        {
+          "dir": "qinyan-citation",
+          "name": "qinyan-citation",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-citation",
+          "description": "沁言学术文献引用 - 先通过沁言学术OpenAPI检索文献，然后按照GB/T 7714、IEEE、APA、MLA、Chicago、Harvard等标准格式输出引用参考文献。严格遵循学术规范，未获取的信息保留省略号。触发词：文献引用、参考文献、引用格式、citation、reference format、生成引用、引用管理、参考文献格式"
+        },
+        {
+          "dir": "qinyan-nature-figures",
+          "name": "qinyan-nature-figures",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-nature-figures",
+          "description": "面向 Nature Portfolio 与高影响力期刊的证据驱动科研绘图技能。用于从原始或汇总数据设计单图与多面板 figure、选择合适图形语法、编写 Python/R 绘图代码、重绘现有图件、生成机制示意图草案、撰写图注并导出可编辑 SVG/PDF 与高分辨率 TIFF/PNG；同时检查数据完整性、颜色可访问性、统计标注和最终尺寸可读性。触发场景包括 Nature 绘图、科研作图、论文配图、scientific figure、publication plot、multi-panel figure、graphical abstract、机制图、图形摘要和 figure audit。"
+        },
+        {
+          "dir": "qinyan-nature-polishing",
+          "name": "qinyan-nature-polishing",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-nature-polishing",
+          "description": "面向 Nature、Nature Communications 及高影响力期刊的学术语言重构与润色技能。用于中译英、英文精修、摘要压缩、段落逻辑修复、术语统一、语气校准、过度声称检查和去除模板化 AI 文风，同时严格保持数据、引用意图和科学含义不变。触发场景包括 Nature 润色、SCI 英文润色、academic editing、paper polishing、proofreading、rewrite、中文论文英译、abstract polishing、语言降重和学术表达优化。"
+        },
+        {
+          "dir": "qinyan-nature-review",
+          "name": "qinyan-nature-review",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-nature-review",
+          "description": "面向 Nature、Nature Communications 及高影响力期刊的可追溯投稿前评审技能。用于模拟同行评审、检查原创性与广泛意义、压力测试技术严谨性、核验主张—证据链、评估可重复性与表达清晰度，并生成带严重级别、证据指针和解决标准的审稿报告及交叉综合。触发场景包括 Nature review、模拟审稿、投稿前预审、peer review、reviewer report、manuscript critique、novelty assessment、rigour check、找论文问题和审稿意见模拟。"
+        },
+        {
+          "dir": "qinyan-nature-statistics",
+          "name": "qinyan-nature-statistics",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-nature-statistics",
+          "description": "面向 Nature Portfolio 与高影响力期刊的实验设计一致型统计分析、审查和报告技能。用于定义独立实验单位与重复层级、制定统计分析计划、检查数据质量、选择模型与估计量、计算效应量和不确定性、处理多重比较与敏感性分析，并重写 Methods、Results、表格和图注中的统计文本。触发场景包括 Nature 统计、数据统计、statistical analysis、p value、sample size、effect size、confidence interval、replicates、multiple comparisons、统计方法、图注统计和审稿人统计意见。"
+        },
+        {
+          "dir": "qinyan-nature-writing",
+          "name": "qinyan-nature-writing",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-nature-writing",
+          "description": "面向 Nature、Nature Communications 及同等级综合期刊的证据驱动论文写作技能。用于从已核验的结果、图表、实验记录或中英文草稿构建标题、摘要、引言、结果、方法、讨论、结论和首次投稿材料；也用于重组论文论证、建立 claim–evidence map、控制声称边界和开展投稿前完整性检查。触发场景包括 Nature 写作、论文起草、章节重写、scientific writing、manuscript drafting、abstract、introduction、results narrative、discussion、cover letter、投稿材料。"
+        },
+        {
+          "dir": "qinyan-paper-analysis",
+          "name": "qinyan-paper-analysis",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-paper-analysis",
+          "description": "沁言学术论文分析 - 对单篇学术论文进行深度分析解读，提取研究目标、方法论、主要发现和研究限制。通过沁言学术OpenAPI的analyze接口实现。触发词：论文分析、论文解读、分析论文、paper analysis、analyze paper、论文解析"
+        },
+        {
+          "dir": "qinyan-paper-polish",
+          "name": "qinyan-paper-polish",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-paper-polish",
+          "description": "沁言学术通用论文润色优化 - 按照专业学术规范对中英文学术论文、学位论文和专业报告进行语言润色，提升表达质量、逻辑连贯性和格式规范性。适用于未指定期刊的常规润色；若用户明确要求 Nature/Nature Communications 风格、章节级论证重构、声称—证据边界审查或投稿级英文精修，改用 qinyan-nature-polishing。触发词：论文润色、论文修改、润色优化、paper polishing、academic writing、论文改写、文本润色、报告润色"
+        },
+        {
+          "dir": "qinyan-paper-search",
+          "name": "qinyan-paper-search",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-paper-search",
+          "description": "沁言学术文献检索 - 支持从 Google Scholar、万方(Wanfang)、PubMed、ArXiv 四大学术数据库检索文献。智能选择检索策略：中文优先万方、英文优先Google Scholar、医学类优先PubMed、理工计算机类优先ArXiv。使用沁言学术OpenAPI。触发词：文献检索、论文搜索、搜索论文、查找文献、paper search、find papers、search literature"
+        },
+        {
+          "dir": "qinyan-topic-analysis",
+          "name": "qinyan-topic-analysis",
+          "category": "沁言学术skills",
+          "path": "research/qinyan/沁言学术skills/qinyan-topic-analysis",
+          "description": "沁言学术AI选题分析 - 基于大量文献检索结果，为科研人员提供智能选题建议，包括选题方向、研究价值、研究内容概述、研究难点分析和相关文献推荐。使用沁言学术OpenAPI进行文献检索。触发词：选题分析、选题建议、研究选题、topic analysis、research topic、帮我选题、选题推荐"
+        }
+      ]
+    },
+    {
+      "id": "nsfc",
+      "repo": "njzjz/nsfc-agent-skills",
+      "ref": "master",
+      "sha": "ac06208c6aa1a866b75348338b900432a7f4ddff",
+      "label": "NSFC Agent Skills",
+      "target": "research/nsfc",
+      "count": 4,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "nsfc-figure",
+          "name": "nsfc-figure",
+          "category": null,
+          "path": "research/nsfc/nsfc-figure",
+          "description": "为 NSFC 申请书创建或重绘概念图、研究内容关系图和技术路线图；当交付物需要可编辑源图、稳定版式或可验证导出时，优先生成 Draw.io XML。纯数据统计图、照片处理或论文原图复用不应触发本 skill。"
+        },
+        {
+          "dir": "nsfc-literature",
+          "name": "nsfc-literature",
+          "category": null,
+          "path": "research/nsfc/nsfc-literature",
+          "description": "NSFC申请书文献检索与引用生成。使用OpenAlex API免费搜索学术文献，使用wenxian生成标准引用格式。"
+        },
+        {
+          "dir": "nsfc-policy",
+          "name": "nsfc-policy",
+          "category": null,
+          "path": "research/nsfc/nsfc-policy",
+          "description": "NSFC 2026年度申报政策速查。包含限项规定、AI使用规范、申请代码说明、项目类型定位、申请书结构改革等关键政策信息。"
+        },
+        {
+          "dir": "nsfc-write",
+          "name": "nsfc-write",
+          "category": null,
+          "path": "research/nsfc/nsfc-write",
+          "description": "NSFC申请书撰写指南。覆盖选题、摘要、立项依据、研究内容、研究方案、创新性、可行性分析等各部分的写作技巧与模板。适用于青年C、面上、重点等项目类型。"
+        }
+      ]
+    },
+    {
+      "id": "lieflat-charts",
+      "repo": "larashero3-dotcom/lieflat-charts",
+      "ref": "main",
+      "sha": "ed436ba56b3cbeee20b9b9966b38a9a9689e239c",
+      "label": "Lieflat Charts",
+      "target": "office/lieflat-charts",
+      "count": 1,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "lieflat-charts",
+          "name": "lieflat-charts",
+          "category": null,
+          "path": "office/lieflat-charts",
+          "description": "一套模板驱动的数据可视化、PPT 演示与整页报告生成 skill，既能严格从 Lupi、Basics、Glance、Maps 与 Interactive gallery 的真实实现生成 HTML 图表，也能从 Presentation Mode 生成 HTML/PDF 演示，或从报告模板生成整页 HTML 报告；以 Mono 为保底，能按数据语义自动选择内置彩色预设，也支持用户明确提供的自定义色板。地图仅在用户明确要求时启用，同一交付禁止混用色系。"
+        }
+      ]
+    },
+    {
+      "id": "writing-dna",
+      "repo": "larashero3-dotcom/writing-dna-skill",
+      "ref": "main",
+      "sha": "ee3d97ee27268004b5187d97711161f44fc4aae4",
+      "label": "Writing DNA",
+      "target": "office/writing-dna-skill",
+      "count": 1,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "writing-dna-skill",
+          "name": "writing-dna-skill",
+          "category": null,
+          "path": "office/writing-dna-skill",
+          "description": "从至少 20 篇完整文章中蒸馏可复用的写作 DNA，分析语言、文章结构、选题逻辑、素材策略、认知框架和视觉风格，并生成 Writing-DNA.md；按该 DNA 写作时会读取全部蒸馏产物和 5 篇相关原文。用于中英文作者、账号、品牌或出版物的风格分析与一致性写作。 Distill reusable Writing DNA from at least 20 complete articles for Chinese or English authors, publications, brands, and accounts; use for language, structure, topic logic, source strategy, cognitive-frame, and visual-style analysis."
+        }
+      ]
+    },
+    {
+      "id": "lieflat-gongwen",
+      "repo": "larashero3-dotcom/lieflat-gongwen",
+      "ref": "main",
+      "sha": "e0a5aba6b6ce66402aff799ea213af2d987d99dd",
+      "label": "Lieflat Gongwen",
+      "target": "office/lieflat-gongwen",
+      "count": 1,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "lieflat-gongwen",
+          "name": "lieflat-gongwen",
+          "category": null,
+          "path": "office/lieflat-gongwen",
+          "description": "基于真实公文全量统计的公文写作 skill。分公文族与党建族两族，覆盖调研报告/领导讲话/工作意见/经验材料/工作方案/经验总结六类公文族文体，加千字级党建/基层经验材料一类，提供可验收的数值参数、骨架公式、标题技法和自动化自检脚本。触发场景：\"写一篇调研报告\"\"起草领导讲话\"\"写份工作意见\"\"写篇党建经验材料\"\"把材料写成经验总结\"\"让这篇稿子更有公文味\"\"检查这篇公文的参数对不对\"。"
+        }
+      ]
+    },
+    {
+      "id": "guizang-ppt",
+      "repo": "op7418/guizang-ppt-skill",
+      "ref": "main",
+      "sha": "c91369c449d34755d320a8b81d0734000d99d1ab",
+      "label": "Guizang PPT Skill",
+      "target": "office/guizang-ppt-skill",
+      "count": 1,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "guizang-ppt-skill",
+          "name": "guizang-ppt-skill",
+          "category": null,
+          "path": "office/guizang-ppt-skill",
+          "description": "生成横向翻页网页 PPT（单 HTML 文件），含 WebGL 背景、演讲者视图、观众屏同步、讲稿备注、章节幕封、数据大字报、图片网格等模板。提供两种风格：① \"电子杂志 × 电子墨水\"（衬线 + 流体背景 + 暖色） ② \"瑞士国际主义\"（无衬线 + 网格点阵 + IKB/柠檬黄/柠檬绿/安全橙高亮）。当用户需要制作分享 / 演讲 / 发布会风格的网页 PPT，或提到\"杂志风 PPT\"、\"瑞士风 PPT\"、\"Swiss Style\"、\"horizontal swipe deck\"时使用。"
+        }
+      ]
+    },
+    {
+      "id": "frontend-slides",
+      "repo": "zarazhangrui/frontend-slides",
+      "ref": "main",
+      "sha": "9906a34d640d2111f724544cbc50f7f130569ae1",
+      "label": "Frontend Slides",
+      "target": "office/frontend-slides",
+      "count": 1,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "frontend-slides",
+          "name": "frontend-slides",
+          "category": null,
+          "path": "office/frontend-slides",
+          "description": "Create stunning, animation-rich HTML presentations from scratch or by converting PowerPoint files. Use when the user wants to build a presentation, convert a PPT/PPTX to web, or create slides for a talk/pitch. Helps non-designers discover their aesthetic through visual exploration rather than abstract choices."
+        }
+      ]
+    },
+    {
+      "id": "patent",
+      "repo": "handsomestWei/patent-disclosure-skill",
+      "ref": "main",
+      "sha": "6935a14d342ed9c7a07440c999d1b7bf1852a701",
+      "label": "Patent Skills",
+      "target": "research/patent",
+      "count": 9,
+      "aliases": 0,
+      "outsideCatalog": false,
+      "skills": [
+        {
+          "dir": "patent-application",
+          "name": "patent-application",
+          "category": null,
+          "path": "research/patent/patent-application",
+          "description": "申请文件：把已有交底写成权利要求书、说明书、摘要与说明书附图。须指定交底目录；仅缺材料才终止。内容争议写入问题清单，不阻塞主文件。交付后请确认须摘要清单。已有产出上改稿则另存新时间戳目录。须显式触发。"
+        },
+        {
+          "dir": "patent-chart",
+          "name": "patent-chart",
+          "category": null,
+          "path": "research/patent/patent-chart",
+          "description": "权利要求对照表：独权拆成技术特征，逐格比对对比文件/产品/标准，附证据与强弱。用于无效对照、FTO 初筛、侵权/EoU、SEP、可专利性底稿。须点名。不出法律意见。"
+        },
+        {
+          "dir": "patent-disclosure",
+          "name": "patent-disclosure",
+          "category": null,
+          "path": "research/patent/patent-disclosure",
+          "description": "中国专利交底书：发明/实用新型/外观设计的专利点挖掘、轻量查新与成文、保护型1+N专利布局。"
+        },
+        {
+          "dir": "patent-docket",
+          "name": "patent-docket",
+          "category": null,
+          "path": "research/patent/patent-docket",
+          "description": "按发明人/工程师给的材料一趟写出交底书和申请文件；申请问题清单上的缺口最多改三轮。缺技术事实就问人，不编。触发：交底申请一起做、从零出交底和申请、一条龙、帮写交底再出申请、按清单改、会稿、案卷、/patent-docket。"
+        },
+        {
+          "dir": "patent-exam-policy",
+          "name": "patent-exam-policy",
+          "category": null,
+          "path": "research/patent/patent-exam-policy",
+          "description": "给交底用的政策简报：对照国知局近期口径，说明对交底写法/本稿的影响，并提示申请书式。技能进化仅为旁路，默认只改交底包，须另点名才改文件。"
+        },
+        {
+          "dir": "patent-map",
+          "name": "patent-map",
+          "category": null,
+          "path": "research/patent/patent-map",
+          "description": "专利地图：基于通俗解读已入库的 Obsidian 案例，点名后打开五种图。地形按 bge-small-zh 向量摊开。"
+        },
+        {
+          "dir": "patent-oa",
+          "name": "patent-oa",
+          "category": null,
+          "path": "research/patent/patent-oa",
+          "description": "审查答复辅助：审查意见问答与草稿；库薄时引导案例入库。须显式触发。"
+        },
+        {
+          "dir": "patent-reader",
+          "name": "patent-reader",
+          "category": null,
+          "path": "research/patent/patent-reader",
+          "description": "中国专利通俗解读：公开号/PDF 成通俗笔记、图谱与 Obsidian 入库。"
+        },
+        {
+          "dir": "patent-search",
+          "name": "patent-search",
+          "category": null,
+          "path": "research/patent/patent-search",
+          "description": "中国专利公布公告著录检索：发明人、申请人、分类号、名称、摘要；也可从单图或权利要求生成名称/摘要关键字后查询。"
+        }
+      ]
     }
   ],
   "totals": {
-    "skills": 262
+    "skills": 486
   }
 }

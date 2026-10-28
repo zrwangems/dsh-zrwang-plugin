@@ -33,6 +33,8 @@ export async function loadGates() {
   for (const [id, value] of Object.entries(document.gates)) {
     if (typeof value === 'boolean') gates[id] = value
   }
+  // ARS 是第四行固定区块：默认关闭，用户勾选后才注入。
+  gates.ars = document.gates.ars === true
   return gates
 }
 
@@ -46,6 +48,18 @@ export async function setGates(patch) {
     dirty = true
   }
   if (dirty) await writeJson(gatesFile(), document)
+  return loadGates()
+}
+
+/** 整体替换门禁（切换选择态用）：未列出的全部置 false。 */
+export async function replaceGates(values) {
+  const document = await loadDocument()
+  const next = {}
+  for (const [id, value] of Object.entries(values ?? {})) {
+    if (typeof value === 'boolean' && id.length > 0) next[id] = value
+  }
+  document.gates = next
+  await writeJson(gatesFile(), document)
   return loadGates()
 }
 

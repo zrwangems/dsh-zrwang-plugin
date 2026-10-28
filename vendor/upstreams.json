@@ -124,6 +124,333 @@
       "target": "research/zotero-cli",
       "label": "zotero-cli",
       "note": "上游 54yyyu/zotero-mcp 仓库没有 skills/ 目录，使用仓库内 vendor/local/zotero-cli 的本地副本。"
+    },
+    {
+      "id": "ars",
+      "repo": "Imbad0202/academic-research-skills",
+      "ref": "main",
+      "layout": "skill-dirs",
+      "names": [
+        "deep-research",
+        "academic-paper",
+        "academic-paper-reviewer",
+        "academic-pipeline",
+        "sr-screener"
+      ],
+      "target": "ars/skills",
+      "label": "Academic Research Skills (ARS)",
+      "download": "git",
+      "note": "上游把 shared/ 与 scripts/ 放在仓库根、技能正文按仓库根相对路径引用；DSH 技能资源根就是技能目录本身，所以每个技能内补 _shared/ 与 _scripts/ 并改写引用。",
+      "extraDirs": [
+        {
+          "from": "shared",
+          "to": "_shared"
+        }
+      ],
+      "sharedFiles": [
+        {
+          "from": "MODE_REGISTRY.md",
+          "to": "_shared/MODE_REGISTRY.md"
+        },
+        {
+          "from": "docs/ARCHITECTURE.md",
+          "to": "_shared/ARCHITECTURE.md"
+        }
+      ],
+      "scriptClosure": {
+        "from": "scripts",
+        "into": "scripts",
+        "maxBytes": 20000000
+      },
+      "runtimeRoot": "ars",
+      "outsideCatalog": true,
+      "descriptions": "vendor/ars/descriptions.json",
+      "rewrite": [
+        {
+          "find": "shared/",
+          "to": "_shared/"
+        },
+        {
+          "find": "deep-research/",
+          "to": "../deep-research/",
+          "optional": true
+        },
+        {
+          "find": "academic-paper/",
+          "to": "../academic-paper/",
+          "optional": true
+        },
+        {
+          "find": "academic-paper-reviewer/",
+          "to": "../academic-paper-reviewer/",
+          "optional": true
+        },
+        {
+          "find": "academic-pipeline/",
+          "to": "../academic-pipeline/",
+          "optional": true
+        },
+        {
+          "find": "sr-screener/",
+          "to": "../sr-screener/",
+          "optional": true
+        },
+        {
+          "find": "python3 ",
+          "to": "python ",
+          "optional": true
+        },
+        {
+          "find": "AskUserQuestion",
+          "to": "ask_user_question",
+          "optional": true
+        },
+        {
+          "find": "WebSearch",
+          "to": "web_search",
+          "optional": true
+        },
+        {
+          "find": "WebFetch",
+          "to": "web_fetch",
+          "optional": true
+        },
+        {
+          "find": "Skill tool",
+          "to": "skill 工具",
+          "optional": true
+        },
+        {
+          "find": "Task tool",
+          "to": "subagent 工具",
+          "optional": true
+        },
+        {
+          "find": "Traditional Chinese",
+          "to": "Simplified Chinese"
+        },
+        {
+          "find": "繁體中文",
+          "to": "简体中文",
+          "optional": true
+        },
+        {
+          "find": "zh-TW-only",
+          "to": "Chinese-only",
+          "optional": true
+        },
+        {
+          "find": "EN / zh-TW / bilingual",
+          "to": "EN / Chinese / bilingual",
+          "optional": true
+        },
+        {
+          "find": "default zh-TW + EN",
+          "to": "default Chinese + EN",
+          "optional": true
+        },
+        {
+          "find": "Chinese Abstract (zh-TW)",
+          "to": "Chinese Abstract (中文)",
+          "optional": true
+        }
+      ],
+      "headerNote": {
+        "files": "(?:^|/)(?:SKILL\\.md|agents/[^/]+\\.md|references/[^/]+\\.md)$",
+        "text": "> 输出语言（本 DSH 集成强制）：所有面向用户的文字、稿件、摘要、评审与报告一律使用**简体中文**；英文术语与引文保持英文。文中的 `zh-TW` / `zh-tw-en` 只是上游语言代码与脚本参数，不代表要用繁体输出。用户明确要求其他语言时以用户为准。\n>\n> 多角色执行（评审团、十阶段流水线、角色扮演）必须使用 DSH 的 Agent Team 工具（`spawn_teammate`、`team_task_*`、`wait_agent`、`send_message`）；当前会话看不到这些工具，说明用户没开 Agent Team，必须先提示用户开启，不得退化成单会话顺序扮演。"
+      },
+      "aliases": {
+        "from": "commands",
+        "target": "ars/commands",
+        "rewrite": [
+          {
+            "find": "academic-research-skills:",
+            "to": ""
+          },
+          {
+            "find": "Skill tool",
+            "to": "skill 工具"
+          }
+        ]
+      }
+    },
+    {
+      "id": "academic-humanizer",
+      "repo": "AIScientists-Dev/academic-humanizer",
+      "ref": "main",
+      "layout": "root",
+      "target": "research/academic-humanizer",
+      "label": "Academic Humanizer",
+      "download": "git"
+    },
+    {
+      "id": "lieflat-less-ai-tone",
+      "repo": "larashero3-dotcom/lieflat-less-ai-tone",
+      "ref": "main",
+      "layout": "root",
+      "target": "research/lieflat-less-ai-tone",
+      "label": "Lieflat Less AI Tone",
+      "download": "git"
+    },
+    {
+      "id": "qinyan",
+      "repo": "LeonChaoX/qinyan-academic-skills",
+      "ref": "main",
+      "layout": "catalog",
+      "source": "skills",
+      "target": "research/qinyan",
+      "label": "Qinyan Academic Skills",
+      "download": "git",
+      "note": "187 个技能，按上游 18 个分类目录分子层；install.sh 是 Claude Code 安装器，不收录。"
+    },
+    {
+      "id": "nsfc",
+      "repo": "njzjz/nsfc-agent-skills",
+      "ref": "master",
+      "layout": "skills",
+      "source": ".",
+      "target": "research/nsfc",
+      "label": "NSFC Agent Skills",
+      "download": "git"
+    },
+    {
+      "id": "supervisor",
+      "repo": "HKUSTDial/Supervisor-Skills",
+      "ref": "main",
+      "layout": "skills",
+      "source": "skills",
+      "target": "research/supervisor-skills",
+      "label": "Supervisor Skills",
+      "download": "git",
+      "renames": {
+        "deep-research": "supervisor-deep-research"
+      },
+      "note": "deep-research 与 ARS 的 deep-research 重名，落盘时改名为 supervisor-deep-research；handbook/ 与根 scripts/ 不收录。"
+    },
+    {
+      "id": "lieflat-charts",
+      "repo": "larashero3-dotcom/lieflat-charts",
+      "ref": "main",
+      "layout": "root",
+      "target": "office/lieflat-charts",
+      "label": "Lieflat Charts",
+      "download": "git"
+    },
+    {
+      "id": "writing-dna",
+      "repo": "larashero3-dotcom/writing-dna-skill",
+      "ref": "main",
+      "layout": "root",
+      "target": "office/writing-dna-skill",
+      "label": "Writing DNA",
+      "download": "git",
+      "note": "仓库内 skills/lieflat-less-ai-tone 是独立仓库的副本，不重复收录。"
+    },
+    {
+      "id": "lieflat-gongwen",
+      "repo": "larashero3-dotcom/lieflat-gongwen",
+      "ref": "main",
+      "layout": "root",
+      "target": "office/lieflat-gongwen",
+      "label": "Lieflat Gongwen",
+      "download": "git"
+    },
+    {
+      "id": "guizang-ppt",
+      "repo": "op7418/guizang-ppt-skill",
+      "ref": "main",
+      "layout": "root",
+      "target": "office/guizang-ppt-skill",
+      "label": "Guizang PPT Skill",
+      "download": "git"
+    },
+    {
+      "id": "frontend-slides",
+      "repo": "zarazhangrui/frontend-slides",
+      "ref": "main",
+      "layout": "root",
+      "target": "office/frontend-slides",
+      "label": "Frontend Slides",
+      "download": "git",
+      "note": "仓库按 Claude 插件打包（.claude-plugin + plugins/），技能本体在根 SKILL.md，按单技能收录。"
+    },
+    {
+      "id": "patent",
+      "repo": "handsomestWei/patent-disclosure-skill",
+      "ref": "main",
+      "layout": "skills",
+      "source": "skills",
+      "target": "research/patent",
+      "label": "Patent Skills",
+      "download": "git",
+      "note": "上游根 SKILL.md 是路由入口；这里把 9 个子技能各自独立收录，正文里的整仓路径 skills/<子技能>/ 改写成同级 ../<子技能>/。",
+      "rewrite": [
+        {
+          "find": "skills/patent-disclosure/",
+          "to": "../patent-disclosure/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-application/",
+          "to": "../patent-application/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-docket/",
+          "to": "../patent-docket/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-search/",
+          "to": "../patent-search/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-reader/",
+          "to": "../patent-reader/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-map/",
+          "to": "../patent-map/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-exam-policy/",
+          "to": "../patent-exam-policy/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-oa/",
+          "to": "../patent-oa/",
+          "optional": true
+        },
+        {
+          "find": "skills/patent-chart/",
+          "to": "../patent-chart/",
+          "optional": true
+        },
+        {
+          "find": "python3 ",
+          "to": "python ",
+          "optional": true
+        },
+        {
+          "find": "WebSearch",
+          "to": "web_search",
+          "optional": true
+        },
+        {
+          "find": "WebFetch",
+          "to": "web_fetch",
+          "optional": true
+        },
+        {
+          "find": "AskUserQuestion",
+          "to": "ask_user_question",
+          "optional": true
+        }
+      ]
     }
   ]
 }

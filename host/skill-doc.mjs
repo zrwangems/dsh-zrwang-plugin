@@ -27,6 +27,16 @@ function loadDetails() {
 }
 
 /** 返回技能的文档信息、绝对路径与静态中文详情。 */
+/** 判断一段中文详情是否在生成时被截断（结尾停在半句/半个括号）。 */
+export function looksTruncatedDetail(text) {
+  const value = typeof text === 'string' ? text.trimEnd() : ''
+  if (value.length === 0) return false
+  if (/[。！？!?…」』）)\]】"”’]$/.test(value)) return false
+  return /[（(，,、：:；;]$/.test(value)
+    || /[\u4e00-\u9fff](的|和|与|在|或|可以|需要|时|为|是|用|从|对|把|被|得|地|能|会|要|让|请|若|当)$/.test(value)
+    || /[A-Za-z0-9]$/.test(value)
+}
+
 export async function skillDoc(ctx, catalog, name) {
   void ctx
   const node = indexedSkills(catalog).get(name)
@@ -43,5 +53,7 @@ export async function skillDoc(ctx, catalog, name) {
     zh: node.zh,
     detailZh,
     translated: typeof details[name] === 'string',
+    // 静态翻译表里可能残留生成期被截断的条目；前端据此提示，不假装完整。
+    truncated: looksTruncatedDetail(detailZh),
   }
 }

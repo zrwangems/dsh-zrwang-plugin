@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const PACKAGE_NAME = 'dsh-zrwang-plugin'
-const FRAGMENTS = ['style.mjs', 'api.mjs', 'tree.mjs', 'settings.mjs', 'page.mjs', 'entry.mjs']
+const FRAGMENTS = ['style.mjs', 'api.mjs', 'markdown.mjs', 'tree.mjs', 'settings.mjs', 'page.mjs', 'entry.mjs']
 
 const header = `/**
  * dsh-zrwang-plugin —— 浏览器半侧。

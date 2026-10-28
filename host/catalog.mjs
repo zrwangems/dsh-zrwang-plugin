@@ -44,6 +44,49 @@ export async function loadCatalog() {
   return cache
 }
 
+/** 上游仓库 → GitHub 页面；local 与非法值不生成链接。 */
+function repoUrl(repo) {
+  if (typeof repo !== 'string' || repo === 'local') return undefined
+  return /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo) ? `https://github.com/${repo}` : undefined
+}
+
+/**
+ * 每个“项目根”对应的 GitHub 页面：
+ * - 项目根 = 该节点下所有技能同属一个仓库，且其父节点不属于同一个仓库；
+ * - 只有项目根显示 GitHub 按钮，项目内部的子目录/技能不再重复显示；
+ * - 本地收录（repo = local）不生成链接。
+ */
+export function catalogSources(catalog) {
+  const bySkill = {}
+  const byNode = {}
+  const uniqueRepo = node => {
+    const repos = new Set()
+    const walk = item => {
+      if (item.kind === 'skill') {
+        const url = repoUrl(catalog.skills?.[item.name]?.repo)
+        if (url !== undefined) repos.add(url)
+        return
+      }
+      for (const child of item.children ?? []) walk(child)
+    }
+    walk(node)
+    return repos.size === 1 ? [...repos][0] : undefined
+  }
+  const walk = (node, parentRepo) => {
+    const own = uniqueRepo(node)
+    const isProjectRoot = own !== undefined && own !== parentRepo
+    if (isProjectRoot) {
+      byNode[node.id] = own
+      if (node.kind === 'skill') bySkill[node.name] = own
+    }
+    if (node.kind === 'skill') return
+    const childParent = own === undefined ? undefined : own
+    for (const child of node.children ?? []) walk(child, childParent)
+  }
+  for (const group of catalog.groups ?? []) walk(group, undefined)
+  return { bySkill, byNode }
+}
+
 /** 给前端的目录树视图（技能叶子已带中文说明，不需要额外映射表）。 */
 export function catalogView(catalog) {
   return {
@@ -53,6 +96,7 @@ export function catalogView(catalog) {
     defaults: catalog.defaults,
     repos: catalog.repos,
     groups: catalog.groups,
+    sources: catalogSources(catalog),
   }
 }
 

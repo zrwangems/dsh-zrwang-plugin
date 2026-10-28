@@ -64,6 +64,7 @@ function ZrConfigCard(props) {
   var onOpen = props.onOpen
   var onAction = props.onAction
   var saved = props.saved
+  var busyAction = props.busyAction
   var fields = []
   if (card.kind === 'provider') fields = (card.providerFields || {})[backend] || []
   else if (card.kind === 'fields') fields = card.fields || []
@@ -82,7 +83,8 @@ function ZrConfigCard(props) {
     ),
     card.kind === 'info'
       ? h('div', null,
-        h('div', { className: 'zr-desc' }, card.status || ''),
+        h('div', { className: 'zr-desc' + (busyAction === undefined || busyAction === null ? '' : ' zr-desc-busy') },
+          busyAction === undefined || busyAction === null ? (card.status || '') : '正在检查，请稍等…'),
         h('div', { className: 'zr-actions' }, (card.actions || []).map(function (action) {
           if (typeof action.href === 'string' && action.href.length > 0) {
             return h('a', {
@@ -93,12 +95,15 @@ function ZrConfigCard(props) {
               rel: 'noopener',
             }, action.label)
           }
+          var isBusy = busyAction === action.id
           return h('button', {
-            className: 'zr-btn',
+            className: 'zr-btn' + (isBusy ? ' zr-btn-busy' : ''),
             key: action.id,
-            onClick: function () { onAction(card.id, action.id) },
-          }, action.label)
-        }))
+            type: 'button',
+            disabled: isBusy,
+            onClick: function () { if (!isBusy) onAction(card.id, action.id) },
+          }, isBusy ? '检查中…' : action.label)
+        }), saved === card.id ? h('span', { className: 'zr-saved' }, '已更新') : null)
       )
       : null,
     fields.length > 0
@@ -165,6 +170,9 @@ function ZrSettingsView(props) {
   var busyPair = React.useState(false)
   var busy = busyPair[0]
   var setBusy = busyPair[1]
+  var actionBusyPair = React.useState(null)
+  var actionBusy = actionBusyPair[0]
+  var setActionBusy = actionBusyPair[1]
   var pagePair = React.useState('models')
   var activePage = pagePair[0]
   var setActivePage = pagePair[1]
@@ -249,14 +257,24 @@ function ZrSettingsView(props) {
 
   var runAction = function (cardId, actionId) {
     setError(null)
-    zrRequest('/settings', { action: actionId, cardId: cardId }).catch(function (reason) {
+    setSaved(null)
+    setActionBusy(actionId)
+    zrRequest('/settings', { action: actionId, cardId: cardId }).then(function (payload) {
+      if (payload !== undefined && payload.settings !== undefined) applyPayload(payload.settings)
+      else reload()
+      setSaved(cardId)
+    }).catch(function (reason) {
       setError(zrErrorText(reason))
+    }).then(function () {
+      setActionBusy(null)
     })
   }
 
   var pages = [
+    { id: 'ars', label: 'ARS 设置' },
     { id: 'models', label: '模型服务' },
     { id: 'nature', label: 'Nature-skill设置' },
+    { id: 'researchinfo', label: '科研信息' },
   ]
   var visibleCards = (data.cards || []).filter(function (card) {
     return (card.page || 'models') === activePage
@@ -284,6 +302,7 @@ function ZrSettingsView(props) {
           values: providerValues,
           backend: card.kind === 'provider' && cardValues !== undefined ? cardValues.backend : card.backend,
           saved: saved,
+          busyAction: actionBusy,
           onBackend: setBackend,
           onField: setField,
           onSave: saveCard,

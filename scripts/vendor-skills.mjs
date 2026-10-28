@@ -15,9 +15,10 @@
  */
 import { execFileSync } from 'node:child_process'
 import {
-  cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync,
+  cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync, copyFileSync,
 } from 'node:fs'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
+import { arsParams, writeArsRuntimeNotes } from '../host/ars.mjs'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const WORK = resolve(ROOT, '..', 'AgentsDo', 'skill-management-20261027')
@@ -39,7 +40,9 @@ const EXCLUDE = new Set(['.git', '.github', 'node_modules', '__pycache__', '.ven
 const args = process.argv.slice(2)
 const noNetwork = args.includes('--no-network')
 const onlyArg = args.find(a => a.startsWith('--only='))
-const only = onlyArg === undefined ? undefined : onlyArg.slice('--only='.length)
+const only = onlyArg === undefined
+  ? undefined
+  : new Set(onlyArg.slice('--only='.length).split(',').map(item => item.trim()).filter(Boolean))
 const skipArg = args.find(a => a.startsWith('--skip='))
 const skip = new Set(skipArg === undefined ? [] : skipArg.slice('--skip='.length).split(',').filter(Boolean))
 
@@ -104,7 +107,11 @@ function applySkillPatches(root) {
       if (!existsSync(target)) fail(`补丁目标不存在：${entry.path}`)
       let text = readFileSync(target, 'utf8')
       for (const change of entry.replace ?? []) {
-        if (!text.includes(change.find)) fail(`补丁不适用（上游结构变了）：${entry.path}`)
+        // 幂等：已经改写过的文件不再重复替换（局部更新会重复跑补丁）。
+        if (!text.includes(change.find)) {
+          if (text.includes(change.to)) continue
+          fail(`补丁不适用（上游结构变了）：${entry.path}`)
+        }
         text = text.split(change.find).join(change.to)
       }
       writeFileSync(target, text, 'utf8')
@@ -221,6 +228,15 @@ function enumerateSkills(cfg, repoRoot) {
     found.push({ srcDir: src, category: undefined, dirName: src.split(sep).pop() })
     return found
   }
+  if (cfg.layout === 'skill-dirs') {
+    // 按显式名单枚举仓库根下的技能目录（ARS 用），不猜、不误收 docs/agents/hooks。
+    for (const name of cfg.names ?? []) {
+      const src = join(repoRoot, name)
+      if (!existsSync(join(src, 'SKILL.md'))) fail(`${cfg.id}: 找不到技能目录 ${name}`)
+      found.push({ srcDir: src, category: undefined, dirName: name })
+    }
+    return found
+  }
   if (cfg.layout === 'root') {
     found.push({ srcDir: repoRoot, category: undefined, dirName: cfg.target.split('/').pop() })
     return found
@@ -275,6 +291,18 @@ function enumerateSkills(cfg, repoRoot) {
   return found
 }
 
+/** 按 cfg.renames 改落盘目录名（上游技能名与已有技能重名时用），frontmatter 由 skill-patches 改名。 */
+function applyRenames(cfg, found) {
+  if (cfg.renames === undefined) return
+  const seen = new Set()
+  for (const item of found) {
+    const mapped = cfg.renames[item.dirName]
+    if (mapped !== undefined) item.dirName = mapped
+    if (seen.has(item.dirName)) fail(`${cfg.id}: 改名后目录重复 ${item.dirName}`)
+    seen.add(item.dirName)
+  }
+}
+
 function copyLicenses(cfg, repoRoot) {
   if (cfg.layout === 'local') return
   const dir = join(ROOT, 'vendor', 'licenses', cfg.id)
@@ -286,10 +314,279 @@ function copyLicenses(cfg, repoRoot) {
   }
 }
 
+/** 字面改写：对技能目录下所有 .md 生效；任何一条规则零命中即失败。 */
+function applyRewrites(dir, rules) {
+  if (rules === undefined || rules.length === 0) return
+  const hits = new Map(rules.map(rule => [rule.find, 0]))
+  for (const file of walkFiles(dir)) {
+    if (!/\.(md|markdown)$/i.test(file)) continue
+    let text = readFileSync(file, 'utf8')
+    let changed = false
+    for (const rule of rules) {
+      if (!text.includes(rule.find)) continue
+      hits.set(rule.find, hits.get(rule.find) + 1)
+      text = text.split(rule.find).join(rule.to)
+      changed = true
+    }
+    if (changed) writeFileSync(file, text, 'utf8')
+  }
+  for (const [find, count] of hits) {
+    if (count > 0) continue
+    const rule = rules.find(item => item.find === find)
+    if (rule?.optional === true) continue
+    fail(`改写规则零命中（上游结构可能变了）：${find}`)
+  }
+}
+
+/** 在指定 md 文件顶部（frontmatter 之后）插入一段固定说明，例如输出语言约束。 */
+function applyHeaderNote(dir, spec) {
+  if (spec === undefined) return
+  const pattern = new RegExp(spec.files)
+  let touched = 0
+  for (const file of walkFiles(dir)) {
+    if (!/\.md$/i.test(file)) continue
+    const rel = relative(dir, file).split(sep).join('/')
+    if (!pattern.test(rel)) continue
+    const text = readFileSync(file, 'utf8')
+    if (text.includes(spec.text.trim())) continue
+    const match = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(text)
+    const head = match === null ? '' : match[0].endsWith('\n') ? match[0] : `${match[0]}\n`
+    // 旧版本注入的同一段说明要先摘掉，避免多次 vendor 后叠加。
+    const body = (match === null ? text : text.slice(match[0].length))
+      .split(/\r?\n/)
+      .filter(line => !/^>\s*输出语言（本 DSH 集成强制）/.test(line))
+      .join('\n')
+    writeFileSync(file, `${head}${spec.text}\n${body}`, 'utf8')
+    touched += 1
+  }
+  log(`  顶部说明写入 ${touched} 个文件`)
+}
+
+/** 仓库级附加目录 → 技能内目录（如 shared/ → _shared/）。 */
+function copyExtraDirs(cfg, repoRoot, skillDir) {
+  for (const extra of cfg.extraDirs ?? []) {
+    const from = join(repoRoot, ...String(extra.from).split('/'))
+    if (!existsSync(from)) fail(`缺少附加目录：${extra.from}`)
+    const to = join(skillDir, ...String(extra.to).split('/'))
+    rmSync(to, { recursive: true, force: true })
+    cpSync(from, to, { recursive: true, filter: path => !EXCLUDE.has(path.split(sep).pop()) })
+  }
+}
+
+/** 仓库根的单文件 → 技能内（如 MODE_REGISTRY.md → _shared/MODE_REGISTRY.md）。 */
+function copySharedFiles(cfg, repoRoot, skillDir) {
+  for (const item of cfg.sharedFiles ?? []) {
+    const from = join(repoRoot, ...String(item.from).split('/'))
+    if (!existsSync(from)) fail(`缺少共享文件：${item.from}`)
+    const to = join(skillDir, ...String(item.to).split('/'))
+    mkdirSync(resolve(to, '..'), { recursive: true })
+    copyFileSync(from, to)
+  }
+}
+
+/** 从技能正文里收集它引用的上游脚本（相对 scripts/ 的路径）。 */
+function collectScriptRefs(skillDir) {
+  const refs = new Set()
+  for (const file of walkFiles(skillDir)) {
+    if (!/\.(md|markdown)$/i.test(file)) continue
+    const text = readFileSync(file, 'utf8')
+    for (const match of text.matchAll(/scripts\/([A-Za-z0-9_./-]+\.py)/g)) refs.add(match[1])
+  }
+  return refs
+}
+
+/** 按引用闭包把需要的脚本并进技能自己的 scripts/：被引脚本 + 它 import 的本地模块。
+ *
+ * 上游技能可能本来就有 scripts/（如 sr-screener），所以是"合并"而不是另建目录：
+ * 同名文件内容一致就跳过，不一致直接失败，避免静默覆盖。
+ */
+function copyScriptClosure(cfg, repoRoot, skillDir) {
+  const spec = cfg.scriptClosure
+  if (spec === undefined) return { files: 0, bytes: 0 }
+  const srcRoot = join(repoRoot, ...String(spec.from).split('/'))
+  const outRoot = join(skillDir, ...String(spec.into ?? 'scripts').split('/'))
+  const limit = spec.maxBytes ?? 20_000_000
+  const queue = [...collectScriptRefs(skillDir)].map(item => item.split('/').join(sep))
+  // 命令正文里引用的脚本（如 ars_cache_invalidate.py、ars_mark_read.py）也要一并带上，
+  // 否则 /ars-* 命令让模型去跑脚本时会扑空。
+  const commandDir = join(repoRoot, ...String(cfg.aliases?.from ?? 'commands').split('/'))
+  if (existsSync(commandDir)) {
+    for (const entry of readdirSync(commandDir)) {
+      if (!/\.md$/i.test(entry)) continue
+      const text = readFileSync(join(commandDir, entry), 'utf8')
+      for (const match of text.matchAll(/scripts\/([A-Za-z0-9_./-]+\.py)/g)) {
+        queue.push(match[1].split('/').join(sep))
+      }
+    }
+  }
+  const done = new Set()
+  let bytes = 0
+  while (queue.length > 0) {
+    const rel = queue.shift()
+    if (done.has(rel)) continue
+    done.add(rel)
+    const src = join(srcRoot, rel)
+    if (!existsSync(src)) {
+      log(`  警告：正文引用的脚本不在上游：${rel.split(sep).join('/')}`)
+      continue
+    }
+    const body = readFileSync(src)
+    bytes += body.length
+    if (bytes > limit) fail(`${cfg.id}: 脚本闭包超过上限 ${limit} 字节`)
+    const dest = join(outRoot, rel)
+    if (existsSync(dest)) {
+      if (!readFileSync(dest).equals(body)) fail(`脚本同名但内容不同，拒绝覆盖：${rel.split(sep).join('/')}`)
+      continue
+    }
+    mkdirSync(resolve(dest, '..'), { recursive: true })
+    writeFileSync(dest, body)
+    if (!/\.py$/.test(rel)) continue
+    const text = body.toString('utf8')
+    for (const match of text.matchAll(/^[ \t]*(?:from|import)\s+([A-Za-z_][\w.]*)/gm)) {
+      const mod = match[1].split('.')[0]
+      for (const candidate of [`${mod}.py`, join(mod, '__init__.py')]) {
+        if (existsSync(join(srcRoot, candidate))) queue.push(candidate)
+      }
+    }
+  }
+  return { files: done.size, bytes }
+}
+
+/** 去掉 frontmatter 里的 description（含折叠块），其余键保留。 */
+function stripDescriptionBlock(block) {
+  const out = []
+  let skippingFolded = false
+  for (const line of block.split(/\r?\n/)) {
+    if (/^description\s*:/.test(line)) {
+      skippingFolded = /:\s*[>|][-+\d]*\s*$/.test(line)
+      continue
+    }
+    if (skippingFolded) {
+      if (/^\s+\S/.test(line) || line.trim().length === 0) continue
+      skippingFolded = false
+    }
+    out.push(line)
+  }
+  return out.join('\n').trimEnd()
+}
+
+/** 用登记过的双语摘要替换 frontmatter description，原文留档到 _shared/。 */
+function applyDescription(cfg, skillDir, meta) {
+  if (cfg.descriptions === undefined) return meta
+  const table = JSON.parse(readFileSync(join(ROOT, ...String(cfg.descriptions).split('/')), 'utf8'))
+  const next = table.skills?.[meta.name] ?? table[meta.name]
+  if (typeof next !== 'string' || next.trim().length === 0) return meta
+  if (next.length > 480) fail(`description 超过 480 字：${meta.name}`)
+  const file = join(skillDir, 'SKILL.md')
+  const text = readFileSync(file, 'utf8')
+  const match = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)
+  if (match === null) fail(`缺少 frontmatter：${file}`)
+  const rest = stripDescriptionBlock(match[1])
+  const body = text.slice(match[0].length)
+  writeFileSync(file, `---\n${rest}\ndescription: ${JSON.stringify(next)}\n---${body}`, 'utf8')
+  const shared = join(skillDir, '_shared')
+  mkdirSync(shared, { recursive: true })
+  writeFileSync(join(shared, 'description-original.md'), `# 上游 description 原文（${meta.name}）\n\n${meta.description}\n`, 'utf8')
+  return { ...meta, description: next }
+}
+
+/** 把上游 commands/*.md 变成用户可调用的别名技能（模型目录不可见）。 */
+function generateAliasSkills(cfg, repoRoot, stageRoot) {
+  const spec = cfg.aliases
+  if (spec === undefined) return 0
+  const from = join(repoRoot, ...String(spec.from).split('/'))
+  if (!existsSync(from)) fail(`缺少别名来源目录：${spec.from}`)
+  const target = join(stageRoot, ...String(spec.target).split('/'))
+  rmSync(target, { recursive: true, force: true })
+  mkdirSync(target, { recursive: true })
+  let count = 0
+  for (const entry of readdirSync(from, { withFileTypes: true })) {
+    if (!entry.isFile() || !/\.md$/i.test(entry.name)) continue
+    const text = readFileSync(join(from, entry.name), 'utf8')
+    const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(text)
+    if (match === null) continue
+    const nameLine = /^name:\s*(.+)$/m.exec(match[1])
+    if (nameLine === null) continue
+    const name = nameLine[1].trim().replace(/^['"]|['"]$/g, '')
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) fail(`别名不是 kebab-case：${name}`)
+    const descLine = /^description:\s*(.+)$/m.exec(match[1])
+    const description = descLine === null ? `ARS 命令 ${name}` : descLine[1].trim().replace(/^['"]|['"]$/g, '')
+    let body = match[2].trim()
+    for (const change of spec.rewrite ?? []) body = body.split(change.find).join(change.to)
+    // 保留上游命令正文（含具体脚本与步骤），只把 Claude 插件根路径改写成 DSH 里说得通的写法。
+    body = body
+      .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/MODE_REGISTRY\.md/g, '对应技能目录下的 `_shared/MODE_REGISTRY.md`')
+      .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/([a-z0-9-]+)\/SKILL\.md/g, '`$1` 技能')
+      .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/?/g, '')
+      .replace(/python3\s+scripts\/([A-Za-z0-9_./-]+)/g, 'python `scripts/$1`（用 ARS 技能目录里的副本，解释器见「设置 → ARS 设置」）')
+      .replace(/\$ARGUMENTS/g, '用户本次输入')
+    const head = [
+      '---',
+      `name: ${name}`,
+      `description: ${JSON.stringify(`${description}（ARS 命令入口）`)}`,
+      'disable-model-invocation: true',
+      '---',
+      '',
+    ]
+    const dir = join(target, name)
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'SKILL.md'), `${head.join('\n')}${body}\n`, 'utf8')
+    count += 1
+  }
+  return count
+}
+
+/**
+ * 写 catalog/ars.json：ARS 作为"功能区块"（不进技能树、默认注入）的元数据。
+ * 技能目录与命令文本都由这里描述，宿主半侧只读它。
+ * 实体放在包根 ars/ 下（root: 'package'），不混进 skills/。
+ */
+function writeArsManifest(cfg, records, aliasCount, stageRoot) {
+  const descriptions = cfg.descriptions === undefined
+    ? {}
+    : JSON.parse(readFileSync(join(ROOT, ...String(cfg.descriptions).split('/')), 'utf8'))
+  const commandZh = descriptions.commands ?? {}
+  const aliasRoot = join(stageRoot, ...String(cfg.aliases.target).split('/'))
+  const commands = []
+  if (existsSync(aliasRoot)) {
+    for (const entry of readdirSync(aliasRoot, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      if (!entry.isDirectory()) continue
+      const file = join(aliasRoot, entry.name, 'SKILL.md')
+      if (!existsSync(file)) continue
+      const meta = commandZh[entry.name]
+      const description = typeof meta === 'string' ? meta : meta?.description
+      if (typeof description !== 'string' || description.length === 0) {
+        fail(`缺少命令中文说明：${entry.name}（vendor/ars/descriptions.json 的 commands）`)
+      }
+      const hint = typeof meta === 'object' && meta !== null && typeof meta.hint === 'string' ? meta.hint : '<需求或题目>'
+      commands.push({
+        name: entry.name,
+        description,
+        hint,
+        source: `${cfg.aliases.target}/${entry.name}/SKILL.md`,
+      })
+    }
+  }
+  if (commands.length !== aliasCount) fail(`命令清单与别名数不一致：${commands.length} vs ${aliasCount}`)
+  const manifest = {
+    version: 1,
+    label: '学术研究（ARS）',
+    upstream: cfg.repo,
+    license: 'CC-BY-NC-4.0',
+    root: 'ars',
+    doc: 'docs/ars-usage.md',
+    skills: records.map(record => ({ name: record.name, dir: record.path, root: 'package' })),
+    commands,
+  }
+  const target = join(ROOT, 'catalog', 'ars.json')
+  writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+  log(`  ARS 清单写入 ${relative(ROOT, target)}（${manifest.skills.length} 技能 / ${commands.length} 命令）`)
+}
+
 async function main() {
   const config = JSON.parse(readFileSync(join(ROOT, 'vendor', 'upstreams.json'), 'utf8'))
-  const repos = config.repos.filter(cfg => (only === undefined || cfg.id === only) && !skip.has(cfg.id))
-  if (repos.length === 0) fail(`没有匹配的上游：${only ?? '(全部)'}${skip.size > 0 ? `（跳过 ${[...skip].join(',')}）` : ''}`)
+  const repos = config.repos.filter(cfg => (only === undefined || only.has(cfg.id)) && !skip.has(cfg.id))
+  if (repos.length === 0) fail(`没有匹配的上游：${only === undefined ? '(全部)' : [...only].join(',')}${skip.size > 0 ? `（跳过 ${[...skip].join(',')}）` : ''}`)
 
   for (const dir of [CACHE, EXTRACT, TRASH]) mkdirSync(dir, { recursive: true })
 
@@ -305,6 +602,8 @@ async function main() {
     log(`旧 skills/ 已移到 ${trash}`)
   }
   mkdirSync(STAGE, { recursive: true })
+  // staging 必须干净：局部更新复用同一目录时，旧文件（如上一版生成的 _scripts/）会残留。
+  for (const entry of readdirSync(STAGE)) rmSync(join(STAGE, entry), { recursive: true, force: true })
 
   const lock = { version: 1, generatedAt: new Date().toISOString(), repos: [], totals: { skills: 0 } }
   const seen = new Map()
@@ -336,6 +635,7 @@ async function main() {
 
     const skills = enumerateSkills(cfg, repoRoot)
     if (skills.length === 0) fail(`${cfg.id}: 未发现任何技能`)
+    applyRenames(cfg, skills)
     const targetRoot = join(STAGE, ...cfg.target.split('/'))
     mkdirSync(targetRoot, { recursive: true })
     // dir/root/local 三种 layout 的 target 已经写到了技能目录本身，不能再拼一层 dirName
@@ -343,12 +643,25 @@ async function main() {
     const records = []
     for (const item of skills) {
       if (!existsSync(join(item.srcDir, 'SKILL.md'))) fail(`缺少 SKILL.md：${item.srcDir}`)
-      const meta = readSkillMeta(item.srcDir)
+      let meta = readSkillMeta(item.srcDir)
+      // 改名的技能：先用新名字参与重名检查与 lock，frontmatter 由 skill-patches 在合并后统一改。
+      if (cfg.renames !== undefined && cfg.renames[meta.name] === item.dirName && meta.name !== item.dirName) {
+        meta = { ...meta, name: item.dirName }
+        log(`  ${meta.name}: 按 renames 改名（上游 ${Object.keys(cfg.renames).find(key => cfg.renames[key] === item.dirName)}）`)
+      }
       const category = item.category
       const dest = singleLayout
         ? targetRoot
         : (category === undefined ? join(targetRoot, item.dirName) : join(targetRoot, category, item.dirName))
       copySkill(item.srcDir, dest)
+      // 上游附加内容与受控改写：先补目录/脚本，再改写引用，最后换描述（描述不参与改写）。
+      copyExtraDirs(cfg, repoRoot, dest)
+      copySharedFiles(cfg, repoRoot, dest)
+      applyRewrites(dest, cfg.rewrite)
+      applyHeaderNote(dest, cfg.headerNote)
+      meta = applyDescription(cfg, dest, meta)
+      const closure = copyScriptClosure(cfg, repoRoot, dest)
+      if (closure.files > 0) log(`  ${item.dirName}: 脚本闭包 ${closure.files} 个 / ${(closure.bytes / 1024).toFixed(0)} KB`)
       if (seen.has(meta.name)) fail(`技能重名：${meta.name}（${seen.get(meta.name)} 与 ${cfg.id}）`)
       seen.set(meta.name, cfg.id)
       const relPath = singleLayout
@@ -363,7 +676,14 @@ async function main() {
       })
     }
     records.sort((a, b) => (a.category ?? '').localeCompare(b.category ?? '') || a.dir.localeCompare(b.dir))
-    lock.repos.push({ id: cfg.id, repo: cfg.repo, ref: cfg.ref ?? 'main', sha, label: cfg.label, target: cfg.target, count: records.length, skills: records })
+    const aliasCount = generateAliasSkills(cfg, repoRoot, STAGE)
+    if (aliasCount > 0) log(`  命令别名 ${aliasCount} 个`)
+    if (cfg.runtimeRoot !== undefined) {
+      const written = await writeArsRuntimeNotes(arsParams(), join(STAGE, ...cfg.runtimeRoot.split('/')))
+      log(`  运行时说明写入 ${written.written} 个技能（Python：${written.python.path || '未找到'}）`)
+      writeArsManifest(cfg, records, aliasCount, STAGE)
+    }
+    lock.repos.push({ id: cfg.id, repo: cfg.repo, ref: cfg.ref ?? 'main', sha, label: cfg.label, target: cfg.target, count: records.length, aliases: aliasCount, outsideCatalog: cfg.outsideCatalog === true, skills: records })
     log(`  收录 ${records.length} 个技能`)
   }
 
@@ -371,14 +691,29 @@ async function main() {
     // 局部更新：把 staging 里的目标并回现有 skills/
     if (!existsSync(SKILLS)) mkdirSync(SKILLS, { recursive: true })
     for (const cfg of repos) {
-      const src = join(STAGE, ...cfg.target.split('/'))
-      const dest = join(SKILLS, ...cfg.target.split('/'))
-      mkdirSync(resolve(dest, '..'), { recursive: true })
-      if (existsSync(dest)) {
-        const trash = join(TRASH, `partial-${cfg.id}-${Date.now()}`)
-        renameSync(dest, trash)
+      const targets = [cfg.target, ...(cfg.aliases === undefined ? [] : [cfg.aliases.target])]
+      // 技能树外的功能区块（ARS）实体放包根，其余放 skills/。
+      const base = cfg.outsideCatalog === true ? ROOT : SKILLS
+      for (const target of targets) {
+        const src = join(STAGE, ...target.split('/'))
+        const dest = join(base, ...target.split('/'))
+        if (!existsSync(src)) continue
+        mkdirSync(resolve(dest, '..'), { recursive: true })
+        let replaced = false
+        if (existsSync(dest)) {
+          const trash = join(TRASH, `partial-${cfg.id}-${basename(target)}-${Date.now()}`)
+          try {
+            renameSync(dest, trash)
+            replaced = true
+          } catch (error) {
+            // Windows 下 DSH 的文件监视器可能正持有技能目录句柄，rename 会 EPERM；
+            // 退化为覆盖合并（旧的多余文件会留下，但不影响技能可用）。
+            log(`  注意：${target} 无法整体换入（${String(error?.code ?? error)}），改为覆盖合并`)
+          }
+        }
+        if (replaced || !existsSync(dest)) cpSync(src, dest, { recursive: true })
+        else cpSync(src, dest, { recursive: true, force: true })
       }
-      cpSync(src, dest, { recursive: true })
     }
     const restored = restorePreserved(SKILLS, preserved)
     if (restored > 0) log(`回填用户配置 ${restored} 个文件`)

@@ -60,6 +60,40 @@ export async function resetGroup(catalog, groupId) {
   return setSelection(changes)
 }
 
+/** 找到目录树里的节点（含一级目录本身）。 */
+export function findTreeNode(catalog, nodeId) {
+  const walk = node => {
+    if (node.id === nodeId) return node
+    for (const child of node.children ?? []) {
+      const hit = walk(child)
+      if (hit !== undefined) return hit
+    }
+    return undefined
+  }
+  for (const group of catalog.groups ?? []) {
+    const hit = walk(group)
+    if (hit !== undefined) return hit
+  }
+  return undefined
+}
+
+/**
+ * “全选 / 全关”只作用直接子节点（只往下一层）：
+ * 子技能 → 勾选变更；子目录 → 该目录的门禁；不会递归到孙节点。
+ */
+export function childBatch(catalog, nodeId, value) {
+  const node = findTreeNode(catalog, nodeId)
+  if (node === undefined) throw new Error(`目录树里没有节点：${nodeId}`)
+  if (node.kind === 'skill') throw new Error('技能节点不能做批量选择')
+  const skillChanges = {}
+  const gates = {}
+  for (const child of node.children ?? []) {
+    if (child.kind === 'skill') skillChanges[child.name] = value === true
+    else gates[child.id] = value === true
+  }
+  return { skillChanges, gates }
+}
+
 /** 某个一级目录内的勾选统计。 */
 export function groupCounts(catalog, selection, groupId) {
   const nodes = skillsInGroup(catalog, groupId)

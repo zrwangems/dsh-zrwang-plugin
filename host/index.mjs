@@ -14,8 +14,11 @@ import { PKG_DIR, VERSION } from './config.mjs'
 import { loadCatalog } from './catalog.mjs'
 import { registerRoutes } from './routes.mjs'
 import { readLinks } from './farm.mjs'
-import { currentParams, ensureBuaaSchoolConfig } from './skill-settings.mjs'
+import { applySkillEnv, currentParams, ensureBuaaSchoolConfig } from './skill-settings.mjs'
 import { configDirOfParams } from './plugin-params.mjs'
+import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-commands.mjs'
+import { createSkillGuard } from './skill-guard.mjs'
+import { loadGates } from './gates.mjs'
 import { appendEvent } from './state.mjs'
 
 export const name = 'dsh-zrwang-plugin'
@@ -24,6 +27,8 @@ export function apply(ctx, config) {
   const pluginConfig = config ?? {}
   const initialConfigDir = configDirOfParams(currentParams(pluginConfig))
   void appendEvent('host-applied', { version: VERSION, configDir: initialConfigDir })
+  // 新增技能（沁言/OpenRouter/Zotero 等）需要的密钥写进宿主环境，模型跑的 shell 子进程会继承。
+  applySkillEnv(currentParams(pluginConfig))
   void ensureBuaaSchoolConfig(currentParams(pluginConfig)).catch(() => {})
   ctx.provide('zrwangPlugin', {
     version: VERSION,
@@ -48,5 +53,21 @@ export function apply(ctx, config) {
       'dsh-zrwang-plugin: http routes',
     )
     ctx.logger?.info?.(`dsh-zrwang-plugin ${VERSION}: HTTP 接口已挂到 /dsh-zrwang-plugin`)
+  })
+
+  // 技能文件护栏：禁止模型用 write/edit 改插件里的 skills/ 与 ars/。
+  ctx.inject(['tools'], scope => {
+    const guard = createSkillGuard(ctx)
+    scope.effect(() => scope.tools.guard(guard), 'dsh-zrwang-plugin: skill guard')
+    void appendEvent('skill-guard-applied', { roots: ['skills', 'ars'] })
+  })
+
+  // ARS 的 /ars-* 命令：按侧栏开关动态注册/注销，关掉 ARS 时命令从斜杠菜单消失。
+  ctx.inject(['commands'], scope => {
+    attachArsCommands(scope)
+    scope.effect(() => () => detachArsCommands(), 'dsh-zrwang-plugin: ars commands')
+    void loadGates()
+      .then(gates => syncArsCommands(gates.ars === true))
+      .catch(() => {})
   })
 }

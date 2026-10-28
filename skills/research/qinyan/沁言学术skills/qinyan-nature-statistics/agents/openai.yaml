@@ -1,0 +1,4 @@
+interface:
+  display_name: "沁言 Nature 统计"
+  short_description: "Design-aware statistical analysis and reporting audit"
+  default_prompt: "Use $qinyan-nature-statistics to audit and rewrite the statistical reporting in this manuscript."

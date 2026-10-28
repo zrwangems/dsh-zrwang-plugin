@@ -28,7 +28,7 @@ function readJson(file) {
 // ---- 1 包清单 ----
 const pkg = readJson(join(ROOT, 'package.json'))
 check('package.name', pkg.name === 'dsh-zrwang-plugin')
-check('package.version=0.0.3', pkg.version === '0.0.3', pkg.version)
+check('package.version=0.1.0', pkg.version === '0.1.0', pkg.version)
 check('package.main 存在', typeof pkg.main === 'string' && existsSync(join(ROOT, pkg.main)))
 check('exports["./client"]', pkg.exports?.['./client'] === './lib/client.js')
 check('dsh.bundle.patch', pkg.dsh?.bundle?.patch === './cordis.patch.yml')
@@ -82,13 +82,13 @@ const walkNode = node => {
 for (const group of catalog.groups ?? []) walkNode(group)
 check('目录树节点完整', nodeProblems.length === 0, nodeProblems.slice(0, 6).join('；'))
 check('一级目录=3', (catalog.groups ?? []).length === 3)
-check('目录树 262 个技能', skillNodes.length === 262, String(skillNodes.length))
+check('目录树 481 个技能', skillNodes.length === 481, String(skillNodes.length))
 const defaultsSeed = readJson(join(ROOT, 'catalog', 'defaults.json'))
 check('默认启用种子文件', Array.isArray(defaultsSeed.skills) && defaultsSeed.skills.length === 91, String(defaultsSeed.skills?.length))
 const groupCounts = catalog.stats?.byGroup ?? {}
 check('工程 223', groupCounts.engineering === 223, String(groupCounts.engineering))
-check('科研 25', groupCounts.research === 25, String(groupCounts.research))
-check('办公 14', groupCounts.office === 14, String(groupCounts.office))
+check('科研 239', groupCounts.research === 239, String(groupCounts.research))
+check('办公 19', groupCounts.office === 19, String(groupCounts.office))
 const singletonProblems = []
 const walkSingleton = node => {
   if (node.kind === 'skill') return
@@ -103,6 +103,24 @@ const researchGroup = (catalog.groups ?? []).find(group => group.id === 'researc
 check('ppt-master 为独立技能', officeGroup?.children?.some(child => child.kind === 'skill' && child.name === 'ppt-master'))
 check('html-ppt 为独立技能', officeGroup?.children?.some(child => child.kind === 'skill' && child.name === 'html-ppt'))
 check('zotero-cli 为独立技能', researchGroup?.children?.some(child => child.kind === 'skill' && child.name === 'zotero-cli'))
+// 2026-10 新增的 10 个仓库：目录形态与数量
+const leavesUnder = node => node === undefined ? [] : (node.kind === 'skill' ? [node.name] : (node.children ?? []).flatMap(child => leavesUnder(child)))
+const nodeById = (group, id) => (group?.children ?? []).find(child => child.id === id)
+const qinyanNode = nodeById(researchGroup, 'qinyan')
+const supervisorNode = nodeById(researchGroup, 'supervisor')
+const nsfcNode = nodeById(researchGroup, 'nsfc')
+check('qinyan 18 类 187 技能', (qinyanNode?.children ?? []).length === 18 && leavesUnder(qinyanNode).length === 187,
+  `${(qinyanNode?.children ?? []).length}/${leavesUnder(qinyanNode).length}`)
+check('supervisor 12 技能且已改名', leavesUnder(supervisorNode).length === 12 && leavesUnder(supervisorNode).includes('supervisor-deep-research'),
+  `${leavesUnder(supervisorNode).length}`)
+check('nsfc 4 技能', leavesUnder(nsfcNode).length === 4, String(leavesUnder(nsfcNode).length))
+const patentNode = nodeById(researchGroup, 'patent')
+check('patent 9 技能', leavesUnder(patentNode).length === 9, String(leavesUnder(patentNode).length))
+const newSingleSkills = ['academic-humanizer', 'lieflat-less-ai-tone', 'lieflat-charts', 'writing-dna-skill', 'lieflat-gongwen', 'guizang-ppt-skill', 'frontend-slides']
+check('新增单技能都在组下一层', newSingleSkills.every(name => {
+  const group = name.startsWith('lieflat-charts') || name === 'writing-dna-skill' || name === 'lieflat-gongwen' || name === 'guizang-ppt-skill' || name === 'frontend-slides' ? officeGroup : researchGroup
+  return (group?.children ?? []).some(child => child.kind === 'skill' && child.name === name)
+}))
 
 // ---- 4 技能实体 ----
 const seen = new Map()
@@ -123,14 +141,47 @@ for (const node of skillNodes) {
 }
 check('技能实体齐全', problems.every(item => !item.startsWith('技能目录缺') && !item.startsWith('SKILL.md')))
 check('技能名唯一', seen.size === skillNodes.length)
+const repoProblems = Object.entries(catalog.skills ?? {}).filter(([name, info]) => typeof info.repo !== 'string' || info.repo.length === 0).map(([name]) => name)
+check('每个技能都有来源仓库标记', repoProblems.length === 0, repoProblems.slice(0, 5).join(', '))
 
-// ---- 5 上游锁 ----
+// ---- 5 上游锁与 ARS 功能区块 ----
 const lock = readJson(join(ROOT, 'vendor', 'upstreams.lock.json'))
-check('lock 技能数一致', lock.totals?.skills === skillNodes.length, `${lock.totals?.skills} vs ${skillNodes.length}`)
+const arsManifest = readJson(join(ROOT, 'catalog', 'ars.json'))
+const arsSkillNames = new Set((arsManifest.skills ?? []).map(skill => skill.name))
+const arsCommandNames = new Set((arsManifest.commands ?? []).map(command => command.name))
+check('ARS 清单 5 技能 / 16 命令', (arsManifest.skills ?? []).length === 5 && (arsManifest.commands ?? []).length === 16,
+  `${(arsManifest.skills ?? []).length}/${(arsManifest.commands ?? []).length}`)
+check('ARS 不在技能树里', skillNodes.every(node => !arsSkillNames.has(node.name)))
+const lockSkillCount = (lock.repos ?? []).reduce((sum, repo) => sum + (repo.count ?? 0), 0)
+const lockAliasCount = (lock.repos ?? []).reduce((sum, repo) => sum + (repo.aliases ?? 0), 0)
+check('lock 上游技能数 = 目录 + ARS', lockSkillCount === skillNodes.length + arsSkillNames.size, `${lockSkillCount} vs ${skillNodes.length + arsSkillNames.size}`)
+check('lock 别名命令数 = ARS 命令', lockAliasCount === arsCommandNames.size, `${lockAliasCount} vs ${arsCommandNames.size}`)
 check('lock 记录 SHA', (lock.repos ?? []).every(repo => repo.sha === 'local' || (typeof repo.sha === 'string' && repo.sha.length >= 7)))
-check('上游仓库数=10', (lock.repos ?? []).length === 10, String((lock.repos ?? []).length))
+const upstreamConfig = readJson(join(ROOT, 'vendor', 'upstreams.json'))
+const lockIds = new Set((lock.repos ?? []).map(repo => repo.id))
+const configIds = (upstreamConfig.repos ?? []).map(repo => repo.id)
+check('上游仓库覆盖配置', configIds.every(id => lockIds.has(id)),
+  `缺 ${configIds.filter(id => !lockIds.has(id)).join(', ') || '无'}（lock ${lockIds.size} / 配置 ${configIds.length}）`)
 const lockNames = new Set((lock.repos ?? []).flatMap(repo => (repo.skills ?? []).map(skill => skill.name)))
-check('lock 覆盖全部技能', lockNames.size === skillNodes.length && skillNodes.every(node => lockNames.has(node.name)))
+check('lock 覆盖目录技能', skillNodes.every(node => lockNames.has(node.name)))
+check('lock 覆盖 ARS 技能', [...arsSkillNames].every(name => lockNames.has(name)))
+const arsLicense = join(ROOT, 'vendor', 'licenses', 'ars', 'LICENSE')
+check('ARS 许可文件存在', existsSync(arsLicense))
+check('ARS 许可是 CC-BY-NC', existsSync(arsLicense) && /NonCommercial|CC BY-NC|Attribution-NonCommercial/i.test(readFileSync(arsLicense, 'utf8')))
+const arsProblems = []
+for (const skill of arsManifest.skills ?? []) {
+  const base = join(ROOT, ...String(skill.dir).split('/'))
+  if (!existsSync(join(base, 'SKILL.md'))) arsProblems.push(`${skill.name}: 缺 SKILL.md`)
+  if (!existsSync(join(base, '_shared', 'MODE_REGISTRY.md'))) arsProblems.push(`${skill.name}: 缺 _shared/MODE_REGISTRY.md`)
+  if (!existsSync(join(base, '_shared', 'dsh-runtime.md'))) arsProblems.push(`${skill.name}: 缺 _shared/dsh-runtime.md`)
+}
+check('ARS 技能目录自足', arsProblems.length === 0, arsProblems.slice(0, 4).join('；'))
+check('ARS 实体在包根 ars/ 下', !existsSync(join(ROOT, 'skills', 'research', 'ars')) && existsSync(join(ROOT, 'ars', 'skills')))
+const arsCommandProblems = (arsManifest.commands ?? [])
+  .filter(command => !existsSync(join(ROOT, ...String(command.source).split('/'))))
+  .map(command => command.name)
+check('ARS 命令源存在', arsCommandProblems.length === 0, arsCommandProblems.slice(0, 4).join(', '))
+check('ARS 用法文档存在', existsSync(join(ROOT, ...String(arsManifest.doc ?? 'docs/ars-usage.md').split('/'))))
 const schoolSeed = readJson(join(ROOT, 'config', 'nature-downloader', 'school.json'))
 check('内置北航学校配置', schoolSeed?.school?.code === 'buaa' && schoolSeed?.auth?.sso_domain === 'sso.buaa.edu.cn' && schoolSeed?.discovery?.resource_entry_url === 'https://lib.buaa.edu.cn/')
 check('内置学校配置无私人字段', !/password|passwd|token|api[_-]?key|email|cookie/i.test(JSON.stringify(schoolSeed)))
@@ -148,6 +199,18 @@ const actual = [...(catalog.defaults ?? [])].sort()
 check('默认集合=旧启用集合映射', JSON.stringify(expected) === JSON.stringify(actual), `${actual.length} vs ${expected.length}`)
 check('默认集合全部存在于目录树', (catalog.defaults ?? []).every(name => pathOf[name] !== undefined))
 check('默认不启用 officecli', (catalog.defaults ?? []).every(name => !pathOf[name]?.includes('/officecli')))
+// 2026-10 新增的 210 个技能默认全部关闭，且不与 ARS 五个技能重名
+const newSkillNames = [
+  ...leavesUnder(qinyanNode), ...leavesUnder(supervisorNode), ...leavesUnder(nsfcNode), ...newSingleSkills,
+]
+check('新增技能默认全部关闭', newSkillNames.every(name => !(catalog.defaults ?? []).includes(name)), String(newSkillNames.length))
+check('新增技能不与 ARS 重名', newSkillNames.every(name => !arsSkillNames.has(name)))
+const newRepoIds = ['academic-humanizer', 'lieflat-less-ai-tone', 'qinyan', 'nsfc', 'supervisor', 'lieflat-charts', 'writing-dna', 'lieflat-gongwen', 'guizang-ppt', 'frontend-slides', 'patent']
+const licenseProblems = newRepoIds.filter(id => {
+  const dir = join(ROOT, 'vendor', 'licenses', id)
+  return !existsSync(dir) || readdirSync(dir).length === 0
+})
+check('新增仓库许可/说明齐全', licenseProblems.length === 0, licenseProblems.join(', '))
 
 // ---- 7 客户端产物 ----
 const clientFile = join(ROOT, 'lib', 'client.js')
@@ -157,6 +220,13 @@ if (check('lib/client.js 存在', existsSync(clientFile))) {
   check('client 含 registerTab', client.includes('registerTab'))
   check('client 含 ZrPanel', client.includes('function ZrPanel'))
   check('client 无 import/export', !/^\s*(import|export)\s/m.test(client))
+  let clientSyntax = ''
+  try {
+    execFileSync(process.execPath, ['--check', clientFile], { stdio: 'pipe' })
+  } catch (error) {
+    clientSyntax = String(error.stderr ?? error.message).slice(0, 300)
+  }
+  check('client 语法可解析', clientSyntax.length === 0, clientSyntax)
 }
 
 // ---- 8 语法 ----
