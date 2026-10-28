@@ -3,7 +3,7 @@
 王湛然的 DSH 管理插件是一个 DSH Desktop 右侧栏插件，用来按会话选择要启用的技能。勾选后插件会把对应技能接到当前项目里，取消勾选就收回；同一份技能只保存在插件包中，不会在每个项目里重复复制。
 
 
-![My DSH 技能面板](docs/images/my-dsh-panel.png)
+![My DSH 技能面板](docs/images/my-dsh-panel-v2.png)
 
 ## 功能
 
