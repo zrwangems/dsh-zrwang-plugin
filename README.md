@@ -1,8 +1,7 @@
-# My DSH
+# 王湛然的 DSH 管理插件
 
-My DSH 是一个 DSH Desktop 右侧栏插件，用来按会话选择要启用的技能。勾选后插件会把对应技能接到当前项目里，取消勾选就收回；同一份技能只保存在插件包中，不会在每个项目里重复复制。
+王湛然的 DSH 管理插件是一个 DSH Desktop 右侧栏插件，用来按会话选择要启用的技能。勾选后插件会把对应技能接到当前项目里，取消勾选就收回；同一份技能只保存在插件包中，不会在每个项目里重复复制。
 
-本版本面向北京航空航天大学：Nature 论文下载的学校访问入口已按北航预置，安装后不需要再填写学校配置。
 
 ![My DSH 技能面板](docs/images/my-dsh-panel.png)
 
@@ -12,7 +11,6 @@ My DSH 是一个 DSH Desktop 右侧栏插件，用来按会话选择要启用的
 - 支持逐级开关：打开父目录后，该目录下已选技能才会注入；关闭父目录只影响它下面的技能。
 - 技能详情可直接在侧栏查看中文说明。
 - 设置页可配置图片服务、Nature 检索和图片转 PPT 参数，密钥不会回显。
-- 北航图书馆、统一认证、CARSI 和知网入口开箱可用。
 
 ## 安装
 
@@ -41,13 +39,7 @@ dsh plugin --profile desktop add dsh-zrwang-plugin
 3. 勾选该目录下的技能；勾选后当前项目马上可以使用，取消后立即移除。
 4. 在 DSH 的「设置 → 插件 → My DSH」里修改技能参数。
 
-默认只选中一部分常用技能；Polyspace、playground 和新增技能默认关闭。未配置完成必备参数的技能会置灰，不能勾选。
-
-## 北航论文下载
-
-插件内置了北航的学校访问配置：图书馆入口、统一身份认证、CARSI IdP、知网和常用数据库清单。安装后无需再点“配置学校访问”；如果本机已有学校配置，插件不会覆盖。
-
-使用前请确保浏览器已登录北航统一认证，或处于校园网环境。
+默认选中之前设定的常用技能，可以随时在页签里修改。未配置完成必备参数的技能会置灰，不能勾选。
 
 ## 常见问题
 
@@ -57,9 +49,6 @@ dsh plugin --profile desktop add dsh-zrwang-plugin
 **勾选后项目里没有技能**  
 确认打开的是技能所在的一级目录；父目录关闭时，下级技能不会注入。
 
-**论文下载没有权限**  
-检查浏览器是否已登录北航账号，或当前网络是否能访问学校资源。
-
 ## 卸载
 
 ```powershell
@@ -68,6 +57,24 @@ dsh plugin --profile desktop remove dsh-zrwang-plugin
 
 项目里的技能链接会在取消勾选后自动移除，插件包本身不会被删除。
 
+
+## 致谢
+
+本插件的技能来自以下开源仓库，感谢作者和维护者：
+
+- [MATLAB Agentic Toolkit](https://github.com/matlab/matlab-agentic-toolkit)
+- [Simulink Agentic Toolkit](https://github.com/matlab/simulink-agentic-toolkit)
+- [Polyspace Agentic Toolkit](https://github.com/mathworks/polyspace-agentic-toolkit)
+- [MATLAB Agent Skills Playground](https://github.com/matlab/agent-skills-playground)
+- [Nature Skills](https://github.com/yuan1z0825/nature-skills)
+- [OfficeCLI](https://github.com/iOfficeAI/OfficeCLI)
+- [PPT Master](https://github.com/hugohe3/ppt-master)
+- [HTML PPT Skill](https://github.com/lewislulu/html-ppt-skill)
+- [Zotero MCP](https://github.com/54yyyu/zotero-mcp)
+- [Archify](https://github.com/tt-a1i/archify)
+
 ## 更多
 
 - 架构和实现说明见 [docs/architecture.md](docs/architecture.md)。
+
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)

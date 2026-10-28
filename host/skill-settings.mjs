@@ -20,13 +20,13 @@ import { configDirOfParams, readParams, writeParams } from './plugin-params.mjs'
 export const PROVIDERS = [
   {
     id: 'qwen', label: '通义千问 Qwen',
-    baseUrl: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation',
+    baseUrl: '',
     model: 'qwen-image-2.0-pro',
     getKeyUrl: 'https://bailian.console.aliyun.com/',
   },
   {
     id: 'openai', label: 'OpenAI',
-    baseUrl: 'https://api.openai.com/v1',
+    baseUrl: '',
     model: 'gpt-image-2',
     getKeyUrl: 'https://platform.openai.com/api-keys',
   },
@@ -37,25 +37,25 @@ export const PROVIDERS = [
   },
   {
     id: 'zhipu', label: '智谱 GLM',
-    baseUrl: 'https://open.bigmodel.cn/api/paas/v4/images/generations',
+    baseUrl: '',
     model: 'glm-image',
     getKeyUrl: 'https://open.bigmodel.cn/usercenter/apikeys',
   },
   {
     id: 'volcengine', label: '火山引擎',
-    baseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
+    baseUrl: '',
     model: 'doubao-seedream-4-5-251128',
     getKeyUrl: 'https://console.volcengine.com/ark',
   },
   {
     id: 'minimax', label: 'MiniMax',
-    baseUrl: 'https://api.minimaxi.com/v1/image_generation',
+    baseUrl: '',
     model: 'image-01',
     getKeyUrl: 'https://platform.minimaxi.com/user-center/basic-information/interface-key',
   },
   {
     id: 'tencent', label: '腾讯云 TokenHub',
-    baseUrl: 'https://tokenhub.tencentmaas.com',
+    baseUrl: '',
     model: 'hy-image-v3',
     getKeyUrl: 'https://console.cloud.tencent.com/',
   },
@@ -83,7 +83,7 @@ const ACADEMIC_FIELDS = [
 ]
 
 const IMAGE2PPT_FIELDS = [
-  { id: 'paddleOcrToken', label: '百度 OCR Token', secret: true, required: true, getKeyUrl: 'https://aistudio.baidu.com/account/accessToken', help: '图片转可编辑 PPT 必需；生图模型和接口沿用 PPT Maker 当前供应商' },
+  { id: 'paddleOcrToken', label: '百度 OCR Token', secret: true, required: true, getKeyUrl: 'https://aistudio.baidu.com/account/accessToken' },
 ]
 
 function expansion(catalog, skillName) {
@@ -203,7 +203,7 @@ function image2pptYaml(params) {
   const i = params.natureImage2ppt
   const entry = providerEntry(params, params.pptMaster.backend)
   return [
-    '# 由 dsh-zrwang-plugin 生成；生图模型与 PPT Maker 当前供应商一致',
+    '# 由 dsh-zrwang-plugin 生成；生图模型与当前供应商一致',
     `PADDLE_OCR_TOKEN: ${JSON.stringify(i.paddleOcrToken)}`,
     'IMAGE2PPT_IMAGE_BACKEND: "openai-compatible-api"',
     `OPENAI_BASE_URL: ${JSON.stringify(entry.baseUrl)}`,
@@ -272,10 +272,10 @@ async function downloaderDir(params) {
   return dir
 }
 
-/** 本插件为北航准备：首次运行自动写入学校访问配置，用户无需手工配置。 */
-const BUAA_SCHOOL_CONFIG = {
+/** 内置学校访问配置：首次运行自动写入，用户无需手工配置。 */
+const DEFAULT_SCHOOL_CONFIG = {
   version: 1,
-  school: { name: '北京航空航天大学', code: 'buaa', configured_at: '', source: 'buaa-default' },
+  school: { name: '北京航空航天大学', code: 'buaa', configured_at: '', source: 'plugin-default' },
   auth: {
     type: 'sso',
     sso_domain: 'sso.buaa.edu.cn',
@@ -297,11 +297,11 @@ export async function ensureBuaaSchoolConfig(params) {
   const dir = await downloaderDir(params)
   const file = join(dir, 'school.json')
   if (!existsSync(file)) {
-    let config = BUAA_SCHOOL_CONFIG
+    let config = DEFAULT_SCHOOL_CONFIG
     try {
       config = JSON.parse(await readFile(join(PKG_DIR, 'config', 'nature-downloader', 'school.json'), 'utf8'))
     } catch {
-      config = BUAA_SCHOOL_CONFIG
+      config = DEFAULT_SCHOOL_CONFIG
     }
     config = { ...config, school: { ...config.school, configured_at: new Date().toISOString() } }
     await writeFile(file, `${JSON.stringify(config, null, 2)}
@@ -375,7 +375,8 @@ export async function settingsCards(catalog, params) {
     cards: [
       {
         id: 'ppt-master',
-        title: 'PPT Maker 图片服务',
+        title: '生图模型',
+        page: 'models',
         kind: 'provider',
         backend: params.pptMaster.backend,
         backendOptions: PROVIDERS.map(provider => ({ id: provider.id, label: provider.label })),
@@ -384,20 +385,16 @@ export async function settingsCards(catalog, params) {
       {
         id: 'nature-academic-search',
         title: 'Nature 学术检索',
+        page: 'nature',
         kind: 'fields',
         fields: ACADEMIC_FIELDS.map(field => maskField(field, getNested(params.natureAcademic, field.keys))),
       },
       {
         id: 'nature-image2ppt',
-        title: 'Nature 图片转 PPT',
+        title: 'OCR模型',
+        page: 'models',
         kind: 'fields',
         fields: IMAGE2PPT_FIELDS.map(field => maskField(field, params.natureImage2ppt[field.id] ?? (field.id === 'imageBackend' ? 'auto' : ''))),
-      },
-      {
-        id: 'nature-downloader',
-        title: 'Nature 论文下载',
-        kind: 'info',
-        status: schoolExists ? '已配置学校访问信息' : '未配置学校访问信息；请先登录学校图书馆或数据库',
       },
     ],
   }

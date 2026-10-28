@@ -31,4 +31,4 @@ export const PPT_PROJECTS_REL = ['.agents', 'ppt-master', 'projects']
 /** 技能链接所在的相对位置。 */
 export const SKILLS_REL = ['.agents', 'skills']
 
-export const VERSION = '0.0.1'
+export const VERSION = '0.0.3'

@@ -28,7 +28,7 @@ function readJson(file) {
 // ---- 1 包清单 ----
 const pkg = readJson(join(ROOT, 'package.json'))
 check('package.name', pkg.name === 'dsh-zrwang-plugin')
-check('package.version=0.0.2', pkg.version === '0.0.2', pkg.version)
+check('package.version=0.0.3', pkg.version === '0.0.3', pkg.version)
 check('package.main 存在', typeof pkg.main === 'string' && existsSync(join(ROOT, pkg.main)))
 check('exports["./client"]', pkg.exports?.['./client'] === './lib/client.js')
 check('dsh.bundle.patch', pkg.dsh?.bundle?.patch === './cordis.patch.yml')
@@ -84,7 +84,7 @@ check('目录树节点完整', nodeProblems.length === 0, nodeProblems.slice(0, 
 check('一级目录=3', (catalog.groups ?? []).length === 3)
 check('目录树 262 个技能', skillNodes.length === 262, String(skillNodes.length))
 const defaultsSeed = readJson(join(ROOT, 'catalog', 'defaults.json'))
-check('默认启用种子文件', Array.isArray(defaultsSeed.skills) && defaultsSeed.skills.length === 170, String(defaultsSeed.skills?.length))
+check('默认启用种子文件', Array.isArray(defaultsSeed.skills) && defaultsSeed.skills.length === 91, String(defaultsSeed.skills?.length))
 const groupCounts = catalog.stats?.byGroup ?? {}
 check('工程 223', groupCounts.engineering === 223, String(groupCounts.engineering))
 check('科研 25', groupCounts.research === 25, String(groupCounts.research))
@@ -143,11 +143,11 @@ const legacy = readJson(join(ROOT, 'catalog', 'legacy', 'legacy-enabled.json'))
 const pathOf = Object.fromEntries(skillNodes.map(node => [node.name, node.dir]))
 const expected = (legacy.enabled ?? [])
   .filter(name => pathOf[name] !== undefined)
-  .filter(name => !pathOf[name].includes('/polyspace/') && !pathOf[name].includes('/playground/'))
   .sort()
 const actual = [...(catalog.defaults ?? [])].sort()
 check('默认集合=旧启用集合映射', JSON.stringify(expected) === JSON.stringify(actual), `${actual.length} vs ${expected.length}`)
-check('默认不含 Polyspace/playground', (catalog.defaults ?? []).every(name => !pathOf[name]?.includes('/polyspace/') && !pathOf[name]?.includes('/playground/')))
+check('默认集合全部存在于目录树', (catalog.defaults ?? []).every(name => pathOf[name] !== undefined))
+check('默认不启用 officecli', (catalog.defaults ?? []).every(name => !pathOf[name]?.includes('/officecli')))
 
 // ---- 7 客户端产物 ----
 const clientFile = join(ROOT, 'lib', 'client.js')

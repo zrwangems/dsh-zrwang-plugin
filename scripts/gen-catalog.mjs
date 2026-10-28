@@ -251,7 +251,7 @@ function main() {
   const strip = (node, groupId) => {
     delete node._parent
     if (node.kind === 'skill') {
-      if (legacyEnabled.has(node.name) && !node.dir.includes('/polyspace/') && !node.dir.includes('/playground/')) {
+      if (legacyEnabled.has(node.name)) {
         defaults.push(node.name)
       }
       stats.byGroup[groupId] = (stats.byGroup[groupId] ?? 0) + 1

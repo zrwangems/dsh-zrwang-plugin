@@ -3,9 +3,6 @@
  */
 function ZrBundleConfig(props) {
   return h('div', { className: 'zr-page' },
-    h('div', { className: 'zr-page-head' },
-      h('h4', null, 'My DSH 设置')
-    ),
     h(ZrSettingsView, {
       minimal: true,
       onReload: function () {},

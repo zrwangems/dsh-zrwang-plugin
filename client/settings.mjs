@@ -165,6 +165,9 @@ function ZrSettingsView(props) {
   var busyPair = React.useState(false)
   var busy = busyPair[0]
   var setBusy = busyPair[1]
+  var pagePair = React.useState('models')
+  var activePage = pagePair[0]
+  var setActivePage = pagePair[1]
 
   var applyPayload = function (payload) {
     setState({ loading: false, error: null, value: payload })
@@ -251,10 +254,26 @@ function ZrSettingsView(props) {
     })
   }
 
+  var pages = [
+    { id: 'models', label: '模型服务' },
+    { id: 'nature', label: 'Nature-skill设置' },
+  ]
+  var visibleCards = (data.cards || []).filter(function (card) {
+    return (card.page || 'models') === activePage
+  })
+
   return h(React.Fragment, null,
     error !== null ? h('div', { className: 'zr-err' }, error) : null,
+    h('div', { className: 'zr-tabs' }, pages.map(function (page) {
+      return h('button', {
+        key: page.id,
+        className: 'zr-tab' + (activePage === page.id ? ' zr-tab-active' : ''),
+        type: 'button',
+        onClick: function () { setActivePage(page.id) },
+      }, page.label)
+    })),
     h('div', { className: 'zr-list' },
-      (data.cards || []).map(function (card) {
+      visibleCards.map(function (card) {
         var cardValues = values[card.id]
         var providerValues = (card.kind === 'provider' && cardValues !== undefined)
           ? (cardValues.providers[cardValues.backend] || {})

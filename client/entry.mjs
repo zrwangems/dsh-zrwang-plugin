@@ -233,7 +233,7 @@ function registerSlots(ctx) {
           name: 'plugins.bundle.config',
           key: ZR_PACKAGE,
           view: 'page',
-          label: function () { return 'My DSH 设置' },
+          label: function () { return '' },
         }, function ZrConfigPageHost(props) { return h(ZrBundleConfig, props) })
       })
     }, 'dsh-zrwang-plugin: bundle config page')
