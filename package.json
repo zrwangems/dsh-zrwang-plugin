@@ -1,6 +1,6 @@
 {
   "name": "dsh-zrwang-plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "王湛然的个人 DSH 插件：右侧栏选择本会话要用的技能，并启用 ARS 等功能区块。",
   "main": "./host/index.mjs",
