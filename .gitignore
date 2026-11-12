@@ -28,6 +28,6 @@ AgentsDo/
 # 由设置生成、可能含用户参数的技能运行时文件
 skills/research/nature-skills/nature-academic-search/mcp-server/config.toml
 skills/research/nature-skills/nature-image2ppt/config.yaml
-# 学校配置固定随包分发；只有凭据等运行时文件不入库
-config/nature-downloader/credentials.json
-config/nature-downloader/settings.json
+# 学校配置随 nature-downloader 技能目录分发；凭据类运行时文件不入库
+skills/research/nature-skills/nature-downloader/config/credentials.json
+skills/research/nature-skills/nature-downloader/config/settings.json

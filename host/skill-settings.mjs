@@ -263,8 +263,8 @@ async function mirrorSkillFiles(catalog, params) {
 
 // ---------------- nature-downloader（文件类） ----------------
 
-/** 学校访问配置是固定的，随插件包分发，不再复制到 ~/.dsh。 */
-const SCHOOL_CONFIG_DIR = join(PKG_DIR, 'config', 'nature-downloader')
+/** 学校访问配置是固定的，随 nature-downloader 技能目录分发。 */
+const SCHOOL_CONFIG_DIR = join(SKILLS_DIR, 'research', 'nature-skills', 'nature-downloader', 'config')
 
 /** 内置学校访问配置：包内文件缺失时兜底生成（正常安装不会走到这里）。 */
 const DEFAULT_SCHOOL_CONFIG = {

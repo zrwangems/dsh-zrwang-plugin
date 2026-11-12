@@ -325,7 +325,7 @@ check('删除模式后只剩默认', cleaned.items.length === 1 && cleaned.items
 const { applySkillEnv } = await import('../host/skill-settings.mjs')
 applySkillEnv({ natureAcademic: { pubmed: { email: 'smoke@example.com', apiKey: 'test-key' } } })
 check('PubMed 配置写入环境变量', process.env.NCBI_EMAIL === 'smoke@example.com' && process.env.NCBI_API_KEY === 'test-key')
-check('学校配置指向包内固定目录', process.env.LIT_DL_CONFIG_DIR === join(SKILLS_DIR, '..', 'config', 'nature-downloader'),
+check('学校配置指向包内固定目录', process.env.LIT_DL_CONFIG_DIR === join(SKILLS_DIR, 'research', 'nature-skills', 'nature-downloader', 'config'),
   process.env.LIT_DL_CONFIG_DIR)
 applySkillEnv({ natureAcademic: { pubmed: { email: '', apiKey: '' } } })
 check('清空后移除环境变量', process.env.NCBI_EMAIL === undefined && process.env.NCBI_API_KEY === undefined)
