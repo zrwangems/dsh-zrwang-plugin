@@ -2,7 +2,7 @@
 
 中文 | [English](README.en.md)
 
-[![写作蒸馏器.skill：将任意作者的写作风格蒸馏成 Agent 可复用的 Writing DNA](assets/writing-dna-hero-zh.png)](https://moxt.ai/zh-CN/hub?view=skill&id=writing-dna-skill)
+**官网与商业授权：** [lieflat.work · Writing DNA](https://lieflat.work/skills/writing-dna/)
 
 英文名：`writing-dna-skill`
 
@@ -11,10 +11,6 @@
 所以做了这个可以蒸馏任意账号/作者写作风格的 agent skill，让写作不再痛苦，不再从 0 开始难产。
 
 它并不是简单的“模仿某某风格”提示词，整个 skill 包含了一套完整的蒸馏流程，让 agent 把一批完整文章拆解成可复用的 Writing DNA，包括语言、结构、选题、素材、认知框架与视觉风格。蒸馏完成后，agent 可以在写作前重新读取这些风格文档，从而更稳定地复刻目标写作风格。
-
-该 skill 在 [moxt.ai](https://moxt.ai) 制作。
-
-> [**在 MoxtHub 打开写作蒸馏器.skill →**](https://moxt.ai/zh-CN/hub?view=skill&id=writing-dna-skill)
 
 ## 它解决什么问题
 
@@ -120,8 +116,6 @@
 
 ## 快速上手
 
-推荐直接在 [MoxtHub 打开 `writing-dna-skill`](https://moxt.ai/zh-CN/hub?view=skill&id=writing-dna-skill)：Moxt 拥有强大的上下文空间和 AI 原生的文件格式，方便 agent 处理长文内容。
-
 1. 让 agent 抓取或手动准备至少 20 篇完整文章，放入命名为 `raw/` 或 `raw-corpus/` 的文件夹。
 2. 让 agent 使用 `writing-dna-skill`，或完整阅读 `SKILL.md`，并按流程蒸馏所有文章。
 3. 等待 agent 输出：
@@ -189,7 +183,7 @@ Make 写作 Happy Again ！
 
 这个项目用于学习、分析、风格研究和个人写作资产沉淀。请不要用于冒充作者本人、误导读者，或侵犯他人版权。
 
-开源仓库不应包含未经授权的原文语料。你可以放目录模板、字段模板、说明文档和自己拥有版权的示例文本。
+公开仓库不应包含未经授权的原文语料。你可以放目录模板、字段模板、说明文档和自己拥有版权的示例文本。
 
 ## 文件结构
 
@@ -199,6 +193,7 @@ writing-dna-skill/
 ├── README.md
 ├── README.en.md
 ├── LICENSE
+├── NOTICE
 ├── agents/
 │   └── openai.yaml
 ├── references/
@@ -216,8 +211,8 @@ writing-dna-skill/
     └── format-only/
 ```
 
-## License
+## 授权协议
 
-[**在 MoxtHub 使用 writing-dna-skill →**](https://moxt.ai/zh-CN/hub?view=skill&id=writing-dna-skill)
+当前版本采用 [PolyForm Noncommercial License 1.0.0](LICENSE)，仅授权非商业用途。个人学习、研究及其他符合协议的非商业使用可以按协议使用；将本项目用于商业产品、付费服务或营利性组织的业务，包括集成到 Agent 产品中，需要另行取得商业授权。商业授权可[前往 lieflat.work 选择并购买](https://lieflat.work/skills/writing-dna/#pricing)；超出网站列明范围的需求请联系仓库维护者。
 
-MIT
+著作权不因取得使用授权而转移。之前已按 MIT 协议发布的版本继续受其原有协议约束；本次变更不撤销那些版本已经授予的权利。参见变更前的 [MIT 协议版本](https://github.com/larashero3-dotcom/writing-dna-skill/blob/9e780d0/LICENSE)。

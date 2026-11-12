@@ -63,6 +63,19 @@ export async function replaceGates(values) {
   return loadGates()
 }
 
+/** 删掉这些目录的显式门禁，让它们回到“按勾选推导”的默认行为。 */
+export async function clearGates(ids) {
+  const document = await loadDocument()
+  let dirty = false
+  for (const id of ids ?? []) {
+    if (!Object.prototype.hasOwnProperty.call(document.gates, id)) continue
+    delete document.gates[id]
+    dirty = true
+  }
+  if (dirty) await writeJson(gatesFile(), document)
+  return loadGates()
+}
+
 /** 顶层目录必须显式打开；更深层目录默认开，显式 false 才关。 */
 export function gateOpen(gates, id, depth) {
   return depth === 0 ? gates[id] === true : gates[id] !== false

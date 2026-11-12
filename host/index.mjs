@@ -27,9 +27,10 @@ export function apply(ctx, config) {
   const pluginConfig = config ?? {}
   const initialConfigDir = configDirOfParams(currentParams(pluginConfig))
   void appendEvent('host-applied', { version: VERSION, configDir: initialConfigDir })
-  // 新增技能（沁言/OpenRouter/Zotero 等）需要的密钥写进宿主环境，模型跑的 shell 子进程会继承。
+  // 技能需要的环境变量（NCBI 配置、LIT_DL_CONFIG_DIR 等）写进宿主环境，模型跑的 shell 子进程会继承。
   applySkillEnv(currentParams(pluginConfig))
-  void ensureBuaaSchoolConfig(currentParams(pluginConfig)).catch(() => {})
+  // 学校访问配置随包固定分发，这里只保证包内文件存在，不再往 ~/.dsh 复制。
+  void ensureBuaaSchoolConfig().catch(() => {})
   ctx.provide('zrwangPlugin', {
     version: VERSION,
     packageDir: PKG_DIR,

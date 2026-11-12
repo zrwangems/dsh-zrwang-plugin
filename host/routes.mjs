@@ -9,10 +9,10 @@ import { ROUTE_PREFIX, SKILLS_DIR, STATE_DIR, VERSION } from './config.mjs'
 import { catalogView, loadCatalog } from './catalog.mjs'
 import { reconcile, readLinks } from './farm.mjs'
 import { resolveProjectRoot } from './project.mjs'
-import { childBatch, desiredSkills, groupCounts, loadSelection, resetGroup, setSelection } from './selection.mjs'
+import { ancestorDirIdsOfSkill, buildEffectiveGates, childBatch, desiredSkills, groupCounts, loadSelection, resetGroup, setSelection } from './selection.mjs'
 import { applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, loadPresets, presetsPayload, renameMode, saveActiveMode, activeModeContent } from './presets.mjs'
 import { ensureSession } from './sessions.mjs'
-import { loadGates, setGates } from './gates.mjs'
+import { clearGates, loadGates, setGates } from './gates.mjs'
 import { blockedSkills, applySkillEnv, checkArsDependencies, currentParams, openConfigTarget, saveSettingsCard, settingsCards } from './skill-settings.mjs'
 import { configDirOfParams } from './plugin-params.mjs'
 import { loadArsManifest, mergeArsSkills } from './ars.mjs'
@@ -20,6 +20,7 @@ import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mj
 import { appendEvent, readEvents } from './state.mjs'
 import { loadUi, saveExpanded } from './ui-state.mjs'
 import { skillDoc } from './skill-doc.mjs'
+import { resolveWorkspace, workspaceView } from './workspaces.mjs'
 
 const BODY_LIMIT = 1024 * 1024
 
@@ -99,26 +100,45 @@ export function registerRoutes(scope, ctx, pluginConfig) {
   const webServer = scope.webServer ?? scope.get?.('webServer')
 
   /**
-   * 把某个对话的活跃模式内容同步到全局 selection / gates。
-   * 侧栏的分组门禁、勾选都读全局状态，所以每次读写都先按当前对话的模式对齐，
-   * 避免 A 对话的模式影响 B 对话的显示。
+   * 把某个工作区的活跃模式内容同步到全局 selection / gates。
+   * 侧栏的分组门禁、勾选都读全局状态，所以每次读写都先按当前工作区的模式对齐，
+   * 避免 A 工作区的模式影响 B 工作区的显示。
    */
-  async function activateMode(catalog, projectRoot, sessionId) {
+  async function activateMode(catalog, projectRoot, workspace) {
     const selection = await loadSelection(catalog)
     const gates = await loadGates()
     await loadPresets(catalog, selection, gates, projectRoot)
-    const active = await activeModeContent(catalog, selection, gates, projectRoot, sessionId)
+    const active = await activeModeContent(catalog, selection, gates, projectRoot, workspace, workspace.sessionId)
     if (active.content !== undefined) await applyModeContent(catalog, active.content)
     return { selection: await loadSelection(catalog), gates: await loadGates(), active }
   }
 
-  async function syncState(sessionId, cwd, includeCatalog = true) {
-    const catalog = await loadCatalog()
+  /** 会话 → 项目根 → DSH 工作区，统一入口。 */
+  async function contextOf(sessionId, cwd) {
+    if (typeof sessionId !== 'string' || sessionId.length === 0) throw new Error('缺少 sessionId')
     const resolved = resolveCwd(ctx, sessionId, cwd)
     if (resolved === undefined) throw new Error('无法解析会话工作目录，请从已打开的会话里使用')
     const projectRoot = resolveProjectRoot(resolved)
+    const workspace = await resolveWorkspace(ctx, sessionId, resolved, projectRoot)
+    return { sessionId, cwd: resolved, projectRoot, workspace: { ...workspace, sessionId } }
+  }
+
+  /** 勾选变化后，把受影响的目录显式门禁清掉，让它们回到“按勾选推导”。 */
+  async function resetDerivedGatesForSkills(catalog, names) {
+    if (names.length === 0) return
+    const ids = new Set()
+    for (const name of names) {
+      for (const id of ancestorDirIdsOfSkill(catalog, name)) ids.add(id)
+    }
+    if (ids.size > 0) await clearGates([...ids])
+  }
+
+  async function syncState(sessionId, cwd, includeCatalog = true) {
+    const catalog = await loadCatalog()
+    const scope = await contextOf(sessionId, cwd)
+    const { projectRoot, workspace } = scope
     const session = await ensureSession(sessionId, projectRoot)
-    const { selection, gates } = await activateMode(catalog, projectRoot, sessionId)
+    const { selection, gates } = await activateMode(catalog, projectRoot, workspace)
     // ARS 是固定功能区块：作为技能树里的第四行，由模式里的 gates.ars 控制
     syncArsCommands(gates.ars === true)
     const params = currentParams(pluginConfig)
@@ -143,7 +163,7 @@ export function registerRoutes(scope, ctx, pluginConfig) {
       version: VERSION,
       selection: selection.skills,
       blocked,
-      session: { sessionId, projectRoot, gates },
+      session: { sessionId, projectRoot, gates: buildEffectiveGates(catalog, gates, selection), workspace: workspaceView(workspace) },
       project: {
         root: projectRoot,
         skillsRoot: status.skillsDir,
@@ -168,7 +188,7 @@ export function registerRoutes(scope, ctx, pluginConfig) {
         repo: ars.upstream,
       },
       groups: groupStats(catalog, selection, desired, gates, blocked),
-      presets: presetsPayload(catalog, blocked, projectRoot, sessionId),
+      presets: presetsPayload(catalog, blocked, projectRoot, workspace),
       ui: await loadUi(),
     }
     if (includeCatalog) payload.catalog = catalogView(catalog)
@@ -183,21 +203,19 @@ export function registerRoutes(scope, ctx, pluginConfig) {
     },
     'POST /session': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
+      const scope = await contextOf(body.sessionId, body.cwd)
       const catalog = await loadCatalog()
       const selection = await loadSelection(catalog)
-      const resolved = resolveCwd(ctx, body.sessionId, body.cwd)
-      if (resolved === undefined) throw new Error('无法解析会话工作目录')
-      const projectRoot = resolveProjectRoot(resolved)
-      await ensureSession(body.sessionId, projectRoot)
-      const live = await activateMode(catalog, projectRoot, body.sessionId)
-      // 在「默认」上改任何门禁 → 先为当前对话派生「未命名」，改动落到未命名里
-      await ensureEditableMode(catalog, live.selection, live.gates, projectRoot, body.sessionId)
+      await ensureSession(scope.sessionId, scope.projectRoot)
+      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
+      // 在「默认」上改任何门禁 → 先为当前工作区建立（或复用）以工作区命名的模式
+      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
       const patch = body.gates ?? Object.fromEntries(Object.entries(body.categories ?? {}))
       const nextGates = await setGates(patch)
-      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, projectRoot, body.sessionId)
+      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, scope.projectRoot, scope.workspace)
       // ARS 开/关同时决定 16 个 /ars-* 命令是否出现在斜杠菜单里。
       syncArsCommands(nextGates.ars === true)
-      return syncState(body.sessionId, body.cwd, false)
+      return syncState(scope.sessionId, body.cwd, false)
     },
     'POST /ui': async body => {
       const expanded = body.expanded ?? {}
@@ -226,14 +244,13 @@ export function registerRoutes(scope, ctx, pluginConfig) {
         if (names.has(name) && typeof value === 'boolean') changes[name] = value
       }
       if (Object.keys(changes).length === 0) throw new Error('没有可应用的选择变更')
-      const resolved = resolveCwd(ctx, body.sessionId, body.cwd)
-      if (resolved === undefined) throw new Error('无法解析会话工作目录')
-      const projectRoot = resolveProjectRoot(resolved)
-      const live = await activateMode(catalog, projectRoot, body.sessionId)
-      await ensureEditableMode(catalog, live.selection, live.gates, projectRoot, body.sessionId)
+      const scope = await contextOf(body.sessionId, body.cwd)
+      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
+      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
       await setSelection(changes)
-      await saveActiveMode(catalog, await loadSelection(catalog), live.gates, projectRoot, body.sessionId)
-      return syncState(body.sessionId, body.cwd, false)
+      await resetDerivedGatesForSkills(catalog, Object.keys(changes))
+      await saveActiveMode(catalog, await loadSelection(catalog), await loadGates(), scope.projectRoot, scope.workspace)
+      return syncState(scope.sessionId, body.cwd, false)
     },
     'POST /children': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
@@ -242,19 +259,18 @@ export function registerRoutes(scope, ctx, pluginConfig) {
       const nodeId = typeof body.nodeId === 'string' ? body.nodeId : ''
       const value = body.value === true
       const { skillChanges, gates } = childBatch(catalog, nodeId, value)
-      const resolved = resolveCwd(ctx, body.sessionId, body.cwd)
-      if (resolved === undefined) throw new Error('无法解析会话工作目录')
-      const projectRoot = resolveProjectRoot(resolved)
-      const live = await activateMode(catalog, projectRoot, body.sessionId)
-      await ensureEditableMode(catalog, live.selection, live.gates, projectRoot, body.sessionId)
+      const scope = await contextOf(body.sessionId, body.cwd)
+      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
+      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
       const params = currentParams(pluginConfig)
       const blocked = await blockedSkills(catalog, params)
       const changes = Object.fromEntries(Object.entries(skillChanges).filter(([name]) => blocked[name] === undefined))
       if (Object.keys(changes).length > 0) await setSelection(changes)
-      const nextGates = Object.keys(gates).length > 0 ? await setGates(gates) : live.gates
-      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, projectRoot, body.sessionId)
+      await resetDerivedGatesForSkills(catalog, Object.keys(changes))
+      const nextGates = Object.keys(gates).length > 0 ? await setGates(gates) : await loadGates()
+      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, scope.projectRoot, scope.workspace)
       syncArsCommands(nextGates.ars === true)
-      return syncState(body.sessionId, body.cwd, false)
+      return syncState(scope.sessionId, body.cwd, false)
     },
     'POST /reset': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
@@ -262,34 +278,51 @@ export function registerRoutes(scope, ctx, pluginConfig) {
       const selection = await loadSelection(catalog)
       const group = catalog.groups.find(item => item.id === body.group)
       if (group === undefined) throw new Error(`未知一级目录：${body.group}`)
-      const resolved = resolveCwd(ctx, body.sessionId, body.cwd)
-      if (resolved === undefined) throw new Error('无法解析会话工作目录')
-      const projectRoot = resolveProjectRoot(resolved)
-      const live = await activateMode(catalog, projectRoot, body.sessionId)
-      await ensureEditableMode(catalog, live.selection, live.gates, projectRoot, body.sessionId)
-      await resetGroup(catalog, group.id)
-      await saveActiveMode(catalog, await loadSelection(catalog), live.gates, projectRoot, body.sessionId)
-      return syncState(body.sessionId, body.cwd, false)
+      const scope = await contextOf(body.sessionId, body.cwd)
+      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
+      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
+      const changedNames = await resetGroup(catalog, group.id)
+      await resetDerivedGatesForSkills(catalog, changedNames)
+      await saveActiveMode(catalog, await loadSelection(catalog), await loadGates(), scope.projectRoot, scope.workspace)
+      return syncState(scope.sessionId, body.cwd, false)
     },
     'POST /presets': async body => {
-      if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
+      const scope = await contextOf(body.sessionId, body.cwd)
       const catalog = await loadCatalog()
       const selection = await loadSelection(catalog)
-      const resolved = resolveCwd(ctx, body.sessionId, body.cwd)
-      if (resolved === undefined) throw new Error('无法解析会话工作目录')
-      const projectRoot = resolveProjectRoot(resolved)
-      const live = await activateMode(catalog, projectRoot, body.sessionId)
+      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
       const gates = live.gates
       const action = typeof body.action === 'string' ? body.action : ''
       const name = typeof body.name === 'string' ? body.name.trim() : ''
-      if (action === 'apply') await applyMode(catalog, selection, gates, projectRoot, body.sessionId, name)
-      else if (action === 'create-from') await cloneMode(catalog, selection, gates, projectRoot, body.sessionId, name)
-      else if (action === 'rename') await renameMode(catalog, selection, gates, projectRoot, body.sessionId, name, body.newName)
-      else if (action === 'delete') await deleteMode(catalog, selection, gates, projectRoot, body.sessionId, name)
-      else throw new Error(`未知的选择态操作：${action}`)
+      try {
+        if (action === 'apply') await applyMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
+        else if (action === 'create-from') await cloneMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
+        else if (action === 'rename') await renameMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name, body.newName)
+        else if (action === 'delete') await deleteMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
+        else throw new Error(`未知的选择态操作：${action}`)
+      } catch (error) {
+        await appendEvent('presets-action', {
+          action,
+          name,
+          newName: body.newName ?? null,
+          workspace: scope.workspace.key,
+          title: scope.workspace.title,
+          ok: false,
+          error: String(error?.message ?? error),
+        })
+        throw error
+      }
+      await appendEvent('presets-action', {
+        action,
+        name,
+        newName: body.newName ?? null,
+        workspace: scope.workspace.key,
+        title: scope.workspace.title,
+        ok: true,
+      })
       const gatesAfter = await loadGates()
       syncArsCommands(gatesAfter.ars === true)
-      return syncState(body.sessionId, body.cwd, false)
+      return syncState(scope.sessionId, body.cwd, false)
     },
     'POST /open-url': async body => {
       const url = typeof body.url === 'string' ? body.url.trim() : ''

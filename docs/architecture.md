@@ -71,7 +71,9 @@ html-ppt 是独立技能，直接作为二级技能叶子；任何只剩一个�
 | `settings.json` | 图片服务供应商与 URL/模型/API Key、nature 检索与图片转 PPT 参数 |
 | `catalog.json` | 技能目录树（结构+中文文案） |
 | `defaults.json` | 默认勾选集合 |
-| `nature-downloader/` | 学校访问信息与凭据（技能默认配置目录已改到这里） |
+
+学校访问配置（北航，固定信息）不再放到这里：它作为包内文件 `config/nature-downloader/school.json` 随插件分发，
+插件启动时把 `LIT_DL_CONFIG_DIR` 指向该目录，`nature-downloader` 技能直接读包内文件。
 
 目录开关属于插件运行态，写在插件自己的 `state/gates.json`，不放进配置根。
 
@@ -133,16 +135,15 @@ ARS 的 Python 解释器由「设置 → ARS 设置」维护：`host/ars.mjs` �
 - `read`/`glob`/`grep` 等只读工具不受影响；shell（`bash`/`pwsh`）不拦——命令串无法在每次执行前
   可靠区分读写，误拦只读命令的代价更大，这一点在文档里明说。
 
-## 3.4 2026-10 新增的 10 个技能仓库
+## 3.4 2026-10 新增的技能仓库
 
-科研、办公两组各新增 5 个上游仓库，共 210 个技能，**默认全部关闭**（不进 `legacy-enabled.json`）。
-单技能仓库直接挂成组下一层叶子；多技能仓库先建仓库节点，qinyan 再按上游 18 个分类分子层。
+科研、办公两组新增 10 个上游仓库（其中沁言学术已于 2026-11 移除，剩 9 个），**默认全部关闭**（不进 `legacy-enabled.json`）。
+单技能仓库直接挂成组下一层叶子；多技能仓库先建仓库节点再分子层。
 
 | id | 仓库 | layout / source | 落盘 target | 技能数 | 许可 |
 | --- | --- | --- | --- | --- | --- |
 | academic-humanizer | AIScientists-Dev/academic-humanizer | root | research/academic-humanizer | 1 | MIT |
 | lieflat-less-ai-tone | larashero3-dotcom/lieflat-less-ai-tone | root | research/lieflat-less-ai-tone | 1 | CC BY-NC 4.0 |
-| qinyan | LeonChaoX/qinyan-academic-skills | catalog / skills | research/qinyan | 187 | MIT |
 | nsfc | njzjz/nsfc-agent-skills | skills / . | research/nsfc | 4 | 无 LICENSE（仅本地） |
 | supervisor | HKUSTDial/Supervisor-Skills | skills / skills | research/supervisor-skills | 12 | CC BY-NC-SA 4.0 |
 | lieflat-charts | larashero3-dotcom/lieflat-charts | root | office/lieflat-charts | 1 | PolyForm Noncommercial 1.0.0 |
@@ -157,14 +158,14 @@ ARS 的 Python 解释器由「设置 → ARS 设置」维护：`host/ars.mjs` �
 - **重名改名**：Supervisor 的 `deep-research` 与 ARS 的 `deep-research` 冲突。vendor 配置用
   `renames: { "deep-research": "supervisor-deep-research" }` 改落盘目录，`vendor/skill-patches.json`
   再把 frontmatter 的 `name` 同步改掉；上游其他技能没有引用该目录，改名安全。
-- **qinyan 分子层**：上游是 `skills/<01-17 分类 + 沁言学术skills>/<技能>/SKILL.md`，
-  vendor 用 `catalog` layout 保留分类，gen-catalog 用 `categories: true` 挂到“沁言学术技能”节点下；
-  `nodes.zh.json` 里分类子节点的 **id 必须等于上游目录名**（含数字前缀），title 用中文可读名。
+- **沁言学术已移除（2026-11）**：`skills/research/qinyan` 的 18 类 / 187 个技能整体移入回收站，
+  `vendor/upstreams.json`、`upstreams.lock.json`、`catalog/nodes.zh.json` 与设置卡同步删除；
+  lock 的 `totals.skills` 由 486 降到 299。需要在本地重新 vendor 时不要再把 `qinyan` 加回来。
 - **writing-dna 内嵌副本**：仓库里 `skills/lieflat-less-ai-tone` 是独立仓库的副本，只收根技能，
   内嵌副本仅作为文件随技能目录带过去，不单列。
 - **frontend-slides**：仓库按 Claude 插件打包（`.claude-plugin/` + `plugins/`），技能本体在根
   `SKILL.md`，按单技能收录。
-- **体积**：新增约 67 MB（qinyan 21 MB、Supervisor 14 MB、lieflat-charts 23 MB），随包固定发布。
+- **体积**：新增约 46 MB（Supervisor 14 MB、lieflat-charts 23 MB 等），随包固定发布。
 
 patent-disclosure-skill 收录为 9 个独立技能（交底、申请、案卷、检索、解读、地图、政策简报、审查答复、权利要求对照表），用 `skills` layout 一次枚举、落到 `research/patent/<技能>`。上游子技能正文里的“整仓路径”`skills/<子技能>/…` 由 `rewrite` 改写成同级 `../<子技能>/…`，这样每个技能单独注入后 `tools/`、`prompts/` 等相对路径依然成立；根目录的路由 SKILL.md 不再单独收录。
 
@@ -176,42 +177,58 @@ patent-disclosure-skill 收录为 9 个独立技能（交底、申请、案卷�
 - 中文详情同样由 `scripts/gen-skill-details.mjs` 生成（Google 翻译 description，逐条缓存
   `../AgentsDo/gt-cache/`；中文原文跳过翻译）；详情面板按 Markdown 渲染。
 
-### 3.5 技能选择态（presets，按项目 + 对话）
+### 3.5 技能选择态（presets v3，按项目 + DSH 工作区）
 
 `host/presets.mjs` 把「每一层注入了什么」存成模式，状态在 `state/presets.json`：
 
 ```
-{ version: 2, projects: { "<项目根>": {
-    baselineStamp,                                   // catalog.generatedAt，用于刷新默认模式
-    modes: [{ name, builtin, gates, selection }],    // 默认 + 项目级命名模式
-    unnamed: { "<sessionId>": { gates, selection } },// 每个对话最多一个未命名
-    active: { "<sessionId>": "<模式名>" }            // 每个对话当前用哪个
+{ version: 3, projects: { "<项目根>": {
+    baselineStamp,                                            // catalog.generatedAt，用于刷新默认模式
+    modes: [{ name, builtin, gates, selection }],             // 默认 + 项目级命名模式
+    auto: { "<工作区键>": { name, title, path, gates, selection } }, // 每个 DSH 工作区一个自动模式
+    active: { "<工作区键>": "<模式名>" },                      // 每个工作区当前用哪个
+    legacy: { auto: { "<sessionId>": … }, active: { … } }     // 仅 v2 迁移期存在，搬完即删
 } } }
 ```
 
+- **工作区解析**（`host/workspaces.mjs`）：优先 `ctx.workspaceRegistry.list()` 里 `sessionIds` 含当前会话的记录，
+  其次 `resolveByPath(cwd)`，最后回退成「按项目根」的伪工作区（headless 等没有工作区服务的组合）。
+  工作区键用 `w:<工作区 id>`，回退时用 `p:<项目根>`；标题取工作区 `title`（用户没改名时是目录名）。
 - **默认**：项目基础注入态，`gates={}`（所有层级门禁关闭）→ 注入数恒为 0；只读，不因侧栏操作改变；
   仅当 `catalog.generatedAt` 变化（项目/技能集更新）时刷新它的 selection。
-- **改动即派生**：`POST /selection`、`POST /session`、`POST /reset` 先 `ensureEditableMode`；
-  当前是「默认」就为这个对话建「未命名」（复制当前注入态），之后 `saveActiveMode` 自动保存。
-- **未命名**：只存在当前对话的 `unnamed[sessionId]`，别的对话/项目看不到；右键重命名后升级为
-  `modes` 里的项目级命名模式。
-- **切换模式**：`applyMode` 用模式的 gates + selection 覆盖全局状态；同时写回 `active[sessionId]`。
+- **改动即建立工作区模式**：`POST /selection`、`POST /session`、`POST /children`、`POST /reset` 先
+  `ensureEditableMode`；当前是「默认」就为**当前工作区**建（或复用）自动模式，命名取工作区标题
+  （去空白、最多 20 字，重名追加 ` (2)`），随后 `saveActiveMode` 自动保存。打开新对话、新建工作区本身不建模式。
+- **共享**：`active` 按工作区而不是按对话保存，所以同工作区所有对话看到同一个模式、同一份内容；
+  自动模式只在本工作区可见。工作区改名且模式名还是自动生成的名字时，模式名跟随新标题。
+- **升级为项目级**：右键「重命名」自动模式会把它搬进 `modes`（项目级命名模式），同项目所有工作区可见；
+  项目级模式的修改同样自动保存、所有工作区共享。
+- **基于此新建**：把源模式（项目级命名模式）的 gates + selection 复制进当前工作区的自动模式并切过去；
+  「默认」是 0 注入的基础态，直接复制没有意义，服务端明确拒绝并提示“直接改动即可”。
+- **切换/删除**：`applyMode` 用模式的 gates + selection 覆盖全局状态并写回 `active[workspaceKey]`；
+  删除自动模式回「默认」，删除项目级模式会把所有指向它的工作区回退到「默认」。
+- **v2 迁移**：读到 `version 2` 时先备份 `presets.json` 到 `state/backups/`，把 `unnamed` / `active`
+  搬进 `legacy`；某个会话首次访问时把它那份「未命名」迁移成当前工作区的自动模式，随后删除 legacy 记录。
 - **计数**：`modeInjectedCount` 按门禁逐级打开 + 勾选 + 未禁选统计真正注入的技能数。
-- **会话隔离**：`syncState` 与所有写接口都先 `activateMode`，把当前对话的模式内容同步到全局
-  `selection`/`gates` 再读写；因此两个对话各用各的模式，刷新时不会互相覆盖显示。
-- 客户端：底部只渲染 chips（无标题、无新建按钮），右键菜单提供「基于此新建 / 重命名 / 删除」；
-  「默认」只显示「基于此新建」。菜单节点挂到 `document.body`（避免被侧栏容器的 overflow 裁剪），
-  固定显示在 chip 上方，水平方向按 chip 对齐并夹在视口内。
+- **目录勾选显示**：一级分组（工程/科研/办公）与 ARS 是显式注入闸门；更深层目录的复选框由子树里的勾选
+  自下而上推导（`selection.mjs` 的 `effectiveGateOpen`），子树里没有勾选技能就显示未勾选并禁点，
+  避免出现“子技能全空、父目录却勾着”。勾选变化后会清掉祖先目录的显式门禁，让推导重新生效。
+- **并发**：全局 `selection`/`gates` 是单例，`syncState` 与所有写接口都先 `activateMode` 把当前工作区的
+  模式内容同步到全局再读写；两个工作区同时操作时最后一个写入者生效（与旧版行为一致）。
+- 客户端：底部显示「工作区：<标题>」与模式 chips，右键菜单提供「基于此新建（仅项目级模式）/ 重命名 / 删除」；
+  「默认」只读，右键不弹菜单。菜单节点挂到 `document.body`（避免被侧栏容器的 overflow 裁剪），
+  固定显示在 chip 上方，水平方向按 chip 对齐并夹在视口内。每次模式操作都会写一条
+  `presets-action` 事件到 `state/events.jsonl`，便于排障。
 
-### 3.6 新增技能的参数与环境变量
+### 3.6 技能参数与环境变量
 
-`host/skill-settings.mjs` 的 `NEW_SKILL_FIELDS` 定义新增仓库要的密钥（沁言、OpenRouter、Parallel、Zotero），
-配置存进 `<configDir>/settings.json` 的 `newSkills`。设置页按用途归并：**模型服务**里是 OpenRouter，
-**科研信息**里是沁言学术、Zotero 与 PubMed/NCBI 说明（NCBI 复用 Nature-skill 设置，保存时映射成 `NCBI_EMAIL` / `NCBI_API_KEY`）。
+设置页只保留 ARS、模型服务、Nature-skill 三栏（原「科研信息」栏随 Zotero 配置块一起删除）。
+`zotero-cli` 技能改为**只支持本地 API 模式**（Zotero 桌面版开启 Local API 即可），不再使用 Zotero 官方
+Web API，因此不需要 `ZOTERO_API_KEY` / `ZOTERO_LIBRARY_ID` 这类凭据，插件也不再保留对应设置项。
 
-上游这些技能都从环境变量读配置，所以保存时和插件启动时都会调用 `applySkillEnv(params)`，把值写进宿主进程的
-`process.env`；模型执行 bash/python 时子进程继承这些变量。未配置沁言 Key 时 10 个 `qinyan-*` 技能、
-未配置 Zotero Key/Library ID 时 `pyzotero` 会在侧栏置灰（`blockedSkills`）。
+上游技能需要的环境变量仍由 `applySkillEnv(params)` 写入宿主进程 `process.env`：目前只有 PubMed/NCBI
+三项配置映射成 `NCBI_EMAIL` / `NCBI_API_KEY`，模型执行 bash/python 时子进程继承。本机没有
+`zotero-cli` 命令时该技能会在侧栏置灰（`blockedSkills`）。
 
 ### 3.7 上游仓库链接（GH 按钮）
 
@@ -228,7 +245,7 @@ patent-disclosure-skill 收录为 9 个独立技能（交底、申请、案卷�
 
 `scripts/audit-upstreams.mjs` 按 `vendor/upstreams.lock.json` 记录的 SHA 重新下载每个上游包，
 逐个技能对比“上游文件清单”与“本地落盘清单”：少文件/少技能报错，多出的文件视为插件增量
-（`_shared`、脚本闭包、运行时说明、补丁产物）。跑一遍就能确认 20 个仓库、481 个技能是否完整：
+（`_shared`、脚本闭包、运行时说明、补丁产物）。跑一遍就能确认 19 个 GitHub 仓库 + 2 个本地副本、301 个技能是否完整：
 
 ```powershell
 node scripts/audit-upstreams.mjs --proxy=http://127.0.0.1:7897

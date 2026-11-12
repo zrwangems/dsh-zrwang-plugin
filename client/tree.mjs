@@ -100,6 +100,8 @@ function ZrNodeRow(props) {
     gateOpen = depth === 0 ? props.gates[node.id] === true : props.gates[node.id] !== false
     checked = gateOpen
     disabled = stats.total - stats.blocked === 0
+    // 更深层目录：子树里没有任何勾选技能时不显示勾选，也不让点（避免“空目录也勾着”）
+    if (depth > 0 && stats.selected === 0) disabled = true
   }
   if (props.locked === true) disabled = true
   var onCheck = function () {
@@ -127,7 +129,7 @@ function ZrNodeRow(props) {
         node.kind !== 'skill' && stats.selected !== stats.injected
           ? h('span', { className: 'zr-tag', title: '已勾选的技能数（父级目录关闭时不注入）' }, '已勾选 ' + stats.selected)
           : null,
-        node.kind !== 'skill' && checked !== true && stats.selected > 0 ? h('span', { className: 'zr-tag' }, '未注入') : null,
+        node.kind !== 'skill' && stats.injected === 0 && stats.selected > 0 ? h('span', { className: 'zr-tag' }, '未注入') : null,
         disabled && blockedReason !== undefined ? h('span', { className: 'zr-tag zr-blocked', title: blockedReason }, '未配置') : null
       ),
       node.kind !== 'skill' && node.desc ? h('div', { className: 'zr-desc' }, node.desc) : null,
@@ -219,6 +221,7 @@ function ZrNodeRow(props) {
 function ZrPresetsBar(props) {
   var presets = props.presets || { active: '默认', items: [] }
   var items = presets.items || []
+  var workspace = presets.workspace || null
   var menuPair = React.useState(null)
   var menu = menuPair[0]
   var setMenu = menuPair[1]
@@ -238,8 +241,7 @@ function ZrPresetsBar(props) {
       entries.push({
         label: '重命名',
         action: function () {
-          var current = menu.unnamed === true ? '' : menu.name
-          var next = window.prompt('重命名为：', current)
+          var next = window.prompt('重命名为：', menu.name)
           if (next === null) return
           var trimmed = next.trim()
           if (trimmed.length > 0 && trimmed !== menu.name) props.onRename(menu.name, trimmed)
@@ -303,19 +305,28 @@ function ZrPresetsBar(props) {
       anchor: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom },
       name: item.name,
       builtin: item.builtin === true,
-      unnamed: item.unnamed === true,
+      workspace: item.workspace === true,
     })
   }
 
   return h('div', { className: 'zr-presets' },
+    workspace === null || workspace.title === undefined
+      ? null
+      : h('div', {
+        className: 'zr-presets-ws',
+        title: (workspace.title || '') + (workspace.path !== undefined && workspace.path.length > 0 ? '（' + workspace.path + '）' : ''),
+      }, '工作区：' + workspace.title),
     h('div', { className: 'zr-presets-list' },
       items.map(function (mode) {
         var active = presets.active === mode.name
+        var tip = '项目基础态（注入 0）；右键：基于此新建；勾选或打开门禁会自动建立当前工作区的模式'
+        if (mode.workspace === true) tip = '当前工作区的模式，改动自动保存；右键：基于此新建 / 重命名 / 删除'
+        else if (mode.builtin !== true) tip = '项目级模式，所有工作区共享；右键：基于此新建 / 重命名 / 删除'
         return h('button', {
           key: mode.name,
-          className: 'zr-preset' + (active ? ' zr-active' : '') + (mode.unnamed === true ? ' zr-unnamed' : ''),
+          className: 'zr-preset' + (active ? ' zr-active' : '') + (mode.workspace === true ? ' zr-wsmode' : ''),
           disabled: props.locked === true,
-          title: (mode.unnamed === true ? '当前对话的临时模式，右键可改名/删除' : '右键：基于此新建 / 重命名 / 删除'),
+          title: tip,
           onClick: function () { if (!active) props.onApply(mode.name) },
           onContextMenu: function (event) { openMenu(event, mode) },
         }, mode.name + ' · ' + mode.count)

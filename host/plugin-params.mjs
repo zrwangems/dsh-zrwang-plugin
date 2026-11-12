@@ -1,6 +1,8 @@
 /**
- * 插件设置：全部存在固定配置目录 `<DSH 家目录>/.dsh/zrwang-plugin-config/settings.json`。
+ * 插件设置：全部存在 DSH 家目录下的 `zrwang-plugin-config/settings.json`。
  *
+ * DSH 家目录解析顺序：`$DSH_HOME`（DSH 官方约定，测试/隔离实例用）→ `~/.dsh`。
+ * 这样 dsh web 用临时 DSH_HOME 起测试实例时，插件设置也一起隔离，不会写用户真实配置。
  * 这里负责读写这个 JSON（供应商、URL/模型/API Key、检索与图片转 PPT 参数）；
  * 配置目录不作为可编辑参数，也不写 profile 的 cordis.patch.yml。
  * 技能运行时需要的 .env / config.toml / config.yaml 由这些参数生成。
@@ -8,9 +10,17 @@
  */
 import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 
-const SETTINGS_FILE = join(homedir(), '.dsh', 'zrwang-plugin-config', 'settings.json')
+/** 当前生效的 DSH 家目录（与 @deepseek-ai/dsh-home-paths 的规则一致）。 */
+export function dshHome() {
+  const override = process.env.DSH_HOME
+  if (typeof override === 'string' && override.trim().length > 0) return resolve(override.trim())
+  return join(homedir(), '.dsh')
+}
+
+const CONFIG_DIR = join(dshHome(), 'zrwang-plugin-config')
+const SETTINGS_FILE = join(CONFIG_DIR, 'settings.json')
 
 let cache
 
@@ -46,5 +56,5 @@ export function writeParams(params) {
 
 /** 配置目录固定为 DSH 家目录下的 zrwang-plugin-config，不作为可编辑参数。 */
 export function configDirOfParams() {
-  return join(homedir(), '.dsh', 'zrwang-plugin-config')
+  return CONFIG_DIR
 }

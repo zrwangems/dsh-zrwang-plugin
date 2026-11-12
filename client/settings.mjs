@@ -274,7 +274,6 @@ function ZrSettingsView(props) {
     { id: 'ars', label: 'ARS 设置' },
     { id: 'models', label: '模型服务' },
     { id: 'nature', label: 'Nature-skill设置' },
-    { id: 'researchinfo', label: '科研信息' },
   ]
   var visibleCards = (data.cards || []).filter(function (card) {
     return (card.page || 'models') === activePage

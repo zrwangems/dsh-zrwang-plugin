@@ -41,7 +41,7 @@ def validate_sso_domain(domain: str, timeout: float = 5.0) -> tuple[bool, str]:
     last_err = ""
     for family, socktype, proto, _, sockaddr in addrs:
         try:
-            with socket.create_connection((sockaddr[0], sockaddr[1] or 443), timeout=timeout) as sock:
+            with socket.create_connection(sockaddr, timeout=timeout) as sock:
                 ctx = ssl.create_default_context()
                 with ctx.wrap_socket(sock, server_hostname=domain) as ssock:
                     cert = ssock.getpeercert()

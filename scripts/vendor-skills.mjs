@@ -132,8 +132,28 @@ function restorePreserved(stage, preserved) {
   return restored
 }
 
+/** 网络抖动（代理/TLS/连接被重置）时自动重试，避免全量 vendor 半途而废。 */
+const RETRYABLE_ERROR = /schannel|SSL|TLS|unable to access|timed out|early EOF|RPC failed|server closed|Connection reset|ECONNRESET/i
+const RUN_ATTEMPTS = 4
+
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
+}
+
 function run(command, argv, options = {}) {
-  return execFileSync(command, argv, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options })
+  let lastError
+  for (let attempt = 1; attempt <= RUN_ATTEMPTS; attempt += 1) {
+    try {
+      return execFileSync(command, argv, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options })
+    } catch (error) {
+      lastError = error
+      const text = String(error?.stderr ?? error?.message ?? error)
+      if (attempt === RUN_ATTEMPTS || !RETRYABLE_ERROR.test(text)) throw error
+      log(`  ${command} 网络抖动，重试 ${attempt}/${RUN_ATTEMPTS - 1}：${text.split(/\r?\n/)[0].slice(0, 160)}`)
+      sleepSync(attempt * 1500)
+    }
+  }
+  throw lastError
 }
 
 function resolveSha(repo, ref) {
@@ -734,6 +754,28 @@ async function main() {
     const restored = restorePreserved(STAGE, preserved)
     if (restored > 0) log(`回填用户配置 ${restored} 个文件`)
     applySkillPatches(STAGE)
+    // 技能树外的功能区块（ARS）不属于 skills/，要从 staging 挪回包根，
+    // 否则全量 vendor 会在 skills/ 下留一份重复副本，而包根 ars/ 还是旧内容。
+    for (const cfg of repos) {
+      if (cfg.outsideCatalog !== true) continue
+      const targets = [cfg.target, ...(cfg.aliases === undefined ? [] : [cfg.aliases.target])]
+      for (const target of targets) {
+        const src = join(STAGE, ...target.split('/'))
+        if (!existsSync(src)) continue
+        const dest = join(ROOT, ...target.split('/'))
+        mkdirSync(resolve(dest, '..'), { recursive: true })
+        if (existsSync(dest)) {
+          const trash = join(TRASH, `partial-${cfg.id}-${basename(target)}-${Date.now()}`)
+          renameSync(dest, trash)
+        }
+        renameSync(src, dest)
+      }
+      if (cfg.runtimeRoot !== undefined) {
+        const rootDir = join(STAGE, ...cfg.runtimeRoot.split('/'))
+        if (existsSync(rootDir)) rmSync(rootDir, { recursive: true, force: true })
+      }
+      log(`  ${cfg.id}: 技能树外内容已写入包根 ${cfg.target}`)
+    }
     renameSync(STAGE, SKILLS)
     lock.totals.skills = seen.size
     writeFileSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`, 'utf8')

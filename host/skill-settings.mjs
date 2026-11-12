@@ -6,8 +6,8 @@
  * <configDir> 只放文件类内容：目录树 catalog.json、默认启用 defaults.json、
  * nature-downloader 的学校信息与凭据。
  */
-import { existsSync } from 'node:fs'
-import { cp, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
+import { existsSync, mkdirSync } from 'node:fs'
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { execFileSync, spawn } from 'node:child_process'
@@ -87,28 +87,6 @@ const IMAGE2PPT_FIELDS = [
   { id: 'paddleOcrToken', label: '百度 OCR Token', secret: true, required: true, getKeyUrl: 'https://aistudio.baidu.com/account/accessToken' },
 ]
 
-/**
- * 2026-10 新增仓库里需要密钥/账号的技能参数。
- * 这些上游技能都从环境变量读配置，保存后由 applySkillEnv 写进宿主进程环境，
- * 模型执行 shell 命令时子进程会继承。
- */
-const NEW_SKILL_FIELDS = [
-  { id: 'qinyanApiKey', label: '沁言学术 API Key', secret: true, env: 'QINYAN_API_KEY', help: '沁言自研的 10 个技能（检索、选题、论文分析、润色等）需要', required: true },
-  { id: 'qinyanBaseUrl', label: '沁言学术接口地址', env: 'QINYAN_BASE_URL', help: '可选，留空用官方地址' },
-  { id: 'parallelApiKey', label: 'Parallel API Key', secret: true, env: 'PARALLEL_API_KEY', help: 'parallel-web 检索技能用，可选', getKeyUrl: 'https://parallel.ai/' },
-  { id: 'openrouterApiKey', label: 'OpenRouter API Key', secret: true, env: 'OPENROUTER_API_KEY', help: '生图、幻灯片、示意图、信息图等新增技能用', getKeyUrl: 'https://openrouter.ai/keys' },
-  { id: 'zoteroApiKey', label: 'Zotero API Key', secret: true, env: 'ZOTERO_API_KEY', help: 'pyzotero 技能读写文献库需要', getKeyUrl: 'https://www.zotero.org/settings/keys' },
-  { id: 'zoteroLibraryId', label: 'Zotero Library ID', env: 'ZOTERO_LIBRARY_ID', help: 'Zotero 设置页里的数字用户 ID' },
-  { id: 'zoteroLibraryType', label: 'Zotero 库类型', env: 'ZOTERO_LIBRARY_TYPE', help: 'user 或 group，默认 user' },
-]
-
-/** 这些技能离开密钥就跑不起来，未配置时在侧栏置灰。 */
-const QINYAN_REQUIRED_SKILLS = [
-  'qinyan-citation', 'qinyan-nature-figures', 'qinyan-nature-polishing', 'qinyan-nature-review',
-  'qinyan-nature-statistics', 'qinyan-nature-writing', 'qinyan-paper-analysis', 'qinyan-paper-polish',
-  'qinyan-paper-search', 'qinyan-topic-analysis',
-]
-
 function expansion(catalog, skillName) {
   const node = indexedSkills(catalog).get(skillName)
   if (node === undefined) throw new Error(`目录树里没有技能：${skillName}`)
@@ -172,10 +150,6 @@ function paramsDefaults() {
     natureAcademic: { pubmed: { email: '', apiKey: '', cacheDir: '~/.cache/academic-search', cacheTtl: '86400' }, crossref: { mailto: '', timeout: '15' }, arxiv: { timeout: '30' }, general: { defaultRows: '5', maxRows: '50' } },
     natureImage2ppt: { paddleOcrToken: '' },
     ars: { python: '' },
-    newSkills: {
-      qinyanApiKey: '', qinyanBaseUrl: '', parallelApiKey: '', openrouterApiKey: '',
-      zoteroApiKey: '', zoteroLibraryId: '', zoteroLibraryType: 'user',
-    },
   }
 }
 
@@ -195,7 +169,6 @@ export function currentParams(pluginConfig) {
   }
   merged.natureImage2ppt = { ...defaults.natureImage2ppt, ...(stored.natureImage2ppt ?? {}) }
   merged.ars = { ...defaults.ars, ...(stored.ars ?? {}) }
-  merged.newSkills = { ...defaults.newSkills, ...(stored.newSkills ?? {}) }
   return merged
 }
 
@@ -290,21 +263,10 @@ async function mirrorSkillFiles(catalog, params) {
 
 // ---------------- nature-downloader（文件类） ----------------
 
-async function downloaderDir(params) {
-  const dir = join(configDirOfParams(params), 'nature-downloader')
-  await mkdir(dir, { recursive: true })
-  const legacy = join(homedir(), '.config', 'lit-dl')
-  if (existsSync(legacy)) {
-    for (const name of ['school.json', 'credentials.json', 'settings.json']) {
-      if (!existsSync(join(dir, name)) && existsSync(join(legacy, name))) {
-        await cp(join(legacy, name), join(dir, name))
-      }
-    }
-  }
-  return dir
-}
+/** 学校访问配置是固定的，随插件包分发，不再复制到 ~/.dsh。 */
+const SCHOOL_CONFIG_DIR = join(PKG_DIR, 'config', 'nature-downloader')
 
-/** 内置学校访问配置：首次运行自动写入，用户无需手工配置。 */
+/** 内置学校访问配置：包内文件缺失时兜底生成（正常安装不会走到这里）。 */
 const DEFAULT_SCHOOL_CONFIG = {
   version: 1,
   school: { name: '北京航空航天大学', code: 'buaa', configured_at: '', source: 'plugin-default' },
@@ -325,21 +287,19 @@ const DEFAULT_SCHOOL_CONFIG = {
   notes: '北京航空航天大学：统一认证 sso.buaa.edu.cn；CARSI IdP idp.buaa.edu.cn；图书馆 lib.buaa.edu.cn',
 }
 
-export async function ensureBuaaSchoolConfig(params) {
-  const dir = await downloaderDir(params)
-  const file = join(dir, 'school.json')
+/** 学校配置目录（包内固定路径），同时给技能设 LIT_DL_CONFIG_DIR 用。 */
+export function schoolConfigDir() {
+  return SCHOOL_CONFIG_DIR
+}
+
+export async function ensureBuaaSchoolConfig() {
+  const file = join(SCHOOL_CONFIG_DIR, 'school.json')
   if (!existsSync(file)) {
-    let config = DEFAULT_SCHOOL_CONFIG
-    try {
-      config = JSON.parse(await readFile(join(PKG_DIR, 'config', 'nature-downloader', 'school.json'), 'utf8'))
-    } catch {
-      config = DEFAULT_SCHOOL_CONFIG
-    }
-    config = { ...config, school: { ...config.school, configured_at: new Date().toISOString() } }
-    await writeFile(file, `${JSON.stringify(config, null, 2)}
-`, 'utf8')
+    mkdirSync(SCHOOL_CONFIG_DIR, { recursive: true })
+    const config = { ...DEFAULT_SCHOOL_CONFIG, school: { ...DEFAULT_SCHOOL_CONFIG.school, configured_at: new Date().toISOString() } }
+    await writeFile(file, `${JSON.stringify(config, null, 2)}\n`, 'utf8')
   }
-  return dir
+  return SCHOOL_CONFIG_DIR
 }
 
 // ---------------- 状态与卡片 ----------------
@@ -370,23 +330,14 @@ export async function blockedSkills(catalog, params) {
     backend,
     entry.apiKey.length > 0 ? 1 : 0,
     (params?.natureImage2ppt?.paddleOcrToken ?? '').length > 0 ? 1 : 0,
-    (params?.newSkills?.qinyanApiKey ?? '').length > 0 ? 1 : 0,
-    (params?.newSkills?.zoteroApiKey ?? '').length > 0 && (params?.newSkills?.zoteroLibraryId ?? '').length > 0 ? 1 : 0,
     configDirOfParams(params),
   ].join('|')
   if (blockedCache.signature === signature && Date.now() - blockedCache.at < 3_000) return blockedCache.value
   const blocked = {}
   if (entry.apiKey.length === 0) blocked['ppt-master'] = '未配置图片服务 API Key'
   if ((params?.natureImage2ppt?.paddleOcrToken ?? '').length === 0) blocked['nature-image2ppt'] = '未配置百度 OCR Token'
-  const newSkills = params?.newSkills ?? {}
-  if ((newSkills.qinyanApiKey ?? '').length === 0) {
-    for (const name of QINYAN_REQUIRED_SKILLS) blocked[name] = '未配置沁言学术 API Key'
-  }
-  if ((newSkills.zoteroApiKey ?? '').length === 0 || (newSkills.zoteroLibraryId ?? '').length === 0) {
-    blocked['pyzotero'] = '未配置 Zotero API Key / Library ID'
-  }
-  const dir = await ensureBuaaSchoolConfig(params)
-  if (!existsSync(join(dir, 'school.json'))) blocked['nature-downloader'] = '未配置学校访问信息'
+  // 学校访问信息随包固定分发，不需要用户配置，也不会因为缺文件而置灰。
+  await ensureBuaaSchoolConfig()
   if (!cliExists('officecli')) blocked['officecli'] = '本机未找到 officecli 命令'
   for (const name of ['officecli-academic-paper', 'officecli-data-dashboard', 'officecli-docx', 'officecli-financial-model', 'officecli-pitch-deck', 'officecli-pptx', 'officecli-word-form', 'officecli-xlsx']) {
     if (blocked.officecli !== undefined) blocked[name] = blocked.officecli
@@ -409,8 +360,6 @@ export async function settingsCards(catalog, params) {
       maskField({ id: 'apiKey', label: 'API Key', secret: true, getKeyUrl: provider.getKeyUrl }, entry.apiKey),
     ]
   }
-  const downloader = await ensureBuaaSchoolConfig(params)
-  const schoolExists = existsSync(join(downloader, 'school.json'))
   const python = resolvePython(params)
   const deps = readDepsResult()
   const arsCards = [
@@ -472,48 +421,15 @@ export async function settingsCards(catalog, params) {
         kind: 'fields',
         fields: IMAGE2PPT_FIELDS.map(field => maskField(field, params.natureImage2ppt[field.id] ?? (field.id === 'imageBackend' ? 'auto' : ''))),
       },
-      {
-        id: 'openrouter',
-        title: 'OpenRouter（生图 / 幻灯片）',
-        page: 'models',
-        kind: 'fields',
-        fields: NEW_SKILL_FIELDS.filter(field => field.id === 'openrouterApiKey').map(field => maskField(field, params.newSkills[field.id])),
-      },
-      {
-        id: 'qinyan',
-        title: '沁言学术',
-        page: 'researchinfo',
-        kind: 'fields',
-        fields: ['qinyanApiKey', 'qinyanBaseUrl', 'parallelApiKey'].map(id => NEW_SKILL_FIELDS.find(field => field.id === id)).map(field => maskField(field, params.newSkills[field.id])),
-      },
-      {
-        id: 'zotero',
-        title: 'Zotero 文献库',
-        page: 'researchinfo',
-        kind: 'fields',
-        fields: ['zoteroApiKey', 'zoteroLibraryId', 'zoteroLibraryType'].map(id => NEW_SKILL_FIELDS.find(field => field.id === id)).map(field => maskField(field, params.newSkills[field.id])),
-      },
-      {
-        id: 'researchinfo-pubmed',
-        title: 'PubMed / NCBI',
-        page: 'researchinfo',
-        kind: 'info',
-        status: 'PubMed 邮箱与 NCBI API Key 复用「Nature-skill设置」里的配置；保存后会自动注入 NCBI_EMAIL / NCBI_API_KEY 给新增技能使用。',
-      },
     ],
   }
 }
 
-/** 把新增技能需要的密钥写进宿主进程环境；子进程（bash/python）会继承。 */
+/** 把需要注入宿主环境的配置写进 process.env（子进程 bash/python 继承）。 */
 export function applySkillEnv(params) {
-  const values = params?.newSkills ?? {}
-  for (const field of NEW_SKILL_FIELDS) {
-    const name = field.env
-    const value = typeof values[field.id] === 'string' ? values[field.id].trim() : ''
-    if (value.length > 0) process.env[name] = value
-    else delete process.env[name]
-  }
-  // PubMed / NCBI 复用 Nature-skill 设置，新增技能里也有用 NCBI 环境变量的
+  // 学校访问配置固定在插件包内，技能通过 LIT_DL_CONFIG_DIR 直接读，不往 ~/.dsh 复制。
+  process.env.LIT_DL_CONFIG_DIR = SCHOOL_CONFIG_DIR
+  // PubMed / NCBI 复用 Nature-skill 设置
   const pubmed = params?.natureAcademic?.pubmed ?? {}
   const envPairs = [['NCBI_EMAIL', pubmed.email], ['NCBI_API_KEY', pubmed.apiKey]]
   for (const [name, raw] of envPairs) {
@@ -557,19 +473,6 @@ export async function saveSettingsCard(catalog, pluginConfig, body) {
       if (incoming === undefined) continue
       if (field.secret === true && incoming === '') continue
       params.natureImage2ppt[field.id] = String(incoming)
-    }
-  } else if (['openrouter', 'qinyan', 'zotero'].includes(body.cardId)) {
-    const allowed = {
-      openrouter: ['openrouterApiKey'],
-      qinyan: ['qinyanApiKey', 'qinyanBaseUrl', 'parallelApiKey'],
-      zotero: ['zoteroApiKey', 'zoteroLibraryId', 'zoteroLibraryType'],
-    }[body.cardId]
-    for (const id of allowed) {
-      const incoming = values[id]
-      if (incoming === undefined) continue
-      const field = NEW_SKILL_FIELDS.find(item => item.id === id)
-      if (field?.secret === true && incoming === '') continue
-      params.newSkills[id] = String(incoming).trim()
     }
   } else if (body.cardId === 'ars') {
     // 只存用户填的解释器路径；留空表示继续自动探测。

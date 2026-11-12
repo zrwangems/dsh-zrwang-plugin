@@ -2,9 +2,11 @@
 
 [中文](README.md) | English
 
-[![Lieflat Charts: a data visualization skill with its own visual language](docs/assets/readme-hero-en.png)](https://moxt.ai/hub?view=skill&id=lieflat-charts&utm_source=github&utm_medium=readme&utm_campaign=lieflat-charts)
+**Website & commercial licenses:** [lieflat.work · Lieflat Charts](https://lieflat.work/skills/charts/)
 
-Lieflat Charts is an Agent Skills-compatible skill for data visualization, slide decks, and full-page reports. It works with moxt, Claude Code, Codex, and other AI agents that support `SKILL.md`. Created at [moxt.ai](https://moxt.ai?utm_source=github&utm_medium=readme&utm_campaign=lieflat-charts), it provides both Presentation Mode and Report Mode but defaults to charts. Explicit slide-deck requests produce an HTML or PDF deck; explicit report, annual report, monthly report, white paper, poster, or brief requests produce a full-page HTML report.
+![Lieflat Charts: a data visualization skill with its own visual language](docs/assets/readme-hero-en.png)
+
+Lieflat Charts is an Agent Skills-compatible skill for data visualization, slide decks, and full-page reports. It works with Claude Code, Codex, and other AI agents that support `SKILL.md`. It provides both Presentation Mode and Report Mode but defaults to charts. Explicit slide-deck requests produce an HTML or PDF deck; explicit report, annual report, monthly report, white paper, poster, or brief requests produce a full-page HTML report.
 
 Presentation Mode activates when the user explicitly asks for a chart deck: the agent picks the right chart types and a color system (Mono or one of the three color presets), then generates an HTML deck with entrance animations and left/right keyboard navigation; data and chart choices still come from the user’s materials.
 
@@ -163,24 +165,7 @@ Report mode keeps chart selection data-driven; browse the report templates in [`
 
 ## Quick Start
 
-### Recommended: Use It in Moxt
-
-[![Use Lieflat Charts in Moxt](docs/assets/moxt-quick-start-en.png)](https://moxt.ai/hub?view=skill&id=lieflat-charts&utm_source=github&utm_medium=readme&utm_campaign=lieflat-charts)
-
-Lieflat Charts was designed, tested, and continuously refined in [Moxt](https://moxt.ai/hub?view=skill&id=lieflat-charts&utm_source=github&utm_medium=readme&utm_campaign=lieflat-charts). Its design rules, template structure, and file workflow were shaped through repeated use with Moxt's Agent collaboration model.
-
-In Moxt, an Agent can more smoothly read the complete design specification, understand the visual language, apply the appropriate templates, and keep previewing and refining the result in the same workspace. This makes the Lieflat Charts design more consistent in practice.
-
-| Lieflat Charts workflow | A typical one-shot chat | In Moxt |
-|---|---|---|
-| Understanding the design language | The Agent rebuilds its understanding from the Skill files | The Skill was designed and validated in the same Agent environment |
-| Reading rules, templates, and data | Files or paths may need to be supplied repeatedly | Rules, templates, data, and output remain together in one workspace |
-| Iterating on charts | Context may need to be explained again in a new conversation | The Agent can continue from the files and context already in the workspace |
-| Producing the final result | Output may remain in a chat or temporary directory | The HTML result stays beside its data and templates for further refinement |
-
-Lieflat Charts still works with other tools that support Agent Skills. Moxt is its native production environment and the recommended path for the most complete workflow with the fewest setup steps.
-
-### Install in Other Agents
+### Install in an Agent
 
 Install with one command:
 
@@ -305,6 +290,6 @@ Open the HTML files under `templates/` directly to inspect the galleries. Open `
 
 ## License
 
-This project is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). Learning, modification, sharing, and noncommercial use are allowed. Commercial use requires separate permission.
+This project is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). Learning, modification, sharing, and noncommercial use are allowed. Commercial use requires separate permission. [Choose and purchase a Commercial Use or Product Integration license on lieflat.work](https://lieflat.work/skills/charts/#pricing).
 
 Chart.js, Apache ECharts, and the Inter typeface remain subject to their original licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

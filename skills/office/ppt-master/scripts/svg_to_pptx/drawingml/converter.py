@@ -891,7 +891,12 @@ def _convert_semantic_shape(
         # The carrier path becomes the native object; keep the group's name.
         carrier.set('data-name', str(shape.get('id')))
 
-    if shape.get('data-pptx-geometry-kind') == 'custom':
+    # Imported carriers retain their hash-guarded source geometry. Only a
+    # semantic custom shape without a source payload compiles from SVG alone.
+    if (
+        shape.get('data-pptx-geometry-kind') == 'custom'
+        and carrier.get('data-pptx-custgeom') is None
+    ):
         for name in (
             'data-pptx-custgeom',
             'data-pptx-geometry-kind',
@@ -1261,8 +1266,17 @@ def convert_g(elem: ET.Element, ctx: ConvertContext) -> ShapeResult | None:
         bool(transform)
         and _is_unit_axis_reflection(parse_transform_operations(transform))
     )
+    # A restored native sibling replaces its temporary geometry after conversion.
+    # Preserve pure group rotation on the container, where restoration cannot
+    # discard it. Other affine groups keep their existing matrix conversion.
+    restore_group_rotation = (
+        _extract_rotate_pivot(transform) is not None
+        and any(child.get('data-pptx-roundtrip-object') == 'native-restore-placeholder'
+                for child in elem.iter())
+    )
     matrix_supported = (
         not native_subtree_active
+        and not restore_group_rotation
         and bool(transform)
         and visual_children
         and (

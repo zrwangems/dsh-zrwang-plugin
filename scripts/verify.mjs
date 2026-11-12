@@ -11,6 +11,7 @@ import { frontValue } from '../host/skill-md.mjs'
 const ROOT = resolve(import.meta.dirname, '..')
 const problems = []
 const passed = []
+const skipped = []
 
 function check(name, ok, detail) {
   if (ok) {
@@ -28,12 +29,14 @@ function readJson(file) {
 // ---- 1 包清单 ----
 const pkg = readJson(join(ROOT, 'package.json'))
 check('package.name', pkg.name === 'dsh-zrwang-plugin')
-check('package.version=0.1.0', pkg.version === '0.1.0', pkg.version)
+check('package.version=0.1.1', pkg.version === '0.1.1', pkg.version)
 check('package.main 存在', typeof pkg.main === 'string' && existsSync(join(ROOT, pkg.main)))
 check('exports["./client"]', pkg.exports?.['./client'] === './lib/client.js')
 check('dsh.bundle.patch', pkg.dsh?.bundle?.patch === './cordis.patch.yml')
 check('dsh.client.platform=web', pkg.dsh?.client?.platform === 'web')
 check('dsh.client.inject 含 better-sidebar', (pkg.dsh?.client?.inject ?? []).includes('dsh-better-sidebar'))
+check('dsh.engines.dsh 适配 0.2.2-rc.1', pkg.dsh?.engines?.dsh === '>=0.2.2-rc.1', pkg.dsh?.engines?.dsh)
+check('better-sidebar 依赖对齐 0.30.1', pkg.dependencies?.['dsh-better-sidebar'] === '^0.30.1', pkg.dependencies?.['dsh-better-sidebar'])
 check('icon.svg 存在', existsSync(join(ROOT, 'icon.svg')))
 check('locale/en.json 存在', existsSync(join(ROOT, 'locale', 'en.json')))
 check('locale/zh-CN.json 存在', existsSync(join(ROOT, 'locale', 'zh-CN.json')))
@@ -47,20 +50,28 @@ const profileDir = process.env.DSH_PROFILE_DIR ?? join(process.env.USERPROFILE ?
 const profilePatchFile = join(profileDir, 'cordis.patch.yml')
 const profilePatch = existsSync(profilePatchFile) ? readFileSync(profilePatchFile, 'utf8') : ''
 check('profile 补丁不写插件设置', !profilePatch.includes('dsh-zrwang-plugin params') && !profilePatch.includes('id: dsh-zrwang-plugin'))
-const runtimeConfigDir = join(process.env.USERPROFILE ?? '', '.dsh', 'zrwang-plugin-config')
+const runtimeHome = typeof process.env.DSH_HOME === 'string' && process.env.DSH_HOME.trim().length > 0
+  ? process.env.DSH_HOME.trim()
+  : join(process.env.USERPROFILE ?? '', '.dsh')
+const runtimeConfigDir = join(runtimeHome, 'zrwang-plugin-config')
 const settingsFile = join(runtimeConfigDir, 'settings.json')
-check('设置文件在配置目录', existsSync(settingsFile))
-let patchConfig
-try { patchConfig = JSON.parse(readFileSync(settingsFile, 'utf8')) } catch { patchConfig = undefined }
-check('设置是合法 JSON', patchConfig !== undefined)
-check('配置目录不作为参数', patchConfig?.configDir === undefined)
-check('设置含 pptMaster', patchConfig?.pptMaster?.providers !== undefined)
-check('设置含 natureAcademic', patchConfig?.natureAcademic?.pubmed !== undefined)
-check('设置含 natureImage2ppt', patchConfig?.natureImage2ppt !== undefined)
-if (existsSync(runtimeConfigDir)) {
-  const allowed = new Set(['catalog.json', 'defaults.json', 'settings.json', 'nature-downloader'])
-  const unexpected = readdirSync(runtimeConfigDir).filter(name => !allowed.has(name))
-  check('配置目录只放文件与设置', unexpected.length === 0, unexpected.join(', '))
+// 设置只能由插件设置页写；仓库自检在“插件未安装/未配置”时应跳过这些检查，而不是报失败。
+if (existsSync(settingsFile)) {
+  check('设置文件在配置目录', true)
+  let patchConfig
+  try { patchConfig = JSON.parse(readFileSync(settingsFile, 'utf8')) } catch { patchConfig = undefined }
+  check('设置是合法 JSON', patchConfig !== undefined)
+  check('配置目录不作为参数', patchConfig?.configDir === undefined)
+  check('设置含 pptMaster', patchConfig?.pptMaster?.providers !== undefined)
+  check('设置含 natureAcademic', patchConfig?.natureAcademic?.pubmed !== undefined)
+  check('设置含 natureImage2ppt', patchConfig?.natureImage2ppt !== undefined)
+  if (existsSync(runtimeConfigDir)) {
+    const allowed = new Set(['catalog.json', 'defaults.json', 'settings.json'])
+    const unexpected = readdirSync(runtimeConfigDir).filter(name => !allowed.has(name))
+    check('配置目录只放文件与设置', unexpected.length === 0, unexpected.join(', '))
+  }
+} else {
+  skipped.push('插件尚未安装/未配置：跳过 settings.json 相关检查')
 }
 check('skill-settings 模块存在', existsSync(join(ROOT, 'host', 'skill-settings.mjs')))
 
@@ -82,12 +93,12 @@ const walkNode = node => {
 for (const group of catalog.groups ?? []) walkNode(group)
 check('目录树节点完整', nodeProblems.length === 0, nodeProblems.slice(0, 6).join('；'))
 check('一级目录=3', (catalog.groups ?? []).length === 3)
-check('目录树 481 个技能', skillNodes.length === 481, String(skillNodes.length))
+check('目录树 301 个技能', skillNodes.length === 301, String(skillNodes.length))
 const defaultsSeed = readJson(join(ROOT, 'catalog', 'defaults.json'))
-check('默认启用种子文件', Array.isArray(defaultsSeed.skills) && defaultsSeed.skills.length === 91, String(defaultsSeed.skills?.length))
+check('默认启用种子文件', Array.isArray(defaultsSeed.skills) && defaultsSeed.skills.length === 64, String(defaultsSeed.skills?.length))
 const groupCounts = catalog.stats?.byGroup ?? {}
-check('工程 223', groupCounts.engineering === 223, String(groupCounts.engineering))
-check('科研 239', groupCounts.research === 239, String(groupCounts.research))
+check('工程 230', groupCounts.engineering === 230, String(groupCounts.engineering))
+check('科研 52', groupCounts.research === 52, String(groupCounts.research))
 check('办公 19', groupCounts.office === 19, String(groupCounts.office))
 const singletonProblems = []
 const walkSingleton = node => {
@@ -106,11 +117,17 @@ check('zotero-cli 为独立技能', researchGroup?.children?.some(child => child
 // 2026-10 新增的 10 个仓库：目录形态与数量
 const leavesUnder = node => node === undefined ? [] : (node.kind === 'skill' ? [node.name] : (node.children ?? []).flatMap(child => leavesUnder(child)))
 const nodeById = (group, id) => (group?.children ?? []).find(child => child.id === id)
-const qinyanNode = nodeById(researchGroup, 'qinyan')
 const supervisorNode = nodeById(researchGroup, 'supervisor')
 const nsfcNode = nodeById(researchGroup, 'nsfc')
-check('qinyan 18 类 187 技能', (qinyanNode?.children ?? []).length === 18 && leavesUnder(qinyanNode).length === 187,
-  `${(qinyanNode?.children ?? []).length}/${leavesUnder(qinyanNode).length}`)
+check('沁言学术技能组已移除', nodeById(researchGroup, 'qinyan') === undefined)
+
+// ---- 3.1 选择态 v3（按 DSH 工作区）----
+const presetsSource = readFileSync(join(ROOT, 'host', 'presets.mjs'), 'utf8')
+const workspaceSource = readFileSync(join(ROOT, 'host', 'workspaces.mjs'), 'utf8')
+check('选择态数据版本 v3', presetsSource.includes('version: 3'))
+check('自动模式按工作区标题命名', presetsSource.includes('presetNameFromTitle') && presetsSource.includes('workspace.title'))
+check('工作区解析模块存在', workspaceSource.includes('workspaceRegistry') && workspaceSource.includes('resolveWorkspace'))
+check('自动模式标记为 workspace', presetsSource.includes('workspace: true'))
 check('supervisor 12 技能且已改名', leavesUnder(supervisorNode).length === 12 && leavesUnder(supervisorNode).includes('supervisor-deep-research'),
   `${leavesUnder(supervisorNode).length}`)
 check('nsfc 4 技能', leavesUnder(nsfcNode).length === 4, String(leavesUnder(nsfcNode).length))
@@ -185,6 +202,10 @@ check('ARS 用法文档存在', existsSync(join(ROOT, ...String(arsManifest.doc 
 const schoolSeed = readJson(join(ROOT, 'config', 'nature-downloader', 'school.json'))
 check('内置北航学校配置', schoolSeed?.school?.code === 'buaa' && schoolSeed?.auth?.sso_domain === 'sso.buaa.edu.cn' && schoolSeed?.discovery?.resource_entry_url === 'https://lib.buaa.edu.cn/')
 check('内置学校配置无私人字段', !/password|passwd|token|api[_-]?key|email|cookie/i.test(JSON.stringify(schoolSeed)))
+const skillSettingsSource = readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8')
+check('学校配置随包分发（LIT_DL_CONFIG_DIR 指向包内目录）',
+  skillSettingsSource.includes('LIT_DL_CONFIG_DIR') && skillSettingsSource.includes("join(PKG_DIR, 'config', 'nature-downloader')"))
+check('学校配置不再复制到 DSH 家目录', !skillSettingsSource.includes("zrwang-plugin-config', 'nature-downloader'"))
 const details = readJson(join(ROOT, 'catalog', 'skill-details.zh.json'))
 const detailNames = Object.keys(details)
 check('静态中文详情覆盖全部技能', detailNames.length === skillNodes.length && skillNodes.every(node => typeof details[node.name] === 'string' && details[node.name].trim().length > 0))
@@ -193,19 +214,20 @@ check('静态中文详情覆盖全部技能', detailNames.length === skillNodes.
 const legacy = readJson(join(ROOT, 'catalog', 'legacy', 'legacy-enabled.json'))
 const pathOf = Object.fromEntries(skillNodes.map(node => [node.name, node.dir]))
 const expected = (legacy.enabled ?? [])
-  .filter(name => pathOf[name] !== undefined)
+  .filter(name => pathOf[name] !== undefined && pathOf[name].startsWith('engineering/'))
   .sort()
 const actual = [...(catalog.defaults ?? [])].sort()
-check('默认集合=旧启用集合映射', JSON.stringify(expected) === JSON.stringify(actual), `${actual.length} vs ${expected.length}`)
+check('默认集合=旧启用集合映射（只保留工程）', JSON.stringify(expected) === JSON.stringify(actual), `${actual.length} vs ${expected.length}`)
 check('默认集合全部存在于目录树', (catalog.defaults ?? []).every(name => pathOf[name] !== undefined))
+check('默认集合只含工程技能组', (catalog.defaults ?? []).every(name => pathOf[name]?.startsWith('engineering/')))
 check('默认不启用 officecli', (catalog.defaults ?? []).every(name => !pathOf[name]?.includes('/officecli')))
 // 2026-10 新增的 210 个技能默认全部关闭，且不与 ARS 五个技能重名
 const newSkillNames = [
-  ...leavesUnder(qinyanNode), ...leavesUnder(supervisorNode), ...leavesUnder(nsfcNode), ...newSingleSkills,
+  ...leavesUnder(supervisorNode), ...leavesUnder(nsfcNode), ...newSingleSkills,
 ]
 check('新增技能默认全部关闭', newSkillNames.every(name => !(catalog.defaults ?? []).includes(name)), String(newSkillNames.length))
 check('新增技能不与 ARS 重名', newSkillNames.every(name => !arsSkillNames.has(name)))
-const newRepoIds = ['academic-humanizer', 'lieflat-less-ai-tone', 'qinyan', 'nsfc', 'supervisor', 'lieflat-charts', 'writing-dna', 'lieflat-gongwen', 'guizang-ppt', 'frontend-slides', 'patent']
+const newRepoIds = ['academic-humanizer', 'lieflat-less-ai-tone', 'nsfc', 'supervisor', 'lieflat-charts', 'writing-dna', 'lieflat-gongwen', 'guizang-ppt', 'frontend-slides', 'patent']
 const licenseProblems = newRepoIds.filter(id => {
   const dir = join(ROOT, 'vendor', 'licenses', id)
   return !existsSync(dir) || readdirSync(dir).length === 0
@@ -266,6 +288,9 @@ check('只有 ppt-master 有 .env 例外', envFiles.length <= 3, String(envFiles
 
 // ---- 输出 ----
 process.stdout.write(`通过 ${passed.length} 项\n`)
+if (skipped.length > 0) {
+  for (const item of skipped) process.stdout.write(`跳过 ${item}\n`)
+}
 if (problems.length === 0) {
   process.stdout.write('verify: 全部通过\n')
   process.exit(0)

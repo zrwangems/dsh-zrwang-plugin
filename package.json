@@ -1,6 +1,6 @@
 {
   "name": "dsh-zrwang-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "王湛然的 DSH 管理插件：DSH Desktop 右侧栏技能管理，按会话启用技能。",
   "main": "./host/index.mjs",
@@ -25,8 +25,7 @@
     "docs",
     "cordis.patch.yml",
     "icon.svg",
-    "README.md",
-    "icon.png"
+    "README.md"
   ],
   "scripts": {
     "vendor": "node scripts/vendor-skills.mjs",
@@ -47,7 +46,7 @@
   "dsh": {
     "manifestVersion": 1,
     "engines": {
-      "dsh": ">=0.2.1-rc.1"
+      "dsh": ">=0.2.2-rc.1"
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -70,7 +69,7 @@
     "url": "https://github.com/zrwangems/dsh-zrwang-plugin/issues"
   },
   "dependencies": {
-    "dsh-better-sidebar": "^0.28.1"
+    "dsh-better-sidebar": "^0.30.1"
   },
   "publishConfig": {
     "access": "public"

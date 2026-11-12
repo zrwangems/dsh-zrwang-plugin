@@ -109,11 +109,13 @@ class TextResult:
 
     `svg` is one or more <text> elements, already absolutely positioned
     inside the slide coordinate system. `defs` holds text gradient fills.
+    `frame` carries the source box used by separately positioned vertical text.
     """
 
     svg: str = ""
     defs: list[str] = field(default_factory=list)
     contains_inline_formula: bool = False
+    frame: tuple[float, float, float, float] | None = None
 
 
 VERTICAL_TEXT_MODES = {"eaVert", "vert", "wordArtVert", "wordArtVertRtl"}
@@ -329,6 +331,10 @@ def convert_vertical_txbody(
 
     box_x, box_y, box_w, box_h = _rotated_bbox(xfrm)
     center_x = box_x + box_w / 2.0
+    clip_vertical = (
+        body_pr is not None
+        and body_pr.attrib.get("vertOverflow") in {"clip", "ellipsis"}
+    )
 
     glyphs: list[tuple[str, TextRun]] = []
     for run in runs:
@@ -349,7 +355,7 @@ def convert_vertical_txbody(
     first_baseline: float | None = None
     previous_baseline: float | None = None
     for (char, run), advance in zip(glyphs, advances):
-        if cursor_y + advance > bottom_y:
+        if clip_vertical and cursor_y + advance > bottom_y:
             break
         baseline_y = cursor_y + run.font_size_px * 0.85
         tspan_attrs = _run_tspan_attrs(run)
@@ -377,6 +383,7 @@ def convert_vertical_txbody(
         svg=f"<text{attrs}>{''.join(spans)}</text>",
         defs=_collect_text_defs(paragraphs),
         contains_inline_formula=False,
+        frame=(box_x, box_y, box_w, box_h),
     )
 
 
@@ -434,6 +441,7 @@ def _convert_east_asian_vertical(
         right_x -= width
 
     anchor = body_pr.attrib.get("anchor", "t")
+    clip_vertical = body_pr.attrib.get("vertOverflow") in {"clip", "ellipsis"}
     bottom_y = inner_y + inner_h
     text_blocks: list[str] = []
     for column, center_x in zip(columns, column_centers):
@@ -450,11 +458,14 @@ def _convert_east_asian_vertical(
 
         for upright, text, run in column:
             available = bottom_y - cursor_y
-            if available <= 0:
+            if clip_vertical and available <= 0:
                 break
             if upright:
                 advance = run.font_size_px * 1.05
-                visible_count = min(len(text), int(available // advance))
+                visible_count = (
+                    min(len(text), int(available // advance))
+                    if clip_vertical else len(text)
+                )
                 visible = text[:visible_count]
                 if not visible:
                     break
@@ -472,7 +483,10 @@ def _convert_east_asian_vertical(
                     break
                 continue
 
-            visible = _fit_sideways_vertical_text(text, run, available)
+            visible = (
+                _fit_sideways_vertical_text(text, run, available)
+                if clip_vertical else text
+            )
             if not visible:
                 break
             text_blocks.append(
@@ -491,6 +505,7 @@ def _convert_east_asian_vertical(
         svg="\n".join(text_blocks),
         defs=_collect_text_defs(paragraphs),
         contains_inline_formula=False,
+        frame=(box_x, box_y, box_w, box_h),
     )
 
 
@@ -1748,31 +1763,23 @@ def _text_base_attrs(run: TextRun | None, x: float, y: float,
 
 
 def _run_tspan_attrs(run: TextRun) -> str:
-    """Per-run overrides on a <tspan>. Only emit attributes that differ from
-    the run that drove the parent <text> (we keep things simple: emit only
-    overrides that can plausibly change run-to-run, never re-emit common
-    defaults). For v1 we always emit fill, font family, and font size so each
-    imported run keeps its resolved typeface even when adjacent runs differ.
-    """
+    """Emit resolved run styles, including resets of the parent text style."""
     parts = [
         f'fill="{run.fill}"',
         f'font-family="{run.font_family}"',
         f'font-size="{fmt_num(run.font_size_px)}"',
+        f'fill-opacity="{format_ooxml_alpha(run.fill_opacity)}"',
+        f'font-weight="{"bold" if run.bold else "normal"}"',
+        f'font-style="{"italic" if run.italic else "normal"}"',
     ]
-    if run.fill_opacity < 1.0:
-        parts.append(
-            f'fill-opacity="{format_ooxml_alpha(run.fill_opacity)}"'
-        )
-    if run.bold:
-        parts.append('font-weight="bold"')
-    if run.italic:
-        parts.append('font-style="italic"')
     if run.underline and run.strikethrough:
         parts.append('text-decoration="underline line-through"')
     elif run.underline:
         parts.append('text-decoration="underline"')
     elif run.strikethrough:
         parts.append('text-decoration="line-through"')
+    else:
+        parts.append('text-decoration="none"')
     if run.letter_spacing_px:
         parts.append(f'letter-spacing="{fmt_num(run.letter_spacing_px)}"')
     return " " + " ".join(parts)

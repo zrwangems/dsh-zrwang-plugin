@@ -1,8 +1,8 @@
 ---
 name: academic-pipeline
 metadata:
-  version: "3.24.0"
-  last_updated: "2026-10-27"
+  version: "3.24.2"
+  last_updated: "2026-11-06"
   depends_on: "deep-research, academic-paper, academic-paper-reviewer"
   status: active
   data_access_level: raw
@@ -17,7 +17,7 @@ description: "学术研究总编排：研究→写作→诚信检查→评审→
 >
 > 多角色执行（评审团、十阶段流水线、角色扮演）必须使用 DSH 的 Agent Team 工具（`spawn_teammate`、`team_task_*`、`wait_agent`、`send_message`）；当前会话看不到这些工具，说明用户没开 Agent Team，必须先提示用户开启，不得退化成单会话顺序扮演。
 
-# Academic Pipeline v3.24.0 — Full Academic Research Workflow Orchestrator
+# Academic Pipeline v3.24.2 — Full Academic Research Workflow Orchestrator
 
 A lightweight orchestrator that manages the complete academic pipeline from research exploration to final manuscript. It does not perform substantive work — it only detects stages, recommends modes, dispatches skills, manages transitions, and tracks state.
 
@@ -767,8 +767,8 @@ When `ARS_MODEL_TIERING` is set, the dispatching session routes this skill's age
 
 | Item | Content |
 |------|---------|
-| Skill Version | 3.24.0 |
-| Last Updated | 2026-10-27 |
+| Skill Version | 3.24.2 |
+| Last Updated | 2026-11-06 |
 | Maintainer | Cheng-I Wu |
 | Dependent Skills | deep-research v2.0+, academic-paper v2.0+, academic-paper-reviewer v1.1+ |
 | Role | Full academic research workflow orchestrator |

@@ -49,6 +49,7 @@ import re
 import sys
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
+from xml.etree import ElementTree as ET
 
 _SCRIPTS_DIR = Path(__file__).resolve().parents[1]
 if str(_SCRIPTS_DIR) not in sys.path:
@@ -88,6 +89,7 @@ _ICON_TRANSFORM_RE = re.compile(
     re.ASCII,
 )
 _ICON_STROKE_WIDTH_RE = re.compile(rf'{_NUMBER_PATTERN}(?:px|em|%)?')
+_LOCAL_URL_RE = re.compile(r'''url\(\s*(['"]?)#([^\s)'"\\]+)\1\s*\)''', re.IGNORECASE)
 DEFAULT_ICON_BASE_SIZE = 24
 BaseGeometry = float | tuple[float, float, float, float]
 
@@ -396,6 +398,16 @@ def parse_use_element(use_match: str) -> dict[str, str | float]:
     if stroke_width_value is not None:
         attrs['stroke-width'] = _validate_icon_attr(stroke_width_value, 'stroke-width', _ICON_STROKE_WIDTH_RE)
 
+    # These belong to the authored object, rather than the icon's local
+    # geometry. Keep them on the replacement group, including visibility.
+    for match in re.finditer(
+        r'''(?<!\S)(id|class|style|opacity|display|visibility|fill-opacity|stroke-opacity|'''
+        r'''clip-path|filter|data-pptx-[\w.-]+|data-edit-[\w.-]+)\s*=\s*(["'])(.*?)\2''',
+        use_match,
+        re.DOTALL,
+    ):
+        attrs[match.group(1)] = html.unescape(match.group(3))
+
     return attrs
 
 
@@ -425,7 +437,49 @@ def resolve_icon_color(attrs: dict[str, str | float], style: str) -> str:
     return '#000000'
 
 
-def generate_icon_group(attrs: dict[str, str | float], elements: list[str], style: str, base_size: BaseGeometry) -> str:
+def collect_svg_ids(content: str) -> set[str]:
+    """Collect document IDs before embedding instance-local icon content."""
+    return {elem_id for elem in ET.fromstring(content).iter() if (elem_id := elem.get('id'))}
+
+
+def _namespace_icon_elements(elements: list[str], used_ids: set[str]) -> list[str]:
+    """Reserve a deterministic instance prefix and rewrite its local references."""
+    content = '\n'.join(elements)
+    try:
+        root = ET.fromstring(f'<g xmlns:xlink="http://www.w3.org/1999/xlink">{content}</g>')
+    except ET.ParseError as exc:
+        raise ValueError('Icon content is not valid SVG; repair the project-local icon XML and retry') from exc
+    local_ids = {elem_id for elem in root.iter() if (elem_id := elem.get('id'))}
+    if not local_ids:
+        return elements
+    instance = 1
+    while any(elem_id.startswith(f'icon-instance-{instance}-') for elem_id in used_ids):
+        instance += 1
+    mapping = {elem_id: f'icon-instance-{instance}-{elem_id}' for elem_id in local_ids}
+    used_ids.update(mapping.values())
+    for elem in root.iter():
+        for name, value in list(elem.attrib.items()):
+            if name == 'id':
+                elem.set(name, mapping[value])
+            elif name.rsplit('}', 1)[-1] == 'href' and value.startswith('#'):
+                if value[1:] in mapping:
+                    elem.set(name, f'#{mapping[value[1:]]}')
+            else:
+                elem.set(name, _LOCAL_URL_RE.sub(
+                    lambda match: f'url({match[1]}#{mapping.get(match[2], match[2])}{match[1]})', value,
+                ))
+    leading_text = [html.escape(root.text, quote=False)] if root.text else []
+    return leading_text + [ET.tostring(child, encoding='unicode') for child in root]
+
+
+def generate_icon_group(
+    attrs: dict[str, str | float],
+    elements: list[str],
+    style: str,
+    base_size: BaseGeometry,
+    *,
+    used_ids: set[str] | None = None,
+) -> str:
     """
     Generate the icon's <g> element.
 
@@ -434,6 +488,7 @@ def generate_icon_group(attrs: dict[str, str | float], elements: list[str], styl
         elements:  List of drawable SVG elements
         style:     'fill', 'stroke', or 'preserve'
         base_size: Icon's natural size, or full viewBox geometry for preserve assets
+        used_ids:  Document IDs, extended with each embedded instance's internal IDs
 
     Returns:
         Complete <g> element string
@@ -463,14 +518,26 @@ def generate_icon_group(attrs: dict[str, str | float], elements: list[str], styl
             f'scale({_format_number(scale_x)}, {_format_number(scale_y)})'
         )
 
-    elements_str = '\n    '.join(elements)
+    if used_ids is None:
+        used_ids = set()
+    if attrs.get('id'):
+        used_ids.add(str(attrs['id']))
+    elements_str = '\n    '.join(_namespace_icon_elements(elements, used_ids))
+    context_attrs = ''.join(
+        f' {key}="{_xml_attr(value)}"'
+        for key, value in attrs.items()
+        if key in {
+            'id', 'class', 'style', 'opacity', 'display', 'visibility',
+            'fill-opacity', 'stroke-opacity', 'clip-path', 'filter',
+        } or key.startswith(('data-pptx-', 'data-edit-'))
+    )
 
     if style == 'preserve':
         if min_x or min_y:
             inner_transform = f'translate({_format_number(-min_x)}, {_format_number(-min_y)})'
             elements_str = f'<g transform="{_xml_attr(inner_transform)}">\n    {elements_str}\n    </g>'
         return f'''<!-- icon: {_xml_attr(icon_name)} -->
-  <g transform="{_xml_attr(transform)}">
+  <g transform="{_xml_attr(transform)}"{context_attrs}>
     {elements_str}
   </g>'''
 
@@ -484,7 +551,7 @@ def generate_icon_group(attrs: dict[str, str | float], elements: list[str], styl
         color_attrs = f'fill="{_xml_attr(color)}"'
 
     return f'''<!-- icon: {_xml_attr(icon_name)} -->
-  <g transform="{_xml_attr(transform)}" {color_attrs}>
+  <g transform="{_xml_attr(transform)}" {color_attrs}{context_attrs}>
     {elements_str}
   </g>'''
 
@@ -524,6 +591,7 @@ def process_svg_file(
     
     replaced_count = 0
     new_content = content
+    used_ids = collect_svg_ids(content)
     
     # Replace from back to front to avoid position offset
     for match in reversed(matches):
@@ -561,7 +629,7 @@ def process_svg_file(
                 f'{svg_path.name}: icon has no embeddable shapes: {icon_name}'
             )
         
-        replacement = generate_icon_group(attrs, elements, style, base_size)
+        replacement = generate_icon_group(attrs, elements, style, base_size, used_ids=used_ids)
         
         if verbose or dry_run:
             print(f"  [*] {icon_name}: x={attrs.get('x', 0)}, y={attrs.get('y', 0)}, "

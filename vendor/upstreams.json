@@ -56,7 +56,9 @@
         "simulink-environment-fundamentals",
         "simulink-modeling",
         "simulink-simulation",
-        "verification-validation-and-test"
+        "verification-validation-and-test",
+        "aerospace",
+        "simulink-block-and-blockset-authoring"
       ]
     },
     {
@@ -115,6 +117,15 @@
       "target": "office/html-ppt",
       "label": "HTML PPT Skill",
       "download": "git"
+    },
+    {
+      "id": "archify",
+      "repo": "local",
+      "layout": "local",
+      "source": "vendor/local/archify",
+      "target": "office/archify",
+      "label": "Archify",
+      "note": "上游 tt-a1i/archify 以 release 包分发（仓库根没有 SKILL.md），本地副本固定为 v3.2.0。"
     },
     {
       "id": "zotero",
@@ -291,17 +302,6 @@
       "target": "research/lieflat-less-ai-tone",
       "label": "Lieflat Less AI Tone",
       "download": "git"
-    },
-    {
-      "id": "qinyan",
-      "repo": "LeonChaoX/qinyan-academic-skills",
-      "ref": "main",
-      "layout": "catalog",
-      "source": "skills",
-      "target": "research/qinyan",
-      "label": "Qinyan Academic Skills",
-      "download": "git",
-      "note": "187 个技能，按上游 18 个分类目录分子层；install.sh 是 Claude Code 安装器，不收录。"
     },
     {
       "id": "nsfc",

@@ -39,7 +39,6 @@ const SOURCES = [
   // 2026-10 新增：科研 5 个仓库、办公 5 个仓库，默认全部关闭
   { nodeId: 'academic-humanizer', dir: 'research/academic-humanizer', direct: true },
   { nodeId: 'lieflat-less-ai-tone', dir: 'research/lieflat-less-ai-tone', direct: true },
-  { nodeId: 'qinyan', dir: 'research/qinyan', categories: true },
   { nodeId: 'nsfc', dir: 'research/nsfc' },
   { nodeId: 'supervisor', dir: 'research/supervisor-skills' },
   { nodeId: 'lieflat-charts', dir: 'office/lieflat-charts', direct: true },
@@ -85,6 +84,9 @@ function listCategoryDirs(dir) {
     .filter(e => e.isDirectory() && !existsSync(join(dir, e.name, 'SKILL.md')))
     .map(e => e.name)
 }
+
+/** 默认勾选只来自这些一级分组（工程）；科研/办公默认全不勾。 */
+const DEFAULT_GROUPS = new Set(['engineering'])
 
 /** 上游归到某组、但按使用习惯应挂在另一组节点下的技能。 */
 const NODE_OVERRIDE = {}
@@ -267,7 +269,8 @@ function main() {
   const strip = (node, groupId) => {
     delete node._parent
     if (node.kind === 'skill') {
-      if (legacyEnabled.has(node.name)) {
+      // 默认勾选只保留工程技能组：科研/办公两组默认全部不勾（2026-11 用户确认）
+      if (legacyEnabled.has(node.name) && DEFAULT_GROUPS.has(groupId)) {
         defaults.push(node.name)
       }
       stats.byGroup[groupId] = (stats.byGroup[groupId] ?? 0) + 1
@@ -292,15 +295,20 @@ function main() {
   const defaultsDocument = { version: 1, generatedAt: catalog.generatedAt, skills: defaults }
   writeFileSync(defaultsFile, `${JSON.stringify(defaultsDocument, null, 2)}\n`, 'utf8')
 
-  // 目录树和默认启用属于“文件类”配置，同时写到 DSH 家目录的配置根
-  try {
-    const configDir = configDirOfParams(readParams({}))
-    mkdirSync(configDir, { recursive: true })
-    writeFileSync(join(configDir, 'catalog.json'), `${JSON.stringify(catalog, null, 2)}\n`, 'utf8')
-    writeFileSync(join(configDir, 'defaults.json'), `${JSON.stringify(defaultsDocument, null, 2)}\n`, 'utf8')
-    process.stdout.write(`运行时目录树已写入 ${configDir}\n`)
-  } catch (error) {
-    process.stdout.write(`运行时目录树未写入：${String(error?.message ?? error)}\n`)
+  // 目录树和默认启用属于“文件类”配置，同时写到 DSH 家目录的配置根。
+  // 测试/隔离环境用 --no-config，只写仓库内文件，不动用户真实的 DSH 家目录。
+  if (process.argv.includes('--no-config')) {
+    process.stdout.write('已跳过运行时目录树写入（--no-config）\n')
+  } else {
+    try {
+      const configDir = configDirOfParams(readParams({}))
+      mkdirSync(configDir, { recursive: true })
+      writeFileSync(join(configDir, 'catalog.json'), `${JSON.stringify(catalog, null, 2)}\n`, 'utf8')
+      writeFileSync(join(configDir, 'defaults.json'), `${JSON.stringify(defaultsDocument, null, 2)}\n`, 'utf8')
+      process.stdout.write(`运行时目录树已写入 ${configDir}\n`)
+    } catch (error) {
+      process.stdout.write(`运行时目录树未写入：${String(error?.message ?? error)}\n`)
+    }
   }
   process.stdout.write(`ok：${total} 个技能，默认勾选 ${defaults.length} 个，写入 ${OUT}\n`)
   for (const [group, count] of Object.entries(stats.byGroup)) process.stdout.write(`  ${group.padEnd(12)} ${count}\n`)

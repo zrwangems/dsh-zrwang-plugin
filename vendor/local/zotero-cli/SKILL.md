@@ -16,9 +16,10 @@ Check it is set up before the first real call:
 zotero-cli config          # prints the resolved Zotero settings
 ```
 
-If that fails, Zotero is not reachable. Local mode needs the Zotero desktop
-app running with its local API enabled; web mode needs `ZOTERO_API_KEY` and
-`ZOTERO_LIBRARY_ID`. Say so rather than guessing at library contents.
+If that fails, Zotero is not reachable. 本 DSH 环境只允许走**本地 API 模式**：需要 Zotero 桌面版正在运行、
+并在设置里开启本地 API（Local API）。不要使用 Zotero 官方 Web API，也不需要任何
+`ZOTERO_API_KEY` / `ZOTERO_LIBRARY_ID`；如果连接失败，就说明 Zotero 桌面版没开或本地 API 没启用，
+如实告诉用户，不要猜测文献库内容。
 
 ## Always pass --json when you will read the output
 
@@ -184,7 +185,7 @@ orange, gray. Three or four colors with fixed meanings read better than
 eight; say what they mean in a note on the item.
 
 Writes in local mode need a one-time `zotero-mcp authorize-local` (Zotero 10
-or newer) or web API credentials. A write refused for that reason says so.
+or newer). 本环境不走官方 Web API，因此不要尝试用 API Key 授权或切换到远程模式。
 
 ## When something looks wrong
 

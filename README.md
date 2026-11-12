@@ -1,17 +1,14 @@
 # dsh-zrwang-plugin（My DSH）
 
-王湛然的DSH管理插件：按项目、按对话控制「注入哪些技能」&「注入哪些功能」，把 20 个上游 GitHub 技能仓库、481 个技能收进一个统一入口，并保留一些项目特有的功能。
+王湛然的DSH管理插件：按项目、按 DSH 工作区控制「注入哪些技能」&「注入哪些功能」，把 19 个上游 GitHub 技能仓库、301 个技能收进一个统一入口，并保留一些项目特有的功能。
 
-当前版本 **0.1.0**。
-
-![My DSH 面板](docs/images/my-dsh-panel-v3.png)
 
 ## 它解决什么
 
 1. DSH 的技能来自 `.agents/skills/`，一个项目里装几十上百个技能会互相干扰、难以挑选。这个插件把技能按「工程 / 科研 / 办公」三组做成目录树：
 - 勾选即注入，取消即摘除；同一份技能只存在插件包里，不在每个项目重复复制。
-- 按项目保存「默认」注入态，按对话派生临时「未命名」态，右键可基于、改名、删除。
-- 481 个技能全部可用，默认不注入任何技能（门禁全关），用哪组开哪组。
+- 按项目保存「默认」注入态，按 DSH 工作区自动建立以工作区命名的模式，同工作区所有对话共享、改动自动保存；右键可重命名、删除。
+- 301 个技能全部可用，默认不注入任何技能（门禁全关），用哪组开哪组。
 - 每个技能都能一键打开上游 GitHub 项目；中文短说明与详情在侧栏直接看。
 
 2. 好多好用的AI生态项目都是面向Claude Code/Codex,其余Harness本身无法使用，但是**deepseek**官方给出了具备了「一些皆插件」理念的Deepseek Harness 和 具有「许愿式编程」能力的 deepseek v4.1 flash-1017，给予了像我这种非IT从业者去**优化&改进&修饰&...**自己的Harness，让自己的Harness更适合自己使用，所以可以把很多有趣/好用的项目集成进自己的DSH中。
@@ -26,21 +23,21 @@
 
 ## 功能
 
-- **三级目录树**：工程技能组 223 个、科研技能组 239 个、办公技能组 19 个，共 **481 个技能**，来自 **20 个上游仓库**。
-- **技能选择态（按项目 + 对话）**
+- **三级目录树**：工程技能组 230 个、科研技能组 52 个、办公技能组 19 个，共 **301 个技能**，来自 **19 个上游仓库**。
+- **技能选择态（按项目 + DSH 工作区）**
   - 每个项目初始只有「默认」：基础注入态，所有门禁关闭，**注入数恒为 0**；只读，不因侧栏勾选而改变。
-  - 在「默认」上做任何修改（勾技能、开分组、开 ARS）会自动派生当前对话的「未命名」，自动保存。
-  - 每个对话最多一个「未命名」，没改名之前别的对话/项目都看不到；右键「重命名」后升级为项目级模式，同项目其他对话可见。
-  - 右键菜单：**基于此新建 / 重命名 / 删除**；删掉当前模式会回到「默认」。
-- **逐层与批量**：目录行的「全选 / 全关」只作用于**直接下一层**（子技能勾选、子目录门禁），不会递归下钻。
+  - 在「默认」上做任何修改（勾技能、开分组、开 ARS）会自动建立（或复用）**当前 DSH 工作区**的模式，名字就用工作区名，自动保存。
+  - 一个工作区只有一个模式，**同工作区的所有对话共享**；打开新对话或新建工作区本身不会新建模式。
+  - 右键「重命名」后升级为项目级模式，同项目所有工作区可见；右键菜单：**基于此新建 / 重命名 / 删除**（「默认」只读，不弹菜单）。
+- **逐层与批量**：目录行的「全选 / 全关」只作用于**直接下一层**（子技能勾选、子目录门禁），不会递归下钻。目录复选框按“子树里有没有勾选技能”自下而上推导：空子树显示未勾选并置灰；最上层四个（工程/科研/办公/ARS）仍是注入开关，默认都不勾。
 - **技能详情**：中文短说明一行、详情按 Markdown 渲染，含表格、列表、代码与链接；详情读不出来时提示打开 SKILL.md。
-- **上游链接**：每个「项目根」（如 MATLAB、沁言学术技能、中国专利技能、ARS）右侧有 **↗**，在浏览器打开对应 GitHub 仓库；项目内部的子目录/技能不重复显示。
+- **上游链接**：每个「项目根」（如 MATLAB、中国专利技能、ARS）右侧有 **↗**，在浏览器打开对应 GitHub 仓库；项目内部的子目录/技能不重复显示。
 - **写操作护栏**：模型用 write/edit 改插件内 `skills/`、`ars/` 一律拒绝（含经项目目录联接写入），避免跑任务时改坏技能。
 - **ARS 学术研究**：固定区块（默认关闭），勾选后注入 5 个流水线技能并提供 16 个 `/ars-*` 命令；多角色流程要求 DSH 开启 Agent Team。
 
 ## 安装
 
-需要 DSH Desktop `0.2.1-rc.1` 或更高版本。
+需要 DSH `0.2.2-rc.1` 或更高版本（插件声明 `engines.dsh >=0.2.2-rc.1`），右侧栏依赖 `dsh-better-sidebar 0.30.1+`。
 
 在 DSH 里打开「设置 → 插件 → 安装插件」，搜索并安装：
 
@@ -63,7 +60,7 @@ dsh plugin --profile desktop add dsh-zrwang-plugin
 1. 打开右侧栏「My DSH」，在搜索框里按技能名、类别或说明过滤。
 2. 展开「工程技能组 / 科研技能组 / 办公技能组」，打开需要的一级目录。
 3. 勾选技能，或点目录行的「全选 / 全关」批量处理直接下一层。
-4. 在侧栏底部切换选择态；右键模式可基于此新建、重命名或删除。
+4. 在侧栏底部切换选择态；右键模式可基于此新建（项目级模式）、重命名或删除，工作区模式改名后升级为项目级。
 5. 技能行「详情」展开中文说明，「打开」在右侧栏查看 SKILL.md，「↗」在浏览器打开上游项目。
 
 底部「学术研究（ARS）」与三个技能组排在一起：默认不勾选，勾选后注入 5 个论文流水线技能，并提供 `/ars-plan`、`/ars-full`、`/ars-lit-review`、`/ars-reviewer`、`/ars-revision` 等 16 个命令。多角色流程依赖 DSH 的 **Agent Team**，未开启时对应命令会提示先开启。
@@ -75,18 +72,19 @@ dsh plugin --profile desktop add dsh-zrwang-plugin
 | 栏目 | 内容 |
 | --- | --- |
 | ARS 设置 | Python 解释器、Python 依赖检查（PyYAML、jsonschema、pypdf 等） |
-| 模型服务 | 生图模型（ppt-master）、OCR 模型、OpenRouter（生图/幻灯片技能） |
+| 模型服务 | 生图模型（ppt-master）、OCR 模型 |
 | Nature-skill 设置 | PubMed / Crossref / arXiv 检索参数、百度 OCR Token |
-| 科研信息 | 沁言学术 API、Parallel、Zotero 文献库；PubMed/NCBI 复用 Nature 里的配置 |
 
-保存的密钥写入宿主进程环境（`QINYAN_API_KEY`、`OPENROUTER_API_KEY`、`ZOTERO_*`、`NCBI_*` 等），模型执行脚本时子进程直接继承；沁言学术与 pyzotero 未配置时对应技能在侧栏置灰。
+保存的设置会同步写进宿主进程环境（如 `NCBI_EMAIL`、`NCBI_API_KEY`），模型执行脚本时子进程直接继承；本机没有 `zotero-cli` 命令时对应技能在侧栏置灰。`zotero-cli` 技能只支持 Zotero 桌面版本的本地 API，不需要 Zotero 官方 Web API 凭据，因此设置页没有 Zotero 配置块。
+
+学校的访问配置（北航）是固定信息，随插件包放在 `config/nature-downloader/school.json`；插件启动时把 `LIT_DL_CONFIG_DIR` 指向包内这个目录，`nature-downloader` 技能直接读它，不再往 `~/.dsh/zrwang-plugin-config/` 复制。
 
 ## 技能来源
 
 | 分组 | 技能数 | 说明 |
 | --- | --- | --- |
-| 工程技能组 | 223 | MATLAB / Simulink / Polyspace / 示例 |
-| 科研技能组 | 239 | Nature、Zotero、沁言学术（187）、NSFC、HKUST 导师、中国专利（9）、学术去 AI 味等 |
+| 工程技能组 | 230 | MATLAB / Simulink / Polyspace / 示例 |
+| 科研技能组 | 52 | Nature、Zotero、NSFC、HKUST 导师、中国专利（9）、学术去 AI 味等 |
 | 办公技能组 | 19 | OfficeCLI、PPT Master、HTML PPT、Archify、图表、公文、归藏 PPT、前端幻灯片等 |
 | 学术研究（ARS） | 5 + 16 命令 | 独立功能区块，不占技能树 |
 
@@ -94,7 +92,7 @@ dsh plugin --profile desktop add dsh-zrwang-plugin
 
 ## 完整性与许可
 
-- 上游完整性：`node scripts/audit-upstreams.mjs --proxy=http://127.0.0.1:7897` 按 `vendor/upstreams.lock.json` 的 SHA 重新下载并逐技能核对文件清单；当前 20 仓库 / 481 技能全部通过。
+- 上游完整性：`node scripts/audit-upstreams.mjs --proxy=http://127.0.0.1:7897` 按 `vendor/upstreams.lock.json` 的 SHA 重新下载并逐技能核对文件清单；当前 19 个 GitHub 仓库 + 2 个本地副本 / 301 技能全部通过。
 - 各上游许可保留在 `vendor/licenses/<仓库>/`；`nsfc-agent-skills` 上游没有 LICENSE（仅本地使用）、`guizang-ppt-skill` 为 AGPL-3.0、Supervisor 为 CC BY-NC-SA、lieflat 系为 CC BY-NC / PolyForm Noncommercial，公开再分发前需逐个确认。
 - 插件代码为 MIT。
 
@@ -105,9 +103,10 @@ node --check host\*.mjs            # 语法
 node scripts/build-client.mjs      # 改了 client/ 必须重新构建
 node scripts/verify.mjs            # 包/目录/中文/默认集合/客户端语法全检
 node scripts/smoke-host.mjs        # 宿主冒烟（不装 DSH）
+node scripts/smoke-routes.mjs      # 路由层回归（假 ctx + 假 workspaceRegistry）
 ```
 
-架构与实现细节见 [docs/architecture.md](docs/architecture.md)，ARS 用法见 [docs/ars-usage.md](docs/ars-usage.md)。
+架构与实现细节见 [docs/architecture.md](docs/architecture.md)，选择态 v3 与排障记录见 [docs/presets-v3.md](docs/presets-v3.md)，ARS 用法见 [docs/ars-usage.md](docs/ars-usage.md)。
 
 ## 卸载
 
@@ -134,7 +133,6 @@ dsh plugin --profile desktop remove dsh-zrwang-plugin
 - [Academic Research Skills（ARS）](https://github.com/Imbad0202/academic-research-skills)——CC-BY-NC-4.0
 - [Academic Humanizer](https://github.com/AIScientists-Dev/academic-humanizer)——MIT
 - [Lieflat Less AI Tone](https://github.com/larashero3-dotcom/lieflat-less-ai-tone)——CC BY-NC 4.0
-- [Qinyan Academic Skills](https://github.com/LeonChaoX/qinyan-academic-skills)——MIT
 - [NSFC Agent Skills](https://github.com/njzjz/nsfc-agent-skills)——无 LICENSE（仅本地使用）
 - [Supervisor Skills](https://github.com/HKUSTDial/Supervisor-Skills)——CC BY-NC-SA 4.0
 - [Lieflat Charts](https://github.com/larashero3-dotcom/lieflat-charts)——PolyForm Noncommercial 1.0.0

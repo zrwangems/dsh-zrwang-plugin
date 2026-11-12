@@ -766,8 +766,8 @@ def download_and_rewrite_images(
                 print(f"   [WARN] Skip image {abs_url}: {e}")
                 continue
 
-        rel_path = os.path.join(
-            rel_prefix, saved_name) if rel_prefix else saved_name
+        # Markdown links are URL paths; os.path.join would emit "\" on Windows.
+        rel_path = f"{rel_prefix}/{saved_name}" if rel_prefix else saved_name
         img["src"] = rel_path
         manifest_item = manifest_by_filename.get(saved_name)
         if manifest_item is not None:
@@ -887,7 +887,7 @@ def find_main_content(soup: BeautifulSoup) -> Tag | None:
         for element in elements:
             if not any(element is existing for existing in candidates):
                 candidates.append(element)
-    for tag in soup(["script", "style", "nav", "noscript", "iframe"]):
+    for tag in soup(["script", "style", "nav", "noscript", "template", "iframe"]):
         tag.decompose()
     for tag in soup(["header", "footer", "aside"]):
         if not any(tag is body or body in tag.parents for body in candidates):
@@ -1548,6 +1548,7 @@ def main(argv: list[str] | None = None) -> int:
         "-f", "--file", help="File containing URLs (one per line)")
     parser.add_argument("-o", "--output", help="Output file (single URL only)")
     parser.add_argument("-d", "--dir", help="Output directory")
+    parser.add_argument("--reserved-output", action="append", default=[], help=argparse.SUPPRESS)
     parser.add_argument(
         "--emit-result",
         help="On success, write the saved output path as JSON to this file "
@@ -1570,6 +1571,8 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     args = parser.parse_args(argv)
+    _AUTO_NAMED_OUTPUTS.clear()
+    _AUTO_NAMED_OUTPUTS.update(Path(path).resolve() for path in args.reserved_output)
     CONFIG["insecure"] = args.insecure
     CONFIG["allow_private_hosts"] = args.allow_private_hosts
     if args.insecure:

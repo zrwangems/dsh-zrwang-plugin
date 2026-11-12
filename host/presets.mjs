@@ -1,34 +1,38 @@
 /**
- * 技能选择态 v2：按「项目 + 对话」保存的命名注入模式。
+ * 技能选择态 v3：按「项目 + DSH 工作区」保存的注入模式。
  *
- * 规则（2026-10 用户确认）：
+ * 规则（2026-11 用户确认）：
  * - 每个项目初始只有「默认」模式：项目基础注入态（所有层级门禁全关），注入数 0；不可重命名/删除；
- * - 「默认」只读：侧栏里任何勾选/门禁改动都会为当前对话自动派生一个「未命名」模式并切过去；
- * - 每个对话最多一个「未命名」；它只属于这个对话，**没改名之前别的对话/项目都看不到**；
- * - 「未命名」在右键菜单里改名后，升级为项目级命名模式，同项目其他对话可见；
- * - 项目级命名模式（含改名后的）在所有对话里都可见，修改即自动保存、所有对话共享；
+ * - 「默认」只读：在它上面做任何勾选/门禁改动时，为**当前 DSH 工作区**自动创建（或复用）一个模式；
+ * - 自动模式用工作区名命名（重名加「 (2)」），一个工作区只有一个，**同工作区的所有对话共享**；
+ * - 自动模式改动即自动保存；它只在本工作区可见，别的对话/工作区看不到；
+ * - 自动模式被重命名后升级为项目级命名模式：同项目所有工作区可见，修改即自动保存、所有对话共享；
+ * - 项目级命名模式在所有工作区都可见；「基于此新建」把源模式复制进当前工作区的自动模式；
  * - 一个模式记录每一层级的注入态（所有节点 gates + 技能勾选），计数 = 真正注入的技能数。
  *
  * 文件：state/presets.json
  * {
- *   version: 2,
+ *   version: 3,
  *   projects: {
  *     "<项目根>": {
  *       baselineStamp: "<catalog.generatedAt>",
- *       modes: [{ name, builtin, gates, selection, createdAt, updatedAt }],   // 默认 + 已命名（项目级）
- *       unnamed: { "<sessionId>": { gates, selection, updatedAt } },          // 每个对话的未命名
- *       active: { "<sessionId>": "<模式名>" }
+ *       modes: [{ name, builtin, gates, selection, createdAt, updatedAt }],
+ *       auto: { "<工作区键>": { name, title, path, gates, selection, createdAt, updatedAt } },
+ *       active: { "<工作区键>": "<模式名>" },
+ *       legacy: { auto: { "<sessionId>": { gates, selection, updatedAt } }, active: { "<sessionId>": "<模式名>" } }
  *     }
  *   }
  * }
  */
-import { readJson, stateFile, writeJson } from './state.mjs'
+import { backupFile, readJson, stateFile, writeJson } from './state.mjs'
 import { replaceGates } from './gates.mjs'
-import { setSelection } from './selection.mjs'
+import { effectiveGateOpen, setSelection } from './selection.mjs'
+import { presetNameFromTitle, projectKeyOf, uniquePresetName } from './workspaces.mjs'
 
 const FILE = stateFile('presets.json')
 export const DEFAULT_PRESET = '默认'
-const UNNAMED = '未命名'
+/** v2 的临时模式名：只在迁移旧数据时出现，不再作为新模式名。 */
+export const LEGACY_UNNAMED = '未命名'
 let cache
 
 function now() {
@@ -51,18 +55,111 @@ function gateMap(gates) {
   return out
 }
 
+/** 「默认」模式的基础勾选 = catalog.defaults（生成目录树时决定，当前只含工程组技能）。 */
+function defaultsMap(catalog) {
+  const out = {}
+  for (const name of catalog.defaults ?? []) {
+    if (catalog.skills?.[name] !== undefined) out[name] = true
+  }
+  return out
+}
+
 async function persist() {
   cache.updatedAt = now()
   await writeJson(FILE, cache)
 }
 
 function projectKey(projectRoot) {
-  return String(projectRoot ?? '').replace(/\//g, '\\').replace(/\\+$/, '') || '(未知项目)'
+  return projectKeyOf(projectRoot)
 }
 
 function newMode(name, gates, selection, builtin = false) {
   const stamp = now()
   return { name, builtin, gates, selection, createdAt: stamp, updatedAt: stamp }
+}
+
+function newAutoMode(name, workspace, gates, selection) {
+  const stamp = now()
+  return {
+    name,
+    title: workspace.title,
+    path: workspace.path ?? '',
+    gates,
+    selection,
+    createdAt: stamp,
+    updatedAt: stamp,
+  }
+}
+
+/** 已被占用的模式名：默认 + 项目级命名模式 + 所有工作区的自动模式。 */
+function takenNames(entry) {
+  const taken = new Set([DEFAULT_PRESET])
+  for (const mode of entry.modes) taken.add(mode.name)
+  for (const auto of Object.values(entry.auto)) taken.add(auto.name)
+  return taken
+}
+
+function autoOf(entry, workspace) {
+  return entry.auto[workspace.key]
+}
+
+function namedMode(entry, name) {
+  return entry.modes.find(mode => mode.name === name)
+}
+
+function modeExists(entry, workspace, name) {
+  if (name === DEFAULT_PRESET) return true
+  if (namedMode(entry, name) !== undefined) return true
+  const auto = autoOf(entry, workspace)
+  return auto !== undefined && auto.name === name
+}
+
+function activeNameOf(entry, workspace) {
+  const name = entry.active[workspace.key]
+  if (typeof name === 'string' && modeExists(entry, workspace, name)) return name
+  return DEFAULT_PRESET
+}
+
+function modeContent(entry, workspace, name) {
+  if (name === DEFAULT_PRESET) {
+    const mode = namedMode(entry, DEFAULT_PRESET)
+    if (mode === undefined) return undefined
+    return { gates: mode.gates ?? {}, selection: mode.selection ?? {}, builtin: true, workspace: false }
+  }
+  const mode = namedMode(entry, name)
+  if (mode !== undefined) {
+    return { gates: mode.gates ?? {}, selection: mode.selection ?? {}, builtin: false, workspace: false }
+  }
+  const auto = autoOf(entry, workspace)
+  if (auto !== undefined && auto.name === name) {
+    return { gates: auto.gates ?? {}, selection: auto.selection ?? {}, builtin: false, workspace: true }
+  }
+  return undefined
+}
+
+/** v2 → v3：unnamed/active 先搬到 legacy，等对应会话下次访问时按工作区落位。 */
+function migrateV2(projects) {
+  const out = {}
+  for (const [key, entry] of Object.entries(projects ?? {})) {
+    if (entry === null || typeof entry !== 'object') continue
+    const unnamed = entry.unnamed !== null && typeof entry.unnamed === 'object' ? entry.unnamed : {}
+    const active = entry.active !== null && typeof entry.active === 'object' && typeof entry.active !== 'string' ? entry.active : {}
+    const hasLegacy = Object.keys(unnamed).length > 0 || Object.keys(active).length > 0
+    out[key] = {
+      baselineStamp: entry.baselineStamp ?? '',
+      modes: Array.isArray(entry.modes) ? entry.modes : [],
+      auto:
+        entry.auto !== null && typeof entry.auto === 'object'
+          ? entry.auto
+          : {},
+      active:
+        entry.active !== null && typeof entry.active === 'object' && typeof entry.active !== 'string'
+          ? entry.active
+          : {},
+      ...(hasLegacy ? { legacy: { auto: unnamed, active } } : {}),
+    }
+  }
+  return out
 }
 
 function ensureEntry(catalog, selection, gates, projectRoot) {
@@ -72,87 +169,134 @@ function ensureEntry(catalog, selection, gates, projectRoot) {
   if (entry === undefined) {
     entry = {
       baselineStamp: stamp,
-      modes: [newMode(DEFAULT_PRESET, {}, selectedMap(catalog, selection), true)],
-      unnamed: {},
+      modes: [newMode(DEFAULT_PRESET, {}, defaultsMap(catalog), true)],
+      auto: {},
       active: {},
     }
     cache.projects[key] = entry
     return { entry, key, dirty: true }
   }
   let dirty = false
-  // 兼容旧结构：active 曾是一个字符串
-  if (typeof entry.active === 'string') {
+  if (entry.auto === null || typeof entry.auto !== 'object') {
+    entry.auto = {}
+    dirty = true
+  }
+  if (entry.active === null || typeof entry.active !== 'object' || typeof entry.active === 'string') {
     entry.active = {}
     dirty = true
   }
-  if (entry.active === null || typeof entry.active !== 'object') {
-    entry.active = {}
-    dirty = true
-  }
-  if (entry.unnamed === null || typeof entry.unnamed !== 'object') {
-    entry.unnamed = {}
+  if (entry.legacy !== undefined && (entry.legacy === null || typeof entry.legacy !== 'object')) {
+    delete entry.legacy
     dirty = true
   }
   // 项目本身变化（目录树重新生成）时刷新默认模式的基础选择；已有自定义模式不动。
   if (stamp.length > 0 && entry.baselineStamp !== stamp) {
     const base = entry.modes.find(mode => mode.builtin === true)
-    if (base !== undefined) base.selection = selectedMap(catalog, selection)
+    if (base !== undefined) base.selection = defaultsMap(catalog)
     entry.baselineStamp = stamp
     dirty = true
   }
   const knownSkills = new Set(Object.keys(catalog.skills))
-  for (const mode of entry.modes) {
-    for (const name of Object.keys(mode.selection)) {
-      if (!knownSkills.has(name)) { delete mode.selection[name]; dirty = true }
+  const prune = record => {
+    if (record?.selection === undefined || record.selection === null) return
+    for (const name of Object.keys(record.selection)) {
+      if (!knownSkills.has(name)) { delete record.selection[name]; dirty = true }
     }
   }
+  for (const mode of entry.modes) prune(mode)
+  for (const auto of Object.values(entry.auto)) prune(auto)
   if (!entry.modes.some(mode => mode.builtin === true)) {
-    entry.modes.unshift(newMode(DEFAULT_PRESET, {}, selectedMap(catalog, selection), true))
+    entry.modes.unshift(newMode(DEFAULT_PRESET, {}, defaultsMap(catalog), true))
     dirty = true
+  }
+  // 自动模式与别的模式重名（迁移或手工编辑留下的脏数据）时重新取名。
+  const names = new Set([DEFAULT_PRESET])
+  for (const mode of entry.modes) names.add(mode.name)
+  for (const auto of Object.values(entry.auto)) {
+    if (names.has(auto.name)) {
+      const next = uniquePresetName(auto.title || auto.name, names)
+      for (const [wsKey, active] of Object.entries(entry.active)) {
+        if (active === auto.name && entry.auto[wsKey] === auto) entry.active[wsKey] = next
+      }
+      auto.name = next
+      dirty = true
+    }
+    names.add(auto.name)
   }
   void gates
   return { entry, key, dirty }
 }
 
-/** 读选择态（按项目 + 对话）。 */
+/** 工作区改名后让自动模式名跟随（自动模式名永远是生成的，重命名会升级为项目级模式）。 */
+function syncWorkspaceTitle(entry, workspace) {
+  const auto = autoOf(entry, workspace)
+  if (auto === undefined) return false
+  let dirty = false
+  if (auto.path !== (workspace.path ?? '')) {
+    auto.path = workspace.path ?? ''
+    dirty = true
+  }
+  if (auto.title !== workspace.title) {
+    const names = takenNames(entry)
+    names.delete(auto.name)
+    const next = uniquePresetName(workspace.title, names)
+    if (next !== auto.name) {
+      if (entry.active[workspace.key] === auto.name) entry.active[workspace.key] = next
+      auto.name = next
+    }
+    auto.title = workspace.title
+    dirty = true
+  }
+  return dirty
+}
+
+/** 把 v2 里某个会话的「未命名」搬到当前工作区的自动模式（只搬一次）。 */
+function migrateLegacySession(entry, workspace, sessionId) {
+  const legacy = entry.legacy
+  if (legacy === undefined || legacy === null) return false
+  const id = String(sessionId)
+  const record = legacy.auto?.[id]
+  const wasActive = legacy.active?.[id]
+  if (record === undefined) return false
+  delete legacy.auto[id]
+  if (wasActive !== undefined) delete legacy.active[id]
+  if (autoOf(entry, workspace) === undefined) {
+    const name = uniquePresetName(workspace.title, takenNames(entry))
+    const auto = newAutoMode(name, workspace, gateMap(record.gates), { ...(record.selection ?? {}) })
+    if (typeof record.updatedAt === 'string') auto.createdAt = record.updatedAt
+    entry.auto[workspace.key] = auto
+    if (wasActive === LEGACY_UNNAMED || entry.active[workspace.key] === undefined) entry.active[workspace.key] = name
+  }
+  if (Object.keys(legacy.auto ?? {}).length === 0 && Object.keys(legacy.active ?? {}).length === 0) delete entry.legacy
+  return true
+}
+
+/** 读选择态（按项目 + 工作区）。 */
 export async function loadPresets(catalog, selection, gates, projectRoot) {
+  let migrated = false
   if (cache === undefined) {
     const raw = await readJson(FILE, null)
-    cache = raw !== null && raw.version === 2 && raw.projects !== null && typeof raw.projects === 'object'
-      ? { version: 2, projects: raw.projects, updatedAt: raw.updatedAt }
-      : { version: 2, projects: {}, updatedAt: now() }
+    if (raw !== null && raw.version === 3 && raw.projects !== null && typeof raw.projects === 'object') {
+      cache = { version: 3, projects: raw.projects, updatedAt: raw.updatedAt }
+    } else if (raw !== null && raw.version === 2 && raw.projects !== null && typeof raw.projects === 'object') {
+      // 迁移前备份，迁移失败也不丢旧文件。
+      await backupFile(FILE, 'presets-v2')
+      cache = { version: 3, projects: migrateV2(raw.projects), updatedAt: now() }
+      migrated = true
+    } else {
+      cache = { version: 3, projects: {}, updatedAt: now() }
+    }
   }
   const { entry, key, dirty } = ensureEntry(catalog, selection, gates, projectRoot)
-  if (dirty) {
+  if (dirty || migrated) {
     // 新项目 / 结构迁移后：让默认模式成为当前注入态（门禁全关 → 注入 0）。
-    const base = entry.modes.find(mode => mode.builtin === true)
-    if (base !== undefined) await applyModeContent(catalog, { gates: base.gates ?? {}, selection: base.selection ?? {} })
+    if (migrated) {
+      const base = entry.modes.find(mode => mode.builtin === true)
+      if (base !== undefined) await applyModeContent(catalog, { gates: base.gates ?? {}, selection: base.selection ?? {} })
+    }
     await persist()
   }
   return { key, entry }
-}
-
-function unnamedOf(entry, sessionId) {
-  return entry.unnamed[String(sessionId)]
-}
-
-/** 当前对话活跃模式名：默认 / 命名模式 / 未命名。 */
-function activeNameOf(entry, sessionId) {
-  const name = entry.active[String(sessionId)]
-  if (name === UNNAMED && unnamedOf(entry, sessionId) !== undefined) return UNNAMED
-  if (entry.modes.some(mode => mode.name === name)) return name
-  return DEFAULT_PRESET
-}
-
-function modeContent(entry, sessionId, name) {
-  if (name === UNNAMED) {
-    const unnamed = unnamedOf(entry, sessionId)
-    if (unnamed === undefined) return undefined
-    return { gates: unnamed.gates ?? {}, selection: unnamed.selection ?? {}, builtin: false, unnamed: true }
-  }
-  const mode = entry.modes.find(item => item.name === name)
-  if (mode === undefined) return undefined
-  return { gates: mode.gates ?? {}, selection: mode.selection ?? {}, builtin: mode.builtin === true, unnamed: false }
 }
 
 /** 模式真正注入的技能数（门禁逐级打开、已勾选、未被禁选）。 */
@@ -165,44 +309,52 @@ export function modeInjectedCount(catalog, content, blocked) {
       if (parentOpen === true && selection.skills[node.name] === true && blocked?.[node.name] === undefined) count += 1
       return
     }
-    const isGroup = node.kind === 'group'
-    const selfOpen = isGroup ? gates[node.id] === true : gates[node.id] !== false
-    const open = parentOpen === true && selfOpen
+    const open = parentOpen === true && effectiveGateOpen(node, gates, selection)
     for (const child of node.children ?? []) walk(child, open)
   }
   for (const group of catalog.groups ?? []) walk(group, true)
   return count
 }
 
-/** 给客户端的模式摘要：默认 + 项目级命名模式 + 当前对话的未命名。 */
-export function presetsPayload(catalog, blocked, projectRoot, sessionId) {
+/** 给客户端的模式摘要：默认 + 项目级命名模式 + 当前工作区的自动模式。 */
+export function presetsPayload(catalog, blocked, projectRoot, workspace) {
   const key = projectKey(projectRoot)
   const entry = cache?.projects?.[key]
-  if (entry === undefined) return { active: DEFAULT_PRESET, items: [{ name: DEFAULT_PRESET, count: 0, builtin: true }] }
-  const active = activeNameOf(entry, sessionId)
+  const workspaceView = { key: workspace.key, title: workspace.title, path: workspace.path ?? '' }
+  if (entry === undefined) {
+    return {
+      active: DEFAULT_PRESET,
+      items: [{ name: DEFAULT_PRESET, count: 0, builtin: true, workspace: false }],
+      workspace: workspaceView,
+    }
+  }
+  const active = activeNameOf(entry, workspace)
   const items = entry.modes.map(mode => ({
     name: mode.name,
     count: modeInjectedCount(catalog, { gates: mode.gates, selection: mode.selection }, blocked ?? {}),
     builtin: mode.builtin === true,
-    unnamed: false,
+    workspace: false,
   }))
-  const unnamed = unnamedOf(entry, sessionId)
-  if (unnamed !== undefined) {
+  const auto = autoOf(entry, workspace)
+  if (auto !== undefined) {
     items.push({
-      name: UNNAMED,
-      count: modeInjectedCount(catalog, { gates: unnamed.gates, selection: unnamed.selection }, blocked ?? {}),
+      name: auto.name,
+      count: modeInjectedCount(catalog, { gates: auto.gates, selection: auto.selection }, blocked ?? {}),
       builtin: false,
-      unnamed: true,
+      workspace: true,
     })
   }
-  return { active, items }
+  return { active, items, workspace: workspaceView }
 }
 
-/** 取当前对话的模式内容（供 syncState 判断注入态）。 */
-export async function activeModeContent(catalog, selection, gates, projectRoot, sessionId) {
+/** 取当前工作区的模式内容（供 syncState 判断注入态），并按需迁移 v2 数据/跟随工作区改名。 */
+export async function activeModeContent(catalog, selection, gates, projectRoot, workspace, sessionId) {
   const { key, entry } = ensureEntry(catalog, selection, gates, projectRoot)
-  const name = activeNameOf(entry, sessionId)
-  return { key, entry, name, content: modeContent(entry, sessionId, name) }
+  const titleDirty = syncWorkspaceTitle(entry, workspace)
+  const legacyDirty = migrateLegacySession(entry, workspace, sessionId)
+  if (titleDirty || legacyDirty) await persist()
+  const name = activeNameOf(entry, workspace)
+  return { key, entry, name, content: modeContent(entry, workspace, name) }
 }
 
 /** 把模式内容同步到全局 selection / gates（注入链路读这两个）。 */
@@ -213,134 +365,166 @@ export async function applyModeContent(catalog, content) {
   await replaceGates(content.gates ?? {})
 }
 
-/** 用户改动前调用：当前是「默认」→ 为这个对话派生「未命名」；已有未命名则沿用。 */
-export async function ensureEditableMode(catalog, selection, gates, projectRoot, sessionId) {
+/** 用户改动前调用：当前是「默认」→ 为这个工作区创建/复用自动模式并切过去。 */
+export async function ensureEditableMode(catalog, selection, gates, projectRoot, workspace) {
   const { entry, key } = ensureEntry(catalog, selection, gates, projectRoot)
-  const name = activeNameOf(entry, sessionId)
-  if (name === DEFAULT_PRESET) {
-    entry.unnamed[String(sessionId)] = { gates: gateMap(gates), selection: selectedMap(catalog, selection), updatedAt: now() }
-    entry.active[String(sessionId)] = UNNAMED
-    await persist()
-    return { created: true, name: UNNAMED, entry, key }
+  syncWorkspaceTitle(entry, workspace)
+  const name = activeNameOf(entry, workspace)
+  if (name !== DEFAULT_PRESET) return { created: false, name, entry, key }
+  let auto = autoOf(entry, workspace)
+  if (auto === undefined) {
+    auto = newAutoMode(uniquePresetName(workspace.title, takenNames(entry)), workspace, {}, {})
+    entry.auto[workspace.key] = auto
   }
-  return { created: false, name, entry, key }
+  auto.gates = gateMap(gates)
+  auto.selection = selectedMap(catalog, selection)
+  auto.updatedAt = now()
+  entry.active[workspace.key] = auto.name
+  await persist()
+  return { created: true, name: auto.name, entry, key }
 }
 
-/** 把当前全局 selection/gates 写回当前对话的活跃模式。 */
-export async function saveActiveMode(catalog, selection, gates, projectRoot, sessionId) {
-  const { entry, key } = ensureEntry(catalog, selection, gates, projectRoot)
-  const name = activeNameOf(entry, sessionId)
+/** 把当前全局 selection/gates 写回当前工作区的活跃模式（自动保存）。 */
+export async function saveActiveMode(catalog, selection, gates, projectRoot, workspace) {
+  const { entry } = ensureEntry(catalog, selection, gates, projectRoot)
+  const name = activeNameOf(entry, workspace)
   if (name === DEFAULT_PRESET) return
-  if (name === UNNAMED) {
-    const unnamed = unnamedOf(entry, sessionId)
-    if (unnamed === undefined) return
-    unnamed.gates = gateMap(gates)
-    unnamed.selection = selectedMap(catalog, selection)
-    unnamed.updatedAt = now()
+  const auto = autoOf(entry, workspace)
+  if (auto !== undefined && auto.name === name) {
+    auto.gates = gateMap(gates)
+    auto.selection = selectedMap(catalog, selection)
+    auto.updatedAt = now()
     await persist()
     return
   }
-  const mode = entry.modes.find(item => item.name === name)
+  const mode = namedMode(entry, name)
   if (mode === undefined) return
   mode.gates = gateMap(gates)
   mode.selection = selectedMap(catalog, selection)
   mode.updatedAt = now()
   await persist()
-  void key
 }
 
-/** 切换到某个模式（只影响当前对话的活跃选择；项目级模式内容共享）。 */
-export async function applyMode(catalog, selection, gates, projectRoot, sessionId, name) {
+/** 切换到某个模式（只影响当前工作区的活跃选择；项目级模式内容共享）。 */
+export async function applyMode(catalog, selection, gates, projectRoot, workspace, name) {
   const { entry } = ensureEntry(catalog, selection, gates, projectRoot)
-  const content = modeContent(entry, sessionId, name)
+  const content = modeContent(entry, workspace, name)
   if (content === undefined) throw new Error(`没有这个模式：${name}`)
   await applyModeContent(catalog, content)
-  entry.active[String(sessionId)] = name
+  entry.active[workspace.key] = name
   await persist()
   return content
 }
 
-/** 基于某个模式新建：复制其注入态到当前对话的「未命名」并切过去。 */
-export async function cloneMode(catalog, selection, gates, projectRoot, sessionId, sourceName) {
+/**
+ * 基于某个模式新建：
+ * - 源是「默认」或项目级命名模式 → 复制进当前工作区的自动模式并切过去（自动模式已有内容会被覆盖）；
+ * - 源就是当前工作区的自动模式 → 复制成一个项目级命名模式（「源名 (2)」），因为复制到自己没有意义。
+ */
+export async function cloneMode(catalog, selection, gates, projectRoot, workspace, sourceName) {
   const { entry } = ensureEntry(catalog, selection, gates, projectRoot)
-  const source = modeContent(entry, sessionId, sourceName)
+  const source = modeContent(entry, workspace, sourceName)
   if (source === undefined) throw new Error(`没有这个模式：${sourceName}`)
-  entry.unnamed[String(sessionId)] = {
-    gates: gateMap(source.gates),
-    selection: { ...source.selection },
-    updatedAt: now(),
+  syncWorkspaceTitle(entry, workspace)
+
+  const currentAuto = autoOf(entry, workspace)
+  // 复制当前工作区自动模式：生成项目级副本，保留原自动模式
+  if (currentAuto !== undefined && currentAuto.name === sourceName) {
+    const names = takenNames(entry)
+    const copyName = uniquePresetName(sourceName, names)
+    const stamp = now()
+    entry.modes.push({
+      name: copyName,
+      builtin: false,
+      gates: gateMap(source.gates),
+      selection: { ...source.selection },
+      createdAt: stamp,
+      updatedAt: stamp,
+    })
+    entry.active[workspace.key] = copyName
+    await applyModeContent(catalog, { gates: source.gates, selection: source.selection })
+    await persist()
+    return { name: copyName, createdFrom: sourceName, promoted: true }
   }
-  entry.active[String(sessionId)] = UNNAMED
-  const content = modeContent(entry, sessionId, UNNAMED)
-  await applyModeContent(catalog, content)
+
+  // 其它来源（默认 / 项目级模式）：复制进当前工作区的自动模式
+  let auto = currentAuto
+  if (auto === undefined) {
+    auto = newAutoMode(uniquePresetName(workspace.title, takenNames(entry)), workspace, {}, {})
+    entry.auto[workspace.key] = auto
+  }
+  auto.gates = gateMap(source.gates)
+  auto.selection = { ...source.selection }
+  auto.updatedAt = now()
+  entry.active[workspace.key] = auto.name
+  await applyModeContent(catalog, { gates: auto.gates, selection: auto.selection })
   await persist()
-  return content
+  return { name: auto.name, createdFrom: sourceName }
 }
 
-/** 重命名：未命名 → 升级为项目级命名模式；命名模式 → 直接改名；默认不可改。 */
-export async function renameMode(catalog, selection, gates, projectRoot, sessionId, name, nextName) {
+/** 重命名：自动模式 → 升级为项目级命名模式；命名模式 → 直接改名；默认不可改。 */
+export async function renameMode(catalog, selection, gates, projectRoot, workspace, name, nextName) {
   const { entry } = ensureEntry(catalog, selection, gates, projectRoot)
   const trimmed = String(nextName ?? '').trim()
   if (trimmed.length === 0) throw new Error('模式名称不能为空')
   if (trimmed.length > 20) throw new Error('模式名称最多 20 个字')
-  if (trimmed === DEFAULT_PRESET || trimmed === UNNAMED) throw new Error(`不能命名为「${trimmed}」`)
+  if (trimmed === DEFAULT_PRESET) throw new Error(`不能命名为「${trimmed}」`)
   if (name === DEFAULT_PRESET) throw new Error('「默认」不能重命名')
-  if (entry.modes.some(mode => mode.name === trimmed)) throw new Error(`模式已存在：${trimmed}`)
-  if (name === UNNAMED) {
-    const unnamed = unnamedOf(entry, sessionId)
-    if (unnamed === undefined) throw new Error('当前对话没有「未命名」')
-    const wasActive = entry.active[String(sessionId)] === UNNAMED
+  if (trimmed === name) return { name: trimmed, promoted: false }
+  if (namedMode(entry, trimmed) !== undefined) throw new Error(`模式已存在：${trimmed}`)
+  const auto = autoOf(entry, workspace)
+  if (auto !== undefined && auto.name === name) {
     const stamp = now()
     entry.modes.push({
       name: trimmed,
       builtin: false,
-      gates: gateMap(unnamed.gates),
-      selection: { ...unnamed.selection },
+      gates: gateMap(auto.gates),
+      selection: { ...auto.selection },
       createdAt: stamp,
       updatedAt: stamp,
     })
-    delete entry.unnamed[String(sessionId)]
-    if (wasActive) entry.active[String(sessionId)] = trimmed
+    delete entry.auto[workspace.key]
+    if (entry.active[workspace.key] === name) entry.active[workspace.key] = trimmed
     await persist()
-    return entry.modes[entry.modes.length - 1]
+    return { name: trimmed, promoted: true }
   }
-  const mode = entry.modes.find(item => item.name === name)
+  const mode = namedMode(entry, name)
   if (mode === undefined) throw new Error(`没有这个模式：${name}`)
   mode.name = trimmed
   mode.updatedAt = now()
-  for (const [session, active] of Object.entries(entry.active)) {
-    if (active === name) entry.active[session] = trimmed
+  for (const [wsKey, active] of Object.entries(entry.active)) {
+    if (active === name) entry.active[wsKey] = trimmed
   }
   await persist()
-  return mode
+  return { name: trimmed, promoted: false }
 }
 
-/** 删除：默认不可删；删命名模式或当前对话的未命名。 */
-export async function deleteMode(catalog, selection, gates, projectRoot, sessionId, name) {
+/** 删除：默认不可删；删项目级命名模式或当前工作区的自动模式。 */
+export async function deleteMode(catalog, selection, gates, projectRoot, workspace, name) {
   const { entry } = ensureEntry(catalog, selection, gates, projectRoot)
   if (name === DEFAULT_PRESET) throw new Error('「默认」不能删除')
-  if (name === UNNAMED) {
-    delete entry.unnamed[String(sessionId)]
-    if (activeNameOf(entry, sessionId) === UNNAMED || entry.active[String(sessionId)] === UNNAMED) {
-      entry.active[String(sessionId)] = DEFAULT_PRESET
-      const base = entry.modes.find(mode => mode.builtin === true)
+  const auto = autoOf(entry, workspace)
+  if (auto !== undefined && auto.name === name) {
+    delete entry.auto[workspace.key]
+    if (entry.active[workspace.key] === name) {
+      entry.active[workspace.key] = DEFAULT_PRESET
+      const base = namedMode(entry, DEFAULT_PRESET)
       if (base !== undefined) await applyModeContent(catalog, base)
     }
     await persist()
-    return entry
+    return { deleted: 'workspace' }
   }
   const index = entry.modes.findIndex(mode => mode.name === name)
   if (index < 0) throw new Error(`没有这个模式：${name}`)
+  const wasActiveHere = entry.active[workspace.key] === name
   entry.modes.splice(index, 1)
-  for (const [session, active] of Object.entries(entry.active)) {
-    if (active === name) {
-      entry.active[session] = DEFAULT_PRESET
-      if (session === String(sessionId)) {
-        const base = entry.modes.find(mode => mode.builtin === true)
-        if (base !== undefined) await applyModeContent(catalog, base)
-      }
-    }
+  for (const [wsKey, active] of Object.entries(entry.active)) {
+    if (active === name) entry.active[wsKey] = DEFAULT_PRESET
+  }
+  if (wasActiveHere) {
+    const base = namedMode(entry, DEFAULT_PRESET)
+    if (base !== undefined) await applyModeContent(catalog, base)
   }
   await persist()
-  return entry
+  return { deleted: 'project' }
 }
