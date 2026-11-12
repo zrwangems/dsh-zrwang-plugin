@@ -37,6 +37,16 @@ const PRESERVE_NAMES = new Set([
 /** 拷贝时排除的非技能内容。 */
 const EXCLUDE = new Set(['.git', '.github', 'node_modules', '__pycache__', '.venv', '.pytest_cache', '.DS_Store'])
 
+/** 本插件运行不需要、随包删掉的上游文件/目录（按名字匹配），删除前移到 trash 便于回滚。 */
+const PRUNE_DIR_NAMES = new Set(['tests', 'test', '__pycache__', '.pytest_cache', '.venv', '.github', 'ci', '.vscode'])
+const PRUNE_FILE_NAMES = new Set([
+  'package-lock.json', 'pnpm-lock.yaml', 'yarn.lock', '.gitignore', '.gitattributes',
+  'CHANGELOG.md', 'CHANGELOG', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'codecov.yml',
+  'requirements-dev.txt', 'requirements-test.txt', '.pre-commit-config.yaml', '.eslintrc', '.eslintrc.js', '.eslintrc.json',
+])
+const PRUNE_STAMP = new Date().toISOString().replace(/[:.]/g, '-')
+const pruneTotals = { files: 0, bytes: 0 }
+
 const args = process.argv.slice(2)
 const noNetwork = args.includes('--no-network')
 const onlyArg = args.find(a => a.startsWith('--only='))
@@ -212,6 +222,37 @@ function cloneRepo(cfg) {
   log(`  git clone --depth 1 ${cfg.repo}`)
   run('git', ['clone', '--depth', '1', '--single-branch', '--branch', cfg.ref ?? 'main', `https://github.com/${cfg.repo}.git`, cloneDir])
   return cloneDir
+}
+
+function moveToPruned(full, label) {
+  const dest = join(TRASH, 'pruned', PRUNE_STAMP, label, relative(ROOT, full).split('\\').join('/'))
+  mkdirSync(dirname(dest), { recursive: true })
+  try {
+    renameSync(full, dest)
+  } catch {
+    rmSync(full, { recursive: true, force: true })
+  }
+}
+
+/** 删掉技能目录里本插件运行用不到的上游文件（测试、锁文件、CI 配置等），移到 trash 可回滚。 */
+function pruneUnused(rootDir, label) {
+  if (!existsSync(rootDir)) return
+  for (const entry of readdirSync(rootDir, { withFileTypes: true })) {
+    const full = join(rootDir, entry.name)
+    const shouldPrune = (entry.isDirectory() && PRUNE_DIR_NAMES.has(entry.name)) ||
+      (!entry.isDirectory() && (PRUNE_FILE_NAMES.has(entry.name) || entry.name.endsWith('.pyc')))
+    if (shouldPrune) {
+      if (entry.isDirectory()) {
+        for (const file of walkFiles(full)) { pruneTotals.files += 1; pruneTotals.bytes += statSync(file).size }
+      } else {
+        pruneTotals.files += 1
+        pruneTotals.bytes += statSync(full).size
+      }
+      moveToPruned(full, label)
+      continue
+    }
+    if (entry.isDirectory()) pruneUnused(full, label)
+  }
 }
 
 function copySkill(srcDir, destDir) {
@@ -608,6 +649,16 @@ async function main() {
   const repos = config.repos.filter(cfg => (only === undefined || only.has(cfg.id)) && !skip.has(cfg.id))
   if (repos.length === 0) fail(`没有匹配的上游：${only === undefined ? '(全部)' : [...only].join(',')}${skip.size > 0 ? `（跳过 ${[...skip].join(',')}）` : ''}`)
 
+  if (args.includes('--prune-only')) {
+    for (const cfg of repos) {
+      const base = cfg.outsideCatalog === true ? ROOT : SKILLS
+      const targets = [cfg.target, ...(cfg.aliases === undefined ? [] : [cfg.aliases.target])]
+      for (const target of targets) pruneUnused(join(base, ...target.split('/')), cfg.id)
+    }
+    log(`清理完成：${pruneTotals.files} 个文件 / ${(pruneTotals.bytes / 1048576).toFixed(1)} MB，已移到 ${join(TRASH, 'pruned')}`)
+    return
+  }
+
   for (const dir of [CACHE, EXTRACT, TRASH]) mkdirSync(dir, { recursive: true })
 
   const preserved = collectPreserved()
@@ -681,6 +732,7 @@ async function main() {
       applyHeaderNote(dest, cfg.headerNote)
       meta = applyDescription(cfg, dest, meta)
       const closure = copyScriptClosure(cfg, repoRoot, dest)
+      pruneUnused(dest, cfg.id)
       if (closure.files > 0) log(`  ${item.dirName}: 脚本闭包 ${closure.files} 个 / ${(closure.bytes / 1024).toFixed(0)} KB`)
       if (seen.has(meta.name)) fail(`技能重名：${meta.name}（${seen.get(meta.name)} 与 ${cfg.id}）`)
       seen.set(meta.name, cfg.id)

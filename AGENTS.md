@@ -119,7 +119,7 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
 - 技能密钥/账号配置走 `settings.json` 的对应字段，保存和启动时都调用 `applySkillEnv` 写进 `process.env`，
   模型跑 shell 时子进程继承；密钥字段留空表示保留已保存值，想清空要直接改 settings.json。
   `zotero-cli` 只支持 Zotero 桌面版本地 API，不要给它加官方 Web API 凭据或设置项。
-- **`skills/` 内的技能必须按本插件特性适配，不能直接照搬上游原代码/内容**：配置走插件设置或随包固定文件、工具名换成 DSH 能力、相对路径按单独注入成立、多角色写明 Agent Team；所有改写只走 `vendor/` 规则，并在 `docs/skill-adaptations.md` 登记改造内容（新增/升级技能时同步更新该文件）。
+- **`skills/` 内的技能必须按本插件特性适配，不能直接照搬上游原代码/内容**：配置走插件设置或随包固定文件、工具名换成 DSH 能力、相对路径按单独注入成立、多角色写明 Agent Team；所有改写只走 `vendor/` 规则，并在 `SKILL-ADAPTATIONS.md` 登记改造内容（新增/升级技能时同步更新该文件）。
 - 学校访问配置（北航）是固定信息，随包放在 `skills/research/nature-skills/nature-downloader/config/school.json`；启动时 `applySkillEnv` 把
   `LIT_DL_CONFIG_DIR` 指向包内这个目录，`nature-downloader` 技能直接读，**不要再往 `~/.dsh` 复制一份**。
   该技能其余运行文件（`credentials.json`、`settings.json`）已加进 `.gitignore`。

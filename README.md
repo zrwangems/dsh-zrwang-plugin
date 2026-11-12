@@ -124,7 +124,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 ## 功能区块
 
-ARS 用法见 [docs/ars-usage.md](docs/ars-usage.md)
+ARS 用法见 [docs/ars-usage.md](docs/ars-usage.md)，技能按插件特性做的改造记录见 [SKILL-ADAPTATIONS.md](SKILL-ADAPTATIONS.md)。
 
 - [Academic Research Skills（ARS）](https://github.com/Imbad0202/academic-research-skills)——CC BY-NC 4.0
 

@@ -35,3 +35,13 @@
 4. 需要配置的项已改走插件设置页或随包固定配置，不要求用户改技能目录里的文件。
 5. 上游许可已归档到 `vendor/licenses/<仓库>/`，并在 README「技能来源」标注协议。
 6. 跑 `vendor --only=…`、`gen-catalog`、`gen-skill-details`、`verify`、`smoke-host`，通过后更新本文件。
+
+## 上游文件的裁剪
+
+技能包里只保留运行需要的内容：`SKILL.md`、正文/脚本实际引用的资源、脚本闭包、许可文件。以下上游内容在 vendor 时会删掉（移到 `AgentsDo` 的 trash，可回滚，规则见 `scripts/vendor-skills.mjs` 的 `PRUNE_*`）：
+
+- `tests/`、`test/`、`__pycache__/`、`.pytest_cache/`、`.venv/`、`.github/`、`ci/`、`.vscode/`
+- `package-lock.json`、`pnpm-lock.yaml`、`yarn.lock`、`.gitignore`、`.gitattributes`
+- `CHANGELOG*`、`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`codecov.yml`、`requirements-dev.txt`、`requirements-test.txt`、`.pre-commit-config.yaml`、`.eslintrc*`、`*.pyc`
+
+需要时也可以手动跑 `node scripts/vendor-skills.mjs --prune-only` 对现有 `skills/` 做一次裁剪。
