@@ -20,32 +20,32 @@ function ZrConfigField(props) {
   var onChange = props.onChange
   var onCommit = props.onCommit === undefined ? function () {} : props.onCommit
   var head = [
-    h('span', { className: 'zr-field-label' }, field.label || field.id),
+    h('span', { className: 'zr-field-label' }, zrT(field.label || field.id)),
     field.required ? h('span', { className: 'zr-required' }, ' *') : null,
     field.getKeyUrl ? h('button', {
       className: 'zr-link',
       type: 'button',
       onClick: function () { zrOpenExternal(field.getKeyUrl) },
-    }, field.linkLabel || '获取 Key') : null,
+    }, zrT(field.linkLabel || '获取 Key')) : null,
   ]
   if (field.control === 'inline-select') {
     return h('div', { className: 'zr-status-row zr-status-select', key: field.id },
-      h('span', { className: 'zr-status-label' }, field.label || field.id),
+      h('span', { className: 'zr-status-label' }, zrT(field.label || field.id)),
       h('select', {
         className: 'zr-input zr-inline-select',
         value: value,
         title: value,
         onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
       }, (field.options || []).map(function (option) {
-        return h('option', { key: option.value, value: option.value }, option.label)
+        return h('option', { key: option.value, value: option.value }, zrT(option.label))
       })),
     )
   }
   if (field.control === 'status') {
     var level = field.level === undefined ? '' : field.level
     return h('div', { className: 'zr-status-row zr-status-' + level, key: field.id },
-      h('span', { className: 'zr-status-label' }, field.label || field.id),
-      h('span', { className: 'zr-status-value', title: field.help || field.value }, field.value === undefined ? '' : field.value),
+      h('span', { className: 'zr-status-label' }, zrT(field.label || field.id)),
+      h('span', { className: 'zr-status-value', title: zrT(field.help || field.value || '') }, field.value === undefined ? '' : zrT(field.value)),
     )
   }
   var control
@@ -55,13 +55,13 @@ function ZrConfigField(props) {
       value: value,
       onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
     }, (field.options || []).map(function (option) {
-      return h('option', { key: option.value, value: option.value }, option.label)
+      return h('option', { key: option.value, value: option.value }, zrT(option.label))
     }))
   } else if (field.control === 'textarea') {
     control = h('textarea', {
       className: 'zr-input zr-textarea',
       rows: field.rows || 3,
-      placeholder: field.placeholder || '',
+      placeholder: zrT(field.placeholder || ''),
       value: value,
       onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
       onBlur: function (event) { onCommit(event.target.value) },
@@ -71,7 +71,7 @@ function ZrConfigField(props) {
       className: 'zr-input',
       type: field.secret === true ? 'password' : 'text',
       autoComplete: 'off',
-      placeholder: field.placeholder || '',
+      placeholder: zrT(field.placeholder || ''),
       value: value,
       onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
       onBlur: function (event) { onCommit(event.target.value) },
@@ -79,14 +79,14 @@ function ZrConfigField(props) {
   }
   return h('div', { className: 'zr-field', key: field.id },
     h('label', { className: 'zr-field-head' }, head),
-    field.help ? h('div', { className: 'zr-help' }, field.help) : null,
+    field.help ? h('div', { className: 'zr-help' }, zrT(field.help)) : null,
     control
   )
 }
 
 function zrCheckLine(check) {
   if (check === undefined || check === null) return null
-  var detail = typeof check.detail === 'string' && check.detail.length > 0 ? check.detail : (check.ok ? '检查通过' : '检查失败')
+  var detail = typeof check.detail === 'string' && check.detail.length > 0 ? check.detail : (check.ok ? zrT('检查通过') : zrT('检查失败'))
   return h('div', { className: 'zr-check-result' + (check.ok === true ? ' zr-check-ok' : ' zr-check-bad') }, detail)
 }
 
@@ -112,8 +112,8 @@ function ZrConfigCard(props) {
           type: 'button',
           disabled: isBusy,
           onClick: function () { if (!isBusy) onAction(card.id, action.id) },
-        }, isBusy ? '检查中…' : action.label)
-      }), saved === card.id ? h('span', { className: 'zr-saved' }, '已更新') : null)
+        }, isBusy ? zrT('检查中…') : zrT(action.label))
+      }), saved === card.id ? h('span', { className: 'zr-saved' }, zrT('已更新')) : null)
     }
     return h('div', { className: 'zr-actions zr-actions-top' }, actions.map(function (action) {
       var isBusy = busyAction === action.id
@@ -123,16 +123,16 @@ function ZrConfigCard(props) {
         type: 'button',
         disabled: isBusy,
         onClick: function () { if (!isBusy) onAction(card.id, action.id) },
-      }, isBusy ? '检查中…' : action.label)
-    }), saved === card.id ? h('span', { className: 'zr-saved' }, '已自动保存') : null)
+      }, isBusy ? zrT('检查中…') : zrT(action.label))
+    }), saved === card.id ? h('span', { className: 'zr-saved' }, zrT('已自动保存')) : null)
   })()
   return h('div', { className: 'zr-card', key: card.id },
-    card.title ? h('div', { className: 'zr-card-head' }, h('h4', null, card.title)) : null,
+    card.title ? h('div', { className: 'zr-card-head' }, h('h4', null, zrT(card.title))) : null,
     actionsTop ? actionRow : null,
     card.kind === 'info' && !actionsTop
       ? h('div', null,
         h('div', { className: 'zr-desc' + (busyAction === undefined || busyAction === null ? '' : ' zr-desc-busy') },
-          busyAction === undefined || busyAction === null ? (card.status || '') : '正在检查，请稍等…'),
+          busyAction === undefined || busyAction === null ? zrT(card.status || '') : zrT('正在检查，请稍等…')),
         h('div', { className: 'zr-actions' }, actions.map(function (action) {
           if (typeof action.href === 'string' && action.href.length > 0) {
             return h('a', {
@@ -141,7 +141,7 @@ function ZrConfigCard(props) {
               href: action.href,
               target: '_blank',
               rel: 'noopener',
-            }, action.label)
+            }, zrT(action.label))
           }
           var isBusy = busyAction === action.id
           return h('button', {
@@ -150,8 +150,8 @@ function ZrConfigCard(props) {
             type: 'button',
             disabled: isBusy,
             onClick: function () { if (!isBusy) onAction(card.id, action.id) },
-          }, isBusy ? '检查中…' : action.label)
-        }), saved === card.id ? h('span', { className: 'zr-saved' }, '已更新') : null)
+          }, isBusy ? zrT('检查中…') : zrT(action.label))
+        }), saved === card.id ? h('span', { className: 'zr-saved' }, zrT('已更新')) : null)
       )
       : null,
     fields.length > 0
@@ -206,9 +206,9 @@ function ZrConfigCard(props) {
             type: 'button',
             disabled: isBusy,
             onClick: function () { if (!isBusy) onAction(card.id, action.id) },
-          }, isBusy ? '检查中…' : action.label)
+          }, isBusy ? zrT('检查中…') : zrT(action.label))
         }),
-        saved === card.id ? h('span', { className: 'zr-saved' }, '已自动保存') : null
+        saved === card.id ? h('span', { className: 'zr-saved' }, zrT('已自动保存')) : null
       )
   )
 }
@@ -246,8 +246,8 @@ function ZrSettingsView(props) {
   var errorPair = React.useState(null)
   var error = errorPair[0]
   var setError = errorPair[1]
-  var busyPair = React.useState(false)
-  var busy = busyPair[0]
+  var busyPair = React.useState(0)
+  var busy = busyPair[0] > 0
   var setBusy = busyPair[1]
   var actionBusyPair = React.useState(null)
   var actionBusy = actionBusyPair[0]
@@ -260,11 +260,25 @@ function ZrSettingsView(props) {
   var setActivePage = pagePair[1]
   var timersRef = React.useRef({})
 
-  var applyPayload = function (payload) {
-    setState({ loading: false, error: null, value: payload })
+  /**
+   * 保存/检查成功后刷新服务端数据，但保留用户已输入但尚未提交的内容：
+   * 只更新基线（判断“值有没有变”用），不覆盖本地输入。
+   */
+  var refreshPayload = function (payload) {
     var built = zrBuildValues(payload.cards || [])
     baselineRef.current = built
-    setValues(built)
+    setState({ loading: false, error: null, value: payload })
+    setValues(function (previous) {
+      var next = {}
+      for (var cardId in built) {
+        next[cardId] = {}
+        for (var fieldId in built[cardId]) {
+          var hasLocal = previous[cardId] !== undefined && Object.prototype.hasOwnProperty.call(previous[cardId], fieldId)
+          next[cardId][fieldId] = hasLocal ? previous[cardId][fieldId] : built[cardId][fieldId]
+        }
+      }
+      return next
+    })
   }
 
   React.useEffect(function () {
@@ -274,11 +288,11 @@ function ZrSettingsView(props) {
     setValues(built)
   }, [state.value])
 
-  if (state.loading && state.value === null) return h('div', { className: 'zr-note' }, '正在读取设置…')
+  if (state.loading && state.value === null) return h('div', { className: 'zr-note' }, zrT('正在读取设置…'))
   if (state.error !== null) {
     return h('div', null,
-      h('div', { className: 'zr-err' }, '读取设置失败：' + state.error),
-      h('div', { className: 'zr-actions' }, h('button', { className: 'zr-btn', onClick: reload }, '重试'))
+      h('div', { className: 'zr-err' }, zrT('读取设置失败：') + state.error),
+      h('div', { className: 'zr-actions' }, h('button', { className: 'zr-btn', onClick: reload }, zrT('重试')))
     )
   }
   var data = state.value
@@ -288,8 +302,9 @@ function ZrSettingsView(props) {
     if (card === undefined) return
     var body = { action: 'save', cardId: cardId, values: valuesRef.current[cardId] || {} }
     setError(null)
+    setBusy(function (count) { return count + 1 })
     zrRequest('/settings', body).then(function (payload) {
-      applyPayload(payload.settings)
+      refreshPayload(payload.settings)
       setSaved(cardId)
       setChecks(function (previous) {
         var copy = {}
@@ -299,6 +314,8 @@ function ZrSettingsView(props) {
       })
     }, function (reason) {
       setError(zrErrorText(reason))
+    }).then(function () {
+      setBusy(function (count) { return Math.max(0, count - 1) })
     })
   }
 
@@ -344,7 +361,7 @@ function ZrSettingsView(props) {
           return copy
         })
       }
-      if (payload !== undefined && payload.settings !== undefined) applyPayload(payload.settings)
+      if (payload !== undefined && payload.settings !== undefined) refreshPayload(payload.settings)
       else reload()
       setSaved(cardId)
     }).catch(function (reason) {
@@ -355,9 +372,9 @@ function ZrSettingsView(props) {
   }
 
   var pages = [
-    { id: 'models', label: '模型服务' },
-    { id: 'research', label: '科研服务' },
-    { id: 'runtime', label: '运行环境' },
+    { id: 'models', label: zrT('模型服务') },
+    { id: 'research', label: zrT('科研服务') },
+    { id: 'runtime', label: zrT('运行环境') },
   ]
   var visibleCards = (data.cards || []).filter(function (card) {
     return (card.page || 'models') === activePage
@@ -387,7 +404,7 @@ function ZrSettingsView(props) {
           onAction: runAction,
         })
       }),
-      busy ? h('div', { className: 'zr-note' }, '正在保存…') : null
+      busy ? h('div', { className: 'zr-note' }, zrT('正在保存…')) : null
     )
   )
 }

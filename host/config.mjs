@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { configRoot } from './plugin-params.mjs'
 
 /** 包根目录（本文件在 host/ 下）。 */
 export const PKG_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -14,10 +15,10 @@ export const SKILLS_DIR = join(PKG_DIR, 'skills')
 /** 生成好的目录树。 */
 export const CATALOG_FILE = join(PKG_DIR, 'catalog', 'catalog.json')
 
-/** 运行态目录（gitignore）。测试可用 ZRWANG_PLUGIN_STATE_DIR 改到临时目录。 */
+/** 运行态目录（默认在插件配置目录下，升级/重装不会丢；测试可用 ZRWANG_PLUGIN_STATE_DIR 改到临时目录）。 */
 export const STATE_DIR = (() => {
   const override = process.env.ZRWANG_PLUGIN_STATE_DIR
-  return typeof override === 'string' && override.length > 0 ? resolve(override) : join(PKG_DIR, 'state')
+  return typeof override === 'string' && override.length > 0 ? resolve(override) : join(configRoot(), 'state')
 })()
 
 /** HTTP 路由前缀。 */

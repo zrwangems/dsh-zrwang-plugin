@@ -198,22 +198,24 @@ function ZrPanel(props) {
     post('/presets', { sessionId: scope.sessionId, cwd: scope.cwd, action: action, name: name, newName: newName })
   }
 
-  var bulkToggle = function (nodeId, value) {
-    post('/children', { sessionId: scope.sessionId, cwd: scope.cwd, nodeId: nodeId, value: value })
+  var bulkToggle = function (nodeId, value, only) {
+    var body = { sessionId: scope.sessionId, cwd: scope.cwd, nodeId: nodeId, value: value }
+    if (Array.isArray(only)) body.only = only
+    post('/children', body)
   }
 
   var openRepo = function (url) {
     zrRequest('/open-url', { url: url }).catch(function (reason) {
-      setActionError('打开 GitHub 项目失败：' + zrErrorText(reason))
+      setActionError(zrT('打开 GitHub 项目失败：') + zrErrorText(reason))
     })
   }
 
   var openDoc = function (node) {
     zrRequest('/doc?name=' + encodeURIComponent(node.name) + '&sessionId=' + encodeURIComponent(scope.sessionId)).then(function (doc) {
-      if (zrSidebarService === null || typeof zrSidebarService.openFile !== 'function') throw new Error('右侧栏文件查看器不可用')
+      if (zrSidebarService === null || typeof zrSidebarService.openFile !== 'function') throw new Error(zrT('右侧栏文件查看器不可用'))
       zrSidebarService.openFile({ sessionId: scope.sessionId, cwd: scope.cwd }, doc.path, node.name + ' · SKILL.md')
     }, function (reason) {
-      setActionError('打开文档失败：' + zrErrorText(reason))
+      setActionError(zrT('打开文档失败：') + zrErrorText(reason))
     })
   }
 
@@ -244,15 +246,15 @@ function ZrPanel(props) {
 
   var header = h('div', { className: 'zr-head' },
     h('h3', { title: 'dsh-zrwang-plugin' }, 'My DSH'),
-    h('button', { className: 'zr-btn', onClick: reload, disabled: busy, title: '重新读取' }, '刷新')
+    h('button', { className: 'zr-btn', onClick: reload, disabled: busy, title: zrT('重新读取') }, zrT('刷新'))
   )
 
-  if (state.loading && state.value === null) return h('div', { className: 'zr-root' }, header, h('div', { className: 'zr-note' }, '正在读取技能目录…'))
+  if (state.loading && state.value === null) return h('div', { className: 'zr-root' }, header, h('div', { className: 'zr-note' }, zrT('正在读取技能目录…')))
   if (state.error !== null) {
     return h('div', { className: 'zr-root' }, header,
-      h('div', { className: 'zr-err' }, '读取失败：' + state.error),
+      h('div', { className: 'zr-err' }, zrT('读取失败：') + state.error),
       h('div', { className: 'zr-actions', style: { padding: '0 10px' } },
-        h('button', { className: 'zr-btn', onClick: reload }, '重试'))
+        h('button', { className: 'zr-btn', onClick: reload }, zrT('重试')))
     )
   }
   var data = state.value
@@ -268,7 +270,7 @@ function ZrPanel(props) {
               setActionError(null)
               reload()
             },
-          }, '重试/刷新')))
+          }, zrT('重试/刷新'))))
       : null,
     h(ZrSkillsView, {
       data: data,
@@ -341,20 +343,68 @@ function migrateSidebarLayout() {
   if (migrated !== 0) zrRequest('/event', { kind: 'tab-id-migrated', detail: { migrated: migrated } }).catch(function () {})
 }
 
+/**
+ * 没有 dsh-better-sidebar 时的回退：注册成 DSH 原生右侧栏页签。
+ * 页签类型先在 sidebarRightTabs 注册，内容再挂到 sidebar.right.pane.tab（按类型 id 关联）。
+ */
+function registerNativeSidebar(ctx, report) {
+  var scope = ctx.inject(['slots', 'sidebarRightTabs', 'sidebarRight'], function (inner) {
+    zrEffect(inner, function () {
+      var disposer = inner.sidebarRightTabs.register({
+        id: ZR_PACKAGE,
+        kind: 'dsh-zrwang-plugin',
+        priority: 'extension',
+        title: function () { return 'My DSH' },
+        guide: [{
+          id: 'open',
+          order: 60,
+          title: function () { return 'My DSH' },
+          description: function () { return zrT('按会话选择要注入的技能（工程/科研/办公）') },
+        }],
+      })
+      report(true)
+      zrRequest('/event', { kind: 'native-tab-registered' }).catch(function () {})
+      return disposer
+    }, 'dsh-zrwang-plugin: native sidebar type')
+    zrEffect(inner, function () {
+      return inner.slots.inject('sidebar.right.pane.tab', function () {
+        return inner.slots.register({ name: 'sidebar.right.pane.tab', key: ZR_PACKAGE }, function ZrNativePanelHost(props) {
+          return h(ZrPanel, { scope: { sessionId: props.sessionId, cwd: props.cwd || '' } })
+        })
+      })
+    }, 'dsh-zrwang-plugin: native sidebar body')
+  })
+  return scope
+}
+
 function apply(ctx) {
   zrEffect(ctx, function () { return installStyle() }, 'dsh-zrwang-plugin: style')
   zrRequest('/event', { kind: 'client-apply', detail: { version: ZR_VERSION } }).catch(function () {})
   migrateSidebarLayout()
   registerSlots(ctx)
+  var nativeScope = null
+  var nativeRegistered = false
+  var betterReady = false
+  var registerNative = function () {
+    if (betterReady || nativeRegistered) return
+    nativeScope = registerNativeSidebar(ctx, function (ok) { nativeRegistered = ok === true })
+  }
   var register = function (scope) {
     var service = scope.betterSidebar !== undefined ? scope.betterSidebar : (typeof scope.get === 'function' ? scope.get('betterSidebar') : undefined)
     if (service === undefined || typeof service.registerTab !== 'function') return
+    betterReady = true
+    // 原生回退页签如果已经建好，切换成 better-sidebar 页签并撤掉回退，避免两个入口。
+    if (nativeScope !== null) {
+      try { if (typeof nativeScope.dispose === 'function') nativeScope.dispose() } catch (error) { /* 忽略 */ }
+      nativeScope = null
+      nativeRegistered = false
+    }
     zrSidebarService = service
     zrEffect(scope, function () {
       var disposer = service.registerTab({
         id: ZR_TAB_ID,
         title: function () { return 'My DSH' },
-        description: function () { return '按会话选择要注入的扩展（工程/科研/办公）' },
+        description: function () { return zrT('按会话选择要注入的扩展（工程/科研/办公）') },
         icon: function (size) { return ZrIcon(size) },
         order: 40,
         single: true,
@@ -370,6 +420,10 @@ function apply(ctx) {
   }
   if (typeof ctx.inject === 'function') ctx.inject(['betterSidebar'], register)
   else if (ctx.betterSidebar !== undefined) register(ctx)
+  // betterSidebar 可能比本插件晚就绪：等 2 秒；仍没有就退回 DSH 原生右侧栏页签。
+  if (typeof setTimeout === 'function') {
+    setTimeout(function () { registerNative() }, 2000)
+  }
 }
 
 var zrPlugin = {

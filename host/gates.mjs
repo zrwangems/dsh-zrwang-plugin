@@ -26,18 +26,23 @@ async function loadDocument() {
   return cache
 }
 
-export async function loadGates() {
-  const document = await loadDocument()
+/** 把落盘门禁补齐成完整视图（一级目录、ARS、Windows MCP 默认 false）。 */
+export function normalizeGates(raw) {
   const gates = {}
-  for (const id of GROUP_IDS) gates[id] = document.gates[id] === true
-  for (const [id, value] of Object.entries(document.gates)) {
+  for (const id of GROUP_IDS) gates[id] = raw?.[id] === true
+  for (const [id, value] of Object.entries(raw ?? {})) {
     if (typeof value === 'boolean') gates[id] = value
   }
   // ARS 是第四行固定区块：默认关闭，用户勾选后才注入。
-  gates.ars = document.gates.ars === true
+  gates.ars = raw?.ars === true
   // Windows MCP 组件：手动门禁，默认关闭；MathWorks 组件是推导值，不落盘。
-  gates['windows-mcp'] = document.gates['windows-mcp'] === true
+  gates['windows-mcp'] = raw?.['windows-mcp'] === true
   return gates
+}
+
+export async function loadGates() {
+  const document = await loadDocument()
+  return normalizeGates(document.gates)
 }
 
 export async function setGates(patch) {

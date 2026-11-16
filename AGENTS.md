@@ -65,7 +65,7 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
 | `host/ars-commands.mjs` | ARS 的 16 个 `/ars-*` 原生命令：命令处理器用 `agent.followup()` 投递"技能指令 + 用户输入" |
 | `host/project.mjs` | cwd → 项目根（最近 `.git` 祖先，否则 cwd） |
 | `host/catalog.mjs` | 读 catalog.json、遍历/查询目录树 |
-| `host/sessions.mjs` | 会话一级开关 |
+| `host/state.mjs` | 运行态目录（默认在 `~/.dsh/zrwang-plugin-config/state/`，可用 `ZRWANG_PLUGIN_STATE_DIR` 覆盖；首次启动从旧版包内 `state/` 复制一次）与原子写、事件日志 |
 | `host/selection.mjs` | 全局技能勾选、门禁后的目标集合 |
 | `host/farm.mjs` | 目录联接的创建/移除/冲突检测、ppt projects 链接 |
 | `host/skill-settings.mjs` | 设置参数、技能运行时文件生成、进程环境注入、组件状态与检查动作（写前备份） |
@@ -117,7 +117,7 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
   不要再把它加回 `vendor/upstreams.json`，否则 `gen-catalog` 会因 lock 对不上而失败。
 - `nsfc-agent-skills` 上游无 LICENSE、`guizang-ppt-skill` 是 AGPL-3.0、Supervisor 是 CC BY-NC-SA、
   lieflat 两仓库是 PolyForm Noncommercial：这些技能只能随包本地使用，公开发布前需逐个确认许可。
-- **技能选择态 v3（按项目 + DSH 工作区）**：`state/presets.json` 存 `modes`（默认 + 项目级命名）、
+- **技能选择态 v3（按项目 + DSH 工作区）**：`<配置目录>/state/presets.json` 存 `modes`（默认 + 项目级命名）、
   `auto[workspaceKey]`（每个工作区一个、名字取工作区标题）、`active[workspaceKey]`。所有写接口先
   `activateMode` 同步当前工作区的模式，再 `ensureEditableMode`（在「默认」上改东西会建立/复用工作区模式），
   改完 `saveActiveMode`；漏掉这三步会让 A 工作区的模式串到 B 工作区的显示。
@@ -137,7 +137,9 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
   `skills/<子技能>/` 由 rewrite 改成 `../<子技能>/`，保证单独注入后相对路径仍成立。
 - 上游完整性用 `node scripts/audit-upstreams.mjs --proxy=…` 核对；GH 按钮只给“项目根”生成（见 3.7）。
 - 层级行「全选/全关」走 `POST /children` → `selection.mjs` 的 `childBatch`：只处理直接子节点
-  （子是技能改 selection，子是目录改该目录门禁），不要写成递归。
+  （子是技能改 selection，子是目录改该目录门禁），不要写成递归；**一级目录（group）同时切换本组门禁**，
+  否则用户点「全选」会看到子项勾上但注入数为 0。搜索过滤时客户端会带 `only`（可见子节点列表），
+  后端只处理这些子节点，不要忽略这个参数。
 - 目录复选框显示规则：一级分组（工程/科研/办公）和 ARS 是**显式注入闸门**；更深层目录按「子树里有没有
   勾选技能」自下而上推导（`selection.mjs` 的 `effectiveGateOpen` / `buildEffectiveGates`），子树空就显示
   未勾选并禁点，显式 `false` 仍可覆盖。勾选技能变化后要清掉祖先目录的显式门禁（`gates.mjs` 的 `clearGates`），
@@ -160,9 +162,14 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
   `order` 和 `nodes.zh.json`；单技能类别会被 `gen-catalog.mjs` 的 flatten 规则提成直属技能，这是既有行为。
 - **生图配置 v2**：`settings.json` 只有 `image.{baseUrl,model,apiKey}`，不再分厂商；保存后写
   `ZRWANG_IMAGE_*` 进程环境，`ppt-master` 的 `image_gen.py` 顶部桥接补丁把它映射成 `OPENAI_*` 并固定
-  `IMAGE_BACKEND=openai`。`config.py` 已禁用上游 `.env` 查找；**不写 `~/.ppt-master/.env`，不提供兼容开关**。注意 DSH 的 shell 子进程会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量（`@deepseek-ai/dsh-subprocess-local` 的凭据清洗），所以密钥不能只靠环境变量传给技能；插件生成 `state/python/sitecustomize.py`，技能用的 Python 进程启动时会从 `settings.json` 把密钥补回 `os.environ`（`image_gen.py` 另保留文件兜底）。新增密钥字段时，记得同步 `applyPythonSecretBridge` 的映射表。
+  `IMAGE_BACKEND=openai`。`config.py` 已禁用上游 `.env` 查找；**不写 `~/.ppt-master/.env`，不提供兼容开关**。注意 DSH 的 shell 子进程会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量（`@deepseek-ai/dsh-subprocess-local` 的凭据清洗），所以密钥不能只靠环境变量传给技能；插件生成 `<配置目录>/state/python/sitecustomize.py`，技能用的 Python 进程启动时会从 `settings.json` 把密钥补回 `os.environ`（`image_gen.py` 另保留文件兜底）。新增密钥字段时，记得同步 `applyPythonSecretBridge` 的映射表。
   `image2ppt` 读插件配置目录下的 `config.yaml`（`IMAGE2PPT_CONFIG_HOME`）。
-- **Firecrawl（可选）**：`firecrawl-cli` 由 npm 全局安装（`npm i -g firecrawl-cli`）；插件在 `state/bin` 生成 `firecrawl` shim，由 `scripts/firecrawl-shim.mjs` 从 `settings.json` 的 `optional.firecrawlApiKey` 读取 Key 后调用真实 CLI（DSH shell 会清洗 `FIRECRAWL_API_KEY`，不能直接依赖环境变量）。未安装或未设置 Key 时 shim 不存在/CLI 自行报错，skill 会退回内置抓取。
+- **Firecrawl（可选）**：`firecrawl-cli` 由 npm 全局安装（`npm i -g firecrawl-cli`）；插件在 `<配置目录>/state/bin` 生成 `firecrawl` shim，由 `scripts/firecrawl-shim.mjs` 从 `settings.json` 的 `optional.firecrawlApiKey` 读取 Key 后调用真实 CLI（DSH shell 会清洗 `FIRECRAWL_API_KEY`，不能直接依赖环境变量）。未安装或未设置 Key 时 shim 不存在/CLI 自行报错，skill 会退回内置抓取。
+- **只读请求不改选择态**：`GET /catalog`、`POST /resync` 用 `modeState(..., false)` 在内存里算模式视图，**不要**调用 `applyModeContent` 写 selection/gates；写接口才 `activateMode` 对齐。否则客户端 600ms 后的自动轮询会覆盖用户刚落下的勾选。
+- **settings.json 权限**：写入后和启动时调用 `host/plugin-params.mjs` 的 `hardenFile`（Windows `icacls` 去继承、只留当前账户；其它平台 0600）。新增写 settings 的路径时复用 `writeParams`，不要再手写 `writeFileSync`。
+- **右侧栏回退**：优先 `betterSidebar` 页签；服务缺失 2 秒后回退注册 DSH 原生 `sidebarRightTabs` 页签（body 挂 `sidebar.right.pane.tab`，`props.sessionId` 由槽位传入）。改客户端入口时保留这条回退。
+- **界面文案**：本插件是中文项目，界面只用中文，不做语言切换、不维护英文表（client/text.mjs 的 zrT 只做 {name} 占位符替换）；新增文案直接用中文，宿主下发的卡片/组件文案也在客户端渲染时经 zrT 原样输出。
+- **npm 包内容**：`package.json` 的 `files` 只打包 `vendor/licenses`（不打包 `vendor/local`），`scripts/` 必须保留（firecrawl shim 在运行时用）。
 - **系统 Python（不自带、不安装）**：插件不再自带 `runtime/python`、不再有安装脚本；`host/python-detect.mjs` 检测本机
   Python（PATH、py 启动器、Conda、常见目录），用户在设置 → 运行环境 → Python 解释器 里下拉选择（改动自动保存，无保存按钮）；
   `host/ars.mjs` 的 `applyRuntimeEnv` 把 `python` / `python3` 指向所选解释器，`bash` 指向 Git Bash（`BASH_ENV` 注入
@@ -193,8 +200,10 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
   `audit-skill-config --check`；不同步更新记录会失败。
 - **MCP 组件**：`host/mcp.mjs` 用 `ctx.mcpManager.register()`（DSH ≥ 0.2.2-rc.2 才有）动态注册 `matlab-mcp` /
   `windows-mcp`，插件卸载时注销；headless/sdk profile 没有这个服务，必须降级而不是报错。serverName 固定，
-  profile 里若还有同名静态 MCP 行（旧 `mcp-matlab` / `mcp-windows`）会注册冲突，先删静态行。组件状态是宿主
-  全局的，不能按会话隔离；MathWorks 组件的开关由「工程门禁 + 工程注入数」推导，不落 gates 文件。
+  profile 里若还有同名静态 MCP 行（旧 `mcp-matlab` / `mcp-windows`）会注册冲突，先删静态行。组件注册是宿主
+  全局的；每个会话各自上报想要的状态，控制器取**并集**（任一近期会话需要就保持注册，最后一个会话关掉才注销），
+  不要改回“按当前请求覆盖”的单值，否则切会话会把别的会话正在用的工具注销。MathWorks 组件的开关由
+  「工程门禁 + 工程注入数」推导，不落 gates 文件。
   rc.2 的稳定性能力接上了 `list()` 状态（含 attempt/toolCount/lastError）→ 组件行「启动中/已启动（N 个工具）/启动失败」
   阶段标识 + 客户端轮询、`restart()` 组件行按钮、`POST /mcp` 的 restart/probe 接口；**注册参数固定、设置页不暴露任何 MCP
   配置项**（用户 2026-11-14 要求：mcp 不需要配置；运行环境页只把 matlab-mcp / windows-mcp 作为状态行展示），改参数就改 `host/mcp.mjs` 的 `resolveMatlabEntry/resolveWindowsEntry`。

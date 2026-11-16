@@ -129,6 +129,32 @@ check('同工作区会话共享同一模式与计数', presetsOf(shared.data).ac
   && presetsOf(shared.data).items.find(item => item.name === '工作区甲')?.count === auto.count,
   JSON.stringify(presetsOf(shared.data)))
 
+// ---- 3.1 /resync 只读：不改写选择态文件 ----
+const selectionFile = join(WORK, 'state', 'selection.json')
+const selectionBefore = readFileSync(selectionFile, 'utf8')
+const resynced = await call('POST', '/dsh-zrwang-plugin/resync', { sessionId: 'session-a', cwd: dirA })
+check('resync 成功且不改写 selection.json', resynced.status === 200 && resynced.data.ok === true
+  && readFileSync(selectionFile, 'utf8') === selectionBefore,
+  JSON.stringify(resynced.data?.error ?? resynced.status))
+
+// ---- 3.2 一级目录“全选”同时打开本组门禁，注入数不再为 0 ----
+const bulk = await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: true })
+const engStats = (bulk.data.groups ?? {}).engineering ?? {}
+check('工程组全选后本组门禁打开且有注入', bulk.status === 200 && engStats.enabled === true && engStats.injected > 0,
+  JSON.stringify(engStats))
+
+// ---- 3.3 搜索过滤下全选只改可见子节点 ----
+await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: false })
+const filtered = await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: true, only: ['matlab'] })
+const gatesFile = JSON.parse(readFileSync(join(WORK, 'state', 'gates.json'), 'utf8')).gates
+check('过滤后全选只打开可见子目录',
+  filtered.status === 200
+  && gatesFile.engineering === true
+  && gatesFile.matlab === true
+  && gatesFile.simulink !== true,
+  JSON.stringify({ engineering: gatesFile.engineering, matlab: gatesFile.matlab, simulink: gatesFile.simulink }))
+await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: false })
+
 // ---- 4. 另一工作区隔离 ----
 const isolated = await call('GET', `/dsh-zrwang-plugin/catalog?sessionId=session-c&cwd=${encodeURIComponent(dirB)}`)
 check('另一工作区看不到甲的自动模式', presetsOf(isolated.data).active === '默认'

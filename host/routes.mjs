@@ -10,9 +10,8 @@ import { catalogView, loadCatalog } from './catalog.mjs'
 import { reconcile, readLinks } from './farm.mjs'
 import { resolveProjectRoot } from './project.mjs'
 import { ancestorDirIdsOfSkill, buildEffectiveGates, childBatch, desiredSkills, groupCounts, loadSelection, resetGroup, setSelection } from './selection.mjs'
-import { applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, loadPresets, presetsPayload, renameMode, saveActiveMode, activeModeContent } from './presets.mjs'
-import { ensureSession } from './sessions.mjs'
-import { clearGates, loadGates, setGates } from './gates.mjs'
+import { presetsPayload, loadPresets, applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, renameMode, saveActiveMode, activeModeContent } from './presets.mjs'
+import { clearGates, loadGates, normalizeGates, setGates } from './gates.mjs'
 import { blockedSkills, applySkillEnv, checkArsDependencies, currentParams, openConfigTarget, runSettingCheck, saveSettingsCard, settingsCards } from './skill-settings.mjs'
 import { configDirOfParams } from './plugin-params.mjs'
 import { loadArsManifest, mergeArsSkills } from './ars.mjs'
@@ -103,17 +102,30 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
   const webServer = scope.webServer ?? scope.get?.('webServer')
 
   /**
-   * 把某个工作区的活跃模式内容同步到全局 selection / gates。
-   * 侧栏的分组门禁、勾选都读全局状态，所以每次读写都先按当前工作区的模式对齐，
-   * 避免 A 工作区的模式影响 B 工作区的显示。
+   * 读取当前工作区的活跃模式。
+   * persist=true 时把模式内容写回全局 selection / gates（用户改动前的对齐）；
+   * persist=false（/catalog、/resync 等只读请求）时只在内存里算出同样的视图，
+   * 不覆盖全局状态，避免后台轮询把刚落下的勾选写回旧值。
    */
-  async function activateMode(catalog, projectRoot, workspace) {
+  async function modeState(catalog, projectRoot, workspace, persist) {
     const selection = await loadSelection(catalog)
     const gates = await loadGates()
     await loadPresets(catalog, selection, gates, projectRoot)
     const active = await activeModeContent(catalog, selection, gates, projectRoot, workspace, workspace.sessionId)
-    if (active.content !== undefined) await applyModeContent(catalog, active.content)
-    return { selection: await loadSelection(catalog), gates: await loadGates(), active }
+    if (active.content === undefined) return { selection, gates, active }
+    if (persist === true) {
+      await applyModeContent(catalog, active.content)
+      return { selection: await loadSelection(catalog), gates: await loadGates(), active }
+    }
+    const skills = {}
+    for (const name of Object.keys(catalog.skills)) {
+      skills[name] = active.content.selection?.[name] === true
+    }
+    return { selection: { ...selection, skills }, gates: normalizeGates(active.content.gates), active }
+  }
+
+  async function activateMode(catalog, projectRoot, workspace) {
+    return modeState(catalog, projectRoot, workspace, true)
   }
 
   /** 会话 → 项目根 → DSH 工作区，统一入口。 */
@@ -136,12 +148,11 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
     if (ids.size > 0) await clearGates([...ids])
   }
 
-  async function syncState(sessionId, cwd, includeCatalog = true) {
+  async function syncState(sessionId, cwd, includeCatalog = true, persist = true) {
     const catalog = await loadCatalog()
     const scope = await contextOf(sessionId, cwd)
     const { projectRoot, workspace } = scope
-    const session = await ensureSession(sessionId, projectRoot)
-    const { selection, gates } = await activateMode(catalog, projectRoot, workspace)
+    const { selection, gates } = await modeState(catalog, projectRoot, workspace, persist)
     // ARS 是固定功能区块：作为技能树里的第四行，由模式里的 gates.ars 控制
     syncArsCommands(gates.ars === true)
     const params = currentParams(pluginConfig)
@@ -149,7 +160,7 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
     const desired = desiredSkills(catalog, selection, gates, blocked)
     // MCP 组件：MathWorks 随「工程技能组开启 + 确有工程技能注入」自动开关；Windows MCP 手动。
     const engineeringInjected = [...desired.keys()].filter(name => groupHasSkill(catalog, 'engineering', name)).length
-    if (mcpController !== undefined) await mcpController.reconcile(wantOf({ engineeringInjected, gates }))
+    if (mcpController !== undefined) await mcpController.reconcile(wantOf({ engineeringInjected, gates }), { sessionId })
     const mcpStatus = mcpController === undefined ? { available: false, servers: [] } : mcpController.status()
     const components = componentViews({ engineeringInjected, gates, status: mcpStatus })
     // ARS 是固定功能区块：作为技能树里的第四行，由会话/目录门禁 gates.ars 控制，默认开。
@@ -209,14 +220,13 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
     'GET /catalog': async query => {
       const sessionId = query.get('sessionId')
       if (sessionId === null || sessionId.length === 0) throw new Error('缺少 sessionId')
-      return syncState(sessionId, query.get('cwd') ?? undefined)
+      return syncState(sessionId, query.get('cwd') ?? undefined, true, false)
     },
     'POST /session': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
       const scope = await contextOf(body.sessionId, body.cwd)
       const catalog = await loadCatalog()
       const selection = await loadSelection(catalog)
-      await ensureSession(scope.sessionId, scope.projectRoot)
       const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
       // 在「默认」上改任何门禁 → 先为当前工作区建立（或复用）以工作区命名的模式
       await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
@@ -268,7 +278,9 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
       const selection = await loadSelection(catalog)
       const nodeId = typeof body.nodeId === 'string' ? body.nodeId : ''
       const value = body.value === true
-      const { skillChanges, gates } = childBatch(catalog, nodeId, value)
+      // 搜索过滤时客户端只传可见子节点，避免“全选”把没显示出来的子项也改掉。
+      const only = Array.isArray(body.only) ? body.only.filter(item => typeof item === 'string') : undefined
+      const { skillChanges, gates } = childBatch(catalog, nodeId, value, { only })
       const scope = await contextOf(body.sessionId, body.cwd)
       const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
       await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
@@ -346,7 +358,8 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
     },
     'POST /resync': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
-      return syncState(body.sessionId, body.cwd, false)
+      // 只读刷新：只重算视图与注入联接，不改写选择态文件（避免与用户的写操作抢状态）。
+      return syncState(body.sessionId, body.cwd, false, false)
     },
     'GET /settings': async () => {
       const catalog = await loadCatalog()

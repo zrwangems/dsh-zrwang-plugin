@@ -119,18 +119,18 @@ function ZrNodeRow(props) {
       className: 'zr-chev',
       'data-empty': hasChildren ? '0' : '1',
       onClick: function () { props.onToggleExpanded(node.id, !isOpen) },
-      'aria-label': isOpen ? '收起' : '展开',
+      'aria-label': isOpen ? zrT('收起') : zrT('展开'),
     }, isOpen ? '▾' : '▸'),
     h(ZrCheckbox, { checked: checked, disabled: disabled, label: node.title, onChange: onCheck }),
     h('div', { className: 'zr-text' },
       h('div', { className: 'zr-title' },
         h('span', { title: blockedReason || node.zh || node.desc || node.title }, node.title),
-        node.kind === 'skill' ? null : h('span', { className: 'zr-badge', title: '已注入/技能总数' }, '注入 ' + stats.injected + '/' + stats.total),
+        node.kind === 'skill' ? null : h('span', { className: 'zr-badge', title: zrT('已注入/技能总数') }, '注入 ' + stats.injected + '/' + stats.total),
         node.kind !== 'skill' && stats.selected !== stats.injected
-          ? h('span', { className: 'zr-tag', title: '已勾选的技能数（父级目录关闭时不注入）' }, '已勾选 ' + stats.selected)
+          ? h('span', { className: 'zr-tag', title: zrT('已勾选的技能数（父级目录关闭时不注入）') }, '已勾选 ' + stats.selected)
           : null,
-        node.kind !== 'skill' && stats.injected === 0 && stats.selected > 0 ? h('span', { className: 'zr-tag' }, '未注入') : null,
-        disabled && blockedReason !== undefined ? h('span', { className: 'zr-tag zr-blocked', title: blockedReason }, '未配置') : null
+        node.kind !== 'skill' && stats.injected === 0 && stats.selected > 0 ? h('span', { className: 'zr-tag' }, zrT('未注入')) : null,
+        disabled && blockedReason !== undefined ? h('span', { className: 'zr-tag zr-blocked', title: blockedReason }, zrT('未配置')) : null
       ),
       node.kind !== 'skill' && node.desc ? h('div', { className: 'zr-desc' }, node.desc) : null,
       node.kind === 'skill' ? h('div', { className: 'zr-desc' }, blockedReason !== undefined ? node.zh + '（' + blockedReason + '）' : node.zh) : null
@@ -140,38 +140,45 @@ function ZrNodeRow(props) {
         ? null
         : h('button', {
           className: 'zr-repobtn',
-          title: '在浏览器打开上游 GitHub 项目：' + repoUrl.replace('https://github.com/', ''),
+          title: zrT('在浏览器打开上游 GitHub 项目：') + repoUrl.replace('https://github.com/', ''),
           onClick: function (event) {
             event.stopPropagation()
             if (props.onOpenRepo !== undefined) props.onOpenRepo(repoUrl)
           },
         }, '↗'),
       hasChildren && node.kind !== 'skill'
-        ? h(React.Fragment, null,
-          h('button', {
-            className: 'zr-bulkbtn',
-            title: '选中/打开这一层下面的所有技能与分组（只下一层）',
-            onClick: function (event) { event.stopPropagation(); if (props.onBulk !== undefined) props.onBulk(node.id, true) },
-          }, '全选'),
-          h('button', {
-            className: 'zr-bulkbtn',
-            title: '取消/关闭这一层下面的所有技能与分组（只下一层）',
-            onClick: function (event) { event.stopPropagation(); if (props.onBulk !== undefined) props.onBulk(node.id, false) },
-          }, '全关'))
+        ? (function () {
+          // 搜索过滤时只对“看得见的直接子节点”生效，避免全选波及被过滤掉的项。
+          var only
+          if (searching) {
+            only = (node.children || []).map(function (child) { return child.kind === 'skill' ? child.name : child.id })
+          }
+          return h(React.Fragment, null,
+            h('button', {
+              className: 'zr-bulkbtn',
+              title: zrT('选中/打开这一层下面的所有技能与分组（只下一层）'),
+              onClick: function (event) { event.stopPropagation(); if (props.onBulk !== undefined) props.onBulk(node.id, true, only) },
+            }, zrT('全选')),
+            h('button', {
+              className: 'zr-bulkbtn',
+              title: zrT('取消/关闭这一层下面的所有技能与分组（只下一层）'),
+              onClick: function (event) { event.stopPropagation(); if (props.onBulk !== undefined) props.onBulk(node.id, false, only) },
+            }, zrT('全关')))
+        })()
         : null,
       node.kind === 'skill'
         ? h(React.Fragment, null,
           h('button', {
             className: 'zr-detailbtn' + (props.detail !== null && props.detail.name === node.name ? ' zr-active' : ''),
-            title: '展开/收起中文详情',
+            title: zrT('展开/收起中文详情'),
             onClick: function (event) { event.stopPropagation(); props.onToggleDetail(node) },
-          }, '详情'),
+          }, zrT('详情')),
           props.onOpenDoc !== undefined
             ? h('button', {
               className: 'zr-docbtn',
-              title: '在右侧栏打开 SKILL.md',
+              title: zrT('在右侧栏打开 SKILL.md'),
               onClick: function (event) { event.stopPropagation(); props.onOpenDoc(node) },
-            }, '打开')
+            }, zrT('打开'))
             : null)
         : null)
   )
@@ -182,11 +189,11 @@ function ZrNodeRow(props) {
         ? h('div', { className: 'zr-detail-body' },
           h(ZrMarkdown, { text: detail.doc.detailZh || '' }),
           detail.doc.truncated === true
-            ? h('div', { className: 'zr-detail-note' }, '中文摘要在此处中断；完整内容请点该技能行右侧的「打开」查看 SKILL.md。')
+            ? h('div', { className: 'zr-detail-note' }, zrT('中文摘要在此处中断；完整内容请点该技能行右侧的「打开」查看 SKILL.md。'))
             : null)
         : (detail.failed === true
-          ? h('div', { className: 'zr-detail-body' }, '（中文说明暂不可用）')
-          : h('div', { className: 'zr-detail-loading' }, '正在读取中文说明…'))
+          ? h('div', { className: 'zr-detail-body' }, zrT('（中文说明暂不可用）'))
+          : h('div', { className: 'zr-detail-loading' }, zrT('正在读取中文说明…')))
     )
     return h(React.Fragment, null, row, card)
   }
@@ -254,62 +261,49 @@ function ZrPresetsBar(props) {
     if (event.key === 'Enter') { event.preventDefault(); submitDialog() } else if (event.key === 'Escape') { event.preventDefault(); closeDialog() }
   }
 
-  // 右键菜单挂到 document.body：侧栏容器有 overflow/transform 时，面板内的 fixed 会被裁剪。
-  React.useEffect(function () {
-    if (menu === null) return undefined
-    var node = document.createElement('div')
-    node.className = 'zr-ctx'
-    node.style.position = 'fixed'
-    node.style.zIndex = '2147483000'
-    var entries = [{
-      label: '基于此新建',
-      action: function () { props.onClone(menu.name) },
-    }]
+  // 菜单作为组件自己的 React 子节点渲染（position: fixed + 视口坐标），不再往 document.body 写节点。
+  var menuEntries = []
+  if (menu !== null) {
+    menuEntries.push({ label: zrT('基于此新建'), action: function () { props.onClone(menu.name) } })
     if (menu.builtin !== true) {
-      entries.push({
-        label: '重命名',
+      menuEntries.push({
+        label: zrT('重命名'),
         action: function () { setDialog({ kind: 'rename', name: menu.name, value: menu.name }) },
       })
-      entries.push({
-        label: '删除',
+      menuEntries.push({
+        label: zrT('删除'),
         danger: true,
         action: function () { setDialog({ kind: 'delete', name: menu.name }) },
       })
     }
-    entries.forEach(function (entry) {
-      var button = document.createElement('button')
-      button.type = 'button'
-      button.textContent = entry.label
-      if (entry.danger === true) button.className = 'zr-ctx-danger'
-      button.addEventListener('click', function (event) {
-        event.stopPropagation()
-        setMenu(null)
-        entry.action()
-      })
-      node.appendChild(button)
-    })
-    node.addEventListener('click', function (event) { event.stopPropagation() })
-    document.body.appendChild(node)
-    // 选择态在底部：菜单固定出现在 chip 上方；水平方向按 chip 左边缘对齐并夹在视口内
-    var width = node.offsetWidth || 132
-    var height = node.offsetHeight || 90
-    var anchor = menu.anchor || { left: menu.x, right: menu.x, top: menu.y }
+  }
+  var menuStyle = (function () {
+    if (menu === null) return null
+    var anchor = menu.anchor || { left: menu.x, right: menu.x, top: menu.y, bottom: menu.y }
+    var width = 132
     var left = anchor.left
     if (left + width > window.innerWidth - 8) left = window.innerWidth - width - 8
     if (left < 8) left = 8
-    var top = anchor.top - height - 6
-    if (top < 8) top = Math.max(8, (anchor.bottom || anchor.top) + 6)
-    node.style.left = left + 'px'
-    node.style.top = top + 'px'
+    return {
+      position: 'fixed',
+      left: left + 'px',
+      top: Math.max(8, anchor.top - 6) + 'px',
+      transform: 'translateY(-100%)',
+    }
+  })()
+  React.useEffect(function () {
+    if (menu === null) return undefined
     var close = function () { setMenu(null) }
+    var onKey = function (event) { if (event.key === 'Escape') close() }
     document.addEventListener('click', close)
+    document.addEventListener('keydown', onKey)
     window.addEventListener('resize', close)
     window.addEventListener('scroll', close, true)
     return function () {
       document.removeEventListener('click', close)
+      document.removeEventListener('keydown', onKey)
       window.removeEventListener('resize', close)
       window.removeEventListener('scroll', close, true)
-      if (node.parentNode !== null) node.parentNode.removeChild(node)
     }
   }, [menu])
 
@@ -336,13 +330,13 @@ function ZrPresetsBar(props) {
       : h('div', {
         className: 'zr-presets-ws',
         title: (workspace.title || '') + (workspace.path !== undefined && workspace.path.length > 0 ? '（' + workspace.path + '）' : ''),
-      }, '工作区：' + workspace.title),
+      }, zrT('工作区：') + workspace.title),
     h('div', { className: 'zr-presets-list' },
       items.map(function (mode) {
         var active = presets.active === mode.name
-        var tip = '项目基础态（注入 0）；右键：基于此新建；勾选或打开门禁会自动建立当前工作区的模式'
-        if (mode.workspace === true) tip = '当前工作区的模式，改动自动保存；右键：基于此新建 / 重命名 / 删除'
-        else if (mode.builtin !== true) tip = '项目级模式，所有工作区共享；右键：基于此新建 / 重命名 / 删除'
+        var tip = zrT('项目基础态（注入 0）；右键：基于此新建；勾选或打开门禁会自动建立当前工作区的模式')
+        if (mode.workspace === true) tip = zrT('当前工作区的模式，改动自动保存；右键：基于此新建 / 重命名 / 删除')
+        else if (mode.builtin !== true) tip = zrT('项目级模式，所有工作区共享；右键：基于此新建 / 重命名 / 删除')
         return h('button', {
           key: mode.name,
           className: 'zr-preset' + (active ? ' zr-active' : '') + (mode.workspace === true ? ' zr-wsmode' : ''),
@@ -353,9 +347,21 @@ function ZrPresetsBar(props) {
         }, mode.name + ' · ' + mode.count)
       })
     ),
+    menu === null ? null : h('div', {
+      className: 'zr-ctx',
+      style: menuStyle,
+      onClick: function (event) { event.stopPropagation() },
+    }, menuEntries.map(function (entry) {
+      return h('button', {
+        key: entry.label,
+        type: 'button',
+        className: entry.danger === true ? 'zr-ctx-danger' : undefined,
+        onClick: function (event) { event.stopPropagation(); setMenu(null); entry.action() },
+      }, entry.label)
+    })),
     dialog === null ? null : h('div', { className: 'zr-modal-mask', onClick: closeDialog },
       h('div', { className: 'zr-modal', onClick: function (event) { event.stopPropagation() } },
-        h('div', { className: 'zr-modal-title' }, dialog.kind === 'rename' ? '重命名模式' : '删除模式'),
+        h('div', { className: 'zr-modal-title' }, dialog.kind === 'rename' ? zrT('重命名模式') : zrT('删除模式')),
         dialog.kind === 'rename'
           ? h('input', {
             className: 'zr-input',
@@ -364,14 +370,14 @@ function ZrPresetsBar(props) {
             onChange: dialogInput,
             onKeyDown: dialogKeyDown,
           })
-          : h('div', { className: 'zr-desc' }, '确定删除模式「' + dialog.name + '」？'),
+          : h('div', { className: 'zr-desc' }, zrT('确定删除模式「{name}」？', { name: dialog.name })),
         h('div', { className: 'zr-modal-actions' },
-          h('button', { className: 'zr-btn', type: 'button', onClick: closeDialog }, '取消'),
+          h('button', { className: 'zr-btn', type: 'button', onClick: closeDialog }, zrT('取消')),
           h('button', {
             className: 'zr-btn' + (dialog.kind === 'delete' ? ' zr-btn-danger' : ''),
             type: 'button',
             onClick: submitDialog,
-          }, dialog.kind === 'rename' ? '确定' : '删除')
+          }, dialog.kind === 'rename' ? zrT('确定') : zrT('删除'))
         )
       )
     )
@@ -426,15 +432,15 @@ function ZrArsRow(props) {
       h('div', { className: 'zr-title' },
         h('span', { title: ars.license }, ars.label),
         h('span', { className: 'zr-badge' }, badge),
-        enabled !== true ? h('span', { className: 'zr-tag' }, '未注入') : null
+        enabled !== true ? h('span', { className: 'zr-tag' }, zrT('未注入')) : null
       ),
-      h('div', { className: 'zr-desc' }, '论文流水线 · ' + ars.commandCount + ' 个 /ars-* 命令')
+      h('div', { className: 'zr-desc' }, zrT('论文流水线 · ') + ars.commandCount + zrT(' 个 /ars-* 命令'))
     ),
     h('div', { className: 'zr-row-actions' },
       typeof ars.repo === 'string' && ars.repo.length > 0
         ? h('button', {
           className: 'zr-repobtn',
-          title: '在浏览器打开上游 GitHub 项目：' + ars.repo,
+          title: zrT('在浏览器打开上游 GitHub 项目：') + ars.repo,
           type: 'button',
           onClick: function (event) {
             event.stopPropagation()
@@ -446,19 +452,33 @@ function ZrArsRow(props) {
         className: 'zr-detailbtn' + (open ? ' zr-active' : ''),
         type: 'button',
         onClick: function (event) { event.stopPropagation(); toggle() },
-      }, '详情'))
+      }, zrT('详情')))
   )
   if (!open) return row
   var card = h('div', { className: 'zr-detail-card' },
     doc === null || doc.loading === true
-      ? h('div', { className: 'zr-detail-loading' }, '正在读取用法…')
+      ? h('div', { className: 'zr-detail-loading' }, zrT('正在读取用法…'))
       : (doc.failed !== undefined
-        ? h('div', { className: 'zr-detail-body' }, '用法文档读取失败：' + String(doc.failed))
+        ? h('div', { className: 'zr-detail-body' }, zrT('用法文档读取失败：') + String(doc.failed))
         : h('div', { className: 'zr-ars-doc' }, h(ZrMarkdown, { text: doc.text }))))
   return h(React.Fragment, null, row, card)
 }
 
 var ZR_PHASE_CLASS = { running: ' zr-ok', starting: ' zr-warn', failed: ' zr-bad', unavailable: ' zr-blocked' }
+
+/** 组件行状态文案：用本地模板拼，避免宿主返回的中文状态串在英文界面里露出来。 */
+function zrComponentStatus(component) {
+  var phase = component.phase === undefined ? 'idle' : component.phase
+  if (phase === 'running') {
+    return component.toolCount === undefined ? zrT('已启动') : zrT('已启动（{count} 个工具）', { count: component.toolCount })
+  }
+  if (phase === 'starting') {
+    return component.attempt > 0 ? zrT('启动中（第 {n} 次尝试）', { n: component.attempt + 1 }) : zrT('启动中…')
+  }
+  if (phase === 'failed') return zrT('启动失败')
+  if (phase === 'unavailable') return zrT('当前 profile 不支持')
+  return zrT('未启动')
+}
 
 function ZrComponentRow(props) {
   var component = props.component
@@ -472,38 +492,40 @@ function ZrComponentRow(props) {
   var phase = component.phase || 'idle'
   var tagTitle = ''
   if (component.server && component.server.lastError) tagTitle = component.server.lastError
-  else if (phase === 'running') tagTitle = '已注册到当前 DSH：MCP 工具会在当前对话的下一条消息起出现在工具表，不需要新开会话'
-  else if (phase === 'starting') tagTitle = '启动完成后，MCP 工具从当前对话的下一条消息起生效，不需要新开会话'
+  else if (phase === 'running') tagTitle = zrT('已注册到当前 DSH：MCP 工具会在当前对话的下一条消息起出现在工具表，不需要新开会话')
+  else if (phase === 'starting') tagTitle = zrT('启动完成后，MCP 工具从当前对话的下一条消息起生效，不需要新开会话')
   var tag = component.enabled === true
-    ? h('span', { className: 'zr-tag' + (ZR_PHASE_CLASS[phase] || ''), title: tagTitle }, component.statusLabel || '')
-    : h('span', { className: 'zr-tag' }, component.kind === 'auto' ? '未开启' : '未注入')
+    ? h('span', { className: 'zr-tag' + (ZR_PHASE_CLASS[phase] || ''), title: tagTitle }, zrComponentStatus(component))
+    : (component.globallyActive === true
+      ? h('span', { className: 'zr-tag zr-ok', title: zrT('其它会话仍在使用，组件保持注册') }, zrT('全局已启动'))
+      : h('span', { className: 'zr-tag' }, component.kind === 'auto' ? zrT('未开启') : zrT('未注入')))
   var actions = []
   if (component.restartable === true && props.onMcpAction !== undefined) {
     actions.push(h('button', {
       className: 'zr-bulkbtn',
       type: 'button',
-      title: '重建这个 MCP 服务器实例（重置重连预算；MATLAB 重开会话后也用它）',
+      title: zrT('重建这个 MCP 服务器实例（重置重连预算；MATLAB 重开会话后也用它）'),
       onClick: function (event) {
         event.stopPropagation()
         props.onMcpAction(component.id, 'restart')
       },
-    }, '重启'))
+    }, zrT('重启')))
   }
   return h('div', { className: 'zr-row', 'data-kind': 'group', 'data-blocked': '0', style: { paddingLeft: '6px' } },
     h('button', { className: 'zr-chev', 'data-empty': '1', tabIndex: -1, 'aria-hidden': 'true' }, '▸'),
     h(ZrCheckbox, {
       checked: component.enabled === true,
       disabled: locked,
-      label: component.label,
+      label: zrT(component.label),
       onChange: toggle,
     }),
     h('div', { className: 'zr-text' },
       h('div', { className: 'zr-title' },
-        h('span', null, component.label),
+        h('span', null, zrT(component.label)),
         tag
       ),
       h('div', { className: 'zr-desc' },
-        component.desc + ' · ' + (component.kind === 'auto' ? '随工程技能组自动开关' : '手动开关'))
+        zrT(component.desc) + ' · ' + (component.kind === 'auto' ? zrT('随工程技能组自动开关') : zrT('手动开关')))
     ),
     actions.length > 0 ? h('div', { className: 'zr-row-actions' }, actions) : null
   )
@@ -524,12 +546,12 @@ function ZrSkillsView(props) {
     h('div', { className: 'zr-toolbar' },
       h('input', {
         className: 'zr-search',
-        placeholder: '搜索技能、类别或说明',
+        placeholder: zrT('搜索技能、类别或说明'),
         value: props.search,
         onChange: function (event) { props.onSearch(event.target.value) },
       }),
-      h('button', { className: 'zr-btn', onClick: function () { props.onExpandAll(true) } }, '展开'),
-      h('button', { className: 'zr-btn', onClick: function () { props.onExpandAll(false) } }, '收起')
+      h('button', { className: 'zr-btn', onClick: function () { props.onExpandAll(true) } }, zrT('展开')),
+      h('button', { className: 'zr-btn', onClick: function () { props.onExpandAll(false) } }, zrT('收起'))
     ),
     h('div', { className: 'zr-tree' },
       (data.components || []).some(function (item) { return item.enabled === true; })
@@ -538,10 +560,10 @@ function ZrSkillsView(props) {
             key: item.id,
             className: 'zr-tag' + (ZR_PHASE_CLASS[item.phase] || ''),
             title: item.server && item.server.lastError ? item.server.lastError : '',
-          }, item.label + '：' + (item.statusLabel || ''))
+          }, zrT('{label}：{status}', { label: zrT(item.label), status: zrComponentStatus(item) }))
         }))
         : null,
-      groups.length === 0 ? h('div', { className: 'zr-note' }, '没有匹配的技能') : null,
+      groups.length === 0 ? h('div', { className: 'zr-note' }, zrT('没有匹配的技能')) : null,
       groups.map(function (group) {
         return h(ZrNodeRow, {
           key: group.id,

@@ -68,8 +68,25 @@ for (const dir of distributableRoots) {
 }
 check('运行期代码不含作者本机路径', localPathHits.length === 0, localPathHits.join(', '))
 check('icon.svg 存在', existsSync(join(ROOT, 'icon.svg')))
-check('locale/en.json 存在', existsSync(join(ROOT, 'locale', 'en.json')))
+check('不提供英文 locale（中文项目）', !existsSync(join(ROOT, 'locale', 'en.json')))
 check('locale/zh-CN.json 存在', existsSync(join(ROOT, 'locale', 'zh-CN.json')))
+check('打包清单含 locale/docs/图标/补丁', ['locale', 'docs', 'icon.svg', 'cordis.patch.yml'].every(item => (pkg.files ?? []).includes(item)))
+check('vendor 只打包 licenses（不打包 22MB 的 vendor/local）',
+  (pkg.files ?? []).includes('vendor/licenses') && !(pkg.files ?? []).includes('vendor'))
+check('运行时脚本随包（firecrawl shim 在 scripts/ 下）', (pkg.files ?? []).includes('scripts')
+  && existsSync(join(ROOT, 'scripts', 'firecrawl-shim.mjs')))
+check('运行态目录不在包内（默认在 DSH 配置目录）',
+  !readFileSync(join(ROOT, 'host', 'config.mjs'), 'utf8').includes("join(PKG_DIR, 'state')"))
+check('只读请求不写选择态（resync/catalog 走 persist=false）', (() => {
+  const source = readFileSync(join(ROOT, 'host', 'routes.mjs'), 'utf8')
+  return source.includes('syncState(sessionId, query.get(\'cwd\') ?? undefined, true, false)')
+    && source.includes('syncState(body.sessionId, body.cwd, false, false)')
+})())
+check('客户端有 betterSidebar 缺失时的原生回退', readFileSync(join(ROOT, 'client', 'entry.mjs'), 'utf8').includes('registerNativeSidebar')
+  && readFileSync(join(ROOT, 'client', 'entry.mjs'), 'utf8').includes('sidebarRightTabs.register'))
+check('客户端文案统一中文（zrT 只做占位符）', existsSync(join(ROOT, 'client', 'text.mjs'))
+  && !readFileSync(join(ROOT, 'client', 'text.mjs'), 'utf8').includes('ZR_EN')
+  && readFileSync(join(ROOT, 'client', 'tree.mjs'), 'utf8').includes("zrT('全选')"))
 
 // ---- 2 补丁与设置 ----
 const packagePatch = readFileSync(join(ROOT, 'cordis.patch.yml'), 'utf8')

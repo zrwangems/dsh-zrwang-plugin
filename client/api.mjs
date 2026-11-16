@@ -45,7 +45,7 @@ function zrUseAsync(loader, deps) {
 }
 
 function zrErrorText(error) {
-  return String((error && error.message) || error || '未知错误')
+  return String((error && error.message) || error || zrT('未知错误'))
 }
 
 /** 兼容 ctx.effect 缺失的极端情况：直接执行，返回清理函数。 */

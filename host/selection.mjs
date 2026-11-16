@@ -81,17 +81,23 @@ export function findTreeNode(catalog, nodeId) {
 /**
  * “全选 / 全关”只作用直接子节点（只往下一层）：
  * 子技能 → 勾选变更；子目录 → 该目录的门禁；不会递归到孙节点。
+ * 一级目录行同时切换本组门禁，避免“子项都勾上了但注入数为 0”。
+ * options.only 给出可见子节点（搜索过滤后用），只处理这些子节点。
  */
-export function childBatch(catalog, nodeId, value) {
+export function childBatch(catalog, nodeId, value, options = {}) {
   const node = findTreeNode(catalog, nodeId)
   if (node === undefined) throw new Error(`目录树里没有节点：${nodeId}`)
   if (node.kind === 'skill') throw new Error('技能节点不能做批量选择')
+  const only = Array.isArray(options.only) ? new Set(options.only) : undefined
   const skillChanges = {}
   const gates = {}
   for (const child of node.children ?? []) {
+    const key = child.kind === 'skill' ? child.name : child.id
+    if (only !== undefined && !only.has(key)) continue
     if (child.kind === 'skill') skillChanges[child.name] = value === true
     else gates[child.id] = value === true
   }
+  if (node.kind === 'group') gates[node.id] = value === true
   return { skillChanges, gates }
 }
 

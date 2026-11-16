@@ -76,8 +76,29 @@ export function createMcpController(ctx) {
   const disposers = new Map()
   /** @type {Map<string, string>} 注册失败原因 */
   const failures = new Map()
-  let want = { mathworks: false, windows: false }
+  /**
+   * 每个会话各自想要的组件状态。组件注册是宿主全局的，取并集：
+   * 只要还有一个会话（工作区模式）需要，就保持注册，避免切会话把别人的工具注销。
+   * @type {Map<string, {mathworks: boolean, windows: boolean, at: number}>}
+   */
+  const wants = new Map()
+  const WANT_LIMIT = 50
   let queue = Promise.resolve()
+
+  const unionWant = () => {
+    const merged = { mathworks: false, windows: false }
+    for (const want of wants.values()) {
+      if (want.mathworks === true) merged.mathworks = true
+      if (want.windows === true) merged.windows = true
+    }
+    return merged
+  }
+
+  const pruneWants = () => {
+    if (wants.size <= WANT_LIMIT) return
+    const ordered = [...wants.entries()].sort((a, b) => a[1].at - b[1].at)
+    for (const [key] of ordered.slice(0, wants.size - WANT_LIMIT)) wants.delete(key)
+  }
 
   const manager = () => {
     try {
@@ -120,9 +141,10 @@ export function createMcpController(ctx) {
       { key: 'mathworks', name: SERVER_NAMES.mathworks, entry: () => resolveMatlabEntry() },
       { key: 'windows', name: SERVER_NAMES.windows, entry: () => resolveWindowsEntry() },
     ]
+    const wanted = unionWant()
     for (const target of targets) {
-      const wanted = want[target.key] === true
-      if (!wanted) {
+      const enabled = wanted[target.key] === true
+      if (!enabled) {
         release(target.name)
         continue
       }
@@ -133,12 +155,18 @@ export function createMcpController(ctx) {
 
   return {
     /**
-     * 对账当前组件状态。force=true 时先把已注册的实例注销再重建。
-     * @param {{mathworks?: boolean, windows?: boolean}} next - 目标组件状态
-     * @param {{force?: boolean}} [options]
+     * 对账某个会话的组件状态（多个会话取并集）。
+     * @param {{mathworks?: boolean, windows?: boolean}} next - 该会话的目标组件状态
+     * @param {{force?: boolean, sessionId?: string}} [options] - force 先注销重建；sessionId 用于按会话记状态
      */
     reconcile(next, options = {}) {
-      want = { mathworks: next?.mathworks === true, windows: next?.windows === true }
+      const key = typeof options.sessionId === 'string' && options.sessionId.length > 0 ? options.sessionId : '(全局)'
+      wants.set(key, {
+        mathworks: next?.mathworks === true,
+        windows: next?.windows === true,
+        at: Date.now(),
+      })
+      pruneWants()
       if (options.force === true) {
         for (const name of [...disposers.keys()]) release(name)
         failures.clear()
@@ -301,6 +329,8 @@ export function componentViews({ engineeringInjected, gates, status }) {
       desc,
       hint,
       phase,
+      // 本会话没开、但别的会话还在用：界面上要能看出来，别让人以为工具没了。
+      globallyActive: enabled !== true && (server.state === 'connected' || server.state === 'connecting' || server.state === 'reconnecting'),
       statusLabel: statusLabelOf(server),
       stateLabel: STATE_LABELS[server.state] ?? '状态未知',
       restartable: enabled && phase !== 'unavailable' && phase !== 'idle',

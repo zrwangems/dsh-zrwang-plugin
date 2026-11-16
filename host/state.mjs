@@ -3,14 +3,43 @@
  * 所有状态都在 state/ 下，不写 DSH profile，也不写用户主目录。
  */
 import { appendFile, copyFile, mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
-import { STATE_DIR } from './config.mjs'
+import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { PKG_DIR, STATE_DIR } from './config.mjs'
 
 const BACKUP_DIR = join(STATE_DIR, 'backups')
 const EVENTS_FILE = join(STATE_DIR, 'events.jsonl')
 const EVENT_LIMIT = 512 * 1024
+/** 旧版把 state 放在包目录；首次启动时复制到配置目录，旧目录保留不删。 */
+const LEGACY_STATE_DIR = join(PKG_DIR, 'state')
+const MIGRATED_MARK = join(STATE_DIR, '.migrated-from-package')
+let migrationDone = false
+
+/** 一次性迁移旧版包内 state 到配置目录（用户显式指定 ZRWANG_PLUGIN_STATE_DIR 时跳过）。 */
+function migrateLegacyState() {
+  if (migrationDone) return
+  migrationDone = true
+  if (typeof process.env.ZRWANG_PLUGIN_STATE_DIR === 'string' && process.env.ZRWANG_PLUGIN_STATE_DIR.length > 0) return
+  if (resolve(LEGACY_STATE_DIR) === resolve(STATE_DIR)) return
+  if (existsSync(MIGRATED_MARK)) return
+  if (!existsSync(LEGACY_STATE_DIR)) return
+  try {
+    mkdirSync(STATE_DIR, { recursive: true })
+    cpSync(LEGACY_STATE_DIR, STATE_DIR, { recursive: true, force: false, errorOnExist: false })
+    writeFileSync(MIGRATED_MARK, `${new Date().toISOString()}\n`, 'utf8')
+  } catch {
+    // 迁移失败不影响启动：继续用空状态，旧目录原样保留
+  }
+}
+
+/** 同步确保状态目录存在（插件装配早期、写 Python 启动钩子前调用）。 */
+export function ensureStateDirSync() {
+  migrateLegacyState()
+  mkdirSync(STATE_DIR, { recursive: true })
+}
 
 export async function ensureStateDir() {
+  ensureStateDirSync()
   await mkdir(STATE_DIR, { recursive: true })
 }
 

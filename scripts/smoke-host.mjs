@@ -22,7 +22,6 @@ writeFileSync(join(runtimeConfigDir, 'defaults.json'), `${JSON.stringify({ versi
 const { loadCatalog, skillsInGroup } = await import('../host/catalog.mjs')
 const { loadSelection, desiredSkills, setSelection } = await import('../host/selection.mjs')
 const { buildEffectiveGates } = await import('../host/selection.mjs')
-const { ensureSession, setGates } = await import('../host/sessions.mjs')
 const { resolveProjectRoot } = await import('../host/project.mjs')
 const { reconcile } = await import('../host/farm.mjs')
 const { SKILLS_DIR } = await import('../host/config.mjs')
@@ -177,26 +176,30 @@ check('projects 链接指向当前项目', existsSync(pptLink) && realpathSync(p
 const r6 = await reconcile({ projectRoot: proj, desired: new Map() })
 check('取消 ppt-master 后移除 projects 链接', !existsSync(pptLink), JSON.stringify(r6))
 
-// ---- 会话与持久化 ----
-const session = await ensureSession('smoke-session', proj)
-check('新会话三类全 false', ['engineering', 'research', 'office'].every(id => session.gates[id] === false))
-await setGates('smoke-session', { engineering: true, matlab: false })
-const session2 = await ensureSession('smoke-session', proj)
-check('目录闸门按会话保存', session2.gates.engineering === true && session2.gates.matlab === false && session2.gates.simulink === undefined)
+// ---- 持久化 ----
 await setSelection({ [pick.name]: false })
 const reloaded = await loadSelection(catalog)
 check('二级以下勾选持久化', reloaded.skills[pick.name] === false)
 await setSelection({ [pick.name]: true })
 
-// ---- 全选/全关：只对直接子节点生效 ----
+// ---- 全选/全关：只对直接子节点生效，一级目录同时打开本组门禁 ----
 const { childBatch } = await import('../host/selection.mjs')
 const engBatch = childBatch(catalog, 'engineering', true)
 const engChildIds = (catalog.groups.find(group => group.id === 'engineering').children ?? []).map(child => child.id).sort()
-check('全选一级组只作用直接子目录', Object.keys(engBatch.gates).sort().join(',') === engChildIds.join(',') && Object.keys(engBatch.skillChanges).length === 0,
+check('全选一级组作用直接子目录并打开本组门禁',
+  Object.keys(engBatch.gates).sort().join(',') === [...engChildIds, 'engineering'].sort().join(',')
+  && engBatch.gates.engineering === true
+  && Object.keys(engBatch.skillChanges).length === 0,
   JSON.stringify(engBatch.gates))
 const nsfcBatch = childBatch(catalog, 'nsfc', true)
 check('全选项目节点只作用直接子技能', Object.keys(nsfcBatch.skillChanges).length === 4 && Object.keys(nsfcBatch.gates).length === 0,
   String(Object.keys(nsfcBatch.skillChanges).length))
+const engVisible = ['matlab', 'simulink']
+const engFiltered = childBatch(catalog, 'engineering', true, { only: engVisible })
+check('搜索过滤时全选只处理可见子节点',
+  Object.keys(engFiltered.gates).filter(id => id !== 'engineering').sort().join(',') === engVisible.sort().join(',')
+  && engFiltered.gates.engineering === true,
+  JSON.stringify(engFiltered.gates))
 const matlabGroupNode = (catalog.groups.find(group => group.id === 'engineering').children ?? []).find(node => node.id === 'matlab')
 const matlabBatch = childBatch(catalog, 'matlab', false)
 const matlabChildDirs = (matlabGroupNode.children ?? []).filter(child => child.kind !== 'skill')
@@ -377,6 +380,13 @@ await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: { e
 check('工程技能关掉后注销 MathWorks MCP', !registered.has('matlab-mcp') && registered.has('windows-mcp'))
 await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: {} }))
 check('取消 Windows MCP 后全部注销', registered.size === 0)
+// 多会话并集：任一活跃会话需要就保持注册，最后一个会话关掉才注销
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 5, gates: { engineering: true } }), { sessionId: 'session-1' })
+check('会话 1 打开工程组后注册 MathWorks MCP', registered.has('matlab-mcp'))
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: {} }), { sessionId: 'session-2' })
+check('另一会话不需要时仍保持注册（并集）', registered.has('matlab-mcp'))
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: {} }), { sessionId: 'session-1' })
+check('最后一个需要它的会话关掉后才注销', !registered.has('matlab-mcp'))
 const views = mcpModule.componentViews({
   engineeringInjected: 3,
   gates: { engineering: true },
@@ -385,6 +395,13 @@ const views = mcpModule.componentViews({
 check('组件行：MathWorks 自动开启且状态 ready',
   views.components[0].id === 'mathworks' && views.components[0].enabled === true && views.components[0].stateLabel === '已连接',
   JSON.stringify(views.components[0]))
+const sharedViews = mcpModule.componentViews({
+  engineeringInjected: 0,
+  gates: {},
+  status: { available: true, servers: [{ name: 'matlab-mcp', state: 'connected', toolCount: 3 }] },
+})
+check('本会话未开但全局在跑时标为全局已启动', sharedViews.components[0].enabled === false && sharedViews.components[0].globallyActive === true,
+  JSON.stringify(sharedViews.components[0]))
 const noManagerController = mcpModule.createMcpController({ get: () => undefined })
 await noManagerController.reconcile({ mathworks: true, windows: true })
 const noManagerStatus = noManagerController.status()

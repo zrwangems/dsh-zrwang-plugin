@@ -17,17 +17,21 @@ import { loadCatalog } from './catalog.mjs'
 import { registerRoutes } from './routes.mjs'
 import { readLinks } from './farm.mjs'
 import { applySkillEnv, currentParams, ensureBuaaSchoolConfig, mirrorSkillFiles } from './skill-settings.mjs'
-import { configDirOfParams } from './plugin-params.mjs'
+import { configDirOfParams, ensureSettingsHardened } from './plugin-params.mjs'
 import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-commands.mjs'
 import { createSkillGuard } from './skill-guard.mjs'
 import { loadGates } from './gates.mjs'
 import { createMcpController } from './mcp.mjs'
-import { appendEvent } from './state.mjs'
+import { appendEvent, ensureStateDirSync } from './state.mjs'
 
 export const name = 'dsh-zrwang-plugin'
 
 export function apply(ctx, config) {
   const pluginConfig = config ?? {}
+  // 运行态目录在插件配置目录下；首次启动从旧版包内 state/ 复制一次（旧目录保留）。
+  ensureStateDirSync()
+  // settings.json 存有 API Key：启动时把文件权限收紧到当前账户（失败不影响启动）。
+  ensureSettingsHardened()
   const initialConfigDir = configDirOfParams(currentParams(pluginConfig))
   // MCP 组件控制器：MathWorks / Windows MCP 服务器随侧栏组件注册与注销。
   const mcpController = createMcpController(ctx)

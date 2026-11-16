@@ -19,13 +19,14 @@
     "skills",
     "ars",
     "mathworks",
-    "vendor",
+    "vendor/licenses",
     "scripts",
     "locale",
     "docs",
     "cordis.patch.yml",
     "icon.svg",
-    "README.md"
+    "README.md",
+    "SKILL-ADAPTATIONS.md"
   ],
   "scripts": {
     "vendor": "node scripts/vendor-skills.mjs",
