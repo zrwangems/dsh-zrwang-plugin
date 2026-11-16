@@ -49,6 +49,9 @@ const pruneTotals = { files: 0, bytes: 0 }
 
 const args = process.argv.slice(2)
 const noNetwork = args.includes('--no-network')
+const lockedMode = args.includes('--locked')
+const proxyArg = args.find(a => a.startsWith('--proxy='))
+const proxy = proxyArg === undefined ? (process.env.DSH_GT_PROXY ?? '') : proxyArg.slice('--proxy='.length)
 const onlyArg = args.find(a => a.startsWith('--only='))
 const only = onlyArg === undefined
   ? undefined
@@ -115,16 +118,20 @@ function applySkillPatches(root) {
     for (const entry of patch.files ?? []) {
       const target = join(root, ...entry.path.split('/'))
       if (!existsSync(target)) fail(`补丁目标不存在：${entry.path}`)
-      let text = readFileSync(target, 'utf8')
+      const raw = readFileSync(target, 'utf8')
+      const crlf = raw.includes('\r\n')
+      let text = crlf ? raw.replace(/\r\n/g, '\n') : raw
       for (const change of entry.replace ?? []) {
+        const find = change.find.replace(/\r\n/g, '\n')
+        const to = change.to.replace(/\r\n/g, '\n')
         // 幂等：已经改写过的文件不再重复替换（局部更新会重复跑补丁）。
-        if (!text.includes(change.find)) {
-          if (text.includes(change.to)) continue
+        if (!text.includes(find)) {
+          if (text.includes(to)) continue
           fail(`补丁不适用（上游结构变了）：${entry.path}`)
         }
-        text = text.split(change.find).join(change.to)
+        text = text.split(find).join(to)
       }
-      writeFileSync(target, text, 'utf8')
+      writeFileSync(target, crlf ? text.replace(/\n/g, '\r\n') : text, 'utf8')
     }
   }
   log(`已应用技能补丁 ${document.patches?.length ?? 0} 组`)
@@ -134,8 +141,7 @@ function restorePreserved(stage, preserved) {
   let restored = 0
   for (const [rel, bytes] of preserved) {
     const target = join(stage, ...rel.split('/'))
-    if (!existsSync(resolve(target, '..'))) continue
-    mkdirSync(resolve(target, '..'), { recursive: true })
+    mkdirSync(dirname(target), { recursive: true })
     writeFileSync(target, bytes)
     restored += 1
   }
@@ -152,9 +158,12 @@ function sleepSync(ms) {
 
 function run(command, argv, options = {}) {
   let lastError
+  const env = proxy.length > 0
+    ? { ...process.env, ...(options.env ?? {}), HTTPS_PROXY: proxy, HTTP_PROXY: proxy }
+    : options.env
   for (let attempt = 1; attempt <= RUN_ATTEMPTS; attempt += 1) {
     try {
-      return execFileSync(command, argv, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options })
+      return execFileSync(command, argv, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...options, env })
     } catch (error) {
       lastError = error
       const text = String(error?.stderr ?? error?.message ?? error)
@@ -179,6 +188,18 @@ async function download(repo, sha) {
   if (existsSync(file) && statSync(file).size > 0) return file
   if (noNetwork) throw new Error(`缓存缺失：${file}`)
   const url = `https://codeload.github.com/${repo}/tar.gz/${sha}`
+  if (proxy.length > 0) {
+    // Node 的 fetch 不读系统代理；有代理时用 curl，和 audit-upstreams 保持一致。
+    try {
+      log(`  下载 ${url}（代理 ${proxy}）`)
+      execFileSync('curl', ['-sL', '--max-time', '300', '--url', url, '-x', proxy, '-o', file], { stdio: 'ignore' })
+      if (!existsSync(file) || statSync(file).size < 1024) throw new Error(`文件过小或不存在：${file}`)
+      log(`  完成 ${(statSync(file).size / 1024 / 1024).toFixed(1)} MB`)
+      return file
+    } catch (error) {
+      throw new Error(`下载失败 ${repo}（代理）：${String(error?.message ?? error)}`)
+    }
+  }
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
       log(`  下载 ${url}`)
@@ -220,7 +241,28 @@ function cloneRepo(cfg) {
   rmSync(cloneDir, { recursive: true, force: true })
   mkdirSync(join(EXTRACT, cfg.id), { recursive: true })
   log(`  git clone --depth 1 ${cfg.repo}`)
-  run('git', ['clone', '--depth', '1', '--single-branch', '--branch', cfg.ref ?? 'main', `https://github.com/${cfg.repo}.git`, cloneDir])
+  run('git', ['-c', 'core.autocrlf=true', '-c', 'core.eol=crlf', 'clone', '--depth', '1', '--single-branch', '--branch', cfg.ref ?? 'main', `https://github.com/${cfg.repo}.git`, cloneDir])
+  return cloneDir
+}
+
+/** 按锁定 SHA 取仓库（--locked）。优先 codeload，失败时 git init + fetch 指定 SHA。 */
+function cloneRepoAt(cfg, sha) {
+  const cloneDir = join(EXTRACT, `${cfg.id}-locked-crlf`, 'clone')
+  if (existsSync(join(cloneDir, '.git'))) {
+    log(`  复用已有 locked clone：${cfg.id}`)
+    return cloneDir
+  }
+  rmSync(cloneDir, { recursive: true, force: true })
+  mkdirSync(cloneDir, { recursive: true })
+  log(`  git fetch --depth 1 ${cfg.repo}@${sha.slice(0, 12)}`)
+  run('git', ['init'], { cwd: cloneDir })
+  // 仓库工作树约定是 CRLF（core.autocrlf=true），锁定检出也按 CRLF 落盘；
+  // 字面补丁在 applySkillPatches 里会先归一化成 LF 再匹配，写回时恢复 CRLF。
+  run('git', ['config', 'core.autocrlf', 'true'], { cwd: cloneDir })
+  run('git', ['config', 'core.eol', 'crlf'], { cwd: cloneDir })
+  run('git', ['remote', 'add', 'origin', `https://github.com/${cfg.repo}.git`], { cwd: cloneDir })
+  run('git', ['fetch', '--depth', '1', 'origin', sha], { cwd: cloneDir })
+  run('git', ['checkout', '--detach', 'FETCH_HEAD'], { cwd: cloneDir })
   return cloneDir
 }
 
@@ -284,6 +326,16 @@ function readSkillMeta(dir) {
 /** 按 layout 枚举出一个仓库里的技能：{srcDir, category, dirName}。 */
 function enumerateSkills(cfg, repoRoot) {
   const found = []
+  if (cfg.layout === 'local-skills') {
+    // 本地多技能副本：source 目录下每个带 SKILL.md 的子目录是一个技能（lark 用）。
+    const src = resolve(cfg.source)
+    if (!existsSync(src)) fail(`${cfg.id}: 找不到 ${src}`)
+    for (const entry of readdirSync(src, { withFileTypes: true })) {
+      if (!entry.isDirectory() || EXCLUDE.has(entry.name)) continue
+      if (existsSync(join(src, entry.name, 'SKILL.md'))) found.push({ srcDir: join(src, entry.name), category: undefined, dirName: entry.name })
+    }
+    return found
+  }
   if (cfg.layout === 'local' || cfg.layout === 'dir') {
     const src = cfg.layout === 'local' ? resolve(cfg.source) : join(repoRoot, ...cfg.source.split('/'))
     found.push({ srcDir: src, category: undefined, dirName: src.split(sep).pop() })
@@ -365,7 +417,7 @@ function applyRenames(cfg, found) {
 }
 
 function copyLicenses(cfg, repoRoot) {
-  if (cfg.layout === 'local') return
+  if (cfg.layout === 'local' || cfg.layout === 'local-skills') return
   const dir = join(ROOT, 'vendor', 'licenses', cfg.id)
   for (const entry of readdirSync(repoRoot, { withFileTypes: true })) {
     if (!entry.isFile()) continue
@@ -381,15 +433,19 @@ function applyRewrites(dir, rules) {
   const hits = new Map(rules.map(rule => [rule.find, 0]))
   for (const file of walkFiles(dir)) {
     if (!/\.(md|markdown)$/i.test(file)) continue
-    let text = readFileSync(file, 'utf8')
+    const raw = readFileSync(file, 'utf8')
+    const crlf = raw.includes('\r\n')
+    let text = crlf ? raw.replace(/\r\n/g, '\n') : raw
     let changed = false
     for (const rule of rules) {
-      if (!text.includes(rule.find)) continue
+      const find = rule.find.replace(/\r\n/g, '\n')
+      const to = rule.to.replace(/\r\n/g, '\n')
+      if (!text.includes(find)) continue
       hits.set(rule.find, hits.get(rule.find) + 1)
-      text = text.split(rule.find).join(rule.to)
+      text = text.split(find).join(to)
       changed = true
     }
-    if (changed) writeFileSync(file, text, 'utf8')
+    if (changed) writeFileSync(file, crlf ? text.replace(/\n/g, '\r\n') : text, 'utf8')
   }
   for (const [find, count] of hits) {
     if (count > 0) continue
@@ -399,28 +455,37 @@ function applyRewrites(dir, rules) {
   }
 }
 
-/** 在指定 md 文件顶部（frontmatter 之后）插入一段固定说明，例如输出语言约束。 */
-function applyHeaderNote(dir, spec) {
-  if (spec === undefined) return
-  const pattern = new RegExp(spec.files)
+/** 在指定 md 文件顶部（frontmatter 之后）插入固定说明；支持单条 headerNote 与多条 headerNotes。 */
+function applyHeaderNotes(dir, input) {
+  const specs = (Array.isArray(input) ? input : [input]).filter(spec => spec !== undefined && spec !== null)
+  if (specs.length === 0) return
   let touched = 0
   for (const file of walkFiles(dir)) {
     if (!/\.md$/i.test(file)) continue
     const rel = relative(dir, file).split(sep).join('/')
-    if (!pattern.test(rel)) continue
-    const text = readFileSync(file, 'utf8')
-    if (text.includes(spec.text.trim())) continue
-    const match = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(text)
+    const matched = specs.filter(spec => {
+      if (Array.isArray(spec.skills) && !spec.skills.includes(basename(dir))) return false
+      return new RegExp(spec.files).test(rel)
+    })
+    if (matched.length === 0) continue
+    const raw = readFileSync(file, 'utf8')
+    const crlf = raw.includes('\r\n')
+    const text = crlf ? raw.replace(/\r\n/g, '\n') : raw
+    // 本插件新式注记统一以 `> [dsh-zrwang-plugin]` 开头，重建时先摘掉旧行。
+    const without = text.split(/\r?\n/).filter(line => !line.startsWith('> [dsh-zrwang-plugin]')).join('\n')
+    const match = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(without)
     const head = match === null ? '' : match[0].endsWith('\n') ? match[0] : `${match[0]}\n`
-    // 旧版本注入的同一段说明要先摘掉，避免多次 vendor 后叠加。
-    const body = (match === null ? text : text.slice(match[0].length))
-      .split(/\r?\n/)
-      .filter(line => !/^>\s*输出语言（本 DSH 集成强制）/.test(line))
-      .join('\n')
-    writeFileSync(file, `${head}${spec.text}\n${body}`, 'utf8')
-    touched += 1
+    const body = match === null ? without : without.slice(match[0].length)
+    const block = matched.map(spec => spec.text.trim()).join('\n')
+    // 已存在同一段（含旧的多行 headerNote）就不重复插入。
+    if (body.includes(block)) continue
+    const next = `${head}${block}\n${body.replace(/^\n+/, '')}`
+    if (next !== raw) {
+      writeFileSync(file, crlf ? next.replace(/\n/g, '\r\n') : next, 'utf8')
+      touched += 1
+    }
   }
-  log(`  顶部说明写入 ${touched} 个文件`)
+  if (touched > 0) log(`  顶部说明写入 ${touched} 个文件`)
 }
 
 /** 仓库级附加目录 → 技能内目录（如 shared/ → _shared/）。 */
@@ -579,7 +644,7 @@ function generateAliasSkills(cfg, repoRoot, stageRoot) {
       .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/MODE_REGISTRY\.md/g, '对应技能目录下的 `_shared/MODE_REGISTRY.md`')
       .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/([a-z0-9-]+)\/SKILL\.md/g, '`$1` 技能')
       .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/?/g, '')
-      .replace(/python3\s+scripts\/([A-Za-z0-9_./-]+)/g, 'python `scripts/$1`（用 ARS 技能目录里的副本，解释器见「设置 → ARS 设置」）')
+      .replace(/python3\s+scripts\/([A-Za-z0-9_./-]+)/g, 'python `scripts/$1`（用技能目录里的副本，解释器由设置里选择的系统 Python 提供）')
       .replace(/\$ARGUMENTS/g, '用户本次输入')
     const head = [
       '---',
@@ -646,6 +711,8 @@ function writeArsManifest(cfg, records, aliasCount, stageRoot) {
 
 async function main() {
   const config = JSON.parse(readFileSync(join(ROOT, 'vendor', 'upstreams.json'), 'utf8'))
+  const previousLock = existsSync(LOCK) ? JSON.parse(readFileSync(LOCK, 'utf8')) : { repos: [] }
+  const lockedById = new Map((previousLock.repos ?? []).map(record => [record.id, record]))
   const repos = config.repos.filter(cfg => (only === undefined || only.has(cfg.id)) && !skip.has(cfg.id))
   if (repos.length === 0) fail(`没有匹配的上游：${only === undefined ? '(全部)' : [...only].join(',')}${skip.size > 0 ? `（跳过 ${[...skip].join(',')}）` : ''}`)
 
@@ -683,14 +750,28 @@ async function main() {
     log(`\n[${cfg.id}] ${cfg.repo} (${cfg.layout})`)
     let sha
     let repoRoot
-    if (cfg.layout === 'local') {
+    if (cfg.layout === 'local' || cfg.layout === 'local-skills') {
       sha = 'local'
       repoRoot = resolve(cfg.source)
       if (!existsSync(repoRoot)) fail(`本地来源不存在：${repoRoot}`)
     } else {
-      sha = resolveSha(cfg.repo, cfg.ref ?? 'main')
-      log(`  SHA ${sha}`)
-      if (cfg.download === 'git') {
+      const lockedRecord = lockedById.get(cfg.id)
+      if (lockedMode) {
+        if (lockedRecord === undefined || typeof lockedRecord.sha !== 'string') fail(`--locked：lock 里没有 ${cfg.id}`)
+        sha = lockedRecord.sha
+      } else {
+        sha = resolveSha(cfg.repo, cfg.ref ?? 'main')
+      }
+      log(`  SHA ${sha}${lockedMode ? '（锁定）' : ''}`)
+      if (lockedMode) {
+        try {
+          const file = await download(cfg.repo, sha)
+          repoRoot = extractTarball(file, `${cfg.id}-locked`)
+        } catch (error) {
+          log(`  tarball 失败，改用锁定 SHA 的 git fetch：${String(error?.message ?? error)}`)
+          repoRoot = cloneRepoAt(cfg, sha)
+        }
+      } else if (cfg.download === 'git') {
         repoRoot = cloneRepo(cfg)
       } else {
         try {
@@ -729,7 +810,7 @@ async function main() {
       copyExtraDirs(cfg, repoRoot, dest)
       copySharedFiles(cfg, repoRoot, dest)
       applyRewrites(dest, cfg.rewrite)
-      applyHeaderNote(dest, cfg.headerNote)
+      applyHeaderNotes(dest, [...(cfg.headerNote === undefined ? [] : [cfg.headerNote]), ...(cfg.headerNotes ?? [])])
       meta = applyDescription(cfg, dest, meta)
       const closure = copyScriptClosure(cfg, repoRoot, dest)
       pruneUnused(dest, cfg.id)

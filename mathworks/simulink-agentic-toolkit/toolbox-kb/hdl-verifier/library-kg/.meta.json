@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:08",
+  "generatedAtDatenum": 740254.69314887736,
+  "generatorVersion": 4,
+  "libraries": [
+    "HDL Verifier"
+  ],
+  "blockCount": 8,
+  "categoryCount": 3,
+  "libraryFingerprints": {
+    "HDL_Verifier": {
+      "blockCount": 8
+    }
+  }
+}

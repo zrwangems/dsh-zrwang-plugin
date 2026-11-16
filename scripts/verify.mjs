@@ -29,14 +29,44 @@ function readJson(file) {
 // ---- 1 包清单 ----
 const pkg = readJson(join(ROOT, 'package.json'))
 check('package.name', pkg.name === 'dsh-zrwang-plugin')
-check('package.version=0.1.2', pkg.version === '0.1.2', pkg.version)
+check('package.version=0.1.0（用户要求固定）', pkg.version === '0.1.0', pkg.version)
 check('package.main 存在', typeof pkg.main === 'string' && existsSync(join(ROOT, pkg.main)))
 check('exports["./client"]', pkg.exports?.['./client'] === './lib/client.js')
 check('dsh.bundle.patch', pkg.dsh?.bundle?.patch === './cordis.patch.yml')
 check('dsh.client.platform=web', pkg.dsh?.client?.platform === 'web')
 check('dsh.client.inject 含 better-sidebar', (pkg.dsh?.client?.inject ?? []).includes('dsh-better-sidebar'))
-check('dsh.engines.dsh 适配 0.2.2-rc.1', pkg.dsh?.engines?.dsh === '>=0.2.2-rc.1', pkg.dsh?.engines?.dsh)
+check('dsh.engines.dsh 适配 0.2.2-rc.2', pkg.dsh?.engines?.dsh === '>=0.2.2-rc.2', pkg.dsh?.engines?.dsh)
 check('better-sidebar 依赖对齐 0.30.1', pkg.dependencies?.['dsh-better-sidebar'] === '^0.30.1', pkg.dependencies?.['dsh-better-sidebar'])
+check('package 打包 mathworks 组件目录', (pkg.files ?? []).includes('mathworks'))
+check('MathWorks 组件 exe 存在', existsSync(join(ROOT, 'mathworks', 'matlab-mcp-server-windows-x64.exe')))
+check('Simulink 工具扩展文件存在', existsSync(join(ROOT, 'mathworks', 'simulink-agentic-toolkit', 'tools', 'tools.json')))
+check('Simulink Agentic Toolkit 运行时随包分发', [
+  join(ROOT, 'mathworks', 'simulink-agentic-toolkit', 'satk_initialize.p'),
+  join(ROOT, 'mathworks', 'simulink-agentic-toolkit', 'satk-libraries.json'),
+  join(ROOT, 'mathworks', 'simulink-agentic-toolkit', 'toolbox-kb'),
+  join(ROOT, 'mathworks', 'simulink-agentic-toolkit', 'tools', 'registry.json'),
+].every(file => existsSync(file)))
+check('插件不提供任何 Python 安装功能',
+  !existsSync(join(ROOT, 'scripts', 'install-python-runtime.mjs'))
+  && !existsSync(join(ROOT, 'runtime'))
+  && !readFileSync(join(ROOT, 'host', 'python-detect.mjs'), 'utf8').includes('pip install'))
+check('Python 走系统检测与选择',
+  readFileSync(join(ROOT, 'host', 'python-detect.mjs'), 'utf8').includes('detectPythons')
+  && readFileSync(join(ROOT, 'host', 'python-detect.mjs'), 'utf8').includes('selectPython')
+  && readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8').includes("'runtime-check'"))
+check('Windows MCP 走系统 PATH', readFileSync(join(ROOT, 'host', 'mcp.mjs'), 'utf8').includes("command: 'windows-mcp'"))
+// 可分发性：运行期源码里不能出现作者本机路径
+const distributableRoots = ['host', 'client', 'scripts']
+const localPathHits = []
+for (const dir of distributableRoots) {
+  // verify.mjs 自己带着要扫描的字符串，跳过自身
+  const files = readdirSync(join(ROOT, dir)).filter(file => file.endsWith('.mjs') && !(dir === 'scripts' && file === 'verify.mjs'))
+  for (const name of files) {
+    const text = readFileSync(join(ROOT, dir, name), 'utf8')
+    if (/AgentRelated|C:\\\\Users\\\\17745|\.local\\\\bin/i.test(text)) localPathHits.push(`${dir}/${name}`)
+  }
+}
+check('运行期代码不含作者本机路径', localPathHits.length === 0, localPathHits.join(', '))
 check('icon.svg 存在', existsSync(join(ROOT, 'icon.svg')))
 check('locale/en.json 存在', existsSync(join(ROOT, 'locale', 'en.json')))
 check('locale/zh-CN.json 存在', existsSync(join(ROOT, 'locale', 'zh-CN.json')))
@@ -62,11 +92,14 @@ if (existsSync(settingsFile)) {
   try { patchConfig = JSON.parse(readFileSync(settingsFile, 'utf8')) } catch { patchConfig = undefined }
   check('设置是合法 JSON', patchConfig !== undefined)
   check('配置目录不作为参数', patchConfig?.configDir === undefined)
-  check('设置含 pptMaster', patchConfig?.pptMaster?.providers !== undefined)
+  check('设置含生图配置（v2 image 或 v1 pptMaster）', patchConfig?.image !== undefined || patchConfig?.pptMaster?.providers !== undefined)
+  if (patchConfig?.image !== undefined) {
+    check('v2 设置不含旧 runtime/Python 配置', patchConfig?.runtime === undefined && patchConfig?.ars === undefined)
+  }
   check('设置含 natureAcademic', patchConfig?.natureAcademic?.pubmed !== undefined)
   check('设置含 natureImage2ppt', patchConfig?.natureImage2ppt !== undefined)
   if (existsSync(runtimeConfigDir)) {
-    const allowed = new Set(['catalog.json', 'defaults.json', 'settings.json'])
+    const allowed = new Set(['catalog.json', 'defaults.json', 'settings.json', 'nature-figure.json', 'patent', 'nature-academic-search', 'nature-image2ppt', 'nature-downloader'])
     const unexpected = readdirSync(runtimeConfigDir).filter(name => !allowed.has(name))
     check('配置目录只放文件与设置', unexpected.length === 0, unexpected.join(', '))
   }
@@ -93,13 +126,55 @@ const walkNode = node => {
 for (const group of catalog.groups ?? []) walkNode(group)
 check('目录树节点完整', nodeProblems.length === 0, nodeProblems.slice(0, 6).join('；'))
 check('一级目录=3', (catalog.groups ?? []).length === 3)
-check('目录树 301 个技能', skillNodes.length === 301, String(skillNodes.length))
+check('目录树 329 个技能', skillNodes.length === 329, String(skillNodes.length))
 const defaultsSeed = readJson(join(ROOT, 'catalog', 'defaults.json'))
-check('默认启用种子文件', Array.isArray(defaultsSeed.skills) && defaultsSeed.skills.length === 64, String(defaultsSeed.skills?.length))
+check('默认启用种子文件', Array.isArray(defaultsSeed.skills) && defaultsSeed.skills.length === 68, String(defaultsSeed.skills?.length))
 const groupCounts = catalog.stats?.byGroup ?? {}
 check('工程 230', groupCounts.engineering === 230, String(groupCounts.engineering))
 check('科研 52', groupCounts.research === 52, String(groupCounts.research))
-check('办公 19', groupCounts.office === 19, String(groupCounts.office))
+check('办公 47', groupCounts.office === 47, String(groupCounts.office))
+// 办公组新增飞书 Lark：28 个技能、单一分类节点
+const officeGroupForLark = (catalog.groups ?? []).find(group => group.id === 'office')
+const larkNode = (officeGroupForLark?.children ?? []).find(child => child.id === 'lark')
+check('飞书 Lark 分类挂在办公组下', larkNode !== undefined && larkNode.kind === 'node')
+check('飞书 Lark 含 28 个技能', (larkNode?.children ?? []).filter(child => child.kind === 'skill').length === 28,
+  String((larkNode?.children ?? []).filter(child => child.kind === 'skill').length))
+check('飞书技能目录在 skills/office/lark', existsSync(join(ROOT, 'skills', 'office', 'lark')))
+check('飞书许可证随包', existsSync(join(ROOT, 'vendor', 'licenses', 'lark', 'LICENSE')))
+check('飞书本地副本已登记', (() => {
+  const u = readJson(join(ROOT, 'vendor', 'upstreams.json'))
+  const cfg = (u.repos ?? []).find(item => item.id === 'lark')
+  return cfg !== undefined && cfg.layout === 'local-skills' && cfg.target === 'office/lark' && existsSync(join(ROOT, 'vendor', 'local', 'lark-skills'))
+})())
+// 工程组下三类并列：MATLAB / Simulink / MathWorks其他（Polyspace + 示例与演示）
+const engineeringGroup = (catalog.groups ?? []).find(group => group.id === 'engineering')
+const engChildren = (engineeringGroup?.children ?? []).map(child => child.id)
+check('工程三大类别并列', engChildren.join(',') === 'matlab,simulink,mathworks-other', engChildren.join(','))
+const mathworksOther = (engineeringGroup?.children ?? []).find(child => child.id === 'mathworks-other')
+check('MathWorks其他 含 Polyspace 与示例与演示',
+  (mathworksOther?.children ?? []).map(child => child.id).join(',') === 'polyspace,playground',
+  (mathworksOther?.children ?? []).map(child => child.id).join(','))
+check('Polyspace 技能归入 MathWorks其他',
+  Object.entries(catalog.skills ?? {}).filter(([, info]) => String(info.dir).startsWith('engineering/polyspace/'))
+    .every(([, info]) => String(info.group) === 'engineering/mathworks-other/polyspace'))
+const mcpModule = join(ROOT, 'host', 'mcp.mjs')
+check('MCP 组件模块存在', existsSync(mcpModule))
+const mcpSource = existsSync(mcpModule) ? readFileSync(mcpModule, 'utf8') : ''
+check('MCP 组件注册 matlab-mcp / windows-mcp',
+  mcpSource.includes("mathworks: 'matlab-mcp'") && mcpSource.includes("windows: 'windows-mcp'"))
+check('MCP 组件随工程技能自动开关', mcpSource.includes('engineeringInjected') && mcpSource.includes('engineering') )
+check('MCP 稳定性接口齐全（重启/探测/启动标识）',
+  mcpSource.includes('async restart(') && mcpSource.includes('async probe(') && mcpSource.includes('已启动'))
+check('MCP 注册参数固定（无设置项）',
+  mcpSource.includes('--matlab-session-mode=existing') && mcpSource.includes("args: ['serve']")
+  && mcpSource.includes('WINDOWS_MCP_SCREENSHOT_SCALE') && !mcpSource.includes('params?.mcp') && !mcpSource.includes('parseReconnect'))
+const routesSource = readFileSync(join(ROOT, 'host', 'routes.mjs'), 'utf8')
+check('MCP 重启/探测路由已注册', routesSource.includes("'POST /mcp'") && routesSource.includes('mcpController.restart') && routesSource.includes('mcpController.probe'))
+const settingsSource = readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8')
+check('设置页不再暴露 MCP 配置',
+  !settingsSource.includes("page: 'mcp'") && !settingsSource.includes("'mcp-check'")
+  && !settingsSource.includes("'mcp-restart'"))
+check('设置页不再按设置重建 MCP', !routesSource.includes('mcpController.refresh'))
 const singletonProblems = []
 const walkSingleton = node => {
   if (node.kind === 'skill') return
@@ -199,13 +274,29 @@ const arsCommandProblems = (arsManifest.commands ?? [])
   .map(command => command.name)
 check('ARS 命令源存在', arsCommandProblems.length === 0, arsCommandProblems.slice(0, 4).join(', '))
 check('ARS 用法文档存在', existsSync(join(ROOT, ...String(arsManifest.doc ?? 'docs/ars-usage.md').split('/'))))
-const schoolSeed = readJson(join(ROOT, 'skills', 'research', 'nature-skills', 'nature-downloader', 'config', 'school.json'))
-check('内置北航学校配置', schoolSeed?.school?.code === 'buaa' && schoolSeed?.auth?.sso_domain === 'sso.buaa.edu.cn' && schoolSeed?.discovery?.resource_entry_url === 'https://lib.buaa.edu.cn/')
-check('内置学校配置无私人字段', !/password|passwd|token|api[_-]?key|email|cookie/i.test(JSON.stringify(schoolSeed)))
+const packagedSchool = readJson(join(ROOT, 'skills', 'research', 'nature-skills', 'nature-downloader', 'config', 'school.json'))
+check('北航学校配置随技能目录分发', packagedSchool?.school?.code === 'buaa' && packagedSchool?.auth?.sso_domain === 'sso.buaa.edu.cn' && packagedSchool?.discovery?.resource_entry_url === 'https://lib.buaa.edu.cn/')
+check('package.json 通过 skills 打包学校配置', readJson(join(ROOT, 'package.json'))?.files?.includes('skills'))
 const skillSettingsSource = readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8')
-check('学校配置随包分发（LIT_DL_CONFIG_DIR 指向包内目录）',
-  skillSettingsSource.includes('LIT_DL_CONFIG_DIR') && skillSettingsSource.includes("join(SKILLS_DIR, 'research', 'nature-skills', 'nature-downloader', 'config')"))
-check('学校配置不再复制到 DSH 家目录', !skillSettingsSource.includes("zrwang-plugin-config', 'nature-downloader'"))
+check('内置北航学校配置', /sso\.buaa\.edu\.cn/.test(skillSettingsSource) && /lib\.buaa\.edu\.cn/.test(skillSettingsSource))
+check('学校配置写插件配置目录（LIT_DL_CONFIG_DIR）',
+  skillSettingsSource.includes('LIT_DL_CONFIG_DIR') && skillSettingsSource.includes('natureDownloaderConfigDir'))
+check('学校配置不再写技能目录', !skillSettingsSource.includes("join(SKILLS_DIR, 'research', 'nature-skills', 'nature-downloader', 'config')"))
+const hostIndexSource = readFileSync(join(ROOT, 'host', 'index.mjs'), 'utf8')
+check('版本号由 package.json 派生', readFileSync(join(ROOT, 'host', 'config.mjs'), 'utf8').includes('pkg.version'))
+const entryVersion = /ZR_VERSION = '([0-9.]+)'/.exec(readFileSync(join(ROOT, 'client', 'entry.mjs'), 'utf8'))
+check('client 版本号与 package.json 一致', entryVersion !== null && entryVersion[1] === pkg.version)
+check('ppt-master 生图密钥有文件兜底', readFileSync(join(ROOT, 'skills', 'office', 'ppt-master', 'scripts', 'image_gen.py'), 'utf8').includes('_plugin_image_values'))
+check('draw.io 支持非 C 盘安装（读注册表）',
+  readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8').includes('drawioFromRegistry'))
+check('Firecrawl CLI shim 已接入',
+  readFileSync(join(ROOT, 'host', 'ars.mjs'), 'utf8').includes('applyFirecrawlShim')
+  && existsSync(join(ROOT, 'scripts', 'firecrawl-shim.mjs')))
+check('Python 技能密钥有 sitecustomize 兜底',
+  readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8').includes('sitecustomize.py')
+  && readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8').includes('applyPythonSecretBridge'))
+check('设置文件跨实例热加载',
+  hostIndexSource.includes("filename !== 'settings.json'") && hostIndexSource.includes('settings hot reload'))
 const details = readJson(join(ROOT, 'catalog', 'skill-details.zh.json'))
 const detailNames = Object.keys(details)
 check('静态中文详情覆盖全部技能', detailNames.length === skillNodes.length && skillNodes.every(node => typeof details[node.name] === 'string' && details[node.name].trim().length > 0))
@@ -213,13 +304,20 @@ check('静态中文详情覆盖全部技能', detailNames.length === skillNodes.
 // ---- 6 默认集合 ----
 const legacy = readJson(join(ROOT, 'catalog', 'legacy', 'legacy-enabled.json'))
 const pathOf = Object.fromEntries(skillNodes.map(node => [node.name, node.dir]))
-const expected = (legacy.enabled ?? [])
-  .filter(name => pathOf[name] !== undefined && pathOf[name].startsWith('engineering/'))
-  .sort()
+const LARK_DEFAULTS = ['lark-contact', 'lark-event', 'lark-im', 'lark-shared']
+const expected = [
+  ...(legacy.enabled ?? [])
+    .filter(name => pathOf[name] !== undefined && pathOf[name].startsWith('engineering/')),
+  ...LARK_DEFAULTS.filter(name => pathOf[name] !== undefined),
+].sort()
 const actual = [...(catalog.defaults ?? [])].sort()
-check('默认集合=旧启用集合映射（只保留工程）', JSON.stringify(expected) === JSON.stringify(actual), `${actual.length} vs ${expected.length}`)
+check('默认集合=工程旧启用集合 + 飞书四个', JSON.stringify(expected) === JSON.stringify(actual), `${actual.length} vs ${expected.length}`)
 check('默认集合全部存在于目录树', (catalog.defaults ?? []).every(name => pathOf[name] !== undefined))
-check('默认集合只含工程技能组', (catalog.defaults ?? []).every(name => pathOf[name]?.startsWith('engineering/')))
+check('默认集合只含工程技能与飞书默认项',
+  (catalog.defaults ?? []).every(name => pathOf[name]?.startsWith('engineering/') || LARK_DEFAULTS.includes(name)))
+check('飞书四个默认开启、其余飞书默认关闭',
+  LARK_DEFAULTS.every(name => (catalog.defaults ?? []).includes(name))
+  && Object.keys(pathOf).filter(name => pathOf[name]?.startsWith('office/lark/')).every(name => LARK_DEFAULTS.includes(name) || !(catalog.defaults ?? []).includes(name)))
 check('默认不启用 officecli', (catalog.defaults ?? []).every(name => !pathOf[name]?.includes('/officecli')))
 // 2026-10 新增的 210 个技能默认全部关闭，且不与 ARS 五个技能重名
 const newSkillNames = [
@@ -285,6 +383,31 @@ for (const file of envFiles) {
   if (/sk-[A-Za-z0-9_-]{16,}/.test(text)) problems.push(`.env 里出现疑似密钥（确认不要提交）：${file}`)
 }
 check('只有 ppt-master 有 .env 例外', envFiles.length <= 3, String(envFiles.length))
+
+// ---- 10 上游适配记录 ----
+const recordDir = join(ROOT, 'AgentsDo', 'upstream-adaptation-record')
+check('上游适配记录目录存在', existsSync(recordDir))
+for (const name of ['README.md', 'upstream-modifications.md', 'skill-config-matrix.json', 'skill-config-matrix.md', 'component-status.md', 'verification-log.md', 'records.json']) {
+  check(`适配记录含 ${name}`, existsSync(join(recordDir, name)))
+}
+const recordUpstreamConfig = readJson(join(ROOT, 'vendor', 'upstreams.json'))
+const recordUpstreamLock = readJson(join(ROOT, 'vendor', 'upstreams.lock.json'))
+const auditRecords = existsSync(join(recordDir, 'records.json')) ? readJson(join(recordDir, 'records.json')) : { repos: {} }
+const missingRecords = (recordUpstreamConfig.repos ?? []).filter(cfg => auditRecords.repos?.[cfg.id] === undefined).map(cfg => cfg.id)
+check('每个上游都有审计记录', missingRecords.length === 0, missingRecords.join(', '))
+const lockById = new Map((recordUpstreamLock.repos ?? []).map(record => [record.id, record]))
+const staleRecords = []
+for (const [id, record] of Object.entries(auditRecords.repos ?? {})) {
+  const locked = lockById.get(id)
+  if (locked !== undefined && locked.sha !== record.lastAuditedLockSha) staleRecords.push(id)
+}
+check('上游 SHA 与审计记录一致（不一致先读记录复核）', staleRecords.length === 0, staleRecords.join(', '))
+try {
+  execFileSync(process.execPath, [join(ROOT, 'scripts', 'audit-skill-config.mjs'), '--check'], { cwd: ROOT, stdio: 'pipe' })
+  check('技能配置审计通过', true)
+} catch (error) {
+  check('技能配置审计通过', false, String(error.stdout ?? error.message).slice(-400))
+}
 
 // ---- 输出 ----
 process.stdout.write(`通过 ${passed.length} 项\n`)

@@ -17,7 +17,8 @@ metadata:
     - "SPONSORS.md"
     - "SPONSORS_CN.md"
 ---
-
+> [dsh-zrwang-plugin] 生图配置由 DSH 插件设置注入进程环境（ZRWANG_IMAGE_* 由脚本内桥接映射为 OPENAI_*）；本 DSH 集成已在 config.py 禁用上游 .env 查找，不要检查或要求用户修改 ~/.ppt-master/.env；验证用 `python scripts/image_gen.py --list-backends`，配置来源应为 `process environment`。
+> [dsh-zrwang-plugin] 项目输出目录：`<当前项目根>/.agents/ppt-master/projects`；本技能目录的 `projects/` 已由插件联接到该目录。多项目并发时链接会指向最近一次同步的项目，因此命令里优先直接传绝对路径。
 # PPT Master Skill
 
 PPT Master is a routed presentation workflow. This entry owns global execution discipline and route selection only; each selected route owns its procedure.

@@ -23,15 +23,21 @@ const onlyArg = args.find(item => item.startsWith('--only='))
 const only = onlyArg === undefined ? undefined : new Set(onlyArg.slice('--only='.length).split(','))
 const proxy = proxyArg === undefined ? (process.env.DSH_GT_PROXY ?? '') : proxyArg.slice('--proxy='.length)
 
-const IGNORED = ['.github/', '.git/', 'node_modules/', '__pycache__/', '.venv/', '.pytest_cache/']
+const IGNORED = ['.github/', '.git/', 'node_modules/', '__pycache__/', '.venv/', '.pytest_cache/', 'tests/', 'test/', 'ci/', '.vscode/']
+const IGNORED_NAMES = new Set([
+  '.gitignore', '.gitattributes', 'package-lock.json', 'pnpm-lock.yaml', 'yarn.lock',
+  'CHANGELOG.md', 'CHANGELOG', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'codecov.yml',
+  'requirements-dev.txt', 'requirements-test.txt', '.pre-commit-config.yaml', '.DS_Store',
+])
 const NL = String.fromCharCode(10)
 
 function isIgnored(path) {
-  return IGNORED.some(prefix => path.startsWith(prefix)) || path === '.DS_Store'
+  if (IGNORED_NAMES.has(path.split('/').pop())) return true
+  return IGNORED.some(prefix => path.startsWith(prefix) || path.includes(`/${prefix}`))
 }
 
 function download(repo, sha) {
-  const argv = ['-sL', '--max-time', '300', '--url', `https://codeload.github.com/${repo}/tar.gz/${sha}`]
+  const argv = ['-sL', '--retry', '3', '--retry-delay', '2', '--max-time', '300', '--url', `https://codeload.github.com/${repo}/tar.gz/${sha}`]
   if (proxy.length > 0) argv.push('-x', proxy)
   return gunzipSync(execFileSync('curl', argv, { maxBuffer: 1024 * 1024 * 1024 }))
 }

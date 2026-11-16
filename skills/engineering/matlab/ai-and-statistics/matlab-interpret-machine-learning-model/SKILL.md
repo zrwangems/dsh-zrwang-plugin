@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.0"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Interpret a Trained Tabular Model
 
 Interpret a trained tabular model — a built-in Statistics and Machine Learning Toolbox (SMLT) classifier or regressor, or a custom model reached through a prediction function handle — by matching the user's intent to the right techniques, handling the custom-model case correctly, and avoiding the failure modes agents fall into on this workflow. This skill bundles the workflow in `references/` (per-technique procedures and branch tables read on-demand) and `scripts/` (the `functionHandleMap` helper). Do not invoke files in `references/` as separate skills — they are only read when the corresponding step runs.

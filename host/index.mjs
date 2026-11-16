@@ -10,15 +10,18 @@
  * 插件级设置放在 cordis.patch.yml 本行的 config 里（configDir）；技能密钥等统一放
  * <configDir> 下，不写 profile 补丁以外的 DSH 配置。
  */
+import { mkdirSync, watch } from 'node:fs'
+import { join } from 'node:path'
 import { PKG_DIR, VERSION } from './config.mjs'
 import { loadCatalog } from './catalog.mjs'
 import { registerRoutes } from './routes.mjs'
 import { readLinks } from './farm.mjs'
-import { applySkillEnv, currentParams, ensureBuaaSchoolConfig } from './skill-settings.mjs'
+import { applySkillEnv, currentParams, ensureBuaaSchoolConfig, mirrorSkillFiles } from './skill-settings.mjs'
 import { configDirOfParams } from './plugin-params.mjs'
 import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-commands.mjs'
 import { createSkillGuard } from './skill-guard.mjs'
 import { loadGates } from './gates.mjs'
+import { createMcpController } from './mcp.mjs'
 import { appendEvent } from './state.mjs'
 
 export const name = 'dsh-zrwang-plugin'
@@ -26,9 +29,43 @@ export const name = 'dsh-zrwang-plugin'
 export function apply(ctx, config) {
   const pluginConfig = config ?? {}
   const initialConfigDir = configDirOfParams(currentParams(pluginConfig))
+  // MCP 组件控制器：MathWorks / Windows MCP 服务器随侧栏组件注册与注销。
+  const mcpController = createMcpController(ctx)
+  ctx.effect(() => () => mcpController.disposeAll(), 'dsh-zrwang-plugin: mcp registrations')
   void appendEvent('host-applied', { version: VERSION, configDir: initialConfigDir })
-  // 技能需要的环境变量（NCBI 配置、LIT_DL_CONFIG_DIR 等）写进宿主环境，模型跑的 shell 子进程会继承。
+  // 技能需要的环境变量（内置 Python、生图、专利目录、LIT_DL_CONFIG_DIR 等）写进宿主环境，模型跑的 shell 子进程会继承。
   applySkillEnv(currentParams(pluginConfig))
+  // 生成集中配置（nature 学术检索 / image2ppt / 学校信息 / ARS 运行时说明）到插件配置目录。
+  void mirrorSkillFiles(currentParams(pluginConfig)).catch(() => {})
+  // 设置热加载：Web 与 Desktop 是两个独立 DSH 进程，各自的 process.env 不会互相推送。
+  // 每个运行中的插件实例都监听共享的 settings.json，其他实例保存后本进程也重新注入环境变量、
+  // 同步技能配置文件；已经启动的长驻子进程仍保留旧环境，新的工具调用会继承新值。
+  const settingsDir = initialConfigDir
+  let settingsTimer
+  const reloadSettings = () => {
+    const fresh = currentParams(pluginConfig)
+    applySkillEnv(fresh)
+    void mirrorSkillFiles(fresh).catch(() => {})
+    void appendEvent('settings-reloaded', { configDir: configDirOfParams(fresh) })
+  }
+  try {
+    mkdirSync(settingsDir, { recursive: true })
+    const settingsWatcher = watch(settingsDir, { persistent: false }, (event, filename) => {
+      if (filename !== 'settings.json') return
+      if (settingsTimer !== undefined) clearTimeout(settingsTimer)
+      settingsTimer = setTimeout(() => {
+        settingsTimer = undefined
+        reloadSettings()
+      }, 300)
+    })
+    settingsWatcher.on('error', () => {})
+    ctx.effect(() => () => {
+      if (settingsTimer !== undefined) clearTimeout(settingsTimer)
+      settingsWatcher.close()
+    }, 'dsh-zrwang-plugin: settings hot reload')
+  } catch {
+    // 文件监视不可用时退回启动/保存时注入，不影响主流程
+  }
   // 学校访问配置随包固定分发，这里只保证包内文件存在，不再往 ~/.dsh 复制。
   void ensureBuaaSchoolConfig().catch(() => {})
   ctx.provide('zrwangPlugin', {
@@ -50,7 +87,7 @@ export function apply(ctx, config) {
 
   ctx.inject(['webServer'], scope => {
     scope.effect(
-      () => registerRoutes(scope, ctx, pluginConfig),
+      () => registerRoutes(scope, ctx, pluginConfig, mcpController),
       'dsh-zrwang-plugin: http routes',
     )
     ctx.logger?.info?.(`dsh-zrwang-plugin ${VERSION}: HTTP 接口已挂到 /dsh-zrwang-plugin`)

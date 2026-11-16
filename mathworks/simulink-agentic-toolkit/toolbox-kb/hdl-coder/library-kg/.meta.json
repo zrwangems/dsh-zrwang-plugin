@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:08",
+  "generatedAtDatenum": 740254.69314829865,
+  "generatorVersion": 4,
+  "libraries": [
+    "HDL Coder"
+  ],
+  "blockCount": 262,
+  "categoryCount": 16,
+  "libraryFingerprints": {
+    "HDL_Coder": {
+      "blockCount": 262
+    }
+  }
+}

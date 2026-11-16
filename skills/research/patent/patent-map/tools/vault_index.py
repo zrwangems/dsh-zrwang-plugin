@@ -16,6 +16,10 @@ PUB_RE = re.compile(
 
 
 def persisted_vault_path() -> Path:
+    cwd = Path.cwd().resolve()
+    for parent in [cwd, *cwd.parents]:
+        if (parent / ".git").exists():
+            return parent / ".agents" / "patent" / "obsidian_vault.txt"
     return Path.home() / ".patent-disclosure-skill" / "obsidian_vault.txt"
 
 

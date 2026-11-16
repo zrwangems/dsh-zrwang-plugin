@@ -13,6 +13,7 @@ import csv
 import hashlib
 import html
 import json
+import os
 import re
 import sys
 import time
@@ -2286,8 +2287,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--max-retries", type=int, default=2, help="Maximum retry count for Crossref requests.")
     parser.add_argument("--from-year", type=int, help="Earliest publication year.")
     parser.add_argument("--to-year", type=int, help="Latest publication year.")
-    parser.add_argument("--mailto", help="Email for Crossref polite pool.")
-    parser.add_argument("--ncbi-email", help="Contact email sent to NCBI E-utilities for PMID requests.")
+    parser.add_argument("--mailto", default=os.environ.get("CROSSREF_MAILTO") or os.environ.get("NCBI_EMAIL"), help="Email for Crossref polite pool (defaults to CROSSREF_MAILTO/NCBI_EMAIL).")
+    parser.add_argument("--ncbi-email", default=os.environ.get("NCBI_EMAIL") or os.environ.get("CROSSREF_MAILTO"), help="Contact email sent to NCBI E-utilities (defaults to NCBI_EMAIL/CROSSREF_MAILTO).")
     parser.add_argument(
         "--allow-incomplete-authors",
         action="store_true",

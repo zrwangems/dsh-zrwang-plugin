@@ -18,7 +18,7 @@ allowed-tools:
   - Edit
   - Bash
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # MATLAB Theming
 
 Style MATLAB charts with color palettes and — for uifigure apps — apply the R2025a Theme API for brand colors, dark mode, and component styling.

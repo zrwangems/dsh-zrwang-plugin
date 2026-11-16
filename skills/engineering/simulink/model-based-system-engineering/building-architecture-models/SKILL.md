@@ -6,6 +6,7 @@ metadata:
   author: MathWorks
   version: "0.4"
 ---
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Building Architecture Models
 
 > **CRITICAL RULE — PHASE GATE:** When building multiple architecture layers, you MUST stop after completing each layer and ask the user for review and approval before starting the next layer. Do NOT build Logical until the user approves Functional. Do NOT build Physical until the user approves Logical. This applies even when the user says "automatically continue" or "build all layers." When you stop, outline the remaining roadmap (e.g., "Next: Logical layer, then Physical layer and allocation sets") and ask for the user's approval to proceed.

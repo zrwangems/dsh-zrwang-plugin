@@ -3,7 +3,7 @@ name: patent-application
 description: "申请文件：把已有交底写成权利要求书、说明书、摘要与说明书附图；规划发明母案与分案并核对原始披露。四件套须指定交底目录。内容争议写入问题清单，交付后请确认须摘要清单。已有产出上改稿则另存新时间戳目录。须显式触发。"
 user-invocable: false
 ---
-
+> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的对应子目录（oa / patent-map / obsidian_vault.txt），不要写 `~/Documents/patent-disclosure-skill`；Obsidian 库路径可用 `PATENT_READER_OBSIDIAN_VAULT` 覆盖。
 # 申请文件
 
 ## 用途

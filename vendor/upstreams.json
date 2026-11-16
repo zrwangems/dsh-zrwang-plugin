@@ -35,6 +35,20 @@
         "signal-processing",
         "test-and-measurement",
         "wireless-communications"
+      ],
+      "headerNotes": [
+        {
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。"
+        },
+        {
+          "files": "^SKILL\\.md$",
+          "skills": [
+            "matlab-call-python",
+            "matlab-import-external-ai-model"
+          ],
+          "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件提供：路径见 `ZRWANG_SKILL_PYTHON`（或插件包 `runtime/python/venv/Scripts/python.exe`）；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统 Python 或另建 venv。"
+        }
       ]
     },
     {
@@ -59,6 +73,19 @@
         "verification-validation-and-test",
         "aerospace",
         "simulink-block-and-blockset-authoring"
+      ],
+      "headerNotes": [
+        {
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。"
+        },
+        {
+          "files": "^SKILL\\.md$",
+          "skills": [
+            "simulink-integrate-python-code"
+          ],
+          "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件提供：路径见 `ZRWANG_SKILL_PYTHON`（或插件包 `runtime/python/venv/Scripts/python.exe`）；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统 Python 或另建 venv。"
+        }
       ]
     },
     {
@@ -68,7 +95,16 @@
       "layout": "catalog-flat",
       "source": "skills-catalog",
       "target": "engineering/polyspace",
-      "label": "Polyspace Agentic Toolkit"
+      "label": "Polyspace Agentic Toolkit",
+      "headerNotes": [
+        {
+          "skills": [
+            "polyspace-agentic-toolkit-setup"
+          ],
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] DSH 的 MCP 配置在 profile 的 `cordis.patch.yml`，不要修改 Claude Code / Cursor / Codex 的配置文件；本机未安装 Polyspace 时直接报告不可用，不要下载二进制硬装。"
+        }
+      ]
     },
     {
       "id": "playground",
@@ -77,7 +113,13 @@
       "layout": "skills",
       "source": "skills",
       "target": "engineering/playground",
-      "label": "MATLAB Agent Skills Playground"
+      "label": "MATLAB Agent Skills Playground",
+      "headerNotes": [
+        {
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。"
+        }
+      ]
     },
     {
       "id": "nature",
@@ -87,7 +129,44 @@
       "source": "skills",
       "target": "research/nature-skills",
       "label": "Nature Skills",
-      "download": "git"
+      "download": "git",
+      "headerNotes": [
+        {
+          "skills": [
+            "nature-image2ppt"
+          ],
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 配置由 DSH 插件设置写入本技能 `config.yaml`（OCR + 通用生图 URL/模型/Key），不要改 `~/.image2ppt/config.yaml`；检查用 `python cli/image2ppt/cli.py doctor`。"
+        },
+        {
+          "skills": [
+            "nature-academic-search"
+          ],
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search MCP 服务器：不要调用 `search_papers` 等 MCP 工具；可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`，并明确告诉用户检索已降级。PubMed/Crossref 等参数在插件设置「科研服务」里，配置在插件配置目录（`ZRWANG_NATURE_ACADEMIC_CONFIG`）。"
+        },
+        {
+          "skills": [
+            "nature-downloader"
+          ],
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 学校配置固定为北航，直接随技能放在 `config/school.json`（无需设置）；插件通过 `LIT_DL_SCHOOL_FILE` 指向它。`credentials.json`、`settings.json` 仍在插件配置目录（`LIT_DL_CONFIG_DIR`），出版社凭据由设置页「科研服务」维护；不要写 `~/.config/lit-dl`。"
+        },
+        {
+          "skills": [
+            "nature-figure"
+          ],
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 绘图后端偏好写在插件配置目录（`NATURE_FIGURE_CONFIG`）；OpenRouter/生图网关的 Key、模型、接口地址不再单独设置，直接复用模型服务的生图 URL/模型/Key（插件注入 `OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`），不要写 `~/.config/nature-skills`。"
+        },
+        {
+          "skills": [
+            "nature-citation"
+          ],
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] Crossref/NCBI 礼貌邮箱和 Firecrawl Key 由插件设置注入（`CROSSREF_MAILTO`/`NCBI_EMAIL`/`FIRECRAWL_API_KEY`）；脚本没显式传参时优先用这些环境变量。"
+        }
+      ]
     },
     {
       "id": "officecli",
@@ -107,7 +186,21 @@
       "source": "skills/ppt-master",
       "target": "office/ppt-master",
       "label": "PPT Master",
-      "download": "git"
+      "download": "git",
+      "headerNotes": [
+        {
+          "files": "(?:^|/)SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 生图配置由 DSH 插件设置注入进程环境（ZRWANG_IMAGE_* 由脚本内桥接映射为 OPENAI_*）；本 DSH 集成已在 config.py 禁用上游 .env 查找，不要检查或要求用户修改 ~/.ppt-master/.env；验证用 `python scripts/image_gen.py --list-backends`，配置来源应为 `process environment`。"
+        },
+        {
+          "files": "(?:^|/)SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 项目输出目录：`<当前项目根>/.agents/ppt-master/projects`；本技能目录的 `projects/` 已由插件联接到该目录。多项目并发时链接会指向最近一次同步的项目，因此命令里优先直接传绝对路径。"
+        },
+        {
+          "files": "(?:^|/)(?:references/image-generator\\.md|scripts/docs/image\\.md)$",
+          "text": "> [dsh-zrwang-plugin] 本 DSH 集成已在 `config.py` 禁用上游 `.env` 查找：生图 URL / 模型 / Key 只来自插件设置注入的进程环境。"
+        }
+      ]
     },
     {
       "id": "html-ppt",
@@ -126,6 +219,21 @@
       "target": "office/archify",
       "label": "Archify",
       "note": "上游 tt-a1i/archify 以 release 包分发（仓库根没有 SKILL.md），本地副本固定为 v3.2.0。"
+    },
+    {
+      "id": "lark",
+      "repo": "local",
+      "layout": "local-skills",
+      "source": "vendor/local/lark-skills",
+      "target": "office/lark",
+      "label": "飞书 Lark",
+      "headerNotes": [
+        {
+          "files": "(?:^|/)SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 本技能收编自 lark-cli 官方 agent skills（MIT）：文件读写用 DSH 的 `read`/`write`/`edit` 工具，命令用 `pwsh`/`bash` 执行 `lark-cli`；需要先安装并登录 lark-cli（`lark-cli auth login`）。文中的 Claude/Codex/Aily 等 harness 对照表仅作参考，按 DSH 工具名替换；`../lark-shared/` 等跨技能引用要求对应技能同时勾选注入。"
+        }
+      ],
+      "note": "上游 open.feishu.cn 的 lark-cli agent skills（well-known 源，MIT，Lark Technologies）；2026-11-14 固定本地副本，含 24 个领域技能 + 本机启用的 contact/event/im/shared。"
     },
     {
       "id": "zotero",
@@ -449,6 +557,12 @@
           "find": "AskUserQuestion",
           "to": "ask_user_question",
           "optional": true
+        }
+      ],
+      "headerNotes": [
+        {
+          "files": "^SKILL\\.md$",
+          "text": "> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的对应子目录（oa / patent-map / obsidian_vault.txt），不要写 `~/Documents/patent-disclosure-skill`；Obsidian 库路径可用 `PATENT_READER_OBSIDIAN_VAULT` 覆盖。"
         }
       ]
     }

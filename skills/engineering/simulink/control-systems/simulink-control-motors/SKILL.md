@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.1"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Simulink Control Motors — Motor Control Blockset Skill
 
 Build motor control solutions using Motor Control Blockset (MCB): characterize motors, select control algorithms (FOC, DTC, six-step, V/f), compose Simulink models, tune gains, configure sensorless estimation, and generate code for embedded targets.

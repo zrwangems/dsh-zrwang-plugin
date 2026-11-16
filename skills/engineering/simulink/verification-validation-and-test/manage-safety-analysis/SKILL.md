@@ -6,7 +6,7 @@ metadata:
   version: "2.1.2"
   author: MathWorks
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Safety Analysis Manager
 
 Use `evaluate_matlab_code` with the `safetyAnalysisMgr` package to create, populate, query, and export safety analysis documents. Requires **Simulink Fault Analyzer** (R2023b+).

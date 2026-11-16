@@ -11,7 +11,7 @@ Read scope is required for every new mark (#738; declaration-only — pass throu
 
 Implementation:
 ```bash
-python `scripts/ars_mark_read.py`（用 ARS 技能目录里的副本，解释器见「设置 → ARS 设置」） 用户本次输入 --passport-path "<path>"
+python `scripts/ars_mark_read.py`（用技能目录里的副本，解释器由插件自带 Python 提供） 用户本次输入 --passport-path "<path>"
 ```
 
 Mode reference: `docs/design/2026-04-30-ars-v3.6.8-trust-provenance-and-drift-transparency-spec.md` §3.6 + Step 7.

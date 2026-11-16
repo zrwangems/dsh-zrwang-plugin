@@ -10,7 +10,7 @@ metadata:
     - Automated Driving Toolbox
     - RoadRunner
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # RoadRunner Core
 
 Foundation skill for all RoadRunner agent workflows. Manages the RoadRunner connection, project/scene/scenario lifecycle, and handle management from MATLAB. Produces the `rrApp` handle used by all downstream RoadRunner skills.

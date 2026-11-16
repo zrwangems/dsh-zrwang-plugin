@@ -1,6 +1,5 @@
 # 运行态：选择、会话、链接清单、备份、事件日志，不入库
 state/
-
 # 环境与密钥
 **/.env
 **/.env.local
@@ -20,8 +19,13 @@ state/
 # 过程文件
 *.log
 *.tmp
-# 本机测试实例（DSH_HOME、插件状态、ego 截图与脚本）都在这里，不入库
-AgentsDo/
+# 本机测试实例（DSH_HOME、插件状态、ego 截图与脚本）都在这里，不入库；
+# 但上游适配记录要随仓库走，供每次升级前对照。
+AgentsDo/*
+!AgentsDo/upstream-adaptation-record/
+!AgentsDo/upstream-adaptation-record/**
+AgentsDo/upstream-adaptation-record/backup-*/
+AgentsDo/upstream-adaptation-record/.tmp/
 # 插件运行期在“被当作项目根”时生成：<项目根>/.agents/skills 目录联接与 ppt 项目目录
 .agents/
 

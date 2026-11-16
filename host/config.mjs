@@ -1,6 +1,7 @@
 /**
  * 固定路径与常量。所有路径都从包根推出来，不依赖 DSH_PROFILE_DIR。
  */
+import { readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -31,4 +32,7 @@ export const PPT_PROJECTS_REL = ['.agents', 'ppt-master', 'projects']
 /** 技能链接所在的相对位置。 */
 export const SKILLS_REL = ['.agents', 'skills']
 
-export const VERSION = '0.1.2'
+const pkg = JSON.parse(readFileSync(join(PKG_DIR, 'package.json'), 'utf8'))
+
+/** 版本号只认 package.json，避免两处漂移。 */
+export const VERSION = pkg.version

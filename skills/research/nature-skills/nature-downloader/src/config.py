@@ -20,7 +20,7 @@ except ImportError:
 
 # 配置文件路径（支持环境变量覆盖，便于测试和多 profile）
 CONFIG_DIR = Path(os.environ.get("LIT_DL_CONFIG_DIR", Path.home() / ".dsh" / "zrwang-plugin-config" / "nature-downloader"))
-CONFIG_FILE = CONFIG_DIR / "school.json"
+CONFIG_FILE = Path(os.environ.get("LIT_DL_SCHOOL_FILE", str(CONFIG_DIR / "school.json")))
 
 # schema 路径（相对于本文件）
 SCHEMA_FILE = Path(__file__).resolve().parent.parent / "data" / "school.schema.json"

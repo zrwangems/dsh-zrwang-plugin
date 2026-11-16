@@ -55,13 +55,8 @@ USER_ENV_FILE = USER_CONFIG_DIR / '.env'
 
 
 def get_env_candidates() -> list[Path]:
-    """Return the supported .env lookup order."""
-    return [
-        Path.cwd() / '.env',
-        PROJECT_ROOT / '.env',
-        REPO_ROOT / '.env',
-        USER_ENV_FILE,
-    ]
+    """DSH 插件集成：禁用上游 .env 查找，配置只来自进程环境。"""
+    return []
 
 
 def resolve_env_path() -> Path:
@@ -75,7 +70,7 @@ def resolve_env_path() -> Path:
     for candidate in candidates:
         if candidate.exists():
             return candidate
-    return candidates[0]
+    return Path.cwd() / '.env.disabled-by-dsh-zrwang-plugin'
 
 
 def strip_env_quotes(value: str) -> str:

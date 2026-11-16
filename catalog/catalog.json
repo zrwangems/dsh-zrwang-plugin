@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-12T03:48:17.436Z",
+  "generatedAt": "2026-11-14T10:12:01.325Z",
   "repos": [
     {
       "id": "matlab-agentic",
@@ -127,15 +127,21 @@
       "repo": "local",
       "sha": "local",
       "label": "Archify"
+    },
+    {
+      "id": "lark",
+      "repo": "local",
+      "sha": "local",
+      "label": "飞书 Lark"
     }
   ],
   "stats": {
-    "total": 301,
-    "defaults": 64,
+    "total": 329,
+    "defaults": 68,
     "byGroup": {
       "engineering": 230,
       "research": 52,
-      "office": 19
+      "office": 47
     }
   },
   "defaults": [
@@ -150,6 +156,10 @@
     "fix-sldv-incompatibility",
     "generate-requirement-drafts",
     "inject-faults",
+    "lark-contact",
+    "lark-event",
+    "lark-im",
+    "lark-shared",
     "manage-safety-analysis",
     "managing-simulink-projects",
     "matlab-analyze-data",
@@ -2123,204 +2133,212 @@
           "kind": "node"
         },
         {
-          "id": "polyspace",
-          "title": "Polyspace 代码分析",
-          "desc": "静态分析、Code Prover、Bug Finder、PSTUnit 测试与结果审查",
-          "kind": "node",
+          "id": "mathworks-other",
+          "title": "MathWorks其他",
+          "desc": "MathWorks 的其他工具：静态代码分析与官方示例",
           "children": [
             {
-              "id": "skill:generate-polyspace-test-xunit-tests",
-              "kind": "skill",
-              "title": "generate-polyspace-test-xunit-tests",
-              "zh": "为 Polyspace Test 的 PSTUnit 框架生成 C/C++ 单元测试（测试计划 + 测试源码）",
-              "name": "generate-polyspace-test-xunit-tests",
-              "dir": "engineering/polyspace/generate-polyspace-test-xunit-tests"
+              "id": "polyspace",
+              "title": "Polyspace 代码分析",
+              "desc": "静态分析、Code Prover、Bug Finder、PSTUnit 测试与结果审查",
+              "kind": "node",
+              "children": [
+                {
+                  "id": "skill:generate-polyspace-test-xunit-tests",
+                  "kind": "skill",
+                  "title": "generate-polyspace-test-xunit-tests",
+                  "zh": "为 Polyspace Test 的 PSTUnit 框架生成 C/C++ 单元测试（测试计划 + 测试源码）",
+                  "name": "generate-polyspace-test-xunit-tests",
+                  "dir": "engineering/polyspace/generate-polyspace-test-xunit-tests"
+                },
+                {
+                  "id": "skill:polyspace-agentic-toolkit-setup",
+                  "kind": "skill",
+                  "title": "polyspace-agentic-toolkit-setup",
+                  "zh": "安装并配置 Polyspace Agentic Toolkit 与 MCP Server",
+                  "name": "polyspace-agentic-toolkit-setup",
+                  "dir": "engineering/polyspace/polyspace-agentic-toolkit-setup"
+                },
+                {
+                  "id": "skill:polyspace-configure-build-options",
+                  "kind": "skill",
+                  "title": "polyspace-configure-build-options",
+                  "zh": "由编译命令或编译数据库生成 Polyspace 构建选项文件",
+                  "name": "polyspace-configure-build-options",
+                  "dir": "engineering/polyspace/polyspace-configure-build-options"
+                },
+                {
+                  "id": "skill:polyspace-configure-checkers",
+                  "kind": "skill",
+                  "title": "polyspace-configure-checkers",
+                  "zh": "生成 Polyspace 检查器配置（MISRA/CWE 等编码标准）",
+                  "name": "polyspace-configure-checkers",
+                  "dir": "engineering/polyspace/polyspace-configure-checkers"
+                },
+                {
+                  "id": "skill:polyspace-documentation-entry-points",
+                  "kind": "skill",
+                  "title": "polyspace-documentation-entry-points",
+                  "zh": "给出 Polyspace 文档入口与链接",
+                  "name": "polyspace-documentation-entry-points",
+                  "dir": "engineering/polyspace/polyspace-documentation-entry-points"
+                },
+                {
+                  "id": "skill:polyspace-find-checker-documentation",
+                  "kind": "skill",
+                  "title": "polyspace-find-checker-documentation",
+                  "zh": "查找 Polyspace 检查器与编码规则的文档",
+                  "name": "polyspace-find-checker-documentation",
+                  "dir": "engineering/polyspace/polyspace-find-checker-documentation"
+                },
+                {
+                  "id": "skill:polyspace-find-option-documentation",
+                  "kind": "skill",
+                  "title": "polyspace-find-option-documentation",
+                  "zh": "查找 Polyspace 选项（-c、-target 等）的文档页",
+                  "name": "polyspace-find-option-documentation",
+                  "dir": "engineering/polyspace/polyspace-find-option-documentation"
+                },
+                {
+                  "id": "skill:polyspace-fix-findings",
+                  "kind": "skill",
+                  "title": "polyspace-fix-findings",
+                  "zh": "修复或给出 Polyspace 分析发现的处置理由",
+                  "name": "polyspace-fix-findings",
+                  "dir": "engineering/polyspace/polyspace-fix-findings"
+                },
+                {
+                  "id": "skill:polyspace-justify-in-code",
+                  "kind": "skill",
+                  "title": "polyspace-justify-in-code",
+                  "zh": "在 C/C++ 源码里用注释标注 Polyspace 偏差理由",
+                  "name": "polyspace-justify-in-code",
+                  "dir": "engineering/polyspace/polyspace-justify-in-code"
+                },
+                {
+                  "id": "skill:polyspace-justify-in-database",
+                  "kind": "skill",
+                  "title": "polyspace-justify-in-database",
+                  "zh": "在 Polyspace 结果数据库里记录审查状态与理由",
+                  "name": "polyspace-justify-in-database",
+                  "dir": "engineering/polyspace/polyspace-justify-in-database"
+                },
+                {
+                  "id": "skill:polyspace-query-justification-catalog",
+                  "kind": "skill",
+                  "title": "polyspace-query-justification-catalog",
+                  "zh": "查询 Polyspace 预先批准的偏差理由库",
+                  "name": "polyspace-query-justification-catalog",
+                  "dir": "engineering/polyspace/polyspace-query-justification-catalog"
+                },
+                {
+                  "id": "skill:polyspace-review-findings",
+                  "kind": "skill",
+                  "title": "polyspace-review-findings",
+                  "zh": "读取、解释并按严重性排序 Polyspace 缺陷与规范违规",
+                  "name": "polyspace-review-findings",
+                  "dir": "engineering/polyspace/polyspace-review-findings"
+                },
+                {
+                  "id": "skill:resolve-polyspace-root",
+                  "kind": "skill",
+                  "title": "resolve-polyspace-root",
+                  "zh": "解析 Polyspace 安装根目录路径",
+                  "name": "resolve-polyspace-root",
+                  "dir": "engineering/polyspace/resolve-polyspace-root"
+                },
+                {
+                  "id": "skill:review-polyspace-code-prover-results",
+                  "kind": "skill",
+                  "title": "review-polyspace-code-prover-results",
+                  "zh": "读取并解释 Polyspace Code Prover 的检查结果（红/橙/绿/灰）",
+                  "name": "review-polyspace-code-prover-results",
+                  "dir": "engineering/polyspace/review-polyspace-code-prover-results"
+                },
+                {
+                  "id": "skill:run-polyspace-as-you-code-analysis",
+                  "kind": "skill",
+                  "title": "run-polyspace-as-you-code-analysis",
+                  "zh": "对单个 C/C++ 文件跑 Polyspace as You Code 静态分析",
+                  "name": "run-polyspace-as-you-code-analysis",
+                  "dir": "engineering/polyspace/run-polyspace-as-you-code-analysis"
+                },
+                {
+                  "id": "skill:run-polyspace-bug-finder-analysis",
+                  "kind": "skill",
+                  "title": "run-polyspace-bug-finder-analysis",
+                  "zh": "对多文件或整个组件跑 Polyspace Bug Finder 静态分析",
+                  "name": "run-polyspace-bug-finder-analysis",
+                  "dir": "engineering/polyspace/run-polyspace-bug-finder-analysis"
+                },
+                {
+                  "id": "skill:run-polyspace-code-prover-analysis",
+                  "kind": "skill",
+                  "title": "run-polyspace-code-prover-analysis",
+                  "zh": "跑 Polyspace Code Prover，证明代码无运行时错误",
+                  "name": "run-polyspace-code-prover-analysis",
+                  "dir": "engineering/polyspace/run-polyspace-code-prover-analysis"
+                },
+                {
+                  "id": "skill:run-polyspace-test-xunit-tests",
+                  "kind": "skill",
+                  "title": "run-polyspace-test-xunit-tests",
+                  "zh": "编译并运行 Polyspace Test 的 PSTUnit 测试，可收集覆盖率",
+                  "name": "run-polyspace-test-xunit-tests",
+                  "dir": "engineering/polyspace/run-polyspace-test-xunit-tests"
+                },
+                {
+                  "id": "skill:triage-orange-checks",
+                  "kind": "skill",
+                  "title": "triage-orange-checks",
+                  "zh": "分诊 Code Prover 橙色（未证明）检查，区分真问题与分析误差",
+                  "name": "triage-orange-checks",
+                  "dir": "engineering/polyspace/triage-orange-checks"
+                }
+              ]
             },
             {
-              "id": "skill:polyspace-agentic-toolkit-setup",
-              "kind": "skill",
-              "title": "polyspace-agentic-toolkit-setup",
-              "zh": "安装并配置 Polyspace Agentic Toolkit 与 MCP Server",
-              "name": "polyspace-agentic-toolkit-setup",
-              "dir": "engineering/polyspace/polyspace-agentic-toolkit-setup"
-            },
-            {
-              "id": "skill:polyspace-configure-build-options",
-              "kind": "skill",
-              "title": "polyspace-configure-build-options",
-              "zh": "由编译命令或编译数据库生成 Polyspace 构建选项文件",
-              "name": "polyspace-configure-build-options",
-              "dir": "engineering/polyspace/polyspace-configure-build-options"
-            },
-            {
-              "id": "skill:polyspace-configure-checkers",
-              "kind": "skill",
-              "title": "polyspace-configure-checkers",
-              "zh": "生成 Polyspace 检查器配置（MISRA/CWE 等编码标准）",
-              "name": "polyspace-configure-checkers",
-              "dir": "engineering/polyspace/polyspace-configure-checkers"
-            },
-            {
-              "id": "skill:polyspace-documentation-entry-points",
-              "kind": "skill",
-              "title": "polyspace-documentation-entry-points",
-              "zh": "给出 Polyspace 文档入口与链接",
-              "name": "polyspace-documentation-entry-points",
-              "dir": "engineering/polyspace/polyspace-documentation-entry-points"
-            },
-            {
-              "id": "skill:polyspace-find-checker-documentation",
-              "kind": "skill",
-              "title": "polyspace-find-checker-documentation",
-              "zh": "查找 Polyspace 检查器与编码规则的文档",
-              "name": "polyspace-find-checker-documentation",
-              "dir": "engineering/polyspace/polyspace-find-checker-documentation"
-            },
-            {
-              "id": "skill:polyspace-find-option-documentation",
-              "kind": "skill",
-              "title": "polyspace-find-option-documentation",
-              "zh": "查找 Polyspace 选项（-c、-target 等）的文档页",
-              "name": "polyspace-find-option-documentation",
-              "dir": "engineering/polyspace/polyspace-find-option-documentation"
-            },
-            {
-              "id": "skill:polyspace-fix-findings",
-              "kind": "skill",
-              "title": "polyspace-fix-findings",
-              "zh": "修复或给出 Polyspace 分析发现的处置理由",
-              "name": "polyspace-fix-findings",
-              "dir": "engineering/polyspace/polyspace-fix-findings"
-            },
-            {
-              "id": "skill:polyspace-justify-in-code",
-              "kind": "skill",
-              "title": "polyspace-justify-in-code",
-              "zh": "在 C/C++ 源码里用注释标注 Polyspace 偏差理由",
-              "name": "polyspace-justify-in-code",
-              "dir": "engineering/polyspace/polyspace-justify-in-code"
-            },
-            {
-              "id": "skill:polyspace-justify-in-database",
-              "kind": "skill",
-              "title": "polyspace-justify-in-database",
-              "zh": "在 Polyspace 结果数据库里记录审查状态与理由",
-              "name": "polyspace-justify-in-database",
-              "dir": "engineering/polyspace/polyspace-justify-in-database"
-            },
-            {
-              "id": "skill:polyspace-query-justification-catalog",
-              "kind": "skill",
-              "title": "polyspace-query-justification-catalog",
-              "zh": "查询 Polyspace 预先批准的偏差理由库",
-              "name": "polyspace-query-justification-catalog",
-              "dir": "engineering/polyspace/polyspace-query-justification-catalog"
-            },
-            {
-              "id": "skill:polyspace-review-findings",
-              "kind": "skill",
-              "title": "polyspace-review-findings",
-              "zh": "读取、解释并按严重性排序 Polyspace 缺陷与规范违规",
-              "name": "polyspace-review-findings",
-              "dir": "engineering/polyspace/polyspace-review-findings"
-            },
-            {
-              "id": "skill:resolve-polyspace-root",
-              "kind": "skill",
-              "title": "resolve-polyspace-root",
-              "zh": "解析 Polyspace 安装根目录路径",
-              "name": "resolve-polyspace-root",
-              "dir": "engineering/polyspace/resolve-polyspace-root"
-            },
-            {
-              "id": "skill:review-polyspace-code-prover-results",
-              "kind": "skill",
-              "title": "review-polyspace-code-prover-results",
-              "zh": "读取并解释 Polyspace Code Prover 的检查结果（红/橙/绿/灰）",
-              "name": "review-polyspace-code-prover-results",
-              "dir": "engineering/polyspace/review-polyspace-code-prover-results"
-            },
-            {
-              "id": "skill:run-polyspace-as-you-code-analysis",
-              "kind": "skill",
-              "title": "run-polyspace-as-you-code-analysis",
-              "zh": "对单个 C/C++ 文件跑 Polyspace as You Code 静态分析",
-              "name": "run-polyspace-as-you-code-analysis",
-              "dir": "engineering/polyspace/run-polyspace-as-you-code-analysis"
-            },
-            {
-              "id": "skill:run-polyspace-bug-finder-analysis",
-              "kind": "skill",
-              "title": "run-polyspace-bug-finder-analysis",
-              "zh": "对多文件或整个组件跑 Polyspace Bug Finder 静态分析",
-              "name": "run-polyspace-bug-finder-analysis",
-              "dir": "engineering/polyspace/run-polyspace-bug-finder-analysis"
-            },
-            {
-              "id": "skill:run-polyspace-code-prover-analysis",
-              "kind": "skill",
-              "title": "run-polyspace-code-prover-analysis",
-              "zh": "跑 Polyspace Code Prover，证明代码无运行时错误",
-              "name": "run-polyspace-code-prover-analysis",
-              "dir": "engineering/polyspace/run-polyspace-code-prover-analysis"
-            },
-            {
-              "id": "skill:run-polyspace-test-xunit-tests",
-              "kind": "skill",
-              "title": "run-polyspace-test-xunit-tests",
-              "zh": "编译并运行 Polyspace Test 的 PSTUnit 测试，可收集覆盖率",
-              "name": "run-polyspace-test-xunit-tests",
-              "dir": "engineering/polyspace/run-polyspace-test-xunit-tests"
-            },
-            {
-              "id": "skill:triage-orange-checks",
-              "kind": "skill",
-              "title": "triage-orange-checks",
-              "zh": "分诊 Code Prover 橙色（未证明）检查，区分真问题与分析误差",
-              "name": "triage-orange-checks",
-              "dir": "engineering/polyspace/triage-orange-checks"
+              "id": "playground",
+              "title": "示例与演示",
+              "desc": "MathWorks 官方 playground 示例技能（uifigure/HTML 等）",
+              "kind": "node",
+              "children": [
+                {
+                  "id": "skill:matlab-performance-optimizer",
+                  "kind": "skill",
+                  "title": "matlab-performance-optimizer",
+                  "zh": "用性能优化器定位性能热点",
+                  "name": "matlab-performance-optimizer",
+                  "dir": "engineering/playground/matlab-performance-optimizer"
+                },
+                {
+                  "id": "skill:matlab-uihtml-app-builder",
+                  "kind": "skill",
+                  "title": "matlab-uihtml-app-builder",
+                  "zh": "用 uifigure 与 HTML 搭应用",
+                  "name": "matlab-uihtml-app-builder",
+                  "dir": "engineering/playground/matlab-uihtml-app-builder"
+                },
+                {
+                  "id": "skill:matlab-uihtml-design",
+                  "kind": "skill",
+                  "title": "matlab-uihtml-design",
+                  "zh": "设计 MATLAB Web 界面",
+                  "name": "matlab-uihtml-design",
+                  "dir": "engineering/playground/matlab-uihtml-design"
+                },
+                {
+                  "id": "skill:simulink-test-sequence-from-ears",
+                  "kind": "skill",
+                  "title": "simulink-test-sequence-from-ears",
+                  "zh": "由 EARS 需求生成测试序列",
+                  "name": "simulink-test-sequence-from-ears",
+                  "dir": "engineering/playground/simulink-test-sequence-from-ears"
+                }
+              ]
             }
-          ]
-        },
-        {
-          "id": "playground",
-          "title": "示例与演示",
-          "desc": "MathWorks 官方 playground 示例技能（uifigure/HTML 等）",
-          "kind": "node",
-          "children": [
-            {
-              "id": "skill:matlab-performance-optimizer",
-              "kind": "skill",
-              "title": "matlab-performance-optimizer",
-              "zh": "用性能优化器定位性能热点",
-              "name": "matlab-performance-optimizer",
-              "dir": "engineering/playground/matlab-performance-optimizer"
-            },
-            {
-              "id": "skill:matlab-uihtml-app-builder",
-              "kind": "skill",
-              "title": "matlab-uihtml-app-builder",
-              "zh": "用 uifigure 与 HTML 搭应用",
-              "name": "matlab-uihtml-app-builder",
-              "dir": "engineering/playground/matlab-uihtml-app-builder"
-            },
-            {
-              "id": "skill:matlab-uihtml-design",
-              "kind": "skill",
-              "title": "matlab-uihtml-design",
-              "zh": "设计 MATLAB Web 界面",
-              "name": "matlab-uihtml-design",
-              "dir": "engineering/playground/matlab-uihtml-design"
-            },
-            {
-              "id": "skill:simulink-test-sequence-from-ears",
-              "kind": "skill",
-              "title": "simulink-test-sequence-from-ears",
-              "zh": "由 EARS 需求生成测试序列",
-              "name": "simulink-test-sequence-from-ears",
-              "dir": "engineering/playground/simulink-test-sequence-from-ears"
-            }
-          ]
+          ],
+          "kind": "node"
         }
       ],
       "kind": "group"
@@ -2882,6 +2900,238 @@
               "zh": "Excel 表格读写与公式",
               "name": "officecli-xlsx",
               "dir": "office/officecli/officecli-xlsx"
+            }
+          ]
+        },
+        {
+          "id": "lark",
+          "title": "飞书 Lark",
+          "desc": "飞书 / Lark 开放平台：消息、通讯录、日历、云文档、表格、审批、会议、任务等 28 个领域技能",
+          "kind": "node",
+          "children": [
+            {
+              "id": "skill:lark-approval",
+              "kind": "skill",
+              "title": "lark-approval",
+              "zh": "飞书审批：处理待办/已办、搜索审批定义并发起审批",
+              "name": "lark-approval",
+              "dir": "office/lark/lark-approval"
+            },
+            {
+              "id": "skill:lark-apps",
+              "kind": "skill",
+              "title": "lark-apps",
+              "zh": "妙搭应用：创建、本地/云端开发、托管与创意设计",
+              "name": "lark-apps",
+              "dir": "office/lark/lark-apps"
+            },
+            {
+              "id": "skill:lark-attendance",
+              "kind": "skill",
+              "title": "lark-attendance",
+              "zh": "飞书考勤：查询自己的考勤打卡记录",
+              "name": "lark-attendance",
+              "dir": "office/lark/lark-attendance"
+            },
+            {
+              "id": "skill:lark-base",
+              "kind": "skill",
+              "title": "lark-base",
+              "zh": "飞书多维表格：建表、字段、记录、视图、表单与仪表盘",
+              "name": "lark-base",
+              "dir": "office/lark/lark-base"
+            },
+            {
+              "id": "skill:lark-calendar",
+              "kind": "skill",
+              "title": "lark-calendar",
+              "zh": "飞书日历：日程、参会人、忙闲查询与会议室预定",
+              "name": "lark-calendar",
+              "dir": "office/lark/lark-calendar"
+            },
+            {
+              "id": "skill:lark-contact",
+              "kind": "skill",
+              "title": "lark-contact",
+              "zh": "飞书通讯录：姓名/邮箱与 open_id 互查、搜索机器人",
+              "name": "lark-contact",
+              "dir": "office/lark/lark-contact"
+            },
+            {
+              "id": "skill:lark-doc",
+              "kind": "skill",
+              "title": "lark-doc",
+              "zh": "飞书云文档：读取、创建、编辑文档与思维笔记",
+              "name": "lark-doc",
+              "dir": "office/lark/lark-doc"
+            },
+            {
+              "id": "skill:lark-drive",
+              "kind": "skill",
+              "title": "lark-drive",
+              "zh": "飞书云空间：上传下载、移动复制、权限与本地导入",
+              "name": "lark-drive",
+              "dir": "office/lark/lark-drive"
+            },
+            {
+              "id": "skill:lark-event",
+              "kind": "skill",
+              "title": "lark-event",
+              "zh": "飞书事件流：订阅消息、审批、会议等实时事件（NDJSON）",
+              "name": "lark-event",
+              "dir": "office/lark/lark-event"
+            },
+            {
+              "id": "skill:lark-im",
+              "kind": "skill",
+              "title": "lark-im",
+              "zh": "飞书即时通讯：收发消息、群聊、搜索、交互卡片与回调",
+              "name": "lark-im",
+              "dir": "office/lark/lark-im"
+            },
+            {
+              "id": "skill:lark-mail",
+              "kind": "skill",
+              "title": "lark-mail",
+              "zh": "飞书邮箱：起草、收发、搜索、标签与收信规则",
+              "name": "lark-mail",
+              "dir": "office/lark/lark-mail"
+            },
+            {
+              "id": "skill:lark-markdown",
+              "kind": "skill",
+              "title": "lark-markdown",
+              "zh": "飞书 Markdown：查看、创建、编辑与版本比较",
+              "name": "lark-markdown",
+              "dir": "office/lark/lark-markdown"
+            },
+            {
+              "id": "skill:lark-meeting",
+              "kind": "skill",
+              "title": "lark-meeting",
+              "zh": "飞书视频会议：会议记录、纪要逐字稿、会中问答",
+              "name": "lark-meeting",
+              "dir": "office/lark/lark-meeting"
+            },
+            {
+              "id": "skill:lark-minutes",
+              "kind": "skill",
+              "title": "lark-minutes",
+              "zh": "妙记入口：相关请求统一交给 lark-meeting",
+              "name": "lark-minutes",
+              "dir": "office/lark/lark-minutes"
+            },
+            {
+              "id": "skill:lark-note",
+              "kind": "skill",
+              "title": "lark-note",
+              "zh": "笔记入口：相关请求统一交给 lark-meeting",
+              "name": "lark-note",
+              "dir": "office/lark/lark-note"
+            },
+            {
+              "id": "skill:lark-okr",
+              "kind": "skill",
+              "title": "lark-okr",
+              "zh": "飞书 OKR：周期、目标、关键结果、对齐与进展记录",
+              "name": "lark-okr",
+              "dir": "office/lark/lark-okr"
+            },
+            {
+              "id": "skill:lark-openapi-explorer",
+              "kind": "skill",
+              "title": "lark-openapi-explorer",
+              "zh": "原生 OpenAPI 探索：现有命令不满足时查接口并调用",
+              "name": "lark-openapi-explorer",
+              "dir": "office/lark/lark-openapi-explorer"
+            },
+            {
+              "id": "skill:lark-shared",
+              "kind": "skill",
+              "title": "lark-shared",
+              "zh": "lark-cli 底座：认证登录、身份切换、权限与高风险操作",
+              "name": "lark-shared",
+              "dir": "office/lark/lark-shared"
+            },
+            {
+              "id": "skill:lark-sheets",
+              "kind": "skill",
+              "title": "lark-sheets",
+              "zh": "飞书电子表格：读写、图表、透视表、筛选与导入导出",
+              "name": "lark-sheets",
+              "dir": "office/lark/lark-sheets"
+            },
+            {
+              "id": "skill:lark-skill-maker",
+              "kind": "skill",
+              "title": "lark-skill-maker",
+              "zh": "自定义 Skill：把飞书 API 操作封装成可复用技能",
+              "name": "lark-skill-maker",
+              "dir": "office/lark/lark-skill-maker"
+            },
+            {
+              "id": "skill:lark-slides",
+              "kind": "skill",
+              "title": "lark-slides",
+              "zh": "飞书幻灯片：创建演示文稿、读取与编辑页面",
+              "name": "lark-slides",
+              "dir": "office/lark/lark-slides"
+            },
+            {
+              "id": "skill:lark-task",
+              "kind": "skill",
+              "title": "lark-task",
+              "zh": "飞书任务：待办、清单、子任务、协作与任务智能体",
+              "name": "lark-task",
+              "dir": "office/lark/lark-task"
+            },
+            {
+              "id": "skill:lark-vc",
+              "kind": "skill",
+              "title": "lark-vc",
+              "zh": "视频会议入口：相关请求统一交给 lark-meeting",
+              "name": "lark-vc",
+              "dir": "office/lark/lark-vc"
+            },
+            {
+              "id": "skill:lark-vc-agent",
+              "kind": "skill",
+              "title": "lark-vc-agent",
+              "zh": "会议助手入口：相关请求统一交给 lark-meeting",
+              "name": "lark-vc-agent",
+              "dir": "office/lark/lark-vc-agent"
+            },
+            {
+              "id": "skill:lark-whiteboard",
+              "kind": "skill",
+              "title": "lark-whiteboard",
+              "zh": "飞书画板：导出预览图、原始节点结构与编辑画板",
+              "name": "lark-whiteboard",
+              "dir": "office/lark/lark-whiteboard"
+            },
+            {
+              "id": "skill:lark-wiki",
+              "kind": "skill",
+              "title": "lark-wiki",
+              "zh": "飞书知识库：知识空间、成员与文档节点管理",
+              "name": "lark-wiki",
+              "dir": "office/lark/lark-wiki"
+            },
+            {
+              "id": "skill:lark-workflow-meeting-summary",
+              "kind": "skill",
+              "title": "lark-workflow-meeting-summary",
+              "zh": "会议纪要工作流：汇总一段时间纪要并生成报告",
+              "name": "lark-workflow-meeting-summary",
+              "dir": "office/lark/lark-workflow-meeting-summary"
+            },
+            {
+              "id": "skill:lark-workflow-standup-report",
+              "kind": "skill",
+              "title": "lark-workflow-standup-report",
+              "zh": "日程待办摘要：今天/明天/本周安排与未完成任务",
+              "name": "lark-workflow-standup-report",
+              "dir": "office/lark/lark-workflow-standup-report"
             }
           ]
         },
@@ -5037,7 +5287,7 @@
       "dir": "engineering\\polyspace\\generate-polyspace-test-xunit-tests",
       "zh": "为 Polyspace Test 的 PSTUnit 框架生成 C/C++ 单元测试（测试计划 + 测试源码）",
       "en": "Authors new C/C++ unit tests for the Polyspace Test XUnit framework (PSTUnit) — creates a test plan and writes the test source code. Use when the user asks to \"generate PSTUnit tests\", \"write Polyspace Test xUnit tests\", \"author PSTUnit tests\", \"create PSTUnit tests for this function\", or wants to design a PSTUnit test plan. For BUILDING or RUNNING already-authored tests, use `run-polyspace-test-x",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/generate-polyspace-test-xunit-tests",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5047,7 +5297,7 @@
       "dir": "engineering\\polyspace\\polyspace-agentic-toolkit-setup",
       "zh": "安装并配置 Polyspace Agentic Toolkit 与 MCP Server",
       "en": "Sets up the Polyspace Agentic Toolkit for any supported AI agent. Use when the user asks to \"set up Polyspace\", \"set up the Polyspace Agentic Toolkit\", \"install the Polyspace MCP Server\", \"configure Polyspace for my agent\", or wants to get Polyspace working with their AI application.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-agentic-toolkit-setup",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5057,7 +5307,7 @@
       "dir": "engineering\\polyspace\\polyspace-configure-build-options",
       "zh": "由编译命令或编译数据库生成 Polyspace 构建选项文件",
       "en": "Creates Polyspace build options files from build commands or compilation databases. Use when the user asks to \"configure build options\", \"create build options file\", \"set up Polyspace build\", or needs to configure compiler settings for Polyspace analysis.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-configure-build-options",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5067,7 +5317,7 @@
       "dir": "engineering\\polyspace\\polyspace-configure-checkers",
       "zh": "生成 Polyspace 检查器配置（MISRA/CWE 等编码标准）",
       "en": "Creates or modifies Polyspace checkers configuration files. Use when the user asks to \"configure checkers\", \"set up MISRA checking\", \"enable CWE\", \"create checkers file\", or needs to select coding standards for Polyspace analysis.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-configure-checkers",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5077,7 +5327,7 @@
       "dir": "engineering\\polyspace\\polyspace-documentation-entry-points",
       "zh": "给出 Polyspace 文档入口与链接",
       "en": "Provides Polyspace documentation entry points and links. Use when the user asks about \"Polyspace documentation\", \"where is the Polyspace docs\", \"documentation links\", or needs to find general Polyspace documentation.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-documentation-entry-points",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5087,7 +5337,7 @@
       "dir": "engineering\\polyspace\\polyspace-find-checker-documentation",
       "zh": "查找 Polyspace 检查器与编码规则的文档",
       "en": "Finds documentation for Polyspace checkers and coding rules. Use when the user asks \"what does this checker do\", \"find checker documentation\", \"explain this Polyspace rule\", or wants to understand a specific Polyspace finding.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-find-checker-documentation",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5097,7 +5347,7 @@
       "dir": "engineering\\polyspace\\polyspace-find-option-documentation",
       "zh": "查找 Polyspace 选项（-c、-target 等）的文档页",
       "en": "REQUIRED before searching for any Polyspace option documentation page. Use when the user asks about a Polyspace option (-c, -target, -sources, -boolean-types, -misra3, etc.), wants to find an option's doc page, or asks 'what does this option do'. This skill contains the only reliable method to locate option reference pages — URLs cannot be guessed from the flag name.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-find-option-documentation",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5107,7 +5357,7 @@
       "dir": "engineering\\polyspace\\polyspace-fix-findings",
       "zh": "修复或给出 Polyspace 分析发现的处置理由",
       "en": "Fixes or justifies Polyspace findings after analysis. Use when the user asks to \"fix this finding\", \"fix these defects\", \"fix violations\", \"address Polyspace results\", or wants to resolve static analysis findings.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-fix-findings",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5117,7 +5367,7 @@
       "dir": "engineering\\polyspace\\polyspace-justify-in-code",
       "zh": "在 C/C++ 源码里用注释标注 Polyspace 偏差理由",
       "en": "Justifies Polyspace findings by adding annotation comments in the C/C++ source code. Use when the user asks to \"add a Polyspace annotation\", \"justify a finding in the source/in code\", \"mark as false positive in the code\", \"suppress a finding with a comment\", or wants an in-source justification the next analysis will read. For recording a review status in the results database instead, use polyspace",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-justify-in-code",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5127,7 +5377,7 @@
       "dir": "engineering\\polyspace\\polyspace-justify-in-database",
       "zh": "在 Polyspace 结果数据库里记录审查状态与理由",
       "en": "Records a review status and rationale on Polyspace findings directly in the results database (.psbf for Bug Finder, .pscp for Code Prover) and carries that review across re-runs. Use when the user asks to \"set the status to Justified\", \"mark this as acceptable in the results\", \"record a rationale in the results database\", or wants review decisions to survive re-running the analysis without editing",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-justify-in-database",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5137,7 +5387,7 @@
       "dir": "engineering\\polyspace\\polyspace-query-justification-catalog",
       "zh": "查询 Polyspace 预先批准的偏差理由库",
       "en": "Queries a Polyspace justification catalog for pre-approved texts. Use when the user asks to \"query justification catalog\", \"find pre-approved justification\", \"look up catalog\", or needs to find pre-approved justification texts for Polyspace findings.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-query-justification-catalog",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5147,7 +5397,7 @@
       "dir": "engineering\\polyspace\\polyspace-review-findings",
       "zh": "读取、解释并按严重性排序 Polyspace 缺陷与规范违规",
       "en": "Reads, explains, and prioritizes Polyspace findings — defects and coding-standard violations — from a results database (.psbf for Bug Finder, .payc for Polyspace as You Code). Use when the user asks \"what did Bug Finder find\", \"what did the analysis find\", \"explain this defect/violation\", \"which findings are serious\", \"prioritize my findings\", or wants the root cause of a defect. For Code Prover r",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/polyspace-review-findings",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5157,7 +5407,7 @@
       "dir": "engineering\\polyspace\\resolve-polyspace-root",
       "zh": "解析 Polyspace 安装根目录路径",
       "en": "Return the Polyspace installation root path (`<polyspace_root>`). Use when a skill or CLI fallback needs the Polyspace root directory and the MCP server is not available.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/resolve-polyspace-root",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5167,7 +5417,7 @@
       "dir": "engineering\\polyspace\\review-polyspace-code-prover-results",
       "zh": "读取并解释 Polyspace Code Prover 的检查结果（红/橙/绿/灰）",
       "en": "Reads, explains, and prioritizes Polyspace Code Prover results from a .pscp database. Use when the user asks \"what did Code Prover find\", \"explain this red/orange/green/gray check\", \"why is this check orange\", \"was most of my code analyzed\", \"what are the most critical run-time errors\", or wants the root cause of a check.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/review-polyspace-code-prover-results",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5177,7 +5427,7 @@
       "dir": "engineering\\polyspace\\run-polyspace-as-you-code-analysis",
       "zh": "对单个 C/C++ 文件跑 Polyspace as You Code 静态分析",
       "en": "Runs Polyspace as You Code (PAYC) static analysis on a single C/C++ file — the file you are editing — to find defects and coding-standard violations. The default when the request targets one file, e.g. \"run Polyspace analysis on source.c\", \"check my code\"/\"check this file\", \"check that my change is MISRA/CERT compliant\", \"find or fix the defects in this file\". For several files or a whole componen",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/run-polyspace-as-you-code-analysis",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5187,7 +5437,7 @@
       "dir": "engineering\\polyspace\\run-polyspace-bug-finder-analysis",
       "zh": "对多文件或整个组件跑 Polyspace Bug Finder 静态分析",
       "en": "Runs Polyspace Bug Finder on C/C++ code — static analysis that finds defects and coding-standard violations across several files / a whole component (interprocedural, cross-file) — producing a results database (.psbf). Use when the request targets multiple files, a component, or a project, or names Bug Finder, e.g. \"run Bug Finder\", \"find defects across my component\", \"check this project for defec",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/run-polyspace-bug-finder-analysis",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5197,7 +5447,7 @@
       "dir": "engineering\\polyspace\\run-polyspace-code-prover-analysis",
       "zh": "跑 Polyspace Code Prover，证明代码无运行时错误",
       "en": "Runs Polyspace Code Prover on C/C++ code, producing a results database (.pscp). Use when the user asks to \"run Code Prover\", \"prove absence of run-time errors\", \"formally verify this code\", wants proof-backed guarantees or memory safety, or wants red/orange/green/gray run-time error checks.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/run-polyspace-code-prover-analysis",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5207,7 +5457,7 @@
       "dir": "engineering\\polyspace\\run-polyspace-test-xunit-tests",
       "zh": "编译并运行 Polyspace Test 的 PSTUnit 测试，可收集覆盖率",
       "en": "Builds and runs C/C++ PSTUnit (Polyspace Test xUnit) tests, on host or target, optionally collecting coverage/profiling. A test is PSTUnit when its sources include `<pstunit.h>` or `PST_*` macros.",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/run-polyspace-test-xunit-tests",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5217,7 +5467,7 @@
       "dir": "engineering\\polyspace\\triage-orange-checks",
       "zh": "分诊 Code Prover 橙色（未证明）检查，区分真问题与分析误差",
       "en": "Triages Polyspace Code Prover orange (unproven) checks and decides what to do about them. Use when the user asks to \"reduce orange\", \"which oranges are real bugs\", \"which oranges can I justify\", \"find defects hidden in orange\", \"what should I do about this orange\", \"is this orange in dead/unreachable code\", or wants to separate genuine potential run-time errors from analysis imprecision. For merel",
-      "group": "engineering/polyspace",
+      "group": "engineering/mathworks-other/polyspace",
       "path": "engineering/polyspace/triage-orange-checks",
       "repo": "mathworks/polyspace-agentic-toolkit",
       "sha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
@@ -5227,7 +5477,7 @@
       "dir": "engineering\\playground\\matlab-performance-optimizer",
       "zh": "用性能优化器定位性能热点",
       "en": "Optimize MATLAB code for better performance through vectorization, memory management, and profiling. Use when user requests optimization, mentions slow code, performance issues, speed improvements, or asks to make code faster or more efficient.",
-      "group": "engineering/playground",
+      "group": "engineering/mathworks-other/playground",
       "path": "engineering/playground/matlab-performance-optimizer",
       "repo": "matlab/agent-skills-playground",
       "sha": "f93265a6477ea05028927530f02cd1e847c73d7e"
@@ -5237,7 +5487,7 @@
       "dir": "engineering\\playground\\matlab-uihtml-app-builder",
       "zh": "用 uifigure 与 HTML 搭应用",
       "en": "Build interactive web applications using HTML/JavaScript interfaces with MATLAB computational backends via the uihtml component. Use when creating HTML-based MATLAB apps, JavaScript MATLAB interfaces, web UIs with MATLAB, interactive MATLAB GUIs, or when user mentions uihtml, HTML, JavaScript, web apps, or web interfaces.",
-      "group": "engineering/playground",
+      "group": "engineering/mathworks-other/playground",
       "path": "engineering/playground/matlab-uihtml-app-builder",
       "repo": "matlab/agent-skills-playground",
       "sha": "f93265a6477ea05028927530f02cd1e847c73d7e"
@@ -5247,7 +5497,7 @@
       "dir": "engineering\\playground\\matlab-uihtml-design",
       "zh": "设计 MATLAB Web 界面",
       "en": "Generate beautiful, distinctive HTML/CSS/JS control panels for MATLAB uihtml components. 8 built-in styles (Clean, Material, Cosmic Dark, Neumorphic Dark, Dashboard Light, Midnight Gradient, Minimal Mono, Warm Dark) plus custom aesthetics. Produces production-grade UI with sliders, buttons, toggles, and panels. Use when building visually polished MATLAB app UIs with uihtml.",
-      "group": "engineering/playground",
+      "group": "engineering/mathworks-other/playground",
       "path": "engineering/playground/matlab-uihtml-design",
       "repo": "matlab/agent-skills-playground",
       "sha": "f93265a6477ea05028927530f02cd1e847c73d7e"
@@ -5257,7 +5507,7 @@
       "dir": "engineering\\playground\\simulink-test-sequence-from-ears",
       "zh": "由 EARS 需求生成测试序列",
       "en": "Generate Simulink Test Sequence blocks and harnesses from EARS requirements. Use when asked to create a test case from a requirement, generate tests from a .slreqx file, or verify a Simulink model with requirement-based tests.",
-      "group": "engineering/playground",
+      "group": "engineering/mathworks-other/playground",
       "path": "engineering/playground/simulink-test-sequence-from-ears",
       "repo": "matlab/agent-skills-playground",
       "sha": "f93265a6477ea05028927530f02cd1e847c73d7e"
@@ -5269,6 +5519,286 @@
       "en": "Create validated architecture, workflow, sequence, data-flow, lifecycle/state, ERD, class, tree, timeline, and waterfall diagrams as explorable standalone HTML with dark/light themes, motion and image/SVG/WebM export. Accept requirements or Mermaid; inspect repository evidence for code-backed diagrams. Use when visualizing systems, API calls, pipelines, schemas, histories, timings, or everyday ste",
       "group": "office/skill:archify",
       "path": "office/archify",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-approval": {
+      "name": "lark-approval",
+      "dir": "office\\lark\\lark-approval",
+      "zh": "飞书审批：处理待办/已办、搜索审批定义并发起审批",
+      "en": "飞书审批：查询和处理审批待办/已办/实例，搜索可发起审批定义、查看定义详情并发起原生审批实例。当用户要处理审批任务、查看审批实例、搜索或发起审批时使用。审批待办不是飞书任务；非审批类待办走 lark-task。不负责创建审批定义；三方审批定义不走原生提单。",
+      "group": "office/lark",
+      "path": "office/lark/lark-approval",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-apps": {
+      "name": "lark-apps",
+      "dir": "office\\lark\\lark-apps",
+      "zh": "妙搭应用：创建、本地/云端开发、托管与创意设计",
+      "en": "妙搭（Spark/Miaoda）应用开发与托管：应用创建、本地全栈开发、云端生成迭代、创意设计（UI mockup / 可交互原型 / 线框图 / 落地页 / 仪表盘 / 幻灯片 deck / 视觉探索）、AI相关能力和飞书平台能力或者其他外部能力集成、日志/Trace/监控指标/PV/UV 查询、环境变量管理、应用协作者与协作权限设置、应用角色与成员管理、自动化触发器（定时/记录变更/Webhook/飞书审批）。当用户要开发/新建一个系统·工具·平台·应用，或要本地开发 / 云端开发 / 修改 / 部署 / 发布 / 上线 / 拿可分享链接，或用 HTML 做页面·网站·部署到妙搭，或要设计 / design / mockup / prototype / wireframe / 做 PPT / deck / 视觉探索，或提到妙搭/Spark/Miaoda 应用（链接形如 `/app/ap",
+      "group": "office/lark",
+      "path": "office/lark/lark-apps",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-attendance": {
+      "name": "lark-attendance",
+      "dir": "office\\lark\\lark-attendance",
+      "zh": "飞书考勤：查询自己的考勤打卡记录",
+      "en": "飞书考勤打卡：查询自己的考勤打卡记录",
+      "group": "office/lark",
+      "path": "office/lark/lark-attendance",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-base": {
+      "name": "lark-base",
+      "dir": "office\\lark\\lark-base",
+      "zh": "飞书多维表格：建表、字段、记录、视图、表单与仪表盘",
+      "en": "飞书多维表格（Base）操作：建表、字段、记录、视图、统计、公式/lookup、表单、仪表盘、应用模式（BaseApp/AppMode 页面与组件）、Workspace 目录、workflow、角色权限、模板中心（多维表格模板分类/列表/搜索）；遇到 Base/多维表格/bitable、BaseApp/AppMode、/base/ 或 /app/ 链接时使用。BaseApp 不走 lark-apps；文件导入/导出转 lark-drive，认证/授权转 lark-shared。",
+      "group": "office/lark",
+      "path": "office/lark/lark-base",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-calendar": {
+      "name": "lark-calendar",
+      "dir": "office\\lark\\lark-calendar",
+      "zh": "飞书日历：日程、参会人、忙闲查询与会议室预定",
+      "en": "飞书日历：管理日历日程和会议室。查看/搜索日程、创建/更新日程、管理参会人、查询忙闲和推荐时段、预定会议室。当用户需要查看日程安排、创建/修改会议、查询/预定会议室时使用。不负责：查询过去的视频会议记录（走 lark-meeting）、待办任务（走 lark-task）。",
+      "group": "office/lark",
+      "path": "office/lark/lark-calendar",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-contact": {
+      "name": "lark-contact",
+      "dir": "office\\lark\\lark-contact",
+      "zh": "飞书通讯录：姓名/邮箱与 open_id 互查、搜索机器人",
+      "en": "飞书 / Lark 通讯录:按姓名 / 邮箱解析成 open_id,或按 open_id 反查姓名 / 部门 / 邮箱 / 联系方式 / 个人状态 / 签名,以及按关键词搜索当前用户可见的机器人 / 智能体(agent)。当用户提到一个名字要下一步发消息 / 排日程,或拿到 open_id 想查具体信息时使用。不负责部门树遍历、按部门列员工、组织架构图,这类需求走原生 OpenAPI。",
+      "group": "office/lark",
+      "path": "office/lark/lark-contact",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-doc": {
+      "name": "lark-doc",
+      "dir": "office\\lark\\lark-doc",
+      "zh": "飞书云文档：读取、创建、编辑文档与思维笔记",
+      "en": "飞书云文档（Docx / Wiki）内容操作：读取、创建、编辑文档，插入或下载图片附件，以及操作思维笔记。用户提供文档 URL/token（包括 doubao.com 的 /docx/、/wiki/）时使用；按 URL 路径/token 而非域名路由；`/page/<token>` 是妙搭应用，非飞书云文档。文档内嵌资源按读取参考中的统一规则分流。独立评论操作走 lark-drive；随正文读取评论使用 docs +fetch。表格或 Base 内部数据操作不在本 skill。",
+      "group": "office/lark",
+      "path": "office/lark/lark-doc",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-drive": {
+      "name": "lark-drive",
+      "dir": "office\\lark\\lark-drive",
+      "zh": "飞书云空间：上传下载、移动复制、权限与本地导入",
+      "en": "飞书云空间（云盘/云存储）：管理 Drive 文件和文件夹，包含上传/下载、创建文件夹、复制/移动/删除、查看元数据、查询权限设置、评论/权限/订阅、标题、版本、飞书文档密级标签（secure labels）和本地文件导入。用户需要整理云盘目录、处理云空间资源 URL/token、判断链接类型/真实 token/标题，或导入 Word/Markdown/Excel/CSV/PPTX/.base 为 docx/sheet/bitable/slides 时使用；doubao.com 云空间 URL/token 也按资源路径和 token 路由，不回退 WebFetch。不负责：文档内容编辑（走 lark-doc）、表格/Base 表内数据操作（走 lark-sheets/lark-base）、知识空间节点/成员管理（走 lark-wiki）、原生 Markdown 文件读写/patch/dif",
+      "group": "office/lark",
+      "path": "office/lark/lark-drive",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-event": {
+      "name": "lark-event",
+      "dir": "office\\lark\\lark-event",
+      "zh": "飞书事件流：订阅消息、审批、会议等实时事件（NDJSON）",
+      "en": "Lark/Feishu real-time event listening / subscribing / consuming: stream events as NDJSON via `lark-cli event consume <EventKey>` (covers IM messages/reactions/chat changes, Approval status changes, Task updates, VC meeting started/joined/ended, Minutes generated, Whiteboard updated, Drive doc comment notices, etc.). Use for Lark bots, real-time message processing, long-running subscribers, streami",
+      "group": "office/lark",
+      "path": "office/lark/lark-event",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-im": {
+      "name": "lark-im",
+      "dir": "office\\lark\\lark-im",
+      "zh": "飞书即时通讯：收发消息、群聊、搜索、交互卡片与回调",
+      "en": "飞书即时通讯：收发消息和管理群聊。发送和回复消息、搜索聊天记录、管理群聊成员、上传下载图片和文件、管理表情回复、发送应用内/短信/电话加急、发送和处理交互卡片（Interactive Card）、监听卡片按钮回调（card.action.trigger）。当用户需要发消息、查看或搜索聊天记录、下载聊天中的文件、查看群成员、搜索群、创建群聊或话题群、管理标记数据、管理 Feed 置顶（添加/移除/查询置顶会话）、管理标签数据、处理卡片回调时使用。",
+      "group": "office/lark",
+      "path": "office/lark/lark-im",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-mail": {
+      "name": "lark-mail",
+      "dir": "office\\lark\\lark-mail",
+      "zh": "飞书邮箱：起草、收发、搜索、标签与收信规则",
+      "en": "飞书邮箱：Use when user mentions 起草邮件、写邮件、草稿、发送/回复/转发邮件、查阅邮件、看邮件、搜索邮件、邮件文件夹、邮件标签、邮件联系人、监听新邮件、邮件收信规则等；use for mail/email intent only. Do not use for docs/sheets/calendar/auth setup/pure contact lookup/IM chat tasks.",
+      "group": "office/lark",
+      "path": "office/lark/lark-mail",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-markdown": {
+      "name": "lark-markdown",
+      "dir": "office\\lark\\lark-markdown",
+      "zh": "飞书 Markdown：查看、创建、编辑与版本比较",
+      "en": "飞书 Markdown：查看、创建、上传、编辑和比较飞书中的原生 Markdown 文件。当用户要操作飞书 Markdown 文件，或比较其远端版本及本地草稿时使用。纯本地 Markdown 文件操作不触发本 skill。不负责将 Markdown 导入为飞书在线文档，也不负责文件搜索、权限、评论、移动、删除等云空间管理操作。",
+      "group": "office/lark",
+      "path": "office/lark/lark-markdown",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-meeting": {
+      "name": "lark-meeting",
+      "dir": "office\\lark\\lark-meeting",
+      "zh": "飞书视频会议：会议记录、纪要逐字稿、会中问答",
+      "en": "飞书视频会议：查询会议记录与会议产物(纪要/逐字稿/妙记)、妙记搜索/上传/下载/编辑、机器人参与会议；查询进行中的会议、实时会议内容(发言/聊天/共享文档)问答(会上/会里)、发送会中聊天/表情；基于 meeting_id、meeting_no、event_id、note_id、minute_token、vc-node-id 或妙记 URL 查询相关信息。预约会议、忙闲和会议室管理走 lark-calendar。",
+      "group": "office/lark",
+      "path": "office/lark/lark-meeting",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-minutes": {
+      "name": "lark-minutes",
+      "dir": "office\\lark\\lark-minutes",
+      "zh": "妙记入口：相关请求统一交给 lark-meeting",
+      "en": "仅当用户或上游配置显式指定 lark-minutes 时使用，相关请求统一交由 lark-meeting 技能处理。",
+      "group": "office/lark",
+      "path": "office/lark/lark-minutes",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-note": {
+      "name": "lark-note",
+      "dir": "office\\lark\\lark-note",
+      "zh": "笔记入口：相关请求统一交给 lark-meeting",
+      "en": "仅当用户或上游配置显式指定 lark-note 时使用，相关请求统一交由 lark-meeting 技能处理。",
+      "group": "office/lark",
+      "path": "office/lark/lark-note",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-okr": {
+      "name": "lark-okr",
+      "dir": "office\\lark\\lark-okr",
+      "zh": "飞书 OKR：周期、目标、关键结果、对齐与进展记录",
+      "en": "飞书 OKR：管理目标与关键结果。查看和编辑 OKR 周期、目标、关键结果、对齐关系、量化指标和进展记录。当用户需要查看或创建 OKR、管理目标和关键结果、查看对齐关系时使用。不负责：待办任务管理（lark-task）、日程/会议安排（lark-calendar）、绩效评估",
+      "group": "office/lark",
+      "path": "office/lark/lark-okr",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-openapi-explorer": {
+      "name": "lark-openapi-explorer",
+      "dir": "office\\lark\\lark-openapi-explorer",
+      "zh": "原生 OpenAPI 探索：现有命令不满足时查接口并调用",
+      "en": "飞书/Lark 原生 OpenAPI 探索：从官方文档库中挖掘未经 CLI 封装的原生 OpenAPI 接口。当用户的需求无法被现有 lark-* skill 或 lark-cli 已注册命令满足，需要查找并调用原生飞书 OpenAPI 时使用。",
+      "group": "office/lark",
+      "path": "office/lark/lark-openapi-explorer",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-shared": {
+      "name": "lark-shared",
+      "dir": "office\\lark\\lark-shared",
+      "zh": "lark-cli 底座：认证登录、身份切换、权限与高风险操作",
+      "en": "Use for lark-cli setup/auth tasks: auth login/status/logout, user vs bot identity, business-domain permissions (--domain, including all/docs/drive), missing scopes, revoking authorization, or handling _notice JSON.",
+      "group": "office/lark",
+      "path": "office/lark/lark-shared",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-sheets": {
+      "name": "lark-sheets",
+      "dir": "office\\lark\\lark-sheets",
+      "zh": "飞书电子表格：读写、图表、透视表、筛选与导入导出",
+      "en": "飞书电子表格：创建和操作电子表格。支持工作表与行列结构（增删/合并/尺寸/隐藏/冻结/分组）、单元格读写（值/公式/样式/批注/单元格图片）、区域复制移动排序填充、查找替换、批量更新，图表、透视表、条件格式、筛选器与筛选视图、下拉列表、迷你图、浮动图片等对象的创建与维护，以及公式校验、历史版本回滚、本地 Excel/CSV 与飞书表格的导入导出。当用户需要创建或编辑表格、统计汇总与可视化、表格美化、公式计算（含 Excel 公式迁移）、金融/财务建模（DCF、三张表、预算、Sensitivity 等）时使用。多维表格（Base/bitable）请改用 lark-base；若用户是想按名称或关键词搜索云空间（云盘/云存储）里的表格文件，请改用 lark-drive 的 drive +search 先定位资源。当用户给出 doubao.com 的 /sheets/ URL/token 时，也应",
+      "group": "office/lark",
+      "path": "office/lark/lark-sheets",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-skill-maker": {
+      "name": "lark-skill-maker",
+      "dir": "office\\lark\\lark-skill-maker",
+      "zh": "自定义 Skill：把飞书 API 操作封装成可复用技能",
+      "en": "创建 lark-cli 的自定义 Skill。当用户需要把飞书 API 操作封装成可复用的 Skill（包装原子 API 或编排多步流程）时使用。",
+      "group": "office/lark",
+      "path": "office/lark/lark-skill-maker",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-slides": {
+      "name": "lark-slides",
+      "dir": "office\\lark\\lark-slides",
+      "zh": "飞书幻灯片：创建演示文稿、读取与编辑页面",
+      "en": "飞书幻灯片：创建和编辑幻灯片。创建演示文稿、读取幻灯片内容、管理幻灯片页面（创建、删除、读取、局部替换）。当用户需要创建或编辑幻灯片、读取或修改单个页面时使用。当用户给出 doubao.com 的 /slides/ URL/token 时，也应直接使用本 skill，不要因为域名不是飞书而回退到 WebFetch；路由依据是 URL 路径模式和 token，而不是域名。不负责：云文档内容编辑（走 lark-doc）、云文档里的独立画板对象（走 lark-whiteboard）、上传或下载普通文件（走 lark-drive）。",
+      "group": "office/lark",
+      "path": "office/lark/lark-slides",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-task": {
+      "name": "lark-task",
+      "dir": "office\\lark\\lark-task",
+      "zh": "飞书任务：待办、清单、子任务、协作与任务智能体",
+      "en": "飞书任务：管理任务、清单和任务智能体。创建待办任务、查看和更新任务状态、拆分子任务、组织任务清单、分配协作成员、上传任务附件、注册或注销任务智能体、更新任务智能体的主页数据、写入智能体任务记录。当用户需要创建待办事项、查看任务列表、跟踪任务进度、管理项目清单或给他人分配任务、为任务上传附件文件、注册注销任务智能体、更新智能体主页数据、写入任务记录时使用。",
+      "group": "office/lark",
+      "path": "office/lark/lark-task",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-vc": {
+      "name": "lark-vc",
+      "dir": "office\\lark\\lark-vc",
+      "zh": "视频会议入口：相关请求统一交给 lark-meeting",
+      "en": "仅当用户或上游配置显式指定 lark-vc 时使用，相关请求统一交由 lark-meeting 技能处理。",
+      "group": "office/lark",
+      "path": "office/lark/lark-vc",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-vc-agent": {
+      "name": "lark-vc-agent",
+      "dir": "office\\lark\\lark-vc-agent",
+      "zh": "会议助手入口：相关请求统一交给 lark-meeting",
+      "en": "仅当用户或上游配置显式指定 lark-vc-agent 时使用，相关请求统一交由 lark-meeting 技能处理。",
+      "group": "office/lark",
+      "path": "office/lark/lark-vc-agent",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-whiteboard": {
+      "name": "lark-whiteboard",
+      "dir": "office\\lark\\lark-whiteboard",
+      "zh": "飞书画板：导出预览图、原始节点结构与编辑画板",
+      "en": "飞书画板：查询和编辑飞书云文档中的画板。支持导出画板为预览图片、导出原始节点结构、使用多种格式更新画板内容。 当用户需要查看画板内容、导出画板图片、编辑画板时使用此 skill。不负责：飞书云文档内容编辑（lark-doc）、文档内嵌电子表格/Base（lark-sheets / lark-base）。",
+      "group": "office/lark",
+      "path": "office/lark/lark-whiteboard",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-wiki": {
+      "name": "lark-wiki",
+      "dir": "office\\lark\\lark-wiki",
+      "zh": "飞书知识库：知识空间、成员与文档节点管理",
+      "en": "飞书知识库：管理知识空间、空间成员和文档节点。创建和查询知识空间、查看和管理空间成员、管理节点层级结构、在知识库中组织文档和快捷方式。当用户需要在知识库中查找或创建文档、浏览知识空间结构、查看或管理空间成员、移动或复制节点时使用。当用户给出 doubao.com 的 /wiki/ URL/token 时，也应直接使用本 skill，不要因为域名不是飞书而回退到 WebFetch；路由依据是 URL 路径模式和 token，而不是域名。不负责：上传文件到知识库节点下（走 lark-drive）、编辑文档/表格/Base 内容（走 lark-doc / lark-sheets / lark-base）。",
+      "group": "office/lark",
+      "path": "office/lark/lark-wiki",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-workflow-meeting-summary": {
+      "name": "lark-workflow-meeting-summary",
+      "dir": "office\\lark\\lark-workflow-meeting-summary",
+      "zh": "会议纪要工作流：汇总一段时间纪要并生成报告",
+      "en": "会议纪要整理工作流：汇总指定时间范围内的会议纪要并生成结构化报告。当用户需要整理会议纪要、生成会议周报、回顾一段时间内的会议内容时使用。",
+      "group": "office/lark",
+      "path": "office/lark/lark-workflow-meeting-summary",
+      "repo": "local",
+      "sha": "local"
+    },
+    "lark-workflow-standup-report": {
+      "name": "lark-workflow-standup-report",
+      "dir": "office\\lark\\lark-workflow-standup-report",
+      "zh": "日程待办摘要：今天/明天/本周安排与未完成任务",
+      "en": "日程待办摘要：编排 calendar +agenda 和 task +get-my-tasks，生成指定日期的日程与未完成任务摘要。适用于了解今天/明天/本周的安排。",
+      "group": "office/lark",
+      "path": "office/lark/lark-workflow-standup-report",
       "repo": "local",
       "sha": "local"
     },

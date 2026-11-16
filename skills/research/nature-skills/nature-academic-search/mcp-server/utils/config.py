@@ -9,7 +9,8 @@ import toml
 class Config:
     def __init__(self, config_path: str | Path | None = None):
         if config_path is None:
-            config_path = Path(__file__).parent.parent / "config.toml"
+            env_path = os.environ.get("ZRWANG_NATURE_ACADEMIC_CONFIG", "").strip()
+            config_path = Path(env_path) if env_path else Path(__file__).parent.parent / "config.toml"
         self._config = toml.load(config_path)
 
     @property

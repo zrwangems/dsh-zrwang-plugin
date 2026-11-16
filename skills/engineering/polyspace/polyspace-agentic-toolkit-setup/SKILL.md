@@ -5,6 +5,7 @@ license: MathWorks BSD-3-Clause
 metadata:
   version: "1.3.1"
 ---
+> [dsh-zrwang-plugin] DSH 的 MCP 配置在 profile 的 `cordis.patch.yml`，不要修改 Claude Code / Cursor / Codex 的配置文件；本机未安装 Polyspace 时直接报告不可用，不要下载二进制硬装。
 # Polyspace Agentic Toolkit — Setup Skill
 
 Automated setup for the Polyspace Agentic Toolkit. This skill guides through platform detection, MCP server binary installation, agent configuration, and verification.

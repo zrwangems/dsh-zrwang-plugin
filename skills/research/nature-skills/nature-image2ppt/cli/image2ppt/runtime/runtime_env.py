@@ -260,7 +260,11 @@ def font_status() -> dict:
 
 
 def image_processing_status(modules: dict[str, dict]) -> dict:
-    imagemagick = shutil.which("magick") or shutil.which("convert")
+    imagemagick = shutil.which("magick")
+    if imagemagick is None:
+        candidate = shutil.which("convert")
+        if candidate is not None and "system32" not in candidate.lower():
+            imagemagick = candidate
     return {
         "pillow": modules["PIL"]["available"],
         "imagemagick": imagemagick,

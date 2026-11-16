@@ -14,7 +14,7 @@ description: >
   uiaxes, annotation, data tips, animation, tiledlayout, colororder, heatmap, scatter,
   figure, visualization, export.
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # MATLAB Chart Builder
 
 Create, customize, and interact with MATLAB charts and plots — in standalone figures, Live Scripts, or uifigure apps.

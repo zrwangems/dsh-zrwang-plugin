@@ -13,7 +13,7 @@ To invalidate the **entire** cache at once (e.g. after a systemic resolver bug c
 
 Implementation:
 ```bash
-python `scripts/ars_cache_invalidate.py`（用 ARS 技能目录里的副本，解释器见「设置 → ARS 设置」） 用户本次输入
+python `scripts/ars_cache_invalidate.py`（用技能目录里的副本，解释器由插件自带 Python 提供） 用户本次输入
 ```
 
 Mode reference: `docs/design/2026-05-21-v3.10-182-promote-citation-gate-spec.md` §2 Delta 2.

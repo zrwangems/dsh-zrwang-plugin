@@ -10,7 +10,7 @@ metadata:
   author: MathWorks
   version: "1.1"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # RoadRunner Asset Mapping
 
 Consolidated lookup tables for mapping source map format elements to RoadRunner project asset paths. All paths are relative to the project `Assets/` folder.

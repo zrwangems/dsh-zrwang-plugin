@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "2.2"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Live Scripts
 
 Plain-text `.m` files that render as rich documents in the MATLAB Live Editor. Version-control friendly — never use binary `.mlx`.

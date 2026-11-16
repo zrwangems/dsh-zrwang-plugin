@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "tools": {
+    "model_overview": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_overview",
+      "title": "Model Overview",
+      "description": "Get a high-level view of the model showing subsystem hierarchy, interfaces, and connections. Use this when first encountering a model to understand the big picture before diving into details. The output of this function will contain syntax [x | y/z] where x=#blocks, y=#inputs, z=#outputs",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Focus on specific subsystem. Use 'root' for entire model or a block ID like 'blk_10' for a specific subsystem"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Level of detail: 'tree' (component hierarchy only — no port or signal info), 'interfaces' (component hierarchy + input/output port names for each component), or 'full' (component hierarchy + port names + top-level component signal connections)"
+          }
+        },
+        "required": ["model", "scope", "detail"]
+      }
+    },
+    "model_read": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_read",
+      "title": "Model Read",
+      "description": "Inspect the structure and algorithmic behavior of a Simulink model. Returns block topology, connections, and expressions showing what each block does.\n\nExpression notation: uN(source) = input port N with source block.port in parentheses; yN = output port N; @Param(value) = parameter with actual set-value from the block. Example: y1 = @Gain(Kp) * u1(blk_5.y1) means output 1 = Gain parameter times input 1 (from block 5's output 1). When value is numeric (e.g., @Gain(5000)), you have the final value. When value is a variable reference (e.g., @Gain(Kp)), use model_resolve_params to get the numeric value.\n\nModel Reference, Subsystem Reference, and Library blocks show interfaces only, not internal content.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Starting scope - use 'root' for model top level or a block ID like 'blk_16'"
+          },
+          "depth": {
+            "type": "string",
+            "description": "Hierarchy depth limit as string. '0'=current level only, '1'=one level down, 'inf'=full hierarchy"
+          }
+        },
+        "required": ["model", "scope", "depth"]
+      }
+    },
+    "model_query_params": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_query_params",
+      "title": "Model Query Params",
+      "description": "Provides random access to any Simulink parameter on blocks, signals, or model configuration. Complements model_read by exposing values not included in the model graph.\n\nUse when you need:\n- Parameters not in model_read expressions (sample times, state names, port dimensions)\n- Model configuration (Solver, StopTime, RelTol, code generation options)\n- Signal properties beyond names (DataLogging, OutDataTypeStr, Min, Max)\n- Targeted verification after model_configure without re-reading the full graph\n\nIf model_read already shows the value in an expression (e.g., @Gain(Kp)), you have the set-value. Use model_resolve_params to resolve variable references to numeric values.\n\nUse compile=true only if certain the parameter requires compilation (e.g., CompiledPortWidths). If unsure, use default; PARAM_UNAVAILABLE error will indicate if compile is needed.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "targets": {
+            "type": "string",
+            "description": "JSON array of target IDs - blocks (blk_5), signals (blk_5.y1 -> blk_8.u1), or config (config:ModelName)"
+          },
+          "params": {
+            "type": "string",
+            "description": "JSON array of param names like '[\"Gain\", \"SampleTime\"]' or '[\"all\"]' for all parameters"
+          },
+          "compile": {
+            "type": "string",
+            "description": "Compile model before querying ('true' or 'false'). Required for compiled params like CompiledPortWidths"
+          }
+        },
+        "required": ["model", "targets", "params", "compile"]
+      }
+    },
+    "model_resolve_params": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_resolve_params",
+      "title": "Model Resolve Params",
+      "description": "Resolve variable references from model_read expressions to actual numeric values. When model_read shows @Param(Kp), this tool returns the value of Kp from MATLAB workspaces.\n\nPass expressions exactly as seen in model_read (e.g., \"Kp\", \"cfg.gains.Ki\", \"TableData(1,:)\"). Searches base workspace, model workspace, mask workspaces, and data dictionaries.\n\nResults organized by workspace source; shadowed variables include users list to identify which blocks use each definition.\n\nUnsupported: arithmetic (Kp+Ki), function calls (sqrt(2)), matrix literals ([1 2 3]). Use evaluate_matlab_code for these.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "expressions": {
+            "type": "string",
+            "description": "JSON array of expressions to resolve, e.g. '[\"Kp\", \"cfg.gains.Ki\"]'"
+          }
+        },
+        "required": ["model", "expressions"]
+      }
+    },
+    "model_edit": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_edit",
+      "title": "Model Edit",
+      "description": "Make structural changes or configure parameters in a Simulink, System Composer, or Stateflow model within ONE scope per call. Use model_read first to get block IDs.\n\nOperations (executed in array order):\n- add_block: {op, type, name?, ref?, params?, position?} - Add block or SF element. SL params e.g. {Gain: \"2.0\"}; SF types: State, Junction, Box, Data, Event, Message, StateflowFunction, EMFunction, TruthTable\n- connect: {op, target: \"blk_X.y1 -> blk_Y.u1\", params?} - Wire output to input (y=output port, u=input port); for physical ports use blk_X.portName <-> blk_Y.portName; in SF scope use portless \"#src -> #dst\" or \"? -> #dst\" (default transition); replaces existing connection if destination port occupied; params set signal properties (SL) or LabelString/ExecutionOrder (SF)\n- disconnect: {op, target: \"blk_X.y1 -> blk_Y.u1\"} - Remove connection; in SF scope target is transition sf_X, endpoint pair \"sf_X -> sf_Y\", or default \"? -> sf_X\"\n- configure: {op, target, params} - Set Simulink parameters, System Composer component properties, or SF element properties. Target types: blk_X (block params), sf_X (SF element, e.g. {LabelString: \"...\"}), blk_X.y1 -> blk_Y.u1 (signal props), config:ModelName (solver settings), or chart:ModelName (SF chart-level props, e.g. {ActionLanguage: \"MATLAB\"})\n- delete: {op, target: \"blk_X\"} - Remove block\n- replace_block: {op, target: \"blk_X\", type, ref?, params?} - Replace block with different type; preserves name, position, connections\n- create_subsystem: {op, name, ref?, interface: {inputs, outputs}} - Create subsystem; connect via #ref.yN/#ref.uN (N = port number from interface)\n- layout: {op, targets: [\"blk_X\", ...]} - Re-place only these blocks (directly inside scope; #ref allowed) and reroute their wires; other blocks stay put apart from small shifts to make room. Use layout_mode \"incremental\". To re-lay out the WHOLE scope (moves every block), pass operations [] with layout_mode \"full\"\n\nFor parameter-only changes (no structural edits), use configure operations alone.\n\nChaining: Use \"ref\" to name a new block, \"#ref\" to reference it within the same call:\n  [{op: \"add_block\", type: \"Gain\", ref: \"g1\"}, {op: \"connect\", target: \"blk_5.y1 -> #g1.u1\"}]\n\nResponse \"created\" map shows ref → blk_id (or sf_X in SF scope). In subsequent calls, use the returned ID instead of #ref. Use model_query_params to discover valid parameter names. Operations continue on error.\n\nIMPORTANT: The operations parameter MUST be single-line JSON with no newlines.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Where to operate: 'root', subsystem block ID 'blk_5', or Stateflow scope 'sf_X' (chart/state/box). Chart blk_X auto-detects as SF. All ops within this scope."
+          },
+          "operations": {
+            "type": "string",
+            "description": "JSON array of operation objects (MUST be single-line, no newlines). Each has 'op' (add_block|connect|disconnect|configure|delete|replace_block|create_subsystem|layout) and operation-specific fields."
+          },
+          "layout_mode": {
+            "type": "string",
+            "description": "Layout mode for this call: 'full' (use when scope is empty/building from scratch, or with empty operations to re-lay out the whole scope) or 'incremental' (use when adding to existing model, and for layout ops). Always provide this parameter.",
+            "enum": ["full", "incremental"]
+          }
+        },
+        "required": ["model", "scope", "operations", "layout_mode"]
+      }
+    },
+    "model_read_diagnostics": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_read_diagnostics",
+      "title": "Model Read Diagnostics",
+      "description": "Retrieve diagnostic messages (errors, warnings, info) from the latest Diagnostic Viewer stage for a loaded Simulink model. Returns structured output with blk_X IDs consistent with model_read.\n\nUse after any operation that triggers compilation, simulation, or code generation (e.g., update diagram via evaluate_matlab_code) to see what went wrong or what warnings were produced. Each message includes severity, originating block ID, message text, and message identifier.\n\nAn empty result means no diagnostics matched the filters — it does NOT prove the model is error-free unless an update/simulation was triggered beforehand.\n\nThis tool never triggers compilation or simulation. It only reads existing diagnostics from the Diagnostic Viewer.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "severity": {
+            "type": "string",
+            "description": "Filter by severity: 'all' (default), 'error', 'warning', 'info', or a JSON array subset like '[\"error\",\"warning\"]'"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Diagnostic scope: 'root' for entire model (default) or a block ID like 'blk_10' to filter to a subsystem subtree"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "Filter to a specific MATLAB message identifier (e.g. 'Simulink:Engine:SolverConsecutiveZCNum')"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Output detail level: 'full' (default, individual messages with block IDs) or 'summary' (severity counts and message ID grouping)"
+          },
+          "sort_by": {
+            "type": "string",
+            "description": "Sort order for results: 'severity' (default), 'message_id', or 'block_path'"
+          },
+          "limit": {
+            "type": "string",
+            "description": "Max messages per page as string, 1-200 (default '50')"
+          },
+          "offset": {
+            "type": "string",
+            "description": "Paging offset as string, 0-based (default '0')"
+          },
+          "token_limit": {
+            "type": "string",
+            "description": "Max tokens in response as string (default '25000'). Lower to save context budget."
+          }
+        },
+        "required": ["model", "severity", "scope", "message_id", "detail", "sort_by", "limit", "offset", "token_limit"]
+      }
+    },
+    "model_check": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_check",
+      "title": "Model Check",
+      "description": "Validate a Simulink model for structural issues. Detects unconnected ports, dangling signal lines, and Stateflow edit-time lint errors. Use after model_edit to catch connectivity problems, or to audit an existing model's structural health.\n\nChecks available:\n- unconnected_ports: blocks with inputs/outputs that have no signal connected\n- unconnected_lines: signal lines missing a source or destination\n- stateflow_lint: edit-time lint diagnostics on Chart and StateTransitionTable blocks\n\nReturns issue list with severity (error/warning), block IDs, and actionable messages. Use scope to focus on a specific subsystem for faster, targeted validation.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Validation scope: 'root' for entire model or a block ID like 'blk_10' for a specific subsystem"
+          },
+          "checks": {
+            "type": "string",
+            "description": "JSON array of check names to run: '[\"all\"]' (default), or selective like '[\"unconnected_ports\", \"unconnected_lines\"]'. Available: unconnected_ports, unconnected_lines, stateflow_lint"
+          }
+        },
+        "required": ["model", "scope", "checks"]
+      }
+    },
+    "model_scan": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_scan",
+      "title": "Model Scan",
+      "description": "Regex search the raw .slx file on disk to locate a SPECIFIC block, parameter value, or string. Extremely fast (<100ms). Returns blk_X IDs usable with model_edit.\n\nWHEN TO USE — only for targeted searches:\n- Find a specific named block: \"PID.*Controller\", \"ErrorSum\"\n- Find blocks using a workspace variable: \"Kp\", \"SampleTime\"\n- Find commented/disabled blocks: \"Commented\"\n- Check if a specific item exists before editing: \"(?i)controller\"\n\nWHEN NOT TO USE — use the dedicated tool instead:\n- Model structure, hierarchy, or subsystem list → use model_overview\n- How blocks are connected or signal flow → use model_overview (detail=full)\n- What a subsystem computes or its algorithm → use model_read\n- Port names, interfaces, or I/O lists → use model_overview (detail=interfaces)\n- Counting blocks or subsystems → use model_overview (detail=tree)\n- Understanding block behavior or expressions → use model_read\n\nDo NOT use broad patterns like \"SubSystem\", \"Block\", or \".\" to discover model structure — model_overview exists for that and gives structured results.\n\nWHAT IS SEARCHED: the raw XML inside the saved .slx — block elements, parameter elements, and Stateflow chart XML. Config sets, package metadata, and _rels files are filtered out of the results. Patterns are Go RE2 applied to the UNESCAPED XML: write '<P Name=\"Gain\">', not '&lt;P Name=&quot;Gain&quot;&gt;'. No lookaround and no backreferences; use '(?i)' for case-insensitive matching.\n\nIMPORTANT: The grep results include id/owner_id fields (blk_X format) that are directly usable with model_edit. Do NOT call evaluate_matlab_code with find_system to re-discover block IDs — they are already in the output.\n\nLimitations:\n- Reads the SAVED .slx on disk, never the in-memory model. A model with unsaved changes returns MODEL_LOCKED — save it and retry, or use model_read (structure, expressions) / model_query_params (specific values), which read the loaded model. Expect this immediately after model_edit: scan before you edit, or save between the edit and the scan.\n- Does not resolve workspace variables or compiled types — use model_resolve_params for that.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "command": {
+            "type": "string",
+            "enum": ["grep"],
+            "description": "Scan command: 'grep' for regex search across all model content"
+          },
+          "pattern": {
+            "type": "string",
+            "description": "Regex pattern for grep command. Examples: 'Gain', 'Controller', '(?i)pid'"
+          }
+        },
+        "required": ["model", "command", "pattern"]
+      }
+    },
+    "model_test": {
+      "matlab_release": ">=R2023a",
+      "matlab_function": "model_test",
+      "title": "Model Test",
+      "description": "Execute behavioral tests against a Simulink model using a Gherkin-format specification file. Auto-creates test artifacts and returns pytest-style results. IMPORTANT: Load the 'testing-simulink-models' skill before writing .feature files — the Gherkin format requires TOML front-matter and custom step syntax not found in standard Gherkin. ROUTING: When a user asks to 'generate tests', 'write test cases', or 'verify requirements' for a Simulink model or subsystem, ALWAYS use this tool with the testing-simulink-models skill — never write matlab.unittest.TestCase classes that reimplement model logic in MATLAB.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model filename (e.g. MyModel.slx) or absolute path to .slx/.mdl file"
+          },
+          "gherkin_file": {
+            "type": "string",
+            "description": "Path to Gherkin test specification file"
+          },
+          "scenarios": {
+            "type": "string",
+            "description": "JSON array of scenario names to run, e.g. '[\"Scenario1\", \"Scenario2\"]'. Use '[]' to run all scenarios."
+          },
+          "verbose": {
+            "type": "string",
+            "description": "Include signal traces on failure ('true' or 'false'). Default: false"
+          },
+          "draft_mode": {
+            "type": "string",
+            "description": "Skip main model compile for faster iteration ('true' or 'false'). Use 'true' by default for rapid test development (~3s vs ~60s). If draft mode fails due to type/bus/dimension issues, re-run with 'false'. Default: false"
+          },
+          "coverage": {
+            "type": "string",
+            "enum": ["none", "decision"],
+            "description": "Coverage metric to collect: 'none' (default) or 'decision'. Requires Simulink Coverage toolbox."
+          }
+        },
+        "required": ["model", "gherkin_file", "scenarios", "verbose", "draft_mode", "coverage"]
+      }
+    }
+  }
+}

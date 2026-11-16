@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.3"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Filing Bug Reports
 
 Generate a self-contained bug report as a Markdown file that gives a receiving developer everything needed to reproduce the issue — without prescribing root cause or solution.

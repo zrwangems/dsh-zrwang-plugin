@@ -30,6 +30,7 @@ const SOURCES = [
   { nodeId: 'polyspace', dir: 'engineering/polyspace' },
   { nodeId: 'playground', dir: 'engineering/playground' },
   { nodeId: 'archify', dir: 'office/archify', direct: true },
+  { nodeId: 'lark', dir: 'office/lark' },
   { nodeId: 'nature-skill', dir: 'research/nature-skills' },
   { nodeId: 'zotero-cli', dir: 'research/zotero-cli', direct: true },
   { nodeId: 'officecli', dir: 'office/officecli' },
@@ -87,6 +88,9 @@ function listCategoryDirs(dir) {
 
 /** 默认勾选只来自这些一级分组（工程）；科研/办公默认全不勾。 */
 const DEFAULT_GROUPS = new Set(['engineering'])
+
+/** 例外：办公组里的飞书技能默认勾选（用户当前在用的四个，2026-11-14 确认）。 */
+const EXTRA_DEFAULT_SKILLS = new Set(['lark-contact', 'lark-event', 'lark-im', 'lark-shared'])
 
 /** 上游归到某组、但按使用习惯应挂在另一组节点下的技能。 */
 const NODE_OVERRIDE = {}
@@ -170,8 +174,17 @@ function main() {
   }
   for (const group of groups) linkParents(group, undefined)
 
+  // 节点可能挂在任意深度（如 MathWorks其他 下的 Polyspace/示例），按 id 深搜。
+  const findInGroups = id => {
+    for (const group of groups) {
+      const hit = findNode(group, id)
+      if (hit !== undefined) return hit
+    }
+    return undefined
+  }
+
   for (const source of SOURCES) {
-    const rootNode = groups.flatMap(g => [g, ...(g.children ?? [])]).find(n => n.id === source.nodeId)
+    const rootNode = findInGroups(source.nodeId)
     if (rootNode === undefined) fail(`nodes.zh.json 缺少节点：${source.nodeId}`)
     const dir = join(SKILLS, ...source.dir.split('/'))
     if (!existsSync(dir)) fail(`技能目录不存在：${dir}`)
@@ -269,8 +282,9 @@ function main() {
   const strip = (node, groupId) => {
     delete node._parent
     if (node.kind === 'skill') {
-      // 默认勾选只保留工程技能组：科研/办公两组默认全部不勾（2026-11 用户确认）
-      if (legacyEnabled.has(node.name) && DEFAULT_GROUPS.has(groupId)) {
+      // 默认勾选：工程组按旧启用集合；另外飞书四个技能固定默认勾选（科研/办公其余不勾）。
+      const isDefault = (legacyEnabled.has(node.name) && DEFAULT_GROUPS.has(groupId)) || EXTRA_DEFAULT_SKILLS.has(node.name)
+      if (isDefault) {
         defaults.push(node.name)
       }
       stats.byGroup[groupId] = (stats.byGroup[groupId] ?? 0) + 1

@@ -1,0 +1,118 @@
+# Copyright 2026 The MathWorks, Inc.
+schema_version: 1
+
+display-name: "Simulink Agentic Toolkit"
+description: "AI skills and MCP tools for Simulink Model-Based Design workflows"
+
+dependencies:
+  - repo: https://github.com/matlab/matlab-mcp-server
+    default-version: latest
+
+mcp-server-extensions:
+  - name: simulink-agentic-toolkit
+    server: matlab
+    path: tools/tools.json
+
+matlab-packages:
+  - name: simulink-agentic-toolkit
+    source: <repo>/releases/download/<version>/simulink-agentic-toolkit.mltbx
+
+skill-groups:
+  - name: model-based-design-core
+    display-name: "Model-Based Design Core"
+    description: "Building, simulating, specifying, and managing Simulink models, plus requirement drafts and bug reports"
+    path: skills-catalog/model-based-design-core
+    required: true
+    requires-products:
+      - Simulink
+
+  - name: simulink-modeling
+    display-name: "Simulink Modeling"
+    description: "Configuring and integrating C/C++ code into Simulink models via C Function blocks"
+    path: skills-catalog/simulink-modeling
+    requires-products:
+      - Simulink
+
+  - name: verification-validation-and-test
+    display-name: "Verification, Validation & Test"
+    description: "Model testing, compliance checking, Model Advisor authoring, fault injection, safety analysis, and design-error resolution"
+    path: skills-catalog/verification-validation-and-test
+    requires-products:
+      - Simulink
+      - Simulink Test
+      - Simulink Check
+      - Simulink Design Verifier
+      - Simulink Fault Analyzer
+
+  - name: model-based-system-engineering
+    display-name: "Model-Based System Engineering"
+    description: "System Composer architecture models, interface dictionaries, allocation, and requirements"
+    path: skills-catalog/model-based-system-engineering
+    requires-products:
+      - Simulink
+      - System Composer
+      - Requirements Toolbox
+
+  - name: simulink-simulation
+    display-name: "Simulink Simulation"
+    description: "Authoring simulation inputs, creating Simulation Data Inspector runs, and running multiple simulations"
+    path: skills-catalog/simulink-simulation
+    requires-products:
+      - Simulink
+
+  - name: control-systems
+    display-name: "Control Systems"
+    description: "Frequency-response analysis and linearization of Simulink models"
+    path: skills-catalog/control-systems
+    requires-products:
+      - Simulink
+      - Simulink Control Design
+      - Control System Toolbox
+
+  - name: code-generation
+    display-name: "Code Generation"
+    description: "Single-precision conversion and embedded code generation workflows"
+    path: skills-catalog/code-generation
+    requires-products:
+      - Simulink
+      - Simulink Coder
+      - Embedded Coder
+      - Fixed-Point Designer
+
+  - name: simulink-environment-fundamentals
+    display-name: "Simulink Environment Fundamentals"
+    description: "Core Simulink environment capabilities, including discovering shipped example models"
+    path: skills-catalog/simulink-environment-fundamentals
+    requires-products:
+      - Simulink
+
+  - name: signal-processing
+    display-name: "Signal Processing"
+    description: "Frame-based streaming DSP models in Simulink — block selection, frame configuration, tunable filters, buffering, multirate, variable-rate decimation"
+    path: skills-catalog/signal-processing
+    requires-products:
+      - Simulink
+      - DSP System Toolbox
+
+  - name: physical-modeling
+    display-name: "Physical Modeling"
+    description: "Model, simulate, and analyze multidomain physical systems with the Simscape product family"
+    path: skills-catalog/physical-modeling
+    requires-products:
+      - Simulink
+      - Simscape
+
+  - name: real-time-simulation-and-testing
+    display-name: "Real-Time Simulation and Testing"
+    description: "Configure, deploy, and run Simulink models on real-time target computers with Simulink Real-Time"
+    path: skills-catalog/real-time-simulation-and-testing
+    requires-products:
+      - Simulink
+      - Simulink Real-Time
+
+  - name: simulink-block-and-blockset-authoring
+    display-name: "Simulink Block and Blockset Authoring"
+    description: "Author the appearance of custom Simulink blocks, such as dynamic SVG block icons"
+    path: skills-catalog/simulink-block-and-blockset-authoring
+    requires-products:
+      - Simulink

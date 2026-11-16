@@ -13,9 +13,10 @@ import { ancestorDirIdsOfSkill, buildEffectiveGates, childBatch, desiredSkills, 
 import { applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, loadPresets, presetsPayload, renameMode, saveActiveMode, activeModeContent } from './presets.mjs'
 import { ensureSession } from './sessions.mjs'
 import { clearGates, loadGates, setGates } from './gates.mjs'
-import { blockedSkills, applySkillEnv, checkArsDependencies, currentParams, openConfigTarget, saveSettingsCard, settingsCards } from './skill-settings.mjs'
+import { blockedSkills, applySkillEnv, checkArsDependencies, currentParams, openConfigTarget, runSettingCheck, saveSettingsCard, settingsCards } from './skill-settings.mjs'
 import { configDirOfParams } from './plugin-params.mjs'
 import { loadArsManifest, mergeArsSkills } from './ars.mjs'
+import { componentViews, SERVER_NAMES, wantOf } from './mcp.mjs'
 import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mjs'
 import { appendEvent, readEvents } from './state.mjs'
 import { loadUi, saveExpanded } from './ui-state.mjs'
@@ -96,7 +97,9 @@ function groupStats(catalog, selection, desired, gates, blocked) {
   }))
 }
 
-export function registerRoutes(scope, ctx, pluginConfig) {
+export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
+  /** 设置页展示 MCP 组件状态用；headless/sdk 没有 mcpManager 时给不可用。 */
+  const mcpStatusOf = () => (mcpController === undefined ? { available: false, servers: [] } : mcpController.status())
   const webServer = scope.webServer ?? scope.get?.('webServer')
 
   /**
@@ -144,6 +147,11 @@ export function registerRoutes(scope, ctx, pluginConfig) {
     const params = currentParams(pluginConfig)
     const blocked = await blockedSkills(catalog, params)
     const desired = desiredSkills(catalog, selection, gates, blocked)
+    // MCP 组件：MathWorks 随「工程技能组开启 + 确有工程技能注入」自动开关；Windows MCP 手动。
+    const engineeringInjected = [...desired.keys()].filter(name => groupHasSkill(catalog, 'engineering', name)).length
+    if (mcpController !== undefined) await mcpController.reconcile(wantOf({ engineeringInjected, gates }))
+    const mcpStatus = mcpController === undefined ? { available: false, servers: [] } : mcpController.status()
+    const components = componentViews({ engineeringInjected, gates, status: mcpStatus })
     // ARS 是固定功能区块：作为技能树里的第四行，由会话/目录门禁 gates.ars 控制，默认开。
     const ars = loadArsManifest()
     const arsEnabled = gates.ars === true
@@ -188,6 +196,8 @@ export function registerRoutes(scope, ctx, pluginConfig) {
         repo: ars.upstream,
       },
       groups: groupStats(catalog, selection, desired, gates, blocked),
+      components: components.components,
+      mcp: { available: mcpStatus.available === true, servers: mcpStatus.servers ?? [] },
       presets: presetsPayload(catalog, blocked, projectRoot, workspace),
       ui: await loadUi(),
     }
@@ -341,7 +351,7 @@ export function registerRoutes(scope, ctx, pluginConfig) {
     'GET /settings': async () => {
       const catalog = await loadCatalog()
       const params = currentParams(pluginConfig)
-      const payload = await settingsCards(catalog, params)
+      const payload = await settingsCards(catalog, params, mcpStatusOf())
       return { ok: true, ...payload }
     },
     'POST /settings': async body => {
@@ -352,15 +362,39 @@ export function registerRoutes(scope, ctx, pluginConfig) {
         await appendEvent('open-config-dir', { target: result.path })
         return { ok: true, ...result }
       }
-      if (body.action === 'ars-check-deps') {
-        const result = await checkArsDependencies(pluginConfig)
-        await appendEvent('ars-check-deps', { ok: result.ok, missing: result.missing })
-        return { ok: true, check: result, settings: await settingsCards(catalog, currentParams(pluginConfig)) }
+      const checkActions = new Set(['ars-check-deps', 'image-check', 'image2ppt-check', 'runtime-check'])
+      if (typeof body.action === 'string' && checkActions.has(body.action)) {
+        if (body.action === 'ars-check-deps') {
+          const result = await checkArsDependencies(pluginConfig)
+          await appendEvent('ars-check-deps', { ok: result.ok, missing: result.missing })
+          return { ok: true, check: result, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
+        }
+        const check = await runSettingCheck(catalog, pluginConfig, body.action, mcpController)
+        await appendEvent('settings-check', { action: body.action, ok: check.ok })
+        return { ok: true, check, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
       }
       const backups = await saveSettingsCard(catalog, pluginConfig, body)
       applySkillEnv(currentParams(pluginConfig))
       await appendEvent('settings-saved', { cardId: body.cardId })
-      return { ok: true, backups, settings: await settingsCards(catalog, currentParams(pluginConfig)) }
+      return { ok: true, backups, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
+    },
+    'POST /mcp': async body => {
+      const action = typeof body.action === 'string' ? body.action : ''
+      const component = typeof body.component === 'string' ? body.component : ''
+      const serverName = SERVER_NAMES[component]
+      if (serverName === undefined) throw new Error(`未知 MCP 组件：${component}`)
+      if (mcpController === undefined) return { ok: false, detail: '当前 profile 没有 MCP 管理器（仅 Web/桌面端支持）' }
+      if (action === 'restart') {
+        const result = await mcpController.restart(serverName)
+        await appendEvent('mcp-restart', { component, ok: result.ok })
+        return { ok: result.ok, action, component, detail: result.detail, mcp: mcpController.status() }
+      }
+      if (action === 'probe') {
+        const result = await mcpController.probe(serverName)
+        await appendEvent('mcp-probe', { component, ok: result.ok })
+        return { ok: result.ok, action, component, detail: result.detail }
+      }
+      throw new Error(`未知 MCP 操作：${action}`)
     },
     'POST /event': async body => {
       const kind = typeof body.kind === 'string' ? body.kind : 'unknown'
@@ -378,6 +412,7 @@ export function registerRoutes(scope, ctx, pluginConfig) {
         configDir: configDirOfParams(currentParams(pluginConfig)),
         catalog: { total: catalog.stats.total, defaults: catalog.stats.defaults, generatedAt: catalog.generatedAt },
         arsCommands: arsCommandCount(),
+        mcp: mcpController === undefined ? { available: false, servers: [] } : mcpController.status(),
         projects: Object.keys(links.projects ?? {}).length,
         events: await readEvents(10),
       }

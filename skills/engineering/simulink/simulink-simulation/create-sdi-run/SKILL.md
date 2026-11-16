@@ -19,7 +19,7 @@ metadata:
   author: MathWorks
   version: "1.0"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Create SDI Run
 
 Get data into the Simulation Data Inspector using the shortest path that works. Most agents reflexively read files into the workspace and rebuild signals by hand; this skill teaches the direct paths and when each applies.

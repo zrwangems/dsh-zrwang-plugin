@@ -21,7 +21,7 @@ metadata:
   author: MathWorks
   version: "2.2.0"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Configure a Simulink Model for Code Generation
 
 Configure Simulink models for Embedded Coder (ERT), Simulink Coder (GRT rapid-prototyping), or AUTOSAR code generation using the configure_for_codegen function.

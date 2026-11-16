@@ -18,7 +18,7 @@ metadata:
   author: MathWorks
   version: "1.0"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Port DAQ Code to the Modern DataAcquisition Interface
 
 Translate legacy session-based Data Acquisition Toolbox code (`daq.createSession`, `addAnalogInputChannel`, `DataAvailable` listeners, `startBackground`, `queueOutputData`, `wait`) to the modern `DataAcquisition` interface introduced in R2020a (`daq("ni")`, `addinput`, `ScansAvailableFcn`, `start`, `write`, `preload`). Also covers writing new multi-feature DAQ scripts where the modern API patterns are easy to get wrong under cognitive load.

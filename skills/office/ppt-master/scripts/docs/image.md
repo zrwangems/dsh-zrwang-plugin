@@ -1,3 +1,4 @@
+> [dsh-zrwang-plugin] 本 DSH 集成已在 `config.py` 禁用上游 `.env` 查找：生图 URL / 模型 / Key 只来自插件设置注入的进程环境。
 # Image Tools
 
 > **Design boundary**: keep provider credentials explicit, keep in-pipeline

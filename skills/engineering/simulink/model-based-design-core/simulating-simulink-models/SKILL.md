@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.2"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Simulating Simulink Models with the sim Command
 
 Use this skill when you need to **configure** a simulation non-destructively — parameter overrides, custom inputs, batch execution, or structured output access. For persistent, reusable pass/fail behavioral testing (especially of individual subsystems), use `testing-simulink-models` instead. For trivial one-shot simulations without configuration, a direct `sim()` call suffices without this skill.

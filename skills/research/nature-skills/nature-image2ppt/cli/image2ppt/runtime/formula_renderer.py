@@ -139,7 +139,11 @@ def convert_pdf(pdf: Path, out_path: Path, fmt: str, *, dpi: int, timeout: int) 
             return "pdf2svg"
         raise FormulaRenderError("SVG output requires dvisvgm or pdf2svg.")
     if fmt == "png":
-        magick = shutil.which("magick") or shutil.which("convert")
+        magick = shutil.which("magick")
+        if magick is None:
+            candidate = shutil.which("convert")
+            if candidate is not None and "system32" not in candidate.lower():
+                magick = candidate
         if not magick:
             raise FormulaRenderError("PNG output requires ImageMagick (`magick` or `convert`).")
         command = [magick, "-density", str(dpi), str(pdf), "-trim", "+repage", str(out_path)]

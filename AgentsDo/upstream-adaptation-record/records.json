@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "note": "每个上游最后一次审计时的 lock SHA。升级/重建上游后必须同步更新；scripts/verify.mjs 会与 vendor/upstreams.lock.json 比对，不一致即失败。",
+  "auditedAt": "2026-11-14",
+  "repos": {
+    "matlab-agentic": {
+      "repo": "matlab/matlab-agentic-toolkit",
+      "lastAuditedLockSha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+    },
+    "simulink": {
+      "repo": "matlab/simulink-agentic-toolkit",
+      "lastAuditedLockSha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+    },
+    "polyspace": {
+      "repo": "mathworks/polyspace-agentic-toolkit",
+      "lastAuditedLockSha": "7d242a24c9f8141addb8f83aa915a923c76f19e4"
+    },
+    "playground": {
+      "repo": "matlab/agent-skills-playground",
+      "lastAuditedLockSha": "f93265a6477ea05028927530f02cd1e847c73d7e"
+    },
+    "nature": {
+      "repo": "yuan1z0825/nature-skills",
+      "lastAuditedLockSha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+    },
+    "officecli": {
+      "repo": "iOfficeAI/OfficeCLI",
+      "lastAuditedLockSha": "7c33491934e8adfeddaa648a934240606801e912"
+    },
+    "ppt-master": {
+      "repo": "hugohe3/ppt-master",
+      "lastAuditedLockSha": "e2820d326d049f1fcbe90523983def3d52280233"
+    },
+    "html-ppt": {
+      "repo": "lewislulu/html-ppt-skill",
+      "lastAuditedLockSha": "fd1629067909ff55b36b905476de4e5f26062a1f"
+    },
+    "zotero": {
+      "repo": "local",
+      "lastAuditedLockSha": "local"
+    },
+    "ars": {
+      "repo": "Imbad0202/academic-research-skills",
+      "lastAuditedLockSha": "c67a7be53f23d9dbba4030bbcd6f5ccfeda3afa9"
+    },
+    "academic-humanizer": {
+      "repo": "AIScientists-Dev/academic-humanizer",
+      "lastAuditedLockSha": "94b88b23703bed7df507acae7d6d5876209a0cdf"
+    },
+    "lieflat-less-ai-tone": {
+      "repo": "larashero3-dotcom/lieflat-less-ai-tone",
+      "lastAuditedLockSha": "fe77df00a27cf94428632ad449a4aecdcb83db41"
+    },
+    "nsfc": {
+      "repo": "njzjz/nsfc-agent-skills",
+      "lastAuditedLockSha": "ac06208c6aa1a866b75348338b900432a7f4ddff"
+    },
+    "supervisor": {
+      "repo": "HKUSTDial/Supervisor-Skills",
+      "lastAuditedLockSha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+    },
+    "lieflat-charts": {
+      "repo": "larashero3-dotcom/lieflat-charts",
+      "lastAuditedLockSha": "61697e4d5bad90d253e230e1f6cbda8f1db155cf"
+    },
+    "writing-dna": {
+      "repo": "larashero3-dotcom/writing-dna-skill",
+      "lastAuditedLockSha": "1335568bfd1141fc8447caaa812e6119e2d2fbbf"
+    },
+    "lieflat-gongwen": {
+      "repo": "larashero3-dotcom/lieflat-gongwen",
+      "lastAuditedLockSha": "c17e885c557930a7d1b1e34c0dc1bada47af2dad"
+    },
+    "guizang-ppt": {
+      "repo": "op7418/guizang-ppt-skill",
+      "lastAuditedLockSha": "93d21bf4a73a851907a6eb00acbf30618236667a"
+    },
+    "frontend-slides": {
+      "repo": "zarazhangrui/frontend-slides",
+      "lastAuditedLockSha": "9906a34d640d2111f724544cbc50f7f130569ae1"
+    },
+    "patent": {
+      "repo": "handsomestWei/patent-disclosure-skill",
+      "lastAuditedLockSha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+    },
+    "archify": {
+      "repo": "local",
+      "lastAuditedLockSha": "local"
+    },
+    "lark": {
+      "repo": "local",
+      "lastAuditedLockSha": "local"
+    }
+  }
+}

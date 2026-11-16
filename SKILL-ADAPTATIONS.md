@@ -17,15 +17,19 @@
 
 | 技能 / 仓库 | 上游形态 | 适配内容 |
 | --- | --- | --- |
-| `ppt-master`（hugohe3/ppt-master） | 用 `.env` 配置生图模型与 Key | 由插件设置页「模型服务 → 生图模型」统一配置，保存时生成 `~/.ppt-master/.env`；用户不再手填技能 `.env` |
-| `nature-downloader`（yuan1z0825/nature-skills） | 默认读 `~/.dsh/zrwang-plugin-config/nature-downloader/school.json` | 学校信息固定为北航，随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`；插件启动时用 `LIT_DL_CONFIG_DIR` 指向该目录，技能直接读，不往 `~/.dsh` 复制 |
-| `nature-academic-search` | 读 `mcp-server/config.toml` | 由设置页「Nature-skill 设置」写 PubMed / Crossref / arXiv 参数到该文件 |
-| `nature-image2ppt` | 读 `config.yaml` 的 OCR Token | 由设置页「模型服务 → OCR 模型」写入 `config.yaml` |
-| `zotero-cli`（54yyyu/zotero-mcp） | 支持官方 Web API / 本地 API 两种模式 | 只保留 Zotero 桌面版本地 API，不使用官方 Web API 凭据；插件不提供 Zotero API 设置项 |
-| `ARS`（Imbad0202/academic-research-skills） | 整仓 `shared/`、`scripts/`，工具名面向 Claude Code，繁体中文输出 | 18 条 rewrite：`shared/`→`_shared/`、跨技能路径改 `../<技能>/`、`python3`→`python`、`AskUserQuestion`→`ask_user_question`、`WebSearch`→`web_search`、`WebFetch`→`web_fetch`、繁体→简体；`headerNote` 强制简体中文与 Agent Team 多角色；补 `_shared/`、脚本闭包；16 个 `/ars-*` 命令别名；`vendor/ars/descriptions.json` 覆盖描述；`runtimeRoot` 写 `_shared/dsh-runtime.md` |
+| `ppt-master`（hugohe3/ppt-master） | 用 `.env` 配置生图模型与 Key；项目目录按仓库根/`cwd` 算 | 设置页「模型服务 → 生图模型」只保留 URL / 模型 / API Key（OpenAI Images 兼容协议，不分厂商）；`applySkillEnv` 注入 `ZRWANG_IMAGE_*`，`image_gen.py` 顶部桥接补丁映射成 `OPENAI_*` 并固定 `IMAGE_BACKEND=openai`；DSH 的 shell 子进程会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量（`@deepseek-ai/dsh-subprocess-local` 的凭据清洗启发式），所以密钥不能再只靠环境变量传递；插件生成 `<state>/python/sitecustomize.py`，在技能用的 Python 启动时从 `settings.json` 把密钥补回 `os.environ`（PPT 生图另有 `image_gen.py` 自身的文件兜底）；`config.py` 已禁用上游 `.env` 查找，**不写 `~/.ppt-master/.env`**；`paths.py`/`cli.py` 补丁优先使用插件维护的 `projects/` 联接；SKILL.md 与配置文档顶部加说明 |
+| `nature-image2ppt` | 读 `config.yaml` 的 OCR/生图配置；用 `shutil.which("convert")` 判断 ImageMagick | 配置由设置页写入技能目录 `config.yaml`；`doctor` 纳入设置页检查；补丁排除 `C:\Windows\System32\convert.exe` 的假 ImageMagick |
+| `nature-academic-search` | 主路径依赖 academic-search / paper-search / pubmed MCP | 本 DSH 未注册这些 MCP：`static/core/tools.md` 与 SKILL.md 顶部写明降级为 `web_search`/`web_fetch` + OpenAlex CLI + preflight；`config.toml` 由设置页写入 |
+| `nature-figure` | 绘图后端偏好写 `~/.config/nature-skills` | `NATURE_FIGURE_CONFIG` 指向插件配置目录，并兜底 `{backend:"python"}` |
+| `nature-downloader`（yuan1z0825/nature-skills） | 默认读 `~/.dsh/zrwang-plugin-config/nature-downloader/school.json` | 学校信息固定为北航，直接随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`；插件通过 `LIT_DL_SCHOOL_FILE` 指向它，不复制到 `~/.dsh`；出版社凭据/邮箱仍走 `LIT_DL_CONFIG_DIR` |
+| `patent`（handsomestWei/patent-disclosure-skill） | 默认写 `~/Documents/patent-disclosure-skill/`、`~/.patent-disclosure-skill/` | oa / patent-map / patent-reader 三个配置解析器补丁：项目内 `.agents/patent/` 优先，无项目时落插件配置目录；SKILL.md 顶部加工作目录说明；整仓路径改 `../<子技能>/` |
+| `MATLAB / Simulink / playground`（MathWorks） | 依赖 MATLAB MCP | 本机 profile 的 MCP 是 existing 模式：SKILL.md 顶部说明需先启动 MATLAB 并 `shareMATLABSession()`，不要绕开 MCP |
+| `Polyspace`（mathworks/polyspace-agentic-toolkit） | 依赖 Polyspace MCP 与 Polyspace 安装 | 本机未安装：技能置灰；setup 技能顶部说明 DSH 的 MCP 配置在 profile `cordis.patch.yml`，不要改 Claude/Cursor/Codex 配置 |
+| `ARS`（Imbad0202/academic-research-skills） | 整仓 `shared/`、`scripts/`，工具名面向 Claude Code，繁体中文输出 | 18 条 rewrite：`shared/`→`_shared/`、跨技能路径改 `../<技能>/`、`python3`→`python`、`AskUserQuestion`→`ask_user_question`、`WebSearch`→`web_search`、`WebFetch`→`web_fetch`、繁体→简体；`headerNote` 强制简体中文与 Agent Team 多角色；补 `_shared/`、脚本闭包；16 个 `/ars-*` 命令别名；`vendor/ars/descriptions.json` 覆盖描述；`runtimeRoot` 写 `_shared/dsh-runtime.md`（含 python/bash shim 说明） |
 | `Supervisor Skills`（HKUSTDial/Supervisor-Skills） | 上游技能名 `deep-research` 与 ARS 重名 | `renames` 落盘为 `supervisor-deep-research`，frontmatter 由 `vendor/skill-patches.json` 同步 |
 | 专利技能（handsomestWei/patent-disclosure-skill） | 正文按仓库根路径 `skills/<子技能>/` 引用 | 13 条 rewrite 改成 `../<子技能>/`，保证每个子技能单独注入时路径仍成立 |
-| 其余仓库 | 技能可单独运行 | 只做描述中文化与必要路径处理；如发现问题按上面的原则补适配并登记到本表 |
+| `飞书 Lark`（open.feishu.cn lark-cli skills，28 技能） | 官方 agent skills，正文面向 Claude/Codex/Aily 等 harness，跨技能按 `../lark-shared/` 等相对路径引用 | 固定本地副本 `vendor/local/lark-skills`（MIT，Lark Technologies，许可证归档 `vendor/licenses/lark/`）；每个 `SKILL.md` 顶部 headerNotes 说明：文件用 DSH `read`/`write`/`edit`、命令用 `pwsh`/`bash` 执行 `lark-cli`、需先安装并 `lark-cli auth login`、harness 对照表仅参考、相关技能一起勾选；四个基础技能默认勾选，其余默认关闭 |
+| 其余仓库 | 技能可单独运行 | 只做描述中文化与必要路径处理；如发现问题按上面的原则补适配并登记到本表与 `AgentsDo/upstream-adaptation-record/upstream-modifications.md` |
 
 ## 新增 / 升级技能检查清单
 
@@ -45,3 +49,26 @@
 - `CHANGELOG*`、`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`codecov.yml`、`requirements-dev.txt`、`requirements-test.txt`、`.pre-commit-config.yaml`、`.eslintrc*`、`*.pyc`
 
 需要时也可以手动跑 `node scripts/vendor-skills.mjs --prune-only` 对现有 `skills/` 做一次裁剪。
+
+## 运行环境适配
+
+以下不是对某个上游技能的改写，而是让所有技能在 DSH + Windows 下可运行的环境适配：
+
+- **生图配置**：设置页只保留 URL / 模型 / API Key；`applySkillEnv` 注入 `ZRWANG_IMAGE_*`；DSH shell 会按变量名清洗 `KEY` 类变量，因此插件生成 `sitecustomize.py` 在 Python 进程启动时把 `settings.json` 里的密钥（生图、OpenRouter、Pexels/Pixabay/OpenAlex、Firecrawl、NCBI）补回环境变量，PPT 的 `image_gen.py` 桥接补丁也保留 `settings.json` 文件兜底；`config.py` 已禁用上游 `.env` 查找；不写 `~/.ppt-master/.env`。`nature-image2ppt` 读插件配置目录的 `config.yaml`。Nature 生图直接复用模型服务的生图 URL/模型/Key（`OPENROUTER_*` / `SCHEMATIC_IMAGE_API_URL` 由同一份配置派生），不再单独设置。不设全局 `OPENAI_API_KEY`。
+- **系统 Python（不自带、不安装）**：插件不再自带 `runtime/python`，也不提供任何安装功能；`host/python-detect.mjs` 检测本机 Python（PATH、py 启动器、Conda、常见目录），设置 → 运行环境 → Python 解释器 里选择/填自定义路径并只读校验依赖（缺包只提示）。所有技能的 `python`/`python3` 由插件 shim 指向所选解释器，`bash` 指向 Git Bash；不在 `skills/`/`ars/` 下建 venv。
+- **配置集中**：`nature-academic-search/config.toml`、`nature-image2ppt/config.yaml`、`nature-figure.json`、`nature-downloader/{credentials,settings}.json` 都放在 `~/.dsh/zrwang-plugin-config/`；学校配置固定为北航，直接随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`，通过 `LIT_DL_SCHOOL_FILE` 读取，不复制。学术/下载相关邮箱与可选 Key 通过 `NCBI_EMAIL`、`UNPAYWALL_EMAIL`、`CROSSREF_MAILTO`、`FIRECRAWL_API_KEY` 注入，不再写回技能目录。
+- **MATLAB MCP**：profile 使用 existing 模式；MATLAB/Simulink/playground 技能顶部注明需先启动 MATLAB 并 `shareMATLABSession()`。
+- **专利工作目录**：项目内 `.agents/patent/` 优先；无项目时落插件配置目录。
+- **组件置灰**：本机未安装 draw.io、Polyspace 时，对应技能在侧栏置灰并给出原因，不静默失败。
+
+## 适配记录
+
+以上所有改动的详细台账、逐技能覆盖矩阵与验证日志在 `AgentsDo/upstream-adaptation-record/`：
+
+- `README.md`：升级前必读、更新流程；
+- `upstream-modifications.md`：每个仓库/技能改了什么、为什么、怎么验证；
+- `skill-config-matrix.md`：301 个技能 + 14 个组件的状态；
+- `records.json`：最后审计的上游 SHA，`verify` 会与 lock 比对；
+- `verification-log.md`：检查命令与结果。
+
+升级任何上游前必须先读该目录；改完 vendor 规则后必须同步更新，否则 `node scripts/verify.mjs` 会失败。

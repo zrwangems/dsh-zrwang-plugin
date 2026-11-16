@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.1"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Volume Display
 
 Display volumes with `volshow` for performant, high quality volume display. Display isosurface meshes, triangulations, and surfaces using `images.ui.graphics.Surface` rather than `isosurface` for more performant, higher quality mesh display with more responsive interactions for meshes of all sizes.

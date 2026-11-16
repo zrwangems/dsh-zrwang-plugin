@@ -115,6 +115,10 @@ def documents_dir() -> Path:
 
 
 def oa_home() -> Path:
+    cwd = Path.cwd().resolve()
+    for parent in [cwd, *cwd.parents]:
+        if (parent / ".git").exists():
+            return (parent / ".agents" / "patent" / "oa").resolve()
     env = (os.environ.get("PATENT_OA_HOME") or "").strip()
     if env:
         return Path(env).expanduser().resolve()

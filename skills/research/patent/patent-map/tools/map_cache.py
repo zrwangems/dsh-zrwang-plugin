@@ -45,6 +45,10 @@ def skill_data_root() -> Path:
 
 
 def map_home() -> Path:
+    cwd = Path.cwd().resolve()
+    for parent in [cwd, *cwd.parents]:
+        if (parent / ".git").exists():
+            return (parent / ".agents" / "patent" / "patent-map").resolve()
     env = (os.environ.get("PATENT_MAP_HOME") or "").strip()
     if env:
         return Path(env).expanduser().resolve()

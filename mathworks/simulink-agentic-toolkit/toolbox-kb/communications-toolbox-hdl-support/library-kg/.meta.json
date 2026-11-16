@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:06",
+  "generatedAtDatenum": 740254.69313246524,
+  "generatorVersion": 4,
+  "libraries": [
+    "Communications Toolbox HDL Support"
+  ],
+  "blockCount": 25,
+  "categoryCount": 6,
+  "libraryFingerprints": {
+    "Communications_Toolbox_HDL_Support": {
+      "blockCount": 25
+    }
+  }
+}

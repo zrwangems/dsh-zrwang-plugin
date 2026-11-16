@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:08",
+  "generatedAtDatenum": 740254.69315841433,
+  "generatorVersion": 4,
+  "libraries": [
+    "Simscape"
+  ],
+  "blockCount": 294,
+  "categoryCount": 13,
+  "libraryFingerprints": {
+    "Simscape": {
+      "blockCount": 294
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:09",
+  "generatedAtDatenum": 740254.69316802081,
+  "generatorVersion": 4,
+  "libraries": [
+    "Simulink Coder Support Package for BBC micro:bit"
+  ],
+  "blockCount": 105,
+  "categoryCount": 8,
+  "libraryFingerprints": {
+    "Simulink_Coder_Support_Package_for_BBC_micro_bit": {
+      "blockCount": 105
+    }
+  }
+}

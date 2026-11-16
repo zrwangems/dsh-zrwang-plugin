@@ -56,7 +56,9 @@ const selection = await loadSelection(catalog)
 // 目录复选框显示：按“子树里有没有勾选技能”自下而上推导；一级目录保持显式门禁
 const effectiveDefault = buildEffectiveGates(catalog, {}, selection)
 const engineeringChildren = catalog.groups.find(group => group.id === 'engineering').children ?? []
-const outerDirs = (catalog.groups.find(group => group.id === 'engineering').children ?? []).filter(node => node.kind !== 'skill')
+// 工程组三类下都含默认勾选技能（MathWorks其他 的 playground 有一个默认技能），
+// 用科研组里没有默认勾选的子树验证“未勾选子树显示为未勾选”。
+const outerDirs = (catalog.groups.find(group => group.id === 'research').children ?? []).filter(node => node.kind !== 'skill')
 const firstEmptyDir = outerDirs.find(node => !(catalog.defaults ?? []).some(name => {
   const walk = item => item.kind === 'skill' ? item.name === name : (item.children ?? []).some(walk)
   return walk(node)
@@ -323,12 +325,136 @@ check('删除模式后只剩默认', cleaned.items.length === 1 && cleaned.items
 
 // ---- 新增技能密钥写入宿主环境 ----
 const { applySkillEnv } = await import('../host/skill-settings.mjs')
-applySkillEnv({ natureAcademic: { pubmed: { email: 'smoke@example.com', apiKey: 'test-key' } } })
+applySkillEnv({
+  image: { baseUrl: 'https://example.com/v1', model: 'demo-image-1', apiKey: 'test-image-key' },
+  natureAcademic: { pubmed: { email: 'smoke@example.com', apiKey: 'test-key' } },
+})
+check('生图配置写入插件专用环境变量', process.env.ZRWANG_IMAGE_BASE_URL === 'https://example.com/v1'
+  && process.env.ZRWANG_IMAGE_MODEL === 'demo-image-1'
+  && process.env.ZRWANG_IMAGE_API_KEY === 'test-image-key')
+check('发热图配置不污染全局 OPENAI_API_KEY', process.env.OPENAI_API_KEY === undefined)
+check('Nature 绘图偏好指向配置目录', typeof process.env.NATURE_FIGURE_CONFIG === 'string'
+  && process.env.NATURE_FIGURE_CONFIG.includes('nature-figure.json'))
+check('archify 关闭自动更新', process.env.ARCHIFY_UPDATE_CHECK_DISABLED === '1')
 check('PubMed 配置写入环境变量', process.env.NCBI_EMAIL === 'smoke@example.com' && process.env.NCBI_API_KEY === 'test-key')
-check('学校配置指向包内固定目录', process.env.LIT_DL_CONFIG_DIR === join(SKILLS_DIR, 'research', 'nature-skills', 'nature-downloader', 'config'),
+check('学校配置指向插件配置目录', process.env.LIT_DL_CONFIG_DIR === join(runtimeConfigDir, 'nature-downloader'),
   process.env.LIT_DL_CONFIG_DIR)
 applySkillEnv({ natureAcademic: { pubmed: { email: '', apiKey: '' } } })
 check('清空后移除环境变量', process.env.NCBI_EMAIL === undefined && process.env.NCBI_API_KEY === undefined)
+check('清空后移除生图变量', process.env.ZRWANG_IMAGE_BASE_URL === undefined
+  && process.env.ZRWANG_IMAGE_MODEL === undefined
+  && process.env.ZRWANG_IMAGE_API_KEY === undefined)
+
+// ---- MCP 组件：MathWorks 自动、Windows MCP 手动 ----
+const mcpModule = await import('../host/mcp.mjs')
+const { currentParams } = await import('../host/skill-settings.mjs')
+const registered = new Map()
+const fakeManager = {
+  register(name, entry) {
+    registered.set(name, entry)
+    return () => { registered.delete(name) }
+  },
+  list() {
+    return [...registered.keys()].map(name => ({ name, configured: false, status: { state: 'connecting', attempt: 1 } }))
+  },
+}
+const controller = mcpModule.createMcpController({ get: key => key === 'mcpManager' ? fakeManager : undefined })
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: { engineering: true } }))
+check('工程组没注入技能时不注册 MathWorks MCP', registered.size === 0, JSON.stringify([...registered.keys()]))
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 12, gates: { engineering: true } }))
+const matlabEntry = registered.get('matlab-mcp')
+check('MathWorks MCP 注册为 matlab-mcp', matlabEntry !== undefined && matlabEntry.command === mcpModule.MATLAB_MCP_EXE,
+  matlabEntry?.command)
+check('MathWorks MCP 带 Simulink 工具扩展', (matlabEntry?.args ?? []).includes(`--extension-file=${mcpModule.SIMULINK_TOOLS_FILE}`)
+  && (matlabEntry?.args ?? []).includes('--matlab-session-mode=existing'))
+check('MathWorks MCP 走官方 stdio 条目字段', matlabEntry?.transport === 'stdio'
+  && matlabEntry?.toolCallTimeoutMs === 120000 && matlabEntry?.startupTimeoutMs === 30000
+  && typeof matlabEntry?.closeTimeoutMs === 'number')
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 12, gates: { engineering: true, 'windows-mcp': true } }))
+check('勾选 Windows MCP 组件后注册 windows-mcp', registered.has('windows-mcp'))
+check('Windows MCP 默认参数 serve', JSON.stringify(registered.get('windows-mcp')?.args) === JSON.stringify(['serve']))
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: { engineering: false, 'windows-mcp': true } }))
+check('工程技能关掉后注销 MathWorks MCP', !registered.has('matlab-mcp') && registered.has('windows-mcp'))
+await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: {} }))
+check('取消 Windows MCP 后全部注销', registered.size === 0)
+const views = mcpModule.componentViews({
+  engineeringInjected: 3,
+  gates: { engineering: true },
+  status: { available: true, servers: [{ name: 'matlab-mcp', state: 'ready', attempt: 0 }] },
+})
+check('组件行：MathWorks 自动开启且状态 ready',
+  views.components[0].id === 'mathworks' && views.components[0].enabled === true && views.components[0].stateLabel === '已连接',
+  JSON.stringify(views.components[0]))
+const noManagerController = mcpModule.createMcpController({ get: () => undefined })
+await noManagerController.reconcile({ mathworks: true, windows: true })
+const noManagerStatus = noManagerController.status()
+check('无 mcpManager 时降级为不可用', noManagerStatus.available === false
+  && noManagerStatus.servers.every(server => server.state === 'unavailable'))
+check('无 mcpManager 时组件行标为不支持', mcpModule.componentViews({ engineeringInjected: 5, gates: { engineering: true }, status: noManagerStatus })
+  .available === false)
+await gatesModule.setGates({ 'windows-mcp': true })
+const mcpGates = await gatesModule.loadGates()
+check('Windows MCP 门禁可持久化', mcpGates['windows-mcp'] === true)
+await gatesModule.setGates({ 'windows-mcp': false })
+check('Windows MCP 门禁可关闭', (await gatesModule.loadGates())['windows-mcp'] === false)
+
+// ---- MCP 稳定性：重启 / 探测 / 固定参数 / 启动成功标识 ----
+const stableRegistered = new Map()
+const stableCalls = []
+const stableManager = {
+  register(name, entry) {
+    stableRegistered.set(name, entry)
+    return () => { stableRegistered.delete(name) }
+  },
+  list() {
+    return [...stableRegistered.keys()].map(name => ({ name, configured: false, status: { state: 'connected', toolCount: 14, connectedAt: Date.now() } }))
+  },
+  async restart(name) { stableCalls.push(['restart', name]) },
+  async probe(name) {
+    stableCalls.push(['probe', name])
+    return { ok: true, serverInfo: { name: 'matlab-mcp', version: '0.16.0' }, toolNames: ['a', 'b'], truncated: false, durationMs: 12, closeConfirmed: true }
+  },
+}
+const stableController = mcpModule.createMcpController({ get: key => key === 'mcpManager' ? stableManager : undefined })
+await stableController.reconcile({ mathworks: true, windows: false })
+const restartResult = await stableController.restart('matlab-mcp')
+check('已开启的服务器可以重启', restartResult.ok === true && stableCalls.some(call => call[0] === 'restart' && call[1] === 'matlab-mcp'))
+const probeResult = await stableController.probe('matlab-mcp')
+check('测试连接返回工具数与用时', probeResult.ok === true && probeResult.detail.includes('2 个工具') && probeResult.detail.includes('12ms'), probeResult.detail)
+const restartOff = await stableController.restart('windows-mcp')
+check('未开启的组件重启给出提示', restartOff.ok === false && restartOff.detail.includes('未开启'))
+const connectedViews = mcpModule.componentViews({
+  engineeringInjected: 5,
+  gates: { engineering: true },
+  status: stableController.status(),
+})
+check('启动成功有明确标识并带工具数',
+  connectedViews.components[0].phase === 'running' && connectedViews.components[0].statusLabel === '已启动（14 个工具）',
+  JSON.stringify(connectedViews.components[0]))
+const connectingViews = mcpModule.componentViews({
+  engineeringInjected: 5,
+  gates: { engineering: true },
+  status: { available: true, servers: [{ name: 'matlab-mcp', state: 'connecting', attempt: 0 }] },
+})
+check('启动中显示启动中标识', connectingViews.components[0].phase === 'starting' && connectingViews.components[0].statusLabel.includes('启动中'))
+const failedViews = mcpModule.componentViews({
+  engineeringInjected: 5,
+  gates: { engineering: true },
+  status: { available: true, servers: [{ name: 'matlab-mcp', state: 'failed', reason: 'gave-up', attempt: 10 }] },
+})
+check('启动失败显示启动失败标识', failedViews.components[0].phase === 'failed' && failedViews.components[0].statusLabel === '启动失败')
+check('MATLAB MCP 参数固定',
+  JSON.stringify(mcpModule.resolveMatlabEntry().args) === JSON.stringify([
+    '--matlab-session-mode=existing',
+    '--extension-file=' + mcpModule.SIMULINK_TOOLS_FILE,
+    '--disable-telemetry=true',
+  ]) && mcpModule.resolveMatlabEntry().env.WINDIR === 'C:\\Windows'
+  && mcpModule.resolveMatlabEntry().reconnect === undefined)
+check('Windows MCP 参数固定',
+  mcpModule.resolveWindowsEntry().command === 'windows-mcp'
+  && JSON.stringify(mcpModule.resolveWindowsEntry().args) === JSON.stringify(['serve'])
+  && mcpModule.resolveWindowsEntry().env.ANONYMIZED_TELEMETRY === 'false'
+  && mcpModule.resolveWindowsEntry().reconnect === undefined)
 
 // ---- 清理 ----
 rmSync(WORK, { recursive: true, force: true })

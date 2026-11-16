@@ -6,7 +6,7 @@ description: >-
   requested AI-generated graphical abstracts and mechanism schematics. Not for
   interactive dashboards, data cleaning, or statistics-only analysis.
 ---
-
+> [dsh-zrwang-plugin] 绘图后端偏好写在插件配置目录（`NATURE_FIGURE_CONFIG`）；OpenRouter/生图网关的 Key、模型、接口地址不再单独设置，直接复用模型服务的生图 URL/模型/Key（插件注入 `OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`），不要写 `~/.config/nature-skills`。
 # Nature Figure Making — Router
 
 ## Routing protocol

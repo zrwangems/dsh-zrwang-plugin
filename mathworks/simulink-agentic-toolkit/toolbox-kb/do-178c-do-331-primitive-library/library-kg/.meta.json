@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:07",
+  "generatedAtDatenum": 740254.69313672453,
+  "generatorVersion": 4,
+  "libraries": [
+    "DO-178C/DO-331 Primitive Library"
+  ],
+  "blockCount": 113,
+  "categoryCount": 14,
+  "libraryFingerprints": {
+    "DO_178C_DO_331_Primitive_Library": {
+      "blockCount": 113
+    }
+  }
+}

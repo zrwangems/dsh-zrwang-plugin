@@ -9,7 +9,7 @@ metadata:
   author: MathWorks
   version: "1.1"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Design Digital Filters in MATLAB
 
 Design, implement, and validate digital filters using Signal Processing Toolbox and DSP System Toolbox. Choose the right architecture (single-stage vs efficient alternatives), generate correct code, and verify the result with plots and numbers.

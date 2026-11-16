@@ -5,6 +5,7 @@ import path from "node:path";
 export const DEFAULT_DISCOVERY_URL = "https://www.webofscience.com/wos/woscc/basic-search";
 
 export function configPathFromEnv(env = process.env) {
+  if (env.LIT_DL_SCHOOL_FILE) return env.LIT_DL_SCHOOL_FILE;
   const dir = env.LIT_DL_CONFIG_DIR || path.join(os.homedir(), ".dsh", "zrwang-plugin-config", "nature-downloader");
   return path.join(dir, "school.json");
 }

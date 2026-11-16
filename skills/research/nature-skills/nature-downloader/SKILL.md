@@ -4,7 +4,7 @@ description: Use when a user needs lawful academic full text, CNKI institutional
 metadata:
   compatibility: Requires Node.js 22+ and Python 3. CNKI, Web Access, and SI routes additionally require the user's authenticated Chrome session and remote debugging. Uses only lawful OA, publisher API, and user-authorized institutional access.
 ---
-
+> [dsh-zrwang-plugin] 学校配置固定为北航，直接随技能放在 `config/school.json`（无需设置）；插件通过 `LIT_DL_SCHOOL_FILE` 指向它。`credentials.json`、`settings.json` 仍在插件配置目录（`LIT_DL_CONFIG_DIR`），出版社凭据由设置页「科研服务」维护；不要写 `~/.config/lit-dl`。
 # Nature Literature Downloader
 
 This skill routes literature through lawful open-access, publisher-API, CNKI institutional, and browser-based institutional providers. `scripts/batch_download.mjs` is the orchestration entry point; school configuration, publisher credentials, metadata/OA resolution, provider downloads, content validation, and manifests are separate modules.

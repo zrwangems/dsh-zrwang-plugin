@@ -51,4 +51,4 @@
 
 **关于 Agent Team**：评审团、完整流水线这类多角色流程会用 DSH 的 Agent Team 并行跑；没开 Agent Team 时对应命令会提示先开启。`/ars-plan` 这种单角色对话不受影响。
 
-**关于 Python**：引用核验、PRISMA 计数这类校验脚本需要 Python。在「设置 → My DSH → ARS 设置」里选解释器、点「检查依赖」；没有 Python 也能用正文流程。
+**关于 Python**：引用核验、PRISMA 计数这类校验脚本需要 Python。插件**不自带也不安装** Python，只检测本机解释器；到「设置 → 运行环境 → Python 解释器」点「重新检测系统 Python」并选一个（缺的包会列出，需自行补齐）。选定后所有技能的 `python`/`python3` 自动指向它；「运行环境 → 组件状态」可检查解释器与依赖。

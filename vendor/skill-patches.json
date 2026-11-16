@@ -9,7 +9,10 @@
         {
           "path": "research/supervisor-skills/supervisor-deep-research/SKILL.md",
           "replace": [
-            { "find": "name: deep-research", "to": "name: supervisor-deep-research" }
+            {
+              "find": "name: deep-research",
+              "to": "name: supervisor-deep-research"
+            }
           ]
         }
       ]
@@ -64,6 +67,231 @@
             {
               "find": "path.join(os.homedir(), \".config\", \"lit-dl\")",
               "to": "path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\")"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppt-master-image-bridge",
+      "reason": "插件设置通过 ZRWANG_IMAGE_* 注入生图配置；在技能进程内映射成 ppt-master 期望的 OPENAI_*。DSH shell 子进程会清洗 *KEY* 等变量名，所以密钥再从插件 settings.json 兜底读取，不依赖环境变量。",
+      "files": [
+        {
+          "path": "office/ppt-master/scripts/image_gen.py",
+          "replace": [
+            {
+              "find": "configure_utf8_stdio()\n\nENV_PATH = resolve_env_path()",
+              "to": "configure_utf8_stdio()\n\n# >>> dsh-zrwang-plugin image bridge\ndef _plugin_image_values():\n    # DSH 的 shell 子进程会按变量名清洗 *KEY*/*TOKEN*/*SECRET*/*PASSWORD*，\n    # 密钥不能只靠环境变量传给技能进程；这里从插件 settings.json 兜底读取。\n    root = os.environ.get(\"ZRWANG_PLUGIN_CONFIG_DIR\", \"\").strip()\n    if not root:\n        return {}\n    try:\n        with open(os.path.join(root, \"settings.json\"), \"r\", encoding=\"utf-8\") as handle:\n            image = (json.load(handle) or {}).get(\"image\") or {}\n        return image if isinstance(image, dict) else {}\n    except Exception:\n        return {}\n\n\ndef _apply_plugin_image_env():\n    image = _plugin_image_values()\n    pairs = (\n        (\"ZRWANG_IMAGE_BASE_URL\", \"OPENAI_BASE_URL\", \"baseUrl\"),\n        (\"ZRWANG_IMAGE_MODEL\", \"OPENAI_MODEL\", \"model\"),\n        (\"ZRWANG_IMAGE_API_KEY\", \"OPENAI_API_KEY\", \"apiKey\"),\n    )\n    for source, target_env, key in pairs:\n        value = os.environ.get(source, \"\").strip() or str(image.get(key) or \"\").strip()\n        if value:\n            os.environ[target_env] = value\n            os.environ.setdefault(source, value)\n    if (\n        os.environ.get(\"ZRWANG_IMAGE_API_KEY\")\n        or os.environ.get(\"ZRWANG_IMAGE_BASE_URL\")\n        or image.get(\"apiKey\")\n        or image.get(\"baseUrl\")\n    ):\n        os.environ[\"IMAGE_BACKEND\"] = \"openai\"\n        os.environ.setdefault(\"OPENAI_QUALITY\", \"omit\")\n\n\n_apply_plugin_image_env()\n# <<< dsh-zrwang-plugin image bridge\n\nENV_PATH = resolve_env_path()"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppt-master-projects-root",
+      "reason": "插件把技能目录的 projects/ 联接到 <项目根>/.agents/ppt-master/projects；paths.py 以技能目录为基准。",
+      "files": [
+        {
+          "path": "office/ppt-master/scripts/project_management/paths.py",
+          "replace": [
+            {
+              "find": "PROJECTS_ROOT = REPO_ROOT / \"projects\"",
+              "to": "PROJECTS_ROOT = SKILL_DIR / \"projects\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppt-master-default-projects-root",
+      "reason": "默认项目根优先使用插件维护的 projects 联接，避免写到 <cwd>/projects 或插件仓库。",
+      "files": [
+        {
+          "path": "office/ppt-master/scripts/project_management/cli.py",
+          "replace": [
+            {
+              "find": "    if is_within_path(Path.cwd(), REPO_ROOT):\n        return PROJECTS_ROOT\n    return Path.cwd() / \"projects\"",
+              "to": "    if PROJECTS_ROOT.is_dir():\n        return PROJECTS_ROOT\n    if is_within_path(Path.cwd(), REPO_ROOT):\n        return PROJECTS_ROOT\n    return Path.cwd() / \"projects\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nature-image2ppt-convert-detection",
+      "reason": "Windows 的 C:\\Windows\\System32\\convert.exe 是 FAT→NTFS 工具，不是 ImageMagick；探测时必须排除。",
+      "files": [
+        {
+          "path": "research/nature-skills/nature-image2ppt/cli/image2ppt/runtime/runtime_env.py",
+          "replace": [
+            {
+              "find": "    imagemagick = shutil.which(\"magick\") or shutil.which(\"convert\")",
+              "to": "    imagemagick = shutil.which(\"magick\")\n    if imagemagick is None:\n        candidate = shutil.which(\"convert\")\n        if candidate is not None and \"system32\" not in candidate.lower():\n            imagemagick = candidate"
+            }
+          ]
+        },
+        {
+          "path": "research/nature-skills/nature-image2ppt/cli/image2ppt/runtime/formula_renderer.py",
+          "replace": [
+            {
+              "find": "        magick = shutil.which(\"magick\") or shutil.which(\"convert\")",
+              "to": "        magick = shutil.which(\"magick\")\n        if magick is None:\n            candidate = shutil.which(\"convert\")\n            if candidate is not None and \"system32\" not in candidate.lower():\n                magick = candidate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nature-academic-search-mcp-note",
+      "reason": "DSH 未注册上游的 academic-search / paper-search MCP；在工具清单顶部写明降级路径，避免模型调用不存在的工具。",
+      "files": [
+        {
+          "path": "research/nature-skills/nature-academic-search/static/core/tools.md",
+          "replace": [
+            {
+              "find": "# MCP tools and shared modules\n",
+              "to": "> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search / pubmed MCP 服务器：不要调用 `search_papers` 等 MCP 工具。可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`；需要 PubMed/Crossref/arXiv 时用 `web_fetch` 直接查 REST API，并明确告诉用户检索已降级。\n\n# MCP tools and shared modules\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patent-oa-project-home",
+      "reason": "默认写 ~/Documents/patent-disclosure-skill/oa；改为项目内 .agents/patent/oa 优先，符合输出只放项目目录的约束。",
+      "files": [
+        {
+          "path": "research/patent/patent-oa/tools/config.py",
+          "replace": [
+            {
+              "find": "def oa_home() -> Path:\n    env = (os.environ.get(\"PATENT_OA_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (documents_dir() / \"patent-disclosure-skill\" / \"oa\").resolve()",
+              "to": "def oa_home() -> Path:\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return (parent / \".agents\" / \"patent\" / \"oa\").resolve()\n    env = (os.environ.get(\"PATENT_OA_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (documents_dir() / \"patent-disclosure-skill\" / \"oa\").resolve()"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patent-map-project-home",
+      "reason": "默认写 ~/Documents/patent-disclosure-skill/patent-map；改为项目内 .agents/patent/patent-map 优先。",
+      "files": [
+        {
+          "path": "research/patent/patent-map/tools/map_cache.py",
+          "replace": [
+            {
+              "find": "def map_home() -> Path:\n    env = (os.environ.get(\"PATENT_MAP_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (skill_data_root() / \"patent-map\").resolve()",
+              "to": "def map_home() -> Path:\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return (parent / \".agents\" / \"patent\" / \"patent-map\").resolve()\n    env = (os.environ.get(\"PATENT_MAP_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (skill_data_root() / \"patent-map\").resolve()"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patent-map-vault-project-home",
+      "reason": "Obsidian 库路径持久化文件默认写 C 盘主目录；改为项目内 .agents/patent/ 优先。",
+      "files": [
+        {
+          "path": "research/patent/patent-map/tools/vault_index.py",
+          "replace": [
+            {
+              "find": "def persisted_vault_path() -> Path:\n    return Path.home() / \".patent-disclosure-skill\" / \"obsidian_vault.txt\"",
+              "to": "def persisted_vault_path() -> Path:\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return parent / \".agents\" / \"patent\" / \"obsidian_vault.txt\"\n    return Path.home() / \".patent-disclosure-skill\" / \"obsidian_vault.txt\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patent-reader-vault-project-home",
+      "reason": "Obsidian 库路径持久化文件默认写 C 盘主目录；改为项目内 .agents/patent/ 优先。",
+      "files": [
+        {
+          "path": "research/patent/patent-reader/tools/shared/obsidian_env.py",
+          "replace": [
+            {
+              "find": "def persisted_vault_config_path() -> Path:\n    \"\"\"用户级持久化：Obsidian 库路径（不强制依赖系统环境变量）。\"\"\"\n    home = Path.home()\n    return home / \".patent-disclosure-skill\" / \"obsidian_vault.txt\"",
+              "to": "def persisted_vault_config_path() -> Path:\n    \"\"\"用户级持久化：Obsidian 库路径（项目内优先，其次用户主目录）。\"\"\"\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return parent / \".agents\" / \"patent\" / \"obsidian_vault.txt\"\n    home = Path.home()\n    return home / \".patent-disclosure-skill\" / \"obsidian_vault.txt\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppt-master-no-dotenv-config",
+      "reason": "插件已禁止兼容上游 .env：生图配置只从进程环境读取；把 .env 候选清空并让 resolve_env_path 返回一个必然不存在的 cwd/.env。",
+      "files": [
+        {
+          "path": "office/ppt-master/scripts/config.py",
+          "replace": [
+            {
+              "find": "def get_env_candidates() -> list[Path]:\n    \"\"\"Return the supported .env lookup order.\"\"\"\n    return [\n        Path.cwd() / '.env',\n        PROJECT_ROOT / '.env',\n        REPO_ROOT / '.env',\n        USER_ENV_FILE,\n    ]",
+              "to": "def get_env_candidates() -> list[Path]:\n    \"\"\"DSH 插件集成：禁用上游 .env 查找，配置只来自进程环境。\"\"\"\n    return []"
+            },
+            {
+              "find": "    return candidates[0]",
+              "to": "    return Path.cwd() / '.env.disabled-by-dsh-zrwang-plugin'"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nature-academic-config-from-plugin",
+      "reason": "配置集中到插件配置目录：优先读 ZRWANG_NATURE_ACADEMIC_CONFIG，其次保留技能目录默认值。",
+      "files": [
+        {
+          "path": "research/nature-skills/nature-academic-search/mcp-server/utils/config.py",
+          "replace": [
+            {
+              "find": "        if config_path is None:\n            config_path = Path(__file__).parent.parent / \"config.toml\"",
+              "to": "        if config_path is None:\n            env_path = os.environ.get(\"ZRWANG_NATURE_ACADEMIC_CONFIG\", \"\").strip()\n            config_path = Path(env_path) if env_path else Path(__file__).parent.parent / \"config.toml\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nature-citation-env-defaults",
+      "reason": "插件设置里的 Crossref/NCBI 邮箱通过环境变量注入，脚本未显式传参时默认使用。",
+      "files": [
+        {
+          "path": "research/nature-skills/nature-citation/scripts/nature_citation.py",
+          "replace": [
+            {
+              "find": "import json\nimport re",
+              "to": "import json\nimport os\nimport re"
+            },
+            {
+              "find": "    parser.add_argument(\"--mailto\", help=\"Email for Crossref polite pool.\")",
+              "to": "    parser.add_argument(\"--mailto\", default=os.environ.get(\"CROSSREF_MAILTO\") or os.environ.get(\"NCBI_EMAIL\"), help=\"Email for Crossref polite pool (defaults to CROSSREF_MAILTO/NCBI_EMAIL).\")"
+            },
+            {
+              "find": "    parser.add_argument(\"--ncbi-email\", help=\"Contact email sent to NCBI E-utilities for PMID requests.\")",
+              "to": "    parser.add_argument(\"--ncbi-email\", default=os.environ.get(\"NCBI_EMAIL\") or os.environ.get(\"CROSSREF_MAILTO\"), help=\"Contact email sent to NCBI E-utilities (defaults to NCBI_EMAIL/CROSSREF_MAILTO).\")"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nature-downloader-school-file",
+      "reason": "学校配置固定随技能分发：school.json 读 LIT_DL_SCHOOL_FILE；credentials/settings 仍走 LIT_DL_CONFIG_DIR。",
+      "files": [
+        {
+          "path": "research/nature-skills/nature-downloader/src/config.py",
+          "replace": [
+            {
+              "find": "CONFIG_FILE = CONFIG_DIR / \"school.json\"",
+              "to": "CONFIG_FILE = Path(os.environ.get(\"LIT_DL_SCHOOL_FILE\", str(CONFIG_DIR / \"school.json\")))"
+            }
+          ]
+        },
+        {
+          "path": "research/nature-skills/nature-downloader/scripts/lib/school-config.mjs",
+          "replace": [
+            {
+              "find": "export function configPathFromEnv(env = process.env) {\n  const dir = env.LIT_DL_CONFIG_DIR || path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\");\n  return path.join(dir, \"school.json\");\n}",
+              "to": "export function configPathFromEnv(env = process.env) {\n  if (env.LIT_DL_SCHOOL_FILE) return env.LIT_DL_SCHOOL_FILE;\n  const dir = env.LIT_DL_CONFIG_DIR || path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\");\n  return path.join(dir, \"school.json\");\n}"
             }
           ]
         }

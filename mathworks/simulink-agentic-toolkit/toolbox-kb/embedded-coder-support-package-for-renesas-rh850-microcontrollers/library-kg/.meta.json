@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:07",
+  "generatedAtDatenum": 740254.69314513891,
+  "generatorVersion": 4,
+  "libraries": [
+    "Embedded Coder Support Package for Renesas RH850 Microcontrollers"
+  ],
+  "blockCount": 9,
+  "categoryCount": 2,
+  "libraryFingerprints": {
+    "Embedded_Coder_Support_Package_for_Renesas_RH850_Microcontrollers": {
+      "blockCount": 9
+    }
+  }
+}

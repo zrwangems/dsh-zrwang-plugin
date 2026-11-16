@@ -8,7 +8,11 @@ from pathlib import Path
 
 
 def persisted_vault_config_path() -> Path:
-    """用户级持久化：Obsidian 库路径（不强制依赖系统环境变量）。"""
+    """用户级持久化：Obsidian 库路径（项目内优先，其次用户主目录）。"""
+    cwd = Path.cwd().resolve()
+    for parent in [cwd, *cwd.parents]:
+        if (parent / ".git").exists():
+            return parent / ".agents" / "patent" / "obsidian_vault.txt"
     home = Path.home()
     return home / ".patent-disclosure-skill" / "obsidian_vault.txt"
 

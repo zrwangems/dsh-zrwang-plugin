@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:07",
+  "generatedAtDatenum": 740254.69314469909,
+  "generatorVersion": 4,
+  "libraries": [
+    "Embedded Coder Support Package for Qualcomm Hexagon"
+  ],
+  "blockCount": 6,
+  "categoryCount": 2,
+  "libraryFingerprints": {
+    "Embedded_Coder_Support_Package_for_Qualcomm_Hexagon": {
+      "blockCount": 6
+    }
+  }
+}

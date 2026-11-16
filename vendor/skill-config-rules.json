@@ -1,0 +1,664 @@
+{
+  "version": 1,
+  "note": "技能配置接入审计规则。profile 决定默认扫描忽略项与状态；skillOverrides/dispositions 逐技能覆盖。新增技能或发现新配置面时，先改这里再跑 scripts/audit-skill-config.mjs。",
+  "profiles": {
+    "matlab": {
+      "label": "MATLAB / Simulink（依赖 MATLAB MCP）",
+      "modules": [
+        "matlab-mcp"
+      ],
+      "status": "configured",
+      "ignore": [
+        "winPath",
+        "python3",
+        "bash",
+        "hostTool",
+        "cli",
+        "env",
+        "repoPath"
+      ],
+      "check": "会话中调用 mcp__matlab-mcp__detect_matlab_toolboxes（MathWorks组件开启后）",
+      "note": "技能正文里的 matlab 命令与 $env: 示例属正常内容；MATLAB MCP 由插件 MathWorks组件在工程技能组开启时动态注册（existing 模式：需先启动 MATLAB 并 shareMATLABSession()）。"
+    },
+    "polyspace": {
+      "label": "Polyspace（依赖 Polyspace MCP）",
+      "modules": [
+        "polyspace-mcp"
+      ],
+      "status": "unavailable",
+      "ignore": [
+        "hostTool",
+        "cli",
+        "winPath",
+        "home",
+        "configFile",
+        "bash",
+        "env"
+      ],
+      "check": "安装 Polyspace 后在 profile 注册 polyspace-mcp 服务器",
+      "note": "本机未安装 Polyspace，profile 未注册 Polyspace MCP；侧栏置灰。"
+    },
+    "officecli": {
+      "label": "OfficeCLI（外部命令）",
+      "modules": [
+        "officecli"
+      ],
+      "status": "configured",
+      "ignore": [
+        "cli",
+        "hostTool",
+        "winPath",
+        "python3",
+        "bash"
+      ],
+      "check": "officecli --version",
+      "note": "依赖本机 officecli 命令；已装 1.0.157。"
+    },
+    "ppt-master": {
+      "label": "PPT Master",
+      "modules": [
+        "image",
+        "python",
+        "projects"
+      ],
+      "status": "configured",
+      "ignore": [],
+      "check": "python <skill>/scripts/image_gen.py --list-backends",
+      "note": "生图配置走插件设置注入进程环境；Python 走插件 shim；项目目录在 <项目根>/.agents/ppt-master/projects。"
+    },
+    "nature": {
+      "label": "Nature Skills",
+      "modules": [
+        "nature-runtime"
+      ],
+      "status": "configured",
+      "ignore": [
+        "hostTool",
+        "winPath",
+        "python3",
+        "bash",
+        "cli",
+        "repoPath"
+      ],
+      "check": "按技能：image2ppt doctor / preflight.py / configure 脚本",
+      "note": "生图/OCR/学术检索/学校配置由插件设置或随包文件提供；Codex 只作为上游可选后端名保留。"
+    },
+    "patent": {
+      "label": "专利技能",
+      "modules": [
+        "patent"
+      ],
+      "status": "configured",
+      "ignore": [
+        "hostTool",
+        "cli",
+        "python3",
+        "bash",
+        "repoPath"
+      ],
+      "check": "各工具 --help 或 dry-run",
+      "note": "工作目录改到 <项目根>/.agents/patent；不写 ~/Documents；embedding 密钥按需配置。"
+    },
+    "zotero": {
+      "label": "zotero-cli",
+      "modules": [
+        "zotero"
+      ],
+      "status": "configured",
+      "ignore": [
+        "cli",
+        "hostTool",
+        "python3",
+        "bash"
+      ],
+      "check": "zotero-cli config",
+      "note": "只走 Zotero 桌面版本地 API；Zotero 需运行并开启本地 API。"
+    },
+    "drawio": {
+      "label": "draw.io",
+      "modules": [
+        "drawio"
+      ],
+      "status": "unavailable",
+      "ignore": [
+        "cli",
+        "hostTool",
+        "python3",
+        "bash"
+      ],
+      "check": "安装 draw.io 桌面版后重试",
+      "note": "本机未安装 draw.io，侧栏置灰。"
+    },
+    "supervisor": {
+      "label": "Supervisor Skills",
+      "modules": [],
+      "status": "no-config",
+      "ignore": [
+        "hostTool",
+        "python3",
+        "bash",
+        "cli",
+        "repoPath"
+      ],
+      "check": "-",
+      "note": "文档/写作流程类，无外部配置。"
+    },
+    "nsfc": {
+      "label": "NSFC Skills",
+      "modules": [],
+      "status": "no-config",
+      "ignore": [
+        "hostTool",
+        "python3",
+        "bash",
+        "cli",
+        "repoPath"
+      ],
+      "check": "-",
+      "note": "文档/写作流程类，无外部配置。"
+    },
+    "office-other": {
+      "label": "其他办公技能",
+      "modules": [],
+      "status": "no-config",
+      "ignore": [
+        "hostTool",
+        "cli",
+        "python3",
+        "bash",
+        "repoPath"
+      ],
+      "check": "-",
+      "note": "HTML/排版类，无外部配置。"
+    },
+    "research-other": {
+      "label": "其他科研技能",
+      "modules": [],
+      "status": "no-config",
+      "ignore": [
+        "hostTool",
+        "cli",
+        "python3",
+        "bash",
+        "repoPath"
+      ],
+      "check": "-",
+      "note": "文档/写作流程类，无外部配置。"
+    },
+    "engineering-other": {
+      "label": "其他工程技能",
+      "modules": [],
+      "status": "no-config",
+      "ignore": [
+        "hostTool",
+        "cli",
+        "python3",
+        "bash",
+        "repoPath"
+      ],
+      "check": "-",
+      "note": "文档/工具类，无外部配置。"
+    },
+    "lark": {
+      "label": "飞书 Lark（依赖 lark-cli）",
+      "modules": [
+        "lark-cli"
+      ],
+      "status": "configured",
+      "ignore": [
+        "cli",
+        "env",
+        "winPath",
+        "home",
+        "configFile",
+        "repoPath",
+        "hostTool",
+        "bash",
+        "python3",
+        "apiKey",
+        "secret",
+        "credential"
+      ],
+      "check": "lark-cli --version；lark-cli auth status",
+      "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。"
+    }
+  },
+  "skillOverrides": {
+    "ppt-master": {
+      "profile": "ppt-master",
+      "status": "configured",
+      "modules": [
+        "image",
+        "python",
+        "projects",
+        "bash"
+      ],
+      "check": "python <skill>/scripts/image_gen.py --list-backends"
+    },
+    "nature-image2ppt": {
+      "profile": "nature",
+      "status": "configured",
+      "modules": [
+        "image",
+        "ocr",
+        "python"
+      ],
+      "check": "python <image2ppt-root>/cli/image2ppt/cli.py doctor"
+    },
+    "nature-academic-search": {
+      "profile": "nature",
+      "status": "configured",
+      "modules": [
+        "academic",
+        "mcp-degraded"
+      ],
+      "check": "python <skill>/scripts/preflight.py",
+      "note": "MCP 未注册，降级为 OpenAlex + web_search/web_fetch；config.toml 由插件写入。"
+    },
+    "nature-downloader": {
+      "profile": "nature",
+      "status": "configured",
+      "modules": [
+        "school",
+        "python"
+      ],
+      "check": "LIT_DL_CONFIG_DIR 指向包内 config"
+    },
+    "nature-figure": {
+      "profile": "nature",
+      "status": "optional",
+      "modules": [
+        "optional-image"
+      ],
+      "check": "python <skill>/scripts/nature_figure_backend.py path/get",
+      "note": "绘图后端偏好；OpenRouter 生图可选，不配也能用。"
+    },
+    "nature-paper-to-patent": {
+      "profile": "nature",
+      "status": "configured",
+      "modules": [
+        "browser",
+        "patent"
+      ],
+      "check": "Playwright 浏览器可用性"
+    },
+    "patent-oa": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home",
+        "optional-embedding"
+      ],
+      "check": "PATENT_OA_HOME=<项目>/.agents/patent/oa；embedding 密钥可选"
+    },
+    "patent-map": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home"
+      ],
+      "check": "PATENT_MAP_HOME=<项目>/.agents/patent/patent-map"
+    },
+    "patent-reader": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home",
+        "obsidian"
+      ],
+      "check": "Obsidian vault 探测或 PATENT_READER_OBSIDIAN_VAULT"
+    },
+    "patent-disclosure": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home",
+        "browser"
+      ],
+      "check": "各工具 --help"
+    },
+    "patent-application": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home"
+      ],
+      "check": "各工具 --help"
+    },
+    "patent-docket": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home"
+      ],
+      "check": "各工具 --help"
+    },
+    "patent-search": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home",
+        "browser"
+      ],
+      "check": "各工具 --help"
+    },
+    "patent-chart": {
+      "profile": "patent",
+      "status": "configured",
+      "modules": [
+        "patent-home"
+      ],
+      "check": "各工具 --help"
+    },
+    "patent-exam-policy": {
+      "profile": "patent",
+      "status": "no-config",
+      "modules": [],
+      "check": "-"
+    },
+    "zotero-cli": {
+      "profile": "zotero",
+      "status": "configured",
+      "modules": [
+        "zotero"
+      ],
+      "check": "zotero-cli config"
+    },
+    "drawio-reconstruction": {
+      "profile": "drawio",
+      "status": "unavailable",
+      "modules": [
+        "drawio"
+      ],
+      "check": "安装 draw.io 桌面版后重试"
+    }
+  },
+  "dispositions": {
+    "academic-humanizer": {
+      "status": "no-config",
+      "modules": [],
+      "note": "README 里的 ~/.claude 只是上游安装示例，无外部配置。",
+      "check": "-"
+    },
+    "archify": {
+      "status": "configured",
+      "modules": [
+        "archify"
+      ],
+      "note": "home/env 命中是更新检查缓存与内部脚本；插件注入 ARCHIFY_UPDATE_CHECK_DISABLED=1，不写用户配置。",
+      "check": "archify 渲染自检"
+    },
+    "frontend-slides": {
+      "status": "no-config",
+      "modules": [],
+      "note": "README 里的 ~/.claude 只是上游安装示例，无外部配置。",
+      "check": "-"
+    },
+    "guizang-ppt-skill": {
+      "status": "no-config",
+      "modules": [],
+      "note": "README 里的 ~/.claude 只是上游安装示例，无外部配置。",
+      "check": "-"
+    },
+    "html-ppt": {
+      "status": "no-config",
+      "modules": [],
+      "note": "README/SKILL 里的 ~/.claude 与 npx 只是安装示例；渲染离线。",
+      "check": "-"
+    },
+    "lieflat-charts": {
+      "status": "no-config",
+      "modules": [],
+      "note": "README 里的 ~/.claude 只是安装示例，无外部配置。",
+      "check": "-"
+    },
+    "lieflat-gongwen": {
+      "status": "no-config",
+      "modules": [],
+      "note": "README 里的 ~/.claude 只是安装示例，无外部配置。",
+      "check": "-"
+    },
+    "matlab-access-datafeed": {
+      "status": "optional",
+      "modules": [
+        "third-party-token"
+      ],
+      "note": "NOAA 等数据源 token 属第三方服务，可选；MATLAB 内配置，不由插件代管。",
+      "check": "-"
+    },
+    "matlab-connect-databricks": {
+      "status": "optional",
+      "modules": [
+        "third-party-token"
+      ],
+      "note": "Databricks PAT 属第三方服务，可选；MATLAB 内配置。",
+      "check": "-"
+    },
+    "matlab-discover-hardware": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home 命中是文档中的支持包安装路径示例。",
+      "check": "-"
+    },
+    "matlab-engineer-tabular-features": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home 命中是文档示例。",
+      "check": "-"
+    },
+    "matlab-install-products": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home 命中是 MATLAB 安装路径示例，由 MATLAB 自身管理。",
+      "check": "-"
+    },
+    "matlab-package-toolbox": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home 命中是工具箱安装路径示例。",
+      "check": "-"
+    },
+    "matlab-secure-credentials": {
+      "status": "no-config",
+      "modules": [],
+      "note": "该技能本身就在教 MATLAB 的 setSecret/凭据管理；不需要插件设置。",
+      "check": "-"
+    },
+    "matlab-use-opcua-client": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home 命中是 OPC UA 证书信任目录示例。",
+      "check": "-"
+    },
+    "matlab-use-package-manager": {
+      "status": "optional",
+      "modules": [
+        "third-party-token"
+      ],
+      "note": "只有私有 MATLAB Package Repository 才需要 ARTIFACTORY_TOKEN；属第三方服务，可选。",
+      "check": "-"
+    },
+    "simulink-configure-model-for-code-generation": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home 命中是 MATLAB 偏好目录说明。",
+      "check": "-"
+    },
+    "simulink-configure-real-time-target": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home/config 命中是 Simulink Real-Time 目标机配置文档。",
+      "check": "-"
+    },
+    "simulink-run-real-time-application": {
+      "status": "no-config",
+      "modules": [],
+      "note": "home 命中是文档示例。",
+      "check": "-"
+    },
+    "nature-citation": {
+      "status": "no-config",
+      "modules": [],
+      "note": "expanduser 只处理调用参数；FIRECRAWL_API_KEY 属可选第三方抓取服务。",
+      "check": "-"
+    },
+    "nature-paper-trans": {
+      "status": "no-config",
+      "modules": [],
+      "note": "expanduser 只处理调用参数，无固定配置路径。",
+      "check": "-"
+    }
+  },
+  "components": [
+    {
+      "name": "设置页与 settings.json",
+      "status": "configured",
+      "modules": [
+        "settings"
+      ],
+      "note": "模型服务（生图/OCR）、科研服务（可选检索 + Nature 学术检索，自动保存）、运行环境（仅组件状态）。",
+      "check": "GET/POST /dsh-zrwang-plugin/settings"
+    },
+    {
+      "name": "技能注入与目录联接（farm）",
+      "status": "configured",
+      "modules": [
+        "inject"
+      ],
+      "note": "按项目勾选建立 .agents/skills 联接；ppt-master projects 链接。",
+      "check": "smoke-host / smoke-routes"
+    },
+    {
+      "name": "ARS 功能区块",
+      "status": "configured",
+      "modules": [
+        "ars",
+        "python"
+      ],
+      "note": "5 技能 + 16 命令；Python 统一用插件自带 runtime/python；跨模型验证为可选配置。",
+      "check": "checkArsDeps 直接调用插件 Python"
+    },
+    {
+      "name": "officecli",
+      "status": "configured",
+      "modules": [
+        "officecli"
+      ],
+      "note": "本机 1.0.157；缺命令时侧栏置灰。",
+      "check": "officecli --version"
+    },
+    {
+      "name": "zotero-cli",
+      "status": "configured",
+      "modules": [
+        "zotero"
+      ],
+      "note": "ZOTERO_LOCAL=true；Zotero 桌面版需运行。",
+      "check": "zotero-cli config"
+    },
+    {
+      "name": "MATLAB MCP",
+      "status": "configured",
+      "modules": [
+        "matlab-mcp"
+      ],
+      "note": "插件 MathWorks组件随工程技能组自动注册 matlab-mcp（5 个 MATLAB 工具 + 9 个 Simulink 工具）；exe 与 simulink-tools.json 在包内 mathworks/；existing 模式需 MATLAB 运行并 shareMATLABSession()。",
+      "check": "设置 → MCP配置 → 检查配置；会话中调用 mcp__matlab-mcp__detect_matlab_toolboxes"
+    },
+    {
+      "name": "Windows MCP",
+      "status": "configured",
+      "modules": [
+        "windows-mcp"
+      ],
+      "note": "Windows MCP组件手动勾选后注册 windows-mcp（桌面截图、快照、点击、窗口操作）；命令默认 %USERPROFILE%\\.local\\bin\\windows-mcp.exe。",
+      "check": "设置 → MCP配置 → 检查配置；勾选组件后调用 mcp__windows-mcp__snapshot"
+    },
+    {
+      "name": "Polyspace MCP",
+      "status": "unavailable",
+      "modules": [
+        "polyspace-mcp"
+      ],
+      "note": "本机未安装 Polyspace，未注册 MCP；19 个技能置灰。",
+      "check": "-"
+    },
+    {
+      "name": "draw.io",
+      "status": "unavailable",
+      "modules": [
+        "drawio"
+      ],
+      "note": "本机未安装 draw.io；drawio-reconstruction 置灰。",
+      "check": "-"
+    },
+    {
+      "name": "ppt-master 运行时",
+      "status": "configured",
+      "modules": [
+        "image",
+        "python",
+        "projects"
+      ],
+      "note": "通用生图 + 插件 Python + 项目目录补丁；config.py 禁用上游 .env；不写 ~/.ppt-master/.env。",
+      "check": "image_gen.py --list-backends"
+    },
+    {
+      "name": "nature 运行时",
+      "status": "configured",
+      "modules": [
+        "image",
+        "ocr",
+        "academic",
+        "school"
+      ],
+      "note": "config.toml/config.yaml/school.json/nature-figure.json 全部在插件配置目录；academic MCP 降级。",
+      "check": "image2ppt doctor / preflight"
+    },
+    {
+      "name": "patent 运行时",
+      "status": "configured",
+      "modules": [
+        "patent-home"
+      ],
+      "note": "工作目录项目内；Obsidian/embedding 按需。",
+      "check": "各工具 --help"
+    },
+    {
+      "name": "archify 运行时",
+      "status": "configured",
+      "modules": [
+        "archify"
+      ],
+      "note": "本地副本；关闭自动更新缓存（ARCHIFY_UPDATE_CHECK_DISABLED=1）。",
+      "check": "archify 渲染自检"
+    },
+    {
+      "name": "插件自带 Python 运行时",
+      "status": "configured",
+      "modules": [
+        "python"
+      ],
+      "note": "runtime/python 由 install-python-runtime.mjs 安装；python/python3/bash 由插件 shim 统一指向，不读系统 Python。",
+      "check": "node scripts/install-python-runtime.mjs"
+    },
+    {
+      "name": "DSH 端到端实测",
+      "status": "optional",
+      "modules": [
+        "dsh-test"
+      ],
+      "note": "需用户同意后用临时 DSH_HOME/profile 起 dsh web 验证；不装 Desktop。",
+      "check": "-"
+    },
+    {
+      "name": "飞书 Lark（lark-cli）",
+      "status": "configured",
+      "modules": [
+        "lark-cli"
+      ],
+      "note": "28 个技能收在办公组 office/lark；lark-cli 已装（@larksuite/cli）；四个基础技能默认勾选。",
+      "check": "lark-cli --version；dsh web 侧栏办公 → 飞书 Lark"
+    }
+  ]
+}

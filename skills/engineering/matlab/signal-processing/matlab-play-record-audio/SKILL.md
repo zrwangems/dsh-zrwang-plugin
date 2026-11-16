@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.0"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # audiostreamer — MATLAB Audio Device I/O (R2025a+)
 
 `audiostreamer` is the unified replacement for `audioDeviceWriter`, `audioDeviceReader`, and `audioPlayerRecorder`. It provides player-only, recorder-only, or full-duplex modes with callbacks, pre-buffering, transport control, and measurement helpers.

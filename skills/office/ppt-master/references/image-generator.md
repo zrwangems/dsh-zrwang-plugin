@@ -1,3 +1,4 @@
+> [dsh-zrwang-plugin] 本 DSH 集成已在 `config.py` 禁用上游 `.env` 查找：生图 URL / 模型 / Key 只来自插件设置注入的进程环境。
 > See [`image-base.md`](./image-base.md) for the common framework. For the web sourcing path, see [`image-searcher.md`](./image-searcher.md).
 
 # Image_Generator Reference Manual

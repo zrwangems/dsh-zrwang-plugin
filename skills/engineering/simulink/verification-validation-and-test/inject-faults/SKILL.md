@@ -6,7 +6,7 @@ metadata:
   version: "1.0"
   author: MathWorks
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Fault Injection
 
 Use `evaluate_matlab_code` with the `Simulink.fault` API to programmatically inject faults into Simulink models. Faults override signal values at block ports to simulate hardware failures, sensor faults, and actuator malfunctions.

@@ -4,7 +4,7 @@ description: "Find and verify Nature/CNS-family literature supporting manuscript
 metadata:
   author: Yuan1z skill, refactored into static/dynamic layers
 ---
-
+> [dsh-zrwang-plugin] Crossref/NCBI 礼貌邮箱和 Firecrawl Key 由插件设置注入（`CROSSREF_MAILTO`/`NCBI_EMAIL`/`FIRECRAWL_API_KEY`）；脚本没显式传参时优先用这些环境变量。
 # Nature Citation — Router
 
 ## Routing protocol

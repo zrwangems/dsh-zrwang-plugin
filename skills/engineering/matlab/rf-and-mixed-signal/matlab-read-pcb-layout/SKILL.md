@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.0"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # Reading PCB and Package Layouts
 
 **Scope:** `pcbFileRead` handles both PCB boards and IC/SiP packages. ODB++ and Allegro files may contain package-level designs (BGA substrates, interposers, embedded passives). The workflow is identical — the format determines what's inside, not the function name.

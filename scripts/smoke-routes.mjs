@@ -107,6 +107,22 @@ const auto = presetsOf(toggled.data).items.find(item => item.workspace === true)
 check('自动模式以工作区名命名并成为活跃模式', presetsOf(toggled.data).active === '工作区甲' && auto !== undefined && auto.name === '工作区甲' && auto.count > 0,
   JSON.stringify(presetsOf(toggled.data)))
 
+// ---- 2.1 MCP 组件行：MathWorks 随工程组自动、Windows MCP 手动 ----
+const initialComponents = initial.data.components ?? []
+check('组件行含 MathWorks 与 Windows MCP',
+  initialComponents.map(item => item.id).join(',') === 'mathworks,windows-mcp',
+  initialComponents.map(item => item.id).join(','))
+check('工程组未开时 MathWorks 组件关闭', initialComponents.find(item => item.id === 'mathworks')?.enabled === false)
+const mathworksOn = (toggled.data.components ?? []).find(item => item.id === 'mathworks')
+check('工程技能组打开后 MathWorks 组件自动开启', mathworksOn?.enabled === true, JSON.stringify(mathworksOn))
+check('无 mcpManager 时组件标记不可用', mathworksOn?.server?.state === 'unavailable', JSON.stringify(mathworksOn?.server))
+const winToggled = await call('POST', '/dsh-zrwang-plugin/session', { sessionId: 'session-a', cwd: dirA, gates: { 'windows-mcp': true } })
+check('勾选 Windows MCP 组件后门禁生效',
+  (winToggled.data.components ?? []).find(item => item.id === 'windows-mcp')?.enabled === true)
+await call('POST', '/dsh-zrwang-plugin/session', { sessionId: 'session-a', cwd: dirA, gates: { 'windows-mcp': false } })
+const health = await call('GET', '/dsh-zrwang-plugin/health')
+check('health 报告 MCP 状态', health.data?.mcp?.available === false && health.data?.ok === true)
+
 // ---- 3. 同工作区第二个会话共享 ----
 const shared = await call('GET', `/dsh-zrwang-plugin/catalog?sessionId=session-b&cwd=${encodeURIComponent(dirA)}`)
 check('同工作区会话共享同一模式与计数', presetsOf(shared.data).active === '工作区甲'

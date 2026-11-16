@@ -6,7 +6,7 @@ metadata:
   author: MathWorks
   version: "1.2"
 ---
-
+> [dsh-zrwang-plugin] 本机 MATLAB MCP 使用 existing 模式：先启动 MATLAB 并执行 shareMATLABSession()，保持会话；若工具报 failed to attach，如实告诉用户先共享 MATLAB 会话，不要绕开 MCP 改用其他方式。
 # MATLAB Database Toolbox Interface to DuckDB
 
 Use when working with DuckDB databases from MATLAB using Database Toolbox. DuckDB is an embedded analytical database engine that ships with Database Toolbox starting in R2026a. It enables SQL-based analytics on files, out-of-memory data preprocessing, and portable development databases — all without external database server configuration.

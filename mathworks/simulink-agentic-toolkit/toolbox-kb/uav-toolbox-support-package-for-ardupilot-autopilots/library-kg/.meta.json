@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-09-29T16:38:10",
+  "generatedAtDatenum": 740254.69317596068,
+  "generatorVersion": 4,
+  "libraries": [
+    "UAV Toolbox Support Package for ArduPilot Autopilots"
+  ],
+  "blockCount": 12,
+  "categoryCount": 3,
+  "libraryFingerprints": {
+    "UAV_Toolbox_Support_Package_for_ArduPilot_Autopilots": {
+      "blockCount": 12
+    }
+  }
+}

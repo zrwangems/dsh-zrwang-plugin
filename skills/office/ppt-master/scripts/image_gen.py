@@ -62,6 +62,46 @@ from config import load_prefixed_env_file, resolve_env_path
 
 configure_utf8_stdio()
 
+# >>> dsh-zrwang-plugin image bridge
+def _plugin_image_values():
+    # DSH 的 shell 子进程会按变量名清洗 *KEY*/*TOKEN*/*SECRET*/*PASSWORD*，
+    # 密钥不能只靠环境变量传给技能进程；这里从插件 settings.json 兜底读取。
+    root = os.environ.get("ZRWANG_PLUGIN_CONFIG_DIR", "").strip()
+    if not root:
+        return {}
+    try:
+        with open(os.path.join(root, "settings.json"), "r", encoding="utf-8") as handle:
+            image = (json.load(handle) or {}).get("image") or {}
+        return image if isinstance(image, dict) else {}
+    except Exception:
+        return {}
+
+
+def _apply_plugin_image_env():
+    image = _plugin_image_values()
+    pairs = (
+        ("ZRWANG_IMAGE_BASE_URL", "OPENAI_BASE_URL", "baseUrl"),
+        ("ZRWANG_IMAGE_MODEL", "OPENAI_MODEL", "model"),
+        ("ZRWANG_IMAGE_API_KEY", "OPENAI_API_KEY", "apiKey"),
+    )
+    for source, target_env, key in pairs:
+        value = os.environ.get(source, "").strip() or str(image.get(key) or "").strip()
+        if value:
+            os.environ[target_env] = value
+            os.environ.setdefault(source, value)
+    if (
+        os.environ.get("ZRWANG_IMAGE_API_KEY")
+        or os.environ.get("ZRWANG_IMAGE_BASE_URL")
+        or image.get("apiKey")
+        or image.get("baseUrl")
+    ):
+        os.environ["IMAGE_BACKEND"] = "openai"
+        os.environ.setdefault("OPENAI_QUALITY", "omit")
+
+
+_apply_plugin_image_env()
+# <<< dsh-zrwang-plugin image bridge
+
 ENV_PATH = resolve_env_path()
 IMAGE_ENV_PREFIXES = (
     "IMAGE_",

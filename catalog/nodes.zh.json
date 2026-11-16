@@ -207,14 +207,21 @@
           ]
         },
         {
-          "id": "polyspace",
-          "title": "Polyspace 代码分析",
-          "desc": "静态分析、Code Prover、Bug Finder、PSTUnit 测试与结果审查"
-        },
-        {
-          "id": "playground",
-          "title": "示例与演示",
-          "desc": "MathWorks 官方 playground 示例技能（uifigure/HTML 等）"
+          "id": "mathworks-other",
+          "title": "MathWorks其他",
+          "desc": "MathWorks 的其他工具：静态代码分析与官方示例",
+          "children": [
+            {
+              "id": "polyspace",
+              "title": "Polyspace 代码分析",
+              "desc": "静态分析、Code Prover、Bug Finder、PSTUnit 测试与结果审查"
+            },
+            {
+              "id": "playground",
+              "title": "示例与演示",
+              "desc": "MathWorks 官方 playground 示例技能（uifigure/HTML 等）"
+            }
+          ]
         }
       ]
     },
@@ -269,6 +276,11 @@
           "id": "officecli",
           "title": "OfficeCLI",
           "desc": "OfficeCLI 命令行，处理 Word/Excel/PPT/PDF"
+        },
+        {
+          "id": "lark",
+          "title": "飞书 Lark",
+          "desc": "飞书 / Lark 开放平台：消息、通讯录、日历、云文档、表格、审批、会议、任务等 28 个领域技能"
         },
         {
           "id": "ppt-master",

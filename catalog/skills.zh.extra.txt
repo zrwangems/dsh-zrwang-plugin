@@ -297,3 +297,33 @@ arranging-simulink-layouts	使用 model_edit 布局引擎排列 Simulink 框图�
 simulink-manage-variant-configuration	管理 Simulink Variant Manager 和 Variant Conf…
 simulink-create-block-icon	以编程方式创建和注册 Simulink 模块图标。
 simulink-integrate-python-code	在 Simulink 模型中使用 Python 代码块 (R2025a+) 运行或集…
+
+# 飞书 Lark（2026-11-14）
+lark-approval	飞书审批：处理待办/已办、搜索审批定义并发起审批
+lark-apps	妙搭应用：创建、本地/云端开发、托管与创意设计
+lark-attendance	飞书考勤：查询自己的考勤打卡记录
+lark-base	飞书多维表格：建表、字段、记录、视图、表单与仪表盘
+lark-calendar	飞书日历：日程、参会人、忙闲查询与会议室预定
+lark-contact	飞书通讯录：姓名/邮箱与 open_id 互查、搜索机器人
+lark-doc	飞书云文档：读取、创建、编辑文档与思维笔记
+lark-drive	飞书云空间：上传下载、移动复制、权限与本地导入
+lark-event	飞书事件流：订阅消息、审批、会议等实时事件（NDJSON）
+lark-im	飞书即时通讯：收发消息、群聊、搜索、交互卡片与回调
+lark-mail	飞书邮箱：起草、收发、搜索、标签与收信规则
+lark-markdown	飞书 Markdown：查看、创建、编辑与版本比较
+lark-meeting	飞书视频会议：会议记录、纪要逐字稿、会中问答
+lark-minutes	妙记入口：相关请求统一交给 lark-meeting
+lark-note	笔记入口：相关请求统一交给 lark-meeting
+lark-okr	飞书 OKR：周期、目标、关键结果、对齐与进展记录
+lark-openapi-explorer	原生 OpenAPI 探索：现有命令不满足时查接口并调用
+lark-shared	lark-cli 底座：认证登录、身份切换、权限与高风险操作
+lark-sheets	飞书电子表格：读写、图表、透视表、筛选与导入导出
+lark-skill-maker	自定义 Skill：把飞书 API 操作封装成可复用技能
+lark-slides	飞书幻灯片：创建演示文稿、读取与编辑页面
+lark-task	飞书任务：待办、清单、子任务、协作与任务智能体
+lark-vc	视频会议入口：相关请求统一交给 lark-meeting
+lark-vc-agent	会议助手入口：相关请求统一交给 lark-meeting
+lark-whiteboard	飞书画板：导出预览图、原始节点结构与编辑画板
+lark-wiki	飞书知识库：知识空间、成员与文档节点管理
+lark-workflow-meeting-summary	会议纪要工作流：汇总一段时间纪要并生成报告
+lark-workflow-standup-report	日程待办摘要：今天/明天/本周安排与未完成任务

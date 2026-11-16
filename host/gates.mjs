@@ -35,6 +35,8 @@ export async function loadGates() {
   }
   // ARS 是第四行固定区块：默认关闭，用户勾选后才注入。
   gates.ars = document.gates.ars === true
+  // Windows MCP 组件：手动门禁，默认关闭；MathWorks 组件是推导值，不落盘。
+  gates['windows-mcp'] = document.gates['windows-mcp'] === true
   return gates
 }
 

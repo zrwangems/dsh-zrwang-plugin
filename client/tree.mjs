@@ -225,6 +225,34 @@ function ZrPresetsBar(props) {
   var menuPair = React.useState(null)
   var menu = menuPair[0]
   var setMenu = menuPair[1]
+  // 不用原生 window.prompt/confirm：Electron 的渲染进程没有 prompt，桌面端会静默失败。
+  var dialogPair = React.useState(null)
+  var dialog = dialogPair[0]
+  var setDialog = dialogPair[1]
+
+  var closeDialog = function () { setDialog(null) }
+  var submitDialog = function () {
+    if (dialog === null) return
+    if (dialog.kind === 'rename') {
+      var trimmed = String(dialog.value || '').trim()
+      if (trimmed.length > 0 && trimmed !== dialog.name) props.onRename(dialog.name, trimmed)
+    } else if (dialog.kind === 'delete') {
+      props.onDelete(dialog.name)
+    }
+    setDialog(null)
+  }
+  var dialogInput = function (event) {
+    setDialog(function (previous) {
+      if (previous === null) return previous
+      var next = {}
+      for (var key in previous) next[key] = previous[key]
+      next.value = event.target.value
+      return next
+    })
+  }
+  var dialogKeyDown = function (event) {
+    if (event.key === 'Enter') { event.preventDefault(); submitDialog() } else if (event.key === 'Escape') { event.preventDefault(); closeDialog() }
+  }
 
   // 右键菜单挂到 document.body：侧栏容器有 overflow/transform 时，面板内的 fixed 会被裁剪。
   React.useEffect(function () {
@@ -240,19 +268,12 @@ function ZrPresetsBar(props) {
     if (menu.builtin !== true) {
       entries.push({
         label: '重命名',
-        action: function () {
-          var next = window.prompt('重命名为：', menu.name)
-          if (next === null) return
-          var trimmed = next.trim()
-          if (trimmed.length > 0 && trimmed !== menu.name) props.onRename(menu.name, trimmed)
-        },
+        action: function () { setDialog({ kind: 'rename', name: menu.name, value: menu.name }) },
       })
       entries.push({
         label: '删除',
         danger: true,
-        action: function () {
-          if (window.confirm('删除模式「' + menu.name + '」？')) props.onDelete(menu.name)
-        },
+        action: function () { setDialog({ kind: 'delete', name: menu.name }) },
       })
     }
     entries.forEach(function (entry) {
@@ -331,6 +352,28 @@ function ZrPresetsBar(props) {
           onContextMenu: function (event) { openMenu(event, mode) },
         }, mode.name + ' · ' + mode.count)
       })
+    ),
+    dialog === null ? null : h('div', { className: 'zr-modal-mask', onClick: closeDialog },
+      h('div', { className: 'zr-modal', onClick: function (event) { event.stopPropagation() } },
+        h('div', { className: 'zr-modal-title' }, dialog.kind === 'rename' ? '重命名模式' : '删除模式'),
+        dialog.kind === 'rename'
+          ? h('input', {
+            className: 'zr-input',
+            autoFocus: true,
+            value: dialog.value,
+            onChange: dialogInput,
+            onKeyDown: dialogKeyDown,
+          })
+          : h('div', { className: 'zr-desc' }, '确定删除模式「' + dialog.name + '」？'),
+        h('div', { className: 'zr-modal-actions' },
+          h('button', { className: 'zr-btn', type: 'button', onClick: closeDialog }, '取消'),
+          h('button', {
+            className: 'zr-btn' + (dialog.kind === 'delete' ? ' zr-btn-danger' : ''),
+            type: 'button',
+            onClick: submitDialog,
+          }, dialog.kind === 'rename' ? '确定' : '删除')
+        )
+      )
     )
   )
 }
@@ -415,6 +458,57 @@ function ZrArsRow(props) {
   return h(React.Fragment, null, row, card)
 }
 
+var ZR_PHASE_CLASS = { running: ' zr-ok', starting: ' zr-warn', failed: ' zr-bad', unavailable: ' zr-blocked' }
+
+function ZrComponentRow(props) {
+  var component = props.component
+  if (component === undefined) return null
+  // MathWorks 组件由工程技能组推导，不能手动勾；Windows MCP 组件手动开关。
+  var locked = props.locked === true || component.kind === 'auto'
+  var toggle = function () {
+    if (locked) return
+    if (props.onToggleGate !== undefined) props.onToggleGate(component.id, !component.enabled)
+  }
+  var phase = component.phase || 'idle'
+  var tagTitle = ''
+  if (component.server && component.server.lastError) tagTitle = component.server.lastError
+  else if (phase === 'running') tagTitle = '已注册到当前 DSH：MCP 工具会在当前对话的下一条消息起出现在工具表，不需要新开会话'
+  else if (phase === 'starting') tagTitle = '启动完成后，MCP 工具从当前对话的下一条消息起生效，不需要新开会话'
+  var tag = component.enabled === true
+    ? h('span', { className: 'zr-tag' + (ZR_PHASE_CLASS[phase] || ''), title: tagTitle }, component.statusLabel || '')
+    : h('span', { className: 'zr-tag' }, component.kind === 'auto' ? '未开启' : '未注入')
+  var actions = []
+  if (component.restartable === true && props.onMcpAction !== undefined) {
+    actions.push(h('button', {
+      className: 'zr-bulkbtn',
+      type: 'button',
+      title: '重建这个 MCP 服务器实例（重置重连预算；MATLAB 重开会话后也用它）',
+      onClick: function (event) {
+        event.stopPropagation()
+        props.onMcpAction(component.id, 'restart')
+      },
+    }, '重启'))
+  }
+  return h('div', { className: 'zr-row', 'data-kind': 'group', 'data-blocked': '0', style: { paddingLeft: '6px' } },
+    h('button', { className: 'zr-chev', 'data-empty': '1', tabIndex: -1, 'aria-hidden': 'true' }, '▸'),
+    h(ZrCheckbox, {
+      checked: component.enabled === true,
+      disabled: locked,
+      label: component.label,
+      onChange: toggle,
+    }),
+    h('div', { className: 'zr-text' },
+      h('div', { className: 'zr-title' },
+        h('span', null, component.label),
+        tag
+      ),
+      h('div', { className: 'zr-desc' },
+        component.desc + ' · ' + (component.kind === 'auto' ? '随工程技能组自动开关' : '手动开关'))
+    ),
+    actions.length > 0 ? h('div', { className: 'zr-row-actions' }, actions) : null
+  )
+}
+
 function ZrSkillsView(props) {
   var data = props.data
   var blocked = props.blocked || {}
@@ -438,6 +532,15 @@ function ZrSkillsView(props) {
       h('button', { className: 'zr-btn', onClick: function () { props.onExpandAll(false) } }, '收起')
     ),
     h('div', { className: 'zr-tree' },
+      (data.components || []).some(function (item) { return item.enabled === true; })
+        ? h('div', { className: 'zr-mcp-strip' }, (data.components || []).filter(function (item) { return item.enabled === true; }).map(function (item) {
+          return h('span', {
+            key: item.id,
+            className: 'zr-tag' + (ZR_PHASE_CLASS[item.phase] || ''),
+            title: item.server && item.server.lastError ? item.server.lastError : '',
+          }, item.label + '：' + (item.statusLabel || ''))
+        }))
+        : null,
       groups.length === 0 ? h('div', { className: 'zr-note' }, '没有匹配的技能') : null,
       groups.map(function (group) {
         return h(ZrNodeRow, {
@@ -468,6 +571,15 @@ function ZrSkillsView(props) {
         locked: props.locked,
         onToggleGate: props.onToggleGate,
         onOpenRepo: props.onOpenRepo,
+      }),
+      (data.components || []).map(function (component) {
+        return h(ZrComponentRow, {
+          key: component.id,
+          component: component,
+          locked: props.locked,
+          onToggleGate: props.onToggleGate,
+          onMcpAction: props.onMcpAction,
+        })
       })
     ),
     conflicts.length > 0
