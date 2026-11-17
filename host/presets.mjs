@@ -73,6 +73,25 @@ function projectKey(projectRoot) {
   return projectKeyOf(projectRoot)
 }
 
+/** 兼容早期版本在 Linux/macOS 上误存的反斜杠项目键，读取时归一而不是新建空项目。 */
+function normalizeProjectKeys(projects) {
+  const out = {}
+  for (const [key, entry] of Object.entries(projects ?? {})) {
+    const normalized = projectKey(key)
+    const previous = out[normalized]
+    if (previous === undefined) {
+      out[normalized] = entry
+      continue
+    }
+    // 出错版本可能已经同时写过两种键。保留内容更多的一份，不让后来补出的空默认项目
+    // 覆盖原来的命名模式；正常状态一个项目只有一种键，不会进入这里。
+    const score = value => (value?.modes?.length ?? 0) + Object.keys(value?.auto ?? {}).length
+      + Object.keys(value?.active ?? {}).length + Object.keys(value?.legacy?.auto ?? {}).length
+    if (score(entry) > score(previous)) out[normalized] = entry
+  }
+  return out
+}
+
 function newMode(name, gates, selection, builtin = false) {
   const stamp = now()
   return { name, builtin, gates, selection, createdAt: stamp, updatedAt: stamp }
@@ -145,7 +164,7 @@ function migrateV2(projects) {
     const unnamed = entry.unnamed !== null && typeof entry.unnamed === 'object' ? entry.unnamed : {}
     const active = entry.active !== null && typeof entry.active === 'object' && typeof entry.active !== 'string' ? entry.active : {}
     const hasLegacy = Object.keys(unnamed).length > 0 || Object.keys(active).length > 0
-    out[key] = {
+    out[projectKey(key)] = {
       baselineStamp: entry.baselineStamp ?? '',
       modes: Array.isArray(entry.modes) ? entry.modes : [],
       auto:
@@ -277,7 +296,7 @@ export async function loadPresets(catalog, selection, gates, projectRoot) {
   if (cache === undefined) {
     const raw = await readJson(FILE, null)
     if (raw !== null && raw.version === 3 && raw.projects !== null && typeof raw.projects === 'object') {
-      cache = { version: 3, projects: raw.projects, updatedAt: raw.updatedAt }
+      cache = { version: 3, projects: normalizeProjectKeys(raw.projects), updatedAt: raw.updatedAt }
     } else if (raw !== null && raw.version === 2 && raw.projects !== null && typeof raw.projects === 'object') {
       // 迁移前备份，迁移失败也不丢旧文件。
       await backupFile(FILE, 'presets-v2')

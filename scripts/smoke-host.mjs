@@ -173,14 +173,28 @@ const r5 = await reconcile({ projectRoot: proj, desired: new Map([[pptNode.name,
 const pptTarget = join(proj, '.agents', 'ppt-master', 'projects')
 check('ppt 项目目录被创建', existsSync(pptTarget), JSON.stringify(r5))
 check('projects 链接指向当前项目', existsSync(pptLink) && realpathSync(pptLink) === realpathSync(pptTarget))
-const r6 = await reconcile({ projectRoot: proj, desired: new Map() })
-check('取消 ppt-master 后移除 projects 链接', !existsSync(pptLink), JSON.stringify(r6))
+const otherPptProject = join(WORK, 'other-ppt-project')
+mkdirSync(otherPptProject, { recursive: true })
+await reconcile({ projectRoot: otherPptProject, desired: new Map([[pptNode.name, pptNode]]) })
+const otherPptTarget = join(otherPptProject, '.agents', 'ppt-master', 'projects')
+check('第二个项目接管共享 projects 链接', realpathSync(pptLink) === realpathSync(otherPptTarget))
+await reconcile({ projectRoot: proj, desired: new Map() })
+check('旧项目关闭 ppt-master 不摘另一个项目的链接', existsSync(pptLink) && realpathSync(pptLink) === realpathSync(otherPptTarget))
+const r6 = await reconcile({ projectRoot: otherPptProject, desired: new Map() })
+check('当前项目取消 ppt-master 后移除 projects 链接', !existsSync(pptLink), JSON.stringify(r6))
 
 // ---- 持久化 ----
 await setSelection({ [pick.name]: false })
 const reloaded = await loadSelection(catalog)
 check('二级以下勾选持久化', reloaded.skills[pick.name] === false)
 await setSelection({ [pick.name]: true })
+const { writeJson, stateFile } = await import('../host/state.mjs')
+const concurrentFile = stateFile('concurrent-writes.json')
+const concurrentWrites = await Promise.allSettled(Array.from({ length: 20 }, (_, index) => writeJson(concurrentFile, { index })))
+check('同一状态文件并发原子写不撞临时文件', concurrentWrites.every(result => result.status === 'fulfilled'),
+  concurrentWrites.filter(result => result.status === 'rejected').map(result => String(result.reason)).join('\n'))
+const concurrentResult = JSON.parse(readFileSync(concurrentFile, 'utf8'))
+check('并发写后 JSON 完整且最后一次调用落盘', concurrentResult.index === 19, JSON.stringify(concurrentResult))
 
 // ---- 全选/全关：只对直接子节点生效，一级目录同时打开本组门禁 ----
 const { childBatch } = await import('../host/selection.mjs')

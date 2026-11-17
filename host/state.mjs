@@ -2,9 +2,10 @@
  * 运行态读写：JSON 原子写、配置备份、事件日志。
  * 所有状态都在 state/ 下，不写 DSH profile，也不写用户主目录。
  */
-import { appendFile, copyFile, mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
+import { appendFile, copyFile, mkdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
+import { randomUUID } from 'node:crypto'
 import { PKG_DIR, STATE_DIR } from './config.mjs'
 
 const BACKUP_DIR = join(STATE_DIR, 'backups')
@@ -13,6 +14,7 @@ const EVENT_LIMIT = 512 * 1024
 /** 旧版把 state 放在包目录；首次启动时复制到配置目录，旧目录保留不删。 */
 const LEGACY_STATE_DIR = join(PKG_DIR, 'state')
 const MIGRATED_MARK = join(STATE_DIR, '.migrated-from-package')
+const writeQueues = new Map()
 let migrationDone = false
 
 /** 一次性迁移旧版包内 state 到配置目录（用户显式指定 ZRWANG_PLUGIN_STATE_DIR 时跳过）。 */
@@ -52,12 +54,30 @@ export async function readJson(file, fallback) {
   }
 }
 
-export async function writeJson(file, value) {
-  await ensureStateDir()
-  await mkdir(dirname(file), { recursive: true })
-  const temp = `${file}.${process.pid}.tmp`
-  await writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
-  await rename(temp, file)
+export function writeJson(file, value) {
+  // 同一进程内按目标文件排队，临时文件再按调用区分：既避免互相 rename 掉对方的
+  // 临时文件，也保证调用顺序就是落盘顺序。失败不能堵死后续写入。
+  const previous = writeQueues.get(file) ?? Promise.resolve()
+  const run = async () => {
+    await ensureStateDir()
+    await mkdir(dirname(file), { recursive: true })
+    const temp = `${file}.${process.pid}.${randomUUID()}.tmp`
+    try {
+      await writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
+      await rename(temp, file)
+    } finally {
+      // 写入或 rename 失败时清理自己的临时文件；已成功 rename 后不存在，忽略即可。
+      await unlink(temp).catch(() => {})
+    }
+  }
+  const next = previous.then(run, run)
+  writeQueues.set(file, next)
+  void next.then(() => {
+    if (writeQueues.get(file) === next) writeQueues.delete(file)
+  }, () => {
+    if (writeQueues.get(file) === next) writeQueues.delete(file)
+  })
+  return next
 }
 
 /** 覆盖写之前备份原文件；返回备份路径，文件不存在时返回 undefined。 */

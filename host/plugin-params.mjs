@@ -8,8 +8,9 @@
  * 技能运行时需要的 .env / config.toml / config.yaml 由这些参数生成。
  * 目录树、默认启用、下载器文件也放同一个配置目录；插件源码里不含任何设置。
  */
-import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
 import { homedir, userInfo } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 
@@ -48,9 +49,16 @@ export function writeParams(params) {
   const file = SETTINGS_FILE
   const dir = dirname(file)
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
-  const temp = `${file}.tmp`
-  writeFileSync(temp, `${JSON.stringify(params, null, 2)}\n`, 'utf8')
-  renameSync(temp, file)
+  // Web / Desktop 可能同时热加载和保存，不能共用一个固定临时文件。
+  const temp = `${file}.${process.pid}.${randomUUID()}.tmp`
+  try {
+    writeFileSync(temp, `${JSON.stringify(params, null, 2)}\n`, 'utf8')
+    renameSync(temp, file)
+  } finally {
+    if (existsSync(temp)) {
+      try { unlinkSync(temp) } catch { /* 清理失败不影响正式配置 */ }
+    }
+  }
   hardenFile(file)
   cache = undefined
   return params

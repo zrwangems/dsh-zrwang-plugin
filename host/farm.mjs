@@ -203,7 +203,15 @@ export async function reconcile({ projectRoot, desired, pptTarget }) {
       }
       ppt = { link: pptLink, target: pptTargetPath }
     } else if (ppt !== undefined) {
-      if (existsSync(pptLink)) await removeLink(pptLink)
+      // projects 是技能包里的共享链接，可能已被另一个项目重新指向。关闭旧项目时
+      // 只有链接仍指向旧项目自己的输出目录才摘，不能顺手摘掉别人正在用的链接。
+      let current
+      try {
+        current = await realpath(pptLink)
+      } catch {
+        current = undefined
+      }
+      if (current !== undefined && samePath(current, ppt.target)) await removeLink(pptLink)
       ppt = undefined
     }
 

@@ -15,9 +15,13 @@ import { basename as posixBasename } from 'node:path'
 /** 预设名上限（与历史 rename 限制一致）。 */
 export const PRESET_NAME_LIMIT = 20
 
-/** 把项目根规范成稳定的键（Windows 上用反斜杠、去尾斜杠）。 */
+/** 把项目根规范成稳定的键。Windows 不区分分隔符和大小写，POSIX 路径必须保留 `/`。 */
 export function projectKeyOf(projectRoot) {
-  return String(projectRoot ?? '').replace(/\//g, '\\').replace(/\\+$/, '') || '(未知项目)'
+  const raw = String(projectRoot ?? '')
+  const normalized = process.platform === 'win32'
+    ? raw.replace(/\//g, '\\').replace(/\\+$/, '').toLowerCase()
+    : raw.replace(/\\/g, '/').replace(/\/+$/, '')
+  return normalized || (raw.length > 0 && process.platform !== 'win32' ? '/' : '(未知项目)')
 }
 
 function pathBasename(path) {
