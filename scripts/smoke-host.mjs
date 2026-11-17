@@ -5,7 +5,7 @@
  *
  * 运行时会临时改 STATE_DIR 到 AgentsDo 下的测试目录，结束后清理，不污染 state/。
  */
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
 const WORK = resolve(import.meta.dirname, '..', '..', 'AgentsDo', 'skill-management-20261027', 'tmp', 'smoke')
@@ -340,6 +340,26 @@ await presets.deleteMode(catalog, await loadSelection(catalog), await gatesModul
 const cleaned = presets.presetsPayload(catalog, {}, projRoot, wsRenamed)
 check('删除模式后只剩默认', cleaned.items.length === 1 && cleaned.items[0].name === '默认' && cleaned.active === '默认', JSON.stringify(cleaned))
 
+// 切回「默认」后再编辑：旧工作区模式内容要归档成项目级副本，不能静默覆盖
+await presets.applyMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB, '默认')
+await presets.ensureEditableMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB)
+await setSelection({ [pick.name]: true })
+await gatesModule.setGates({ engineering: true })
+await presets.saveActiveMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB)
+const beforeArchive = presets.presetsPayload(catalog, {}, projRoot, wsB)
+await presets.applyMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB, '默认')
+await setSelection({ [pick.name]: false })
+await presets.ensureEditableMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB)
+const afterArchive = presets.presetsPayload(catalog, {}, projRoot, wsB)
+const autoBefore = beforeArchive.items.find(item => item.workspace === true)
+const autoAfter = afterArchive.items.find(item => item.workspace === true)
+check(
+  '切回默认后编辑不丢旧工作区模式',
+  autoBefore !== undefined && autoAfter !== undefined && autoBefore.count > autoAfter.count
+    && afterArchive.items.some(item => item.workspace === false && item.name.endsWith('(旧)') && item.count === autoBefore.count),
+  JSON.stringify({ before: autoBefore, after: autoAfter, items: afterArchive.items }),
+)
+
 // ---- 新增技能密钥写入宿主环境 ----
 const { applySkillEnv } = await import('../host/skill-settings.mjs')
 applySkillEnv({
@@ -380,8 +400,15 @@ await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 0, gates: { e
 check('工程组没注入技能时不注册 MathWorks MCP', registered.size === 0, JSON.stringify([...registered.keys()]))
 await controller.reconcile(mcpModule.wantOf({ engineeringInjected: 12, gates: { engineering: true } }))
 const matlabEntry = registered.get('matlab-mcp')
-check('MathWorks MCP 注册为 matlab-mcp', matlabEntry !== undefined && matlabEntry.command === mcpModule.MATLAB_MCP_EXE,
-  matlabEntry?.command)
+// exe 先暂存到配置目录（工作区之外）再启动：工作区内的 exe 建不了 %TEMP% 日志目录。
+const stagedExe = mcpModule.stagedMatlabExe()
+check('MathWorks MCP 注册为 matlab-mcp', matlabEntry !== undefined && matlabEntry.command === stagedExe, matlabEntry?.command)
+check('MathWorks MCP 用工作区外的 exe 副本', stagedExe !== mcpModule.MATLAB_MCP_EXE
+  && isInside(mcpModule.MCP_RUNTIME_DIR, stagedExe) && existsSync(stagedExe), stagedExe)
+check('exe 副本与包内文件大小一致', statSync(stagedExe).size === statSync(mcpModule.MATLAB_MCP_EXE).size)
+const stagedAgain = mcpModule.stagedMatlabExe()
+check('exe 副本已存在时不重复复制', stagedAgain === stagedExe && statSync(stagedAgain).mtimeMs === statSync(stagedExe).mtimeMs)
+check('MATLAB 初始化命令指向 exe 副本', mcpModule.matlabInitCommand().includes(stagedExe.split('\\').join('/')))
 check('MathWorks MCP 带 Simulink 工具扩展', (matlabEntry?.args ?? []).includes(`--extension-file=${mcpModule.SIMULINK_TOOLS_FILE}`)
   && (matlabEntry?.args ?? []).includes('--matlab-session-mode=existing'))
 check('MathWorks MCP 走官方 stdio 条目字段', matlabEntry?.transport === 'stdio'

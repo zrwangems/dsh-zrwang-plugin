@@ -3,15 +3,18 @@
  * 只请求本插件前缀，失败抛给界面显示，不吞错。
  */
 var ZR_PREFIX = '/dsh-zrwang-plugin'
+/** 普通请求 15 秒；设置页首次要等组件检测（Python、CLI、MATLAB 等），单独放宽。 */
+var ZR_TIMEOUT = 15000
+var ZR_TIMEOUT_SETTINGS = 60000
 
-function zrRequest(path, options) {
+function zrRequest(path, options, timeoutMs) {
   var init = { headers: { 'content-type': 'application/json' } }
   if (options !== undefined && options !== null) {
     init.method = 'POST'
     init.body = JSON.stringify(options)
   }
   if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
-    init.signal = AbortSignal.timeout(15000)
+    init.signal = AbortSignal.timeout(timeoutMs === undefined ? ZR_TIMEOUT : timeoutMs)
   }
   return fetch(ZR_PREFIX + path, init).then(function (response) {
     return response.json().then(function (payload) {

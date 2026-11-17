@@ -1,6 +1,6 @@
 # 技能与组件配置覆盖矩阵
 
-生成时间：2026/11/16 16:29:05；技能 329 个，组件 16 个。
+生成时间：2026/11/17 19:11:17；技能 329 个，组件 16 个。
 
 状态：`无需配置` / `已接入设置` / `可选配置` / `不可用` / `需修复` / `待处置`。
 
@@ -247,7 +247,7 @@
 | matlab-write-tests | `engineering/matlab/matlab-software-development/matlab-write-tests` | matlab-mcp | 已接入设置 | cli:6 | 技能正文里的 matlab 命令与 $env: 示例属正常内容；MATLAB MCP 由插件 MathWorks组件在工程技能组开启时动态注册（existing 模式：需先启动 MATLAB 并 shareMATLABSession()）。 | 会话中调用 mcp__matlab-mcp__detect_matlab_toolboxes（MathWorks组件开启后） |
 | morph-ppt | `office/officecli/morph-ppt` | officecli | 已接入设置 | cli:1 python3:1 bash:1 | 依赖本机 officecli 命令；已装 1.0.157。 | officecli --version |
 | morph-ppt-3d | `office/officecli/morph-ppt-3d` | officecli | 已接入设置 | cli:1 python3:1 bash:1 | 依赖本机 officecli 命令；已装 1.0.157。 | officecli --version |
-| nature-academic-search | `research/nature-skills/nature-academic-search` | academic、mcp-degraded | 已接入设置 | configFile:6 apiKey:6 hostTool:1 python3:2 bash:4 home:5 env:2 cli:1 | MCP 未注册，降级为 OpenAlex + web_search/web_fetch；config.toml 由插件写入。；额外命中：configFile(install.sh,mcp-server/README.md)；apiKey(install.sh,mcp-server/README.md)；home(mcp-server/config.toml,mcp-server/README.md)；env(mcp-server/utils/config.py,scripts/academic_search.py) | python <skill>/scripts/preflight.py |
+| nature-academic-search | `research/nature-skills/nature-academic-search` | academic、mcp-degraded | 已接入设置 | configFile:6 apiKey:6 hostTool:1 python3:2 bash:4 home:4 env:2 cli:1 | MCP 未注册，降级为 OpenAlex + web_search/web_fetch；config.toml 由插件写入。；额外命中：configFile(install.sh,mcp-server/README.md)；apiKey(install.sh,mcp-server/README.md)；home(mcp-server/README.md,README.md)；env(mcp-server/utils/config.py,scripts/academic_search.py) | python <skill>/scripts/preflight.py |
 | nature-citation | `research/nature-skills/nature-citation` | - | 无需配置 | bash:2 home:1 env:1 python3:1 apiKey:2 | expanduser 只处理调用参数；FIRECRAWL_API_KEY 属可选第三方抓取服务。；额外命中：home(scripts/nature_citation.py)；env(scripts/nature_citation.py)；apiKey(SKILL.md,static/core/principles.md) | - |
 | nature-data | `research/nature-skills/nature-data` | nature-runtime | 已接入设置 | - | 生图/OCR/学术检索/学校配置由插件设置或随包文件提供；Codex 只作为上游可选后端名保留。 | 按技能：image2ppt doctor / preflight.py / configure 脚本 |
 | nature-downloader | `research/nature-skills/nature-downloader` | school、python | 已接入设置 | home:6 python3:6 configFile:6 cli:1 bash:5 env:6 apiKey:1 hostTool:2 | 生图/OCR/学术检索/学校配置由插件设置或随包文件提供；Codex 只作为上游可选后端名保留。；额外命中：home(data/school.schema.json,docs/nature-downloader-reference-research-2026-07-15.md)；configFile(docs/nature-downloader-reference-research-2026-07-15.md,README.md)；env(references/delivery-verification-and-failures.md,references/institutional-browser-workflow.md)；apiKey(scripts/configure_credentials.py) | LIT_DL_CONFIG_DIR 指向包内 config |

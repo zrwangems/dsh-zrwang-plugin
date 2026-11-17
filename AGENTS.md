@@ -213,6 +213,17 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
   `satk_initialize` 即可；不许再写 `D:\AgentRelated` 这类作者本机路径。Windows MCP 组件**不自带运行时**：直接用系统 PATH 里已安装的 `windows-mcp`
   （本机是 uv tool 安装的 0.8.x），插件里不再有 `runtime/windows-mcp` 目录。
   `verify` 会扫描 host/client/scripts 里的作者本机路径，出现即失败。
+- **MCP exe 要先暂存到工作区外**：`host/mcp.mjs` 的 `stagedMatlabExe()` 把 exe 复制到
+  `<配置目录>/state/mcp/`（按源文件大小 + mtime 刷新），`resolveMatlabEntry()` 与 `matlabInitCommand()`
+  都用副本路径。原因（2026-11-17 实测）：exe 位于工作区目录树里（例如仓库 junction 安装时）时，
+  它建不了 `%TEMP%` 下的日志目录，MCP 启动直接 `Connection closed`；复制到工作区外就正常。
+  改这里不要再把 `MATLAB_MCP_EXE` 直接当 `command`。
+- **设置页首次加载慢**：`GET /settings` 要跑组件检测（Python、officecli、zotero-cli、draw.io、MATLAB），
+  宿主侧按参数快照缓存 10 秒（`routes.mjs` 的 `settingsCache`，保存设置时清空），客户端 `zrRequest('/settings', …)`
+  用 `ZR_TIMEOUT_SETTINGS`（60 秒）而不是默认 15 秒；普通请求仍用 15 秒。
+- **冲突提示是折叠列表**：侧栏底部 `<N> 个同名目录/链接未被接管` 默认只显示一行摘要，展开后限高滚动
+  （`client/tree.mjs` 的 `ZrConflicts` + `.zr-conflict-*` 样式）。不要退回「把全部冲突拼成一段」的写法，
+  那样会盖住技能树。
 - **目录树深度**：`gen-catalog.mjs` 的来源节点按 id 深搜（MathWorks其他 下的 Polyspace/示例是三层节点）；
   新增中间节点时只要改 `nodes.zh.json`，不要移动 `skills/engineering/*` 实体目录。
 - **飞书 Lark 技能组**：`skills/office/lark/`（28 个领域技能）由本地副本 `vendor/local/lark-skills/` 经

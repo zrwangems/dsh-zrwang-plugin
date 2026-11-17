@@ -6,6 +6,8 @@
  * - 「默认」只读：在它上面做任何勾选/门禁改动时，为**当前 DSH 工作区**自动创建（或复用）一个模式；
  * - 自动模式用工作区名命名（重名加「 (2)」），一个工作区只有一个，**同工作区的所有对话共享**；
  * - 自动模式改动即自动保存；它只在本工作区可见，别的对话/工作区看不到；
+ * - 从「默认」继续编辑时会复用这个自动模式；如果它原有内容和工作区当时的基础态不同，
+ *   先把旧内容归档成项目级副本「<名字> (旧)」，避免之前的勾选被静默覆盖；
  * - 自动模式被重命名后升级为项目级命名模式：同项目所有工作区可见，修改即自动保存、所有对话共享；
  * - 项目级命名模式在所有工作区都可见；「基于此新建」把源模式复制进当前工作区的自动模式；
  * - 一个模式记录每一层级的注入态（所有节点 gates + 技能勾选），计数 = 真正注入的技能数。
@@ -384,6 +386,44 @@ export async function applyModeContent(catalog, content) {
   await replaceGates(content.gates ?? {})
 }
 
+/** 两个模式内容是否一致：都只存「勾上的技能」和布尔门禁。 */
+function sameContent(left, right) {
+  const selected = map => Object.keys(map ?? {}).filter(key => map[key] === true).sort().join('|')
+  const gated = map => Object.keys(map ?? {}).filter(key => map[key] === true).sort().join('|')
+  return selected(left?.selection) === selected(right?.selection) && gated(left?.gates) === gated(right?.gates)
+}
+
+/** 归档名：原名加「 (旧)」，总长不超过模式名上限，重名再加序号。 */
+function archiveName(base, taken) {
+  const suffix = ' (旧)'
+  const room = Math.max(1, 20 - [...suffix].length)
+  return uniquePresetName(`${[...String(base ?? '工作区')].slice(0, room).join('')}${suffix}`, taken)
+}
+
+/**
+ * 从「默认」继续编辑前，把工作区自动模式里原有的内容留一份项目级副本。
+ *
+ * 场景：用户先有工作区模式（比如注入了 64 个技能），点回「默认」后再勾选；
+ * 旧实现直接用「默认」的内容覆盖自动模式，之前那 64 个勾选就静默没了。
+ */
+function archiveAutoBeforeOverwrite(entry, auto, gates, selection, catalog) {
+  const previous = { gates: auto.gates ?? {}, selection: auto.selection ?? {} }
+  const next = { gates: gateMap(gates), selection: selectedMap(catalog, selection) }
+  if (sameContent(previous, next)) return undefined
+  if (Object.keys(previous.selection).length === 0 && Object.keys(previous.gates).length === 0) return undefined
+  const name = archiveName(auto.name, takenNames(entry))
+  const stamp = now()
+  entry.modes.push({
+    name,
+    builtin: false,
+    gates: gateMap(previous.gates),
+    selection: { ...previous.selection },
+    createdAt: stamp,
+    updatedAt: stamp,
+  })
+  return name
+}
+
 /** 用户改动前调用：当前是「默认」→ 为这个工作区创建/复用自动模式并切过去。 */
 export async function ensureEditableMode(catalog, selection, gates, projectRoot, workspace) {
   const { entry, key } = ensureEntry(catalog, selection, gates, projectRoot)
@@ -394,6 +434,8 @@ export async function ensureEditableMode(catalog, selection, gates, projectRoot,
   if (auto === undefined) {
     auto = newAutoMode(uniquePresetName(workspace.title, takenNames(entry)), workspace, {}, {})
     entry.auto[workspace.key] = auto
+  } else {
+    archiveAutoBeforeOverwrite(entry, auto, gates, selection, catalog)
   }
   auto.gates = gateMap(gates)
   auto.selection = selectedMap(catalog, selection)

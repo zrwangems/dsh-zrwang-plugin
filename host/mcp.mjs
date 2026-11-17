@@ -10,9 +10,9 @@
  * transport / command / args / env / cwd / toolCallTimeoutMs / startupTimeoutMs /
  * closeTimeoutMs。参数固定，设置页不暴露 MCP 配置。
  */
-import { existsSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { PKG_DIR } from './config.mjs'
+import { PKG_DIR, STATE_DIR } from './config.mjs'
 
 /** MathWorks 组件目录：MATLAB MCP exe + 完整的 Simulink Agentic Toolkit 运行时。 */
 export const MATHWORKS_DIR = join(PKG_DIR, 'mathworks')
@@ -25,8 +25,48 @@ export const SIMULINK_TOOLS_FILE = join(SIMULINK_TOOLKIT_DIR, 'tools', 'tools.js
 /** 两个组件注册的服务器名（同时决定工具前缀 mcp__<name>__*）。 */
 export const SERVER_NAMES = { mathworks: 'matlab-mcp', windows: 'windows-mcp' }
 
+/** MATLAB MCP 的运行副本目录（在配置目录下，永远在工作区之外）。 */
+export const MCP_RUNTIME_DIR = join(STATE_DIR, 'mcp')
+
 /** mcp-client 的关闭预算；官方默认 5000。 */
 const CLOSE_TIMEOUT_MS = 5000
+
+/**
+ * 取 MATLAB MCP 的可执行文件路径：优先用配置目录下的运行副本。
+ *
+ * 实测（2026-11-17）：exe 放在工作区目录树里（例如从仓库 junction 安装时的
+ * `<工作区>/node_modules/dsh-zrwang-plugin/mathworks/...`）时，它无法在 `%TEMP%`
+ * 下建日志目录，MCP 启动直接报 `Failed to create subdirectory` / 连接被关闭；
+ * 同一个 exe 复制到工作区外（配置目录）就正常。所以这里把 exe 暂存到配置目录，
+ * 按源文件大小 + 修改时间判断是否需要刷新；复制失败时退回原路径，不影响其他功能。
+ */
+export function stagedMatlabExe() {
+  const target = join(MCP_RUNTIME_DIR, 'matlab-mcp-server-windows-x64.exe')
+  const stampFile = `${target}.stamp`
+  try {
+    if (!existsSync(MATLAB_MCP_EXE)) return MATLAB_MCP_EXE
+    const source = statSync(MATLAB_MCP_EXE)
+    const signature = `${source.size}:${Math.round(source.mtimeMs)}`
+    const previous = existsSync(target) && existsSync(stampFile) ? readFileSync(stampFile, 'utf8').trim() : ''
+    if (previous === signature) return target
+    mkdirSync(MCP_RUNTIME_DIR, { recursive: true })
+    const temp = `${target}.${process.pid}.tmp`
+    try {
+      copyFileSync(MATLAB_MCP_EXE, temp)
+      if (existsSync(target)) unlinkSync(target)
+      renameSync(temp, target)
+    } finally {
+      if (existsSync(temp)) {
+        try { unlinkSync(temp) } catch { /* 清理失败不影响运行副本 */ }
+      }
+    }
+    writeFileSync(stampFile, `${signature}\n`, 'utf8')
+    return target
+  } catch {
+    // 复制不了（权限/占用）时继续用包内路径；行为与修复前一致。
+    return MATLAB_MCP_EXE
+  }
+}
 
 /**
  * 组装 MATLAB MCP 的注册条目（stdio）。参数固定：existing 会话 + 插件自带扩展文件。
@@ -34,7 +74,7 @@ const CLOSE_TIMEOUT_MS = 5000
 export function resolveMatlabEntry() {
   return {
     transport: 'stdio',
-    command: MATLAB_MCP_EXE,
+    command: stagedMatlabExe(),
     args: ['--matlab-session-mode=existing', `--extension-file=${SIMULINK_TOOLS_FILE}`, '--disable-telemetry=true'],
     env: { WINDIR: 'C:\\Windows' },
     cwd: '',
@@ -369,7 +409,7 @@ export function componentViews({ engineeringInjected, gates, status }) {
  */
 export function matlabInitCommand() {
   const dir = SIMULINK_TOOLKIT_DIR.split('\\').join('/')
-  const exe = MATLAB_MCP_EXE.split('\\').join('/')
+  const exe = stagedMatlabExe().split('\\').join('/')
   return `addpath('${dir}'); satk_initialize(MCPServerPath='${exe}')`
 }
 

@@ -100,6 +100,12 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
   /** 设置页展示 MCP 组件状态用；headless/sdk 没有 mcpManager 时给不可用。 */
   const mcpStatusOf = () => (mcpController === undefined ? { available: false, servers: [] } : mcpController.status())
   const webServer = scope.webServer ?? scope.get?.('webServer')
+  /**
+   * 设置页冷启动要做组件检测（Python、officecli、zotero-cli、draw.io、MATLAB 等），
+   * 首次可能超过十秒。这里按参数快照缓存一小段时间，避免同一次打开重复付这份成本。
+   */
+  let settingsCache
+  const SETTINGS_CACHE_MS = 10_000
 
   /**
    * 读取当前工作区的活跃模式。
@@ -364,7 +370,13 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
     'GET /settings': async () => {
       const catalog = await loadCatalog()
       const params = currentParams(pluginConfig)
+      const signature = JSON.stringify(params)
+      if (settingsCache !== undefined && settingsCache.signature === signature
+        && Date.now() - settingsCache.at < SETTINGS_CACHE_MS) {
+        return { ok: true, ...settingsCache.value }
+      }
       const payload = await settingsCards(catalog, params, mcpStatusOf())
+      settingsCache = { signature, at: Date.now(), value: payload }
       return { ok: true, ...payload }
     },
     'POST /settings': async body => {
@@ -388,6 +400,7 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
       }
       const backups = await saveSettingsCard(catalog, pluginConfig, body)
       applySkillEnv(currentParams(pluginConfig))
+      settingsCache = undefined
       await appendEvent('settings-saved', { cardId: body.cardId })
       return { ok: true, backups, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
     },

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-16T08:29:05.895Z",
+  "generatedAt": "2026-11-17T11:11:17.267Z",
   "totalSkills": 329,
   "totalComponents": 16,
   "summary": {
@@ -3785,7 +3785,7 @@
         "hostTool": 1,
         "python3": 2,
         "bash": 4,
-        "home": 5,
+        "home": 4,
         "env": 2,
         "cli": 1
       },
@@ -3807,7 +3807,6 @@
           "scripts/academic_search.py"
         ],
         "home": [
-          "mcp-server/config.toml",
           "mcp-server/README.md",
           "README.md",
           "README_EN.md",
@@ -3820,7 +3819,7 @@
       },
       "note": "MCP 未注册，降级为 OpenAlex + web_search/web_fetch；config.toml 由插件写入。",
       "check": "python <skill>/scripts/preflight.py",
-      "files": 41
+      "files": 40
     },
     {
       "name": "nature-citation",

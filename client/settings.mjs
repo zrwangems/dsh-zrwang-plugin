@@ -230,7 +230,7 @@ function zrBuildValues(cards) {
 function ZrSettingsView(props) {
   var minimal = props.minimal === true
   void minimal
-  var pair = zrUseAsync(function () { return zrRequest('/settings') }, [])
+  var pair = zrUseAsync(function () { return zrRequest('/settings', undefined, ZR_TIMEOUT_SETTINGS) }, [])
   var state = pair[0]
   var setState = pair[1]
   var reload = pair[2]
@@ -303,7 +303,7 @@ function ZrSettingsView(props) {
     var body = { action: 'save', cardId: cardId, values: valuesRef.current[cardId] || {} }
     setError(null)
     setBusy(function (count) { return count + 1 })
-    zrRequest('/settings', body).then(function (payload) {
+    zrRequest('/settings', body, ZR_TIMEOUT_SETTINGS).then(function (payload) {
       refreshPayload(payload.settings)
       setSaved(cardId)
       setChecks(function (previous) {
@@ -352,7 +352,7 @@ function ZrSettingsView(props) {
     setError(null)
     setSaved(null)
     setActionBusy(actionId)
-    zrRequest('/settings', { action: actionId, cardId: cardId }).then(function (payload) {
+    zrRequest('/settings', { action: actionId, cardId: cardId }, ZR_TIMEOUT_SETTINGS).then(function (payload) {
       if (payload !== undefined && payload.check !== undefined) {
         setChecks(function (previous) {
           var copy = {}

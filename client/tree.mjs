@@ -531,6 +531,33 @@ function ZrComponentRow(props) {
   )
 }
 
+/**
+ * 项目里已有同名目录 / 非本插件托管的链接时的提示。
+ * 默认只显示一行摘要，展开后是限高可滚动列表：之前把几十条拼成一段会盖住目录树。
+ */
+function ZrConflicts(props) {
+  var items = props.items || []
+  var pair = React.useState(false)
+  var open = pair[0]
+  var setOpen = pair[1]
+  if (items.length === 0) return null
+  return h('div', { className: 'zr-foot' },
+    h('button', {
+      type: 'button',
+      className: 'zr-conflict-toggle',
+      title: zrT('这些名字在项目里已有同名目录或不是本插件建立的链接，插件不会接管；要接管请先手动清理'),
+      onClick: function () { setOpen(function (previous) { return previous !== true }) },
+    }, (open ? '▾ ' : '▸ ') + zrT('{n} 个同名目录/链接未被接管', { n: String(items.length) })),
+    open === true
+      ? h('div', { className: 'zr-conflict-list' }, items.map(function (item) {
+        return h('div', { className: 'zr-conflict-item', key: item.name + '|' + item.reason },
+          h('span', { className: 'zr-conflict-name' }, item.name),
+          h('span', { className: 'zr-conflict-reason' }, item.reason))
+      }))
+      : null
+  )
+}
+
 function ZrSkillsView(props) {
   var data = props.data
   var blocked = props.blocked || {}
@@ -604,9 +631,6 @@ function ZrSkillsView(props) {
         })
       })
     ),
-    conflicts.length > 0
-      ? h('div', { className: 'zr-foot' },
-        h('div', { className: 'zr-err' }, conflicts.map(function (item) { return item.name + '：' + item.reason }).join('\n')))
-      : null
+    h(ZrConflicts, { items: conflicts })
   )
 }
