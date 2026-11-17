@@ -68,7 +68,9 @@ for (const dir of distributableRoots) {
 }
 check('运行期代码不含作者本机路径', localPathHits.length === 0, localPathHits.join(', '))
 check('icon.svg 存在', existsSync(join(ROOT, 'icon.svg')))
-check('不提供英文 locale（中文项目）', !existsSync(join(ROOT, 'locale', 'en.json')))
+check('插件元数据为中文（en/zh 同一份中文文案）', existsSync(join(ROOT, 'locale', 'en.json'))
+  && !readFileSync(join(ROOT, 'locale', 'en.json'), 'utf8').includes('Pick this session')
+  && /[\u4e00-\u9fff]/.test(readFileSync(join(ROOT, 'locale', 'en.json'), 'utf8')))
 check('locale/zh-CN.json 存在', existsSync(join(ROOT, 'locale', 'zh-CN.json')))
 check('打包清单含 locale/docs/图标/补丁', ['locale', 'docs', 'icon.svg', 'cordis.patch.yml'].every(item => (pkg.files ?? []).includes(item)))
 check('vendor 只打包 licenses（不打包 22MB 的 vendor/local）',
