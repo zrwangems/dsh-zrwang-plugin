@@ -63,7 +63,8 @@ for (const dir of distributableRoots) {
   const files = readdirSync(join(ROOT, dir)).filter(file => file.endsWith('.mjs') && !(dir === 'scripts' && file === 'verify.mjs'))
   for (const name of files) {
     const text = readFileSync(join(ROOT, dir, name), 'utf8')
-    if (/AgentRelated|C:\\\\Users\\\\17745|\.local\\\\bin/i.test(text)) localPathHits.push(`${dir}/${name}`)
+    // 只认「作者本机专属」的形态，不写死具体用户名/盘符：任何 C:\Users\<名字>、AgentRelated、.local\bin
+    if (/AgentRelated|[A-Za-z]:\\\\Users\\\\[^\\\\/'"\s]+|\.local\\\\bin/i.test(text)) localPathHits.push(`${dir}/${name}`)
   }
 }
 check('运行期代码不含作者本机路径', localPathHits.length === 0, localPathHits.join(', '))

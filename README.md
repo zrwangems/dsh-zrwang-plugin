@@ -1,17 +1,17 @@
 # dsh-zrwang-plugin（My DSH）
 
-王湛然的DSH管理插件：按项目、按 DSH 工作区控制「注入哪些技能」&「注入哪些功能」，把 21 个上游 GitHub 仓库收进一个统一入口。
+王湛然专属DSH插件：按项目、按 DSH 工作区控制「注入哪些技能」和「启用哪些组件」，把 21 个上游 GitHub 仓库的技能收进一个统一入口。
 
 
 ## 它解决什么
 
-1. 技能来自 `.agents/skills/`，一个项目里装几十上百个技能会互相干扰、难以挑选。这个插件把技能按「工程 / 科研 / 办公」三组做成目录树：
-- 勾选即注入，取消即摘除；同一份技能只存在插件包里，不在每个项目重复复制。
+技能从 `<项目根>/.agents/skills/` 发现，一个项目装几十上百个技能会互相干扰、难以挑选。本插件把技能按「工程 / 科研 / 办公」三组组织成目录树，按项目与 DSH 工作区保存注入状态：
+
+- 勾选即注入，取消即摘除；技能实体只存在插件包里，不在每个项目重复复制。
 - 按项目保存「默认」注入态，按 DSH 工作区自动建立以工作区命名的模式，同工作区所有对话共享、改动自动保存；右键可基于此新建、重命名、删除。
 - 329 个技能全部可用，默认不注入任何技能（门禁全关），用哪组开哪组；默认勾选集合为工程 64 个 + 飞书 4 个基础技能。
 - 每个技能都能一键打开上游 GitHub 项目；中文短说明与详情在侧栏直接看。
 
-2. 好多好用的AI生态项目都是面向Claude Code/Codex,其余Harness本身无法使用，但是**deepseek**官方给出了具备了「一些皆插件」理念的Deepseek Harness 和 具有「许愿式编程」能力的 deepseek v4.1 flash-1017，给予了像我这种非IT从业者去 优化&改进&修饰&... 自己的Harness，让自己的Harness更适合自己使用，所以可以把很多有趣/好用的项目集成进自己的DSH中。
 
 ## 功能
 
@@ -25,7 +25,7 @@
 - **技能详情**：中文短说明一行、详情按 Markdown 渲染，含表格、列表、代码与链接；详情读不出来时提示打开 SKILL.md。
 - **上游链接**：每个「项目根」（如 MATLAB、中国专利技能、ARS）右侧有 **↗**，在浏览器打开对应 GitHub 仓库；项目内部的子目录/技能不重复显示。
 - **写操作护栏**：模型用 write/edit 改插件内 `skills/`、`ars/` 一律拒绝（含经项目目录联接写入），避免跑任务时改坏技能。
-- **ARS 学术研究（独立功能区块）**：目录 `ars/`，不进 `skills/`、不计入 329 个技能；默认关闭，勾选后注入 5 个流水线技能并提供 16 个 `/ars-*` 命令；多角色流程要求 DSH 开启 Agent Team。
+- **ARS 学术研究（独立功能区块）**：目录 `ars/`，不进 `skills/`、不计入 329 个技能；默认关闭，勾选后注入 5 个流水线技能并提供 16 个 `/ars-*` 命令；多角色流程会在执行前自动打开 DSH 的「智能体团队协作」。
 - **MCP 组件（与 ARS 并列的两行）**：
   - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；工程组关掉即注销。
   - **Windows MCP组件**：手动勾选后注册 `windows-mcp`（桌面截图、快照、点击、窗口操作），取消即注销；用系统 PATH 里已安装的 `windows-mcp`（`uv tool install windows-mcp` 等），插件不自带运行时。
@@ -33,7 +33,7 @@
 
 ## 安装
 
-需要 DSH `0.2.2-rc.2` 或更高版本（插件声明 `engines.dsh >=0.2.2-rc.2`；MCP 组件依赖该版本起提供的 `ctx.mcpManager`）。右侧栏默认使用 `dsh-better-sidebar 0.30.1+`（作为插件依赖会自动安装并启用）；**没有它也能用**：插件会退回注册一个 DSH 原生右侧栏页签「My DSH」。
+需要 DSH `0.2.2-rc.2` 或更高版本（插件声明 `engines.dsh >=0.2.2-rc.2`；MCP 组件依赖该版本起提供的 `ctx.mcpManager`）。右侧栏默认使用 `dsh-better-sidebar 0.32.1+`（作为插件依赖会自动安装并启用）；**没有它也能用**：插件会退回注册一个 DSH 原生右侧栏页签「My DSH」。使用 DSH 0.2.2 的团队能力时，低于 0.32.1 的 better-sidebar 读取不到新的团队投影结构，任务页会报错，请一并升级。
 
 在 DSH 里打开「设置 → 插件 → 安装插件」，搜索并安装：
 
@@ -72,7 +72,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 4. 在侧栏底部切换选择态；右键模式可基于此新建、重命名或删除，工作区模式改名后升级为项目级。
 5. 技能行「详情」展开中文说明，「打开」在右侧栏查看 SKILL.md，「↗」在浏览器打开上游项目。
 
-「ARS」功能区块与三个技能组排在一起：默认不勾选，勾选后注入 5 个论文流水线技能，并提供 `/ars-plan`、`/ars-full`、`/ars-lit-review`、`/ars-reviewer`、`/ars-revision` 等 16 个命令。多角色流程依赖 DSH 的 **Agent Team**，未开启时对应命令会提示先开启。
+「ARS」功能区块与三个技能组排在一起：默认不勾选，勾选后注入 5 个论文流水线技能，并提供 `/ars-plan`、`/ars-full`、`/ars-lit-review`、`/ars-reviewer`、`/ars-revision` 等 16 个命令。多角色命令会在执行前自动打开 DSH 的「智能体团队协作」并投递授权说明；只有在无法改动该开关时（例如在子会话里调用）才会提示手动开启。
 
 ## 设置
 
@@ -81,12 +81,12 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 | 栏目 | 内容 |
 | --- | --- |
 | 模型服务 | 生图模型（URL / 模型 / API Key，按 OpenAI Images 兼容协议，不再分厂商）、OCR 模型 |
-| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key；缓存/超时/条数已改为内部固定值，不再暴露）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE，对应你的主要出版社）；学校配置固定为北航随包分发，无需填写；Nature 生图复用模型服务的生图模型，不再单独设置；改动自动保存 |
+| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key；缓存/超时/条数已改为内部固定值，不再暴露）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE，对应主要出版社）；学校配置随包固定分发（`skills/research/nature-skills/nature-downloader/config/school.json`），无需填写；Nature 生图复用模型服务的生图模型，不再单独设置；改动自动保存 |
 | 运行环境 | 顶部一个「检查运行环境」按钮，下面一行一项：Python 解释器（下拉选择）、officecli、zotero-cli、lark-cli、draw.io、Polyspace、MATLAB、MathWorks MCP（可用性＝MATLAB 是否已 shareMATLABSession）、Windows MCP（可用性＝PATH 里是否装了 windows-mcp）；全部自动保存 |
 
 **所有设置项改动即自动保存**（保存后同一个 DSH 进程立即生效；注意 DSH 的 shell 工具会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，插件会生成 Python 启动钩子从配置文件补回密钥；Web 与 Desktop 是独立进程，每个运行中的实例都会监听共享的 `settings.json`，其他实例保存后约 0.3 秒内也会重新注入环境变量，不用重启）（文本框失焦、下拉选择即生效，页面没有「保存」按钮）；「运行环境」合并成一个区块：顶部「检查运行环境」按钮同时做系统 Python 检测/依赖校验、组件状态和 MCP 检查，下面按行显示各环境项状态。`settings.json` 里存有 API Key，插件在写入后和启动时都会把文件权限收紧到当前账户（Windows 用 `icacls` 去掉权限继承，其它平台 `chmod 600`），失败时保持原样。
 
-保存的设置会同步写进宿主进程环境：生图配置用插件专用 `ZRWANG_IMAGE_*`，由 ppt-master 技能内的桥接映射成 `OPENAI_*`；Nature 学术检索、Unpaywall/Crossref 邮箱、Firecrawl 等分别注入 `NCBI_EMAIL` / `UNPAYWALL_EMAIL` / `CROSSREF_MAILTO` / `FIRECRAWL_API_KEY`。Nature 生图的 `OPENROUTER_*` / `SCHEMATIC_IMAGE_API_URL` 直接复用模型服务的生图 URL/模型/Key。Nature 的配置集中写在 `~/.dsh/zrwang-plugin-config/`：`nature-academic-search/config.toml`、`nature-image2ppt/config.yaml`、`nature-figure.json`，以及 `nature-downloader/` 下的 `credentials.json`、`settings.json`；北航 `school.json` 直接随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`，通过 `LIT_DL_SCHOOL_FILE` 读取。**不再读取或写入任何上游 `.env` / 旧配置文件**。
+保存的设置会同步写进宿主进程环境：生图配置用插件专用 `ZRWANG_IMAGE_*`，由 ppt-master 技能内的桥接映射成 `OPENAI_*`；Nature 学术检索、Unpaywall/Crossref 邮箱、Firecrawl 等分别注入 `NCBI_EMAIL` / `UNPAYWALL_EMAIL` / `CROSSREF_MAILTO` / `FIRECRAWL_API_KEY`。Nature 生图的 `OPENROUTER_*` / `SCHEMATIC_IMAGE_API_URL` 直接复用模型服务的生图 URL/模型/Key。Nature 的配置集中写在 `~/.dsh/zrwang-plugin-config/`：`nature-academic-search/config.toml`、`nature-image2ppt/config.yaml`、`nature-figure.json`，以及 `nature-downloader/` 下的 `credentials.json`、`settings.json`；`school.json` 直接随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`，通过 `LIT_DL_SCHOOL_FILE` 读取。**不再读取或写入任何上游 `.env` / 旧配置文件**。
 
 ## 系统 Python
 

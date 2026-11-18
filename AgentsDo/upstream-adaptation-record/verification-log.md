@@ -8,7 +8,7 @@
 
 ```text
 python (PATH)      = D:\anaconda3\python.exe  3.14.6
-python3 (PATH)     = C:\Users\17745\AppData\Local\Microsoft\WindowsApps\python3.exe  （Store 空壳）
+python3 (PATH)     = %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\python3.exe  （Store 空壳）
 bash (PATH)        = C:\Windows\system32\bash.exe  （WSL 空壳，本机无发行版）
 convert (PATH)     = C:\Windows\system32\convert.exe  （FAT→NTFS，不是 ImageMagick）
 drawio / magick / jq = 未安装
@@ -22,7 +22,7 @@ ppt-master：
 ```text
 python <ppt-master>\scripts\image_gen.py --list-backends
   Resolved backend: qwen
-  Configuration source: C:\Users\17745\.ppt-master\.env
+  Configuration source: %USERPROFILE%\.ppt-master\.env
   （设置里模型是 qwen-image-3.0-pro，但 backend_qwen.py 只支持 qwen-image-2.0-pro）
 ```
 
@@ -175,7 +175,7 @@ python <ppt-master>/scripts/image_gen.py --list-backends
 
 ```text
 image2ppt doctor
-  config: C:\Users\17745\.dsh\zrwang-plugin-config\nature-image2ppt\config.yaml (exists)
+  config: %USERPROFILE%\.dsh\zrwang-plugin-config\nature-image2ppt\config.yaml (exists)
   OCR: token=set source=config
   image CLI fallback: openai-compatible-api (ready)
   PPTX renderer: powerpoint-com (ready)
