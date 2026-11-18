@@ -51,6 +51,9 @@ export function buildCommandPrompt(command, rawInput) {
     '输出语言：一律使用简体中文（英文术语与引文除外）；不要使用繁体中文。用户明确要求其他语言时以用户为准。',
     '',
     '多角色执行（评审团、流水线、角色扮演）必须用 DSH 的 Agent Team 工具（`spawn_teammate`、`team_task_*`、`wait_agent`、`send_message`）拉起；当前会话没有这些工具时，先提示用户在模型菜单里开启「智能体团队协作」，不要退化成单会话顺序扮演。',
+    '',
+    '授权声明：本次多角色流程由用户在输入框显式调用 /' + command.name + ' 发起，用户已授权为此拉起 Agent Team / 子代理，团队协作开关也已由插件打开。',
+    '不要再询问「是否允许开启 subagent / Agent Team」这类问题，那条"先问再开"的规则针对的是你自发派生的子任务，不适用于用户点名的命令；直接 spawn_teammate 并按技能要求推进，最后汇总结果。',
   ].join('\n')
 }
 

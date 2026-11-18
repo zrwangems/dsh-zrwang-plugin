@@ -101,6 +101,8 @@ const { buildCommandPrompt } = await import('../host/ars-commands.mjs')
 const arsManifest = loadArsManifest()
 const arsPrompts = (arsManifest?.commands ?? []).map(command => buildCommandPrompt(command, '示例输入'))
 check('ARS 命令正文可生成', arsPrompts.length === 16 && arsPrompts.every(text => text.includes('执行 ARS 命令 /') && text.length > 300), String(arsPrompts.length))
+check('命令提示声明用户已授权拉起 Agent Team',
+  arsPrompts.every(text => text.includes('授权声明') && text.includes('不要再询问')), String(arsPrompts.length))
 check('ARS 命令都声明输入提示', (arsManifest?.commands ?? []).every(command => typeof command.hint === 'string' && command.hint.length > 0), String((arsManifest?.commands ?? []).length))
 // 技能文件护栏：只拦插件内 skills/ 与 ars/ 的写操作
 const { guardReason } = await import('../host/skill-guard.mjs')
