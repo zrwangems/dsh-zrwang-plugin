@@ -118,7 +118,8 @@ if (existsSync(settingsFile)) {
   check('设置含 natureAcademic', patchConfig?.natureAcademic?.pubmed !== undefined)
   check('设置含 natureImage2ppt', patchConfig?.natureImage2ppt !== undefined)
   if (existsSync(runtimeConfigDir)) {
-    const allowed = new Set(['catalog.json', 'defaults.json', 'settings.json', 'nature-figure.json', 'patent', 'nature-academic-search', 'nature-image2ppt', 'nature-downloader'])
+    // state/ 是插件运行态目录（选择态、模式、MCP 暂存 exe、shim），本来就该在这里。
+    const allowed = new Set(['catalog.json', 'defaults.json', 'settings.json', 'nature-figure.json', 'state', 'patent', 'nature-academic-search', 'nature-image2ppt', 'nature-downloader'])
     const unexpected = readdirSync(runtimeConfigDir).filter(name => !allowed.has(name))
     check('配置目录只放文件与设置', unexpected.length === 0, unexpected.join(', '))
   }

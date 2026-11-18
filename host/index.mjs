@@ -105,6 +105,7 @@ export function apply(ctx, config) {
   })
 
   // ARS 的 /ars-* 命令：按侧栏开关动态注册/注销，关掉 ARS 时命令从斜杠菜单消失。
+  // 多角色命令在执行时用 scope.get('agentTeams') 判断团队协作是否开启（懒取，服务缺失也不阻塞本段）。
   ctx.inject(['commands'], scope => {
     attachArsCommands(scope)
     scope.effect(() => () => detachArsCommands(), 'dsh-zrwang-plugin: ars commands')

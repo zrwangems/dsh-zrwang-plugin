@@ -102,7 +102,10 @@ dsh --profile <测试 profile> --from-default-profile web --port 60335 --no-open
   处理器里用 `invocation.agent.followup({ id, role:'user', content, source })` 投递用户消息。
 - ARS 是技能列表的第四行：共用门禁 `gates.ars`（默认 `false`），不进技能树、不列子技能；
   选中时 `mergeArsSkills(desired, true)` 并进 5 个技能，关掉即摘除。
-- **ARS 多角色门禁**：`/ars-full`、`/ars-reviewer`、`/ars-lit-review` 等会拉起多个角色的命令，在执行前检查当前会话有没有 `spawn_teammate` 工具；没有就报错让用户先开 Agent Team。`/ars-plan`、`/ars-cache-invalidate`、`/ars-mark-read` 属于单角色/单机制，不受限制。
+- **ARS 多角色门禁**：`/ars-full`、`/ars-reviewer`、`/ars-lit-review` 等会拉起多个角色的命令，在执行前检查
+  `scope.get('agentTeams').isEnabled(agent)`（DSH 的 Team 工具是 `when: ({ agent }) => isEnabled(agent)` 条件注册的，
+  `tools.get()` 在没有本步准入工具集时看不到它们，别再用工具表判断）；关着就提示用户在模型菜单里打开
+  「启用智能体团队协作」。`/ars-plan`、`/ars-cache-invalidate`、`/ars-mark-read` 属于单角色/单机制，不受限制。
 - **技能文件护栏**：模型用 `write`/`edit` 改插件内 `skills/` 或 `ars/` 会被 `host/skill-guard.mjs`
   拒绝（项目 `.agents/skills/` 联接路径会 realpath 回插件目录，同样命中）。开发时改技能只走
   `vendor/` 规则 + `node scripts/vendor-skills.mjs`；shell 不在护栏范围内，所以 vendor 脚本能跑。

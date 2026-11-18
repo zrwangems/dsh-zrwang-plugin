@@ -50,7 +50,7 @@ export function buildCommandPrompt(command, rawInput) {
     '',
     '输出语言：一律使用简体中文（英文术语与引文除外）；不要使用繁体中文。用户明确要求其他语言时以用户为准。',
     '',
-    '多角色执行（评审团、流水线、角色扮演）必须用 DSH 的 Agent Team 工具（`spawn_teammate`、`team_task_*`、`wait_agent`、`send_message`）拉起；当前会话没有这些工具时，先提示用户开启 Agent Team，不要退化成单会话顺序扮演。',
+    '多角色执行（评审团、流水线、角色扮演）必须用 DSH 的 Agent Team 工具（`spawn_teammate`、`team_task_*`、`wait_agent`、`send_message`）拉起；当前会话没有这些工具时，先提示用户在模型菜单里开启「智能体团队协作」，不要退化成单会话顺序扮演。',
   ].join('\n')
 }
 
@@ -78,8 +78,23 @@ const TEAM_REQUIRED = new Set([
   'ars-rebuttal-audit', 'ars-3w',
 ])
 
-/** 当前会话是否挂上了 Agent Team 工具（多角色流程的硬依赖）。 */
+/**
+ * 当前会话是否挂上了 Agent Team（多角色流程的硬依赖）。
+ *
+ * 先问 `agentTeams` 服务：DSH 的 Team 工具是按 `when: ({ agent }) => isEnabled(agent)` 条件注册的，
+ * 而 `tools.get(name, scope)` 在没有「本步已准入工具集」时看不到条件注册的工具，所以直接查工具表
+ * 会一直返回 undefined（2026-11-18 实测：界面已开「智能体团队协作」，门禁仍报没开）。
+ * 拿不到服务（旧版本）时退回工具表检查。
+ */
 export function teamToolsAvailable(agent) {
+  const teams = commandScope?.get?.('agentTeams')
+  if (teams !== undefined && typeof teams.isEnabled === 'function') {
+    try {
+      return teams.isEnabled(agent) === true
+    } catch {
+      return false
+    }
+  }
   const tools = commandScope?.get?.('tools')
   if (tools === undefined || typeof tools.get !== 'function') return false
   return tools.get('spawn_teammate', agent) !== undefined
@@ -114,7 +129,7 @@ export async function runArsCommand(command, agent, rawInput) {
     if (TEAM_REQUIRED.has(command.name) && !teamToolsAvailable(agent)) {
       return {
         kind: 'error',
-        text: 'ARS 的多角色流程依赖 DSH 的 Agent Team，但当前会话没有开启 Agent Team（找不到 spawn_teammate 等团队工具）。请先在 DSH 里开启 Agent Team，再执行命令。',
+        text: 'ARS 的多角色流程依赖 DSH 的 Agent Team，但当前会话没有开启团队协作。请在输入框上方的模型菜单里打开「启用智能体团队协作」，再执行命令。',
       }
     }
     agent.followup(userMessage(buildCommandPrompt(command, rawInput)))

@@ -116,11 +116,35 @@ for (const [label, target, expectDenied] of guardCases) {
   check(label, denied === expectDenied, `denied=${denied}`)
 }
 // 多角色命令必须依赖 Agent Team；单角色命令（plan/缓存/阅读标记）不依赖
-const { commandNeedsTeam } = await import('../host/ars-commands.mjs')
+const { commandNeedsTeam, attachArsCommands, teamToolsAvailable } = await import('../host/ars-commands.mjs')
 check('多角色命令需要 Agent Team',
   commandNeedsTeam('ars-reviewer') && commandNeedsTeam('ars-full') && commandNeedsTeam('ars-lit-review')
   && !commandNeedsTeam('ars-plan') && !commandNeedsTeam('ars-cache-invalidate'),
   String(commandNeedsTeam('ars-reviewer')))
+// 团队协作开关从 agentTeams 服务读：DSH 的 Team 工具是条件注册的，查工具表看不到
+const fakeAgent = { id: 'agent-team-probe' }
+attachArsCommands({
+  get: name => {
+    if (name === 'agentTeams') return { isEnabled: agent => agent === fakeAgent }
+    if (name === 'tools') return { get: () => undefined }
+    return undefined
+  },
+})
+check('团队协作开启时放行多角色命令', teamToolsAvailable(fakeAgent) === true)
+check('团队协作关闭时拦截多角色命令', teamToolsAvailable({ id: 'other-agent' }) === false)
+// 旧版本没有 agentTeams 服务时，退回工具表检查
+attachArsCommands({
+  get: name => {
+    if (name === 'tools') return { get: toolName => (toolName === 'spawn_teammate' ? {} : undefined) }
+    return undefined
+  },
+})
+check('没有 agentTeams 服务时退回工具表检查', teamToolsAvailable(fakeAgent) === true)
+attachArsCommands({ get: () => undefined })
+check('两种来源都拿不到时不放行', teamToolsAvailable(fakeAgent) === false)
+// 复原：别把桩作用域留给后续检查
+const { detachArsCommands } = await import('../host/ars-commands.mjs')
+detachArsCommands()
 // 通过项目里的联接写技能，也必须被识别（realpath 回插件目录）
 const junctionProject = joinPath(WORK, 'guard-proj')
 const junctionSkills = joinPath(junctionProject, '.agents', 'skills')
