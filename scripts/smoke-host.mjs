@@ -142,6 +142,36 @@ attachArsCommands({
 check('没有 agentTeams 服务时退回工具表检查', teamToolsAvailable(fakeAgent) === true)
 attachArsCommands({ get: () => undefined })
 check('两种来源都拿不到时不放行', teamToolsAvailable(fakeAgent) === false)
+// 显式调用多角色命令时自动打开团队协作
+{
+  let teamOn = false
+  const followed = []
+  const fakeAgent = { id: 'auto-team-probe', followup: message => followed.push(message) }
+  attachArsCommands({
+    get: name => {
+      if (name === 'agentTeams') {
+        return {
+          isEnabled: agent => teamOn && agent === fakeAgent,
+          setEnabled: async (agent, enabled) => {
+            if (agent !== fakeAgent) throw new Error('TEAM_LEAD_REQUIRED')
+            teamOn = enabled === true
+          },
+        }
+      }
+      return undefined
+    },
+  })
+  const { runArsCommand } = await import('../host/ars-commands.mjs')
+  const arsGates = await import('../host/gates.mjs')
+  await arsGates.setGates({ ars: true })
+  const autoRun = await runArsCommand({ name: 'ars-reviewer', source: 'ars/skills/academic-paper-reviewer/SKILL.md' }, fakeAgent, '示例')
+  check('多角色命令自动打开团队协作', autoRun.kind === 'success' && teamOn === true && followed.length === 1, JSON.stringify(autoRun))
+  // 子会话里改不了团队开关：仍应给出明确错误而不是静默失败
+  teamOn = false
+  const subRun = await runArsCommand({ name: 'ars-reviewer', source: 'ars/skills/academic-paper-reviewer/SKILL.md' }, { id: 'sub-agent', followup: () => {} }, '示例')
+  check('改不了团队开关时报出可操作错误', subRun.kind === 'error' && subRun.text.includes('启用智能体团队协作'), JSON.stringify(subRun))
+  await arsGates.setGates({ ars: false })
+}
 // 复原：别把桩作用域留给后续检查
 const { detachArsCommands } = await import('../host/ars-commands.mjs')
 detachArsCommands()

@@ -106,6 +106,22 @@ export function commandNeedsTeam(name) {
 }
 
 /**
+ * 多角色命令执行前打开团队协作：`agentTeams.setEnabled(agent, true)`。
+ * 用户显式调用 /ars-* 就表示要用多角色流程，这里替他点一下开关，不用再去模型菜单手动开。
+ * 只有根会话能改（DSH 规定 TEAM_LEAD_REQUIRED）；子会话里调用会失败，退回提示。
+ */
+export async function enableTeamFor(agent) {
+  const teams = commandScope?.get?.('agentTeams')
+  if (teams === undefined || typeof teams.setEnabled !== 'function') return false
+  try {
+    await teams.setEnabled(agent, true)
+  } catch {
+    return false
+  }
+  return teamToolsAvailable(agent) === true
+}
+
+/**
  * 记住带 commands 服务的上下文，并按当前开关同步命令面。
  * 关掉 ARS 时命令会从斜杠菜单里消失，而不是"留着但执行时报错"。
  */
@@ -126,14 +142,24 @@ export async function runArsCommand(command, agent, rawInput) {
     if (gates.ars !== true) {
       return { kind: 'error', text: 'ARS 已在右侧栏关闭，先勾选「学术研究（ARS）」再执行命令。' }
     }
-    if (TEAM_REQUIRED.has(command.name) && !teamToolsAvailable(agent)) {
-      return {
-        kind: 'error',
-        text: 'ARS 的多角色流程依赖 DSH 的 Agent Team，但当前会话没有开启团队协作。请在输入框上方的模型菜单里打开「启用智能体团队协作」，再执行命令。',
+    let teamReady = true
+    let teamToggled = false
+    if (TEAM_REQUIRED.has(command.name)) {
+      teamReady = teamToolsAvailable(agent)
+      // 开关关着就替用户打开（显式调用 /ars-* 已经是"要用多角色"的表达）。
+      if (!teamReady) {
+        teamToggled = await enableTeamFor(agent)
+        teamReady = teamToggled
+      }
+      if (!teamReady) {
+        return {
+          kind: 'error',
+          text: 'ARS 的多角色流程依赖 DSH 的 Agent Team，但没能自动打开团队协作。请在输入框上方的模型菜单里打开「启用智能体团队协作」，再执行命令。',
+        }
       }
     }
     agent.followup(userMessage(buildCommandPrompt(command, rawInput)))
-    return { kind: 'success', text: `已提交 /${command.name}` }
+    return { kind: 'success', text: teamToggled ? `已开启智能体团队协作，并提交 /${command.name}` : `已提交 /${command.name}` }
   } catch (error) {
     return { kind: 'error', text: `执行 /${command.name} 失败：${String(error?.message ?? error)}` }
   }
