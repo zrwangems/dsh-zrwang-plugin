@@ -7,7 +7,7 @@
  *   3. MCP 组件、技能文件护栏、ARS 命令；
  *   4. 卸载时恢复进程环境、注销 MCP 与命令。
  *
- * 技能只在侧栏勾选后，才由 DSH 官方的 ctx.skills 提供方按工作区列出；
+ * 技能只在侧栏勾选后，才由 DSH 官方的 ctx.skills 提供方按会话列出；
  * 运行期文件全部在 `<插件目录>/cache/`。
  */
 import { existsSync } from 'node:fs'
@@ -22,6 +22,9 @@ import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-com
 import { createSkillGuard } from './skill-guard.mjs'
 import { registerSkillProvider } from './skill-provider.mjs'
 import { installComponentGuard } from './session-components.mjs'
+import { ensureSessionSelection } from './session-selection.mjs'
+import { loadCatalog } from './catalog.mjs'
+import { loadSelection } from './selection.mjs'
 import { loadGates } from './gates.mjs'
 import { createMcpController } from './mcp.mjs'
 
@@ -69,8 +72,12 @@ export function apply(ctx, config) {
   })
 
   // 原生技能注入：每个会话在自己的 agent ctx 里注册提供方，选择互不影响。
-  ctx.on?.('agent/created', ({ agent }) => {
+  ctx.on?.('agent/created', async ({ agent }) => {
     const sessionId = agent.session?.id
+    if (typeof sessionId === 'string' && sessionId.length > 0) {
+      const catalog = await loadCatalog()
+      await ensureSessionSelection(sessionId, await loadSelection(catalog), await loadGates())
+    }
     registerSkillProvider(agent.ctx, runtime, sessionId)
     installComponentGuard(agent.ctx, sessionId)
   })
