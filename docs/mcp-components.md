@@ -57,7 +57,7 @@ MCP 组件**不提供设置项**，注册参数全部固定，保证开箱即用
 ## 边界
 
 - 只在 Web / 桌面端 profile 有效：headless、sdk profile 没有 `ctx.mcpManager`，组件行显示「当前 profile 不支持」，不影响其它功能。
-- 组件注册是宿主全局的，不能按会话隔离；但各会话的组件需求会取并集：只要还有一个近期会话（工作区模式）需要，注册就保持，最后一个需要它的会话关掉后才注销。这样切到另一个会话不会把别人正在用的 MATLAB 工具撤掉。
+- 组件开关按会话保存，DSH 的 MCP 服务器注册仍是宿主全局的：多个会话的组件需求取并集，只要还有一个近期会话需要，注册就保持，最后一个需要它的会话关掉后才注销。为了做到“每个对话只用自己勾选的组件”，插件在每个 agent 的 `tools/pre-execute` 上挂了会话守卫：本会话没启用的 `mcp__matlab-mcp__*` / `mcp__windows-mcp__*` 调用会被拒绝，别的会话不受影响。
 - `serverName` 固定为 `matlab-mcp` / `windows-mcp`。如果 profile 的 `cordis.patch.yml` 里还留着同名的静态 MCP 行（例如旧的 `mcp-matlab` / `mcp-windows`），注册会报冲突，组件行会显示原因；装到该 profile 前先删掉静态行。
 - 服务器名与工具前缀变化会影响按名字引用工具的说明文字：旧文档里的 `mcp__matlab__*` 现在应写作 `mcp__matlab-mcp__*`。
 - MATLAB 本体（R2023a 及以上）仍需用户自己安装；这是 MathWorks 服务器本身的运行前提，不是插件的本机依赖。

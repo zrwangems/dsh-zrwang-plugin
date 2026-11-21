@@ -2,7 +2,7 @@
 /**
  * 路由层回归：不启 DSH，用假 webServer + 假 ctx（含 workspaceRegistry 桩）直接驱动
  * host/routes.mjs 的 HTTP 处理器，覆盖选择态 v3 的完整用户路径：
- *   GET /catalog → POST /session → 同工作区共享 → 跨工作区隔离
+ *   GET /catalog → POST /session → 同工作区不同会话隔离 → 跨工作区隔离
  *   POST /presets create-from（命名模式/默认拒绝）→ rename 升级项目级 → delete。
  *
  * 全程在系统临时目录里跑，不写仓库、不碰真实 ~/.dsh。
@@ -133,9 +133,17 @@ check('health 报告 MCP 状态', health.data?.mcp?.available === false && healt
 
 // ---- 3. 同工作区第二个会话共享 ----
 const shared = await call('GET', `/dsh-zrwang-plugin/catalog?sessionId=session-b&cwd=${encodeURIComponent(dirA)}`)
-check('同工作区会话共享同一模式与计数', presetsOf(shared.data).active === '工作区甲'
+check('同工作区新会话首次继承当前选择', presetsOf(shared.data).active === '工作区甲'
   && presetsOf(shared.data).items.find(item => item.name === '工作区甲')?.count === auto.count,
   JSON.stringify(presetsOf(shared.data)))
+const snapshots = JSON.parse(readFileSync(join(stateRoot(), 'session-selection.json'), 'utf8')).sessions
+check('选择按会话写入快照', Object.keys(snapshots).includes('session-a') && Object.keys(snapshots).includes('session-b'), JSON.stringify(Object.keys(snapshots)))
+await call('POST', '/dsh-zrwang-plugin/session', { sessionId: 'session-b', cwd: dirA, gates: { office: true } })
+const aAgain = await call('GET', `/dsh-zrwang-plugin/catalog?sessionId=session-a&cwd=${encodeURIComponent(dirA)}`)
+const bAgain = await call('GET', `/dsh-zrwang-plugin/catalog?sessionId=session-b&cwd=${encodeURIComponent(dirA)}`)
+check('同工作区不同会话的选择互不影响',
+  aAgain.data.session.gates.office === false && bAgain.data.session.gates.office === true,
+  JSON.stringify({ a: aAgain.data.session.gates.office, b: bAgain.data.session.gates.office }))
 
 // ---- 3.1 /resync 只读：不改写选择态文件 ----
 const selectionFile = join(stateRoot(), 'selection.json')

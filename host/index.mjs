@@ -21,6 +21,7 @@ import { appendEvent, ensureStateDirSync } from './state.mjs'
 import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-commands.mjs'
 import { createSkillGuard } from './skill-guard.mjs'
 import { registerSkillProvider } from './skill-provider.mjs'
+import { installComponentGuard } from './session-components.mjs'
 import { loadGates } from './gates.mjs'
 import { createMcpController } from './mcp.mjs'
 
@@ -67,10 +68,11 @@ export function apply(ctx, config) {
     effect(scope, () => dispose, 'dsh-zrwang-plugin: shell env')
   })
 
-  // 原生技能注入：按工作区把选中的技能注册进 ctx.skills，不写项目目录。
-  ctx.inject?.(['skills'], scope => {
-    const dispose = registerSkillProvider(scope, runtime)
-    effect(scope, () => dispose, 'dsh-zrwang-plugin: skill provider')
+  // 原生技能注入：每个会话在自己的 agent ctx 里注册提供方，选择互不影响。
+  ctx.on?.('agent/created', ({ agent }) => {
+    const sessionId = agent.session?.id
+    registerSkillProvider(agent.ctx, runtime, sessionId)
+    installComponentGuard(agent.ctx, sessionId)
   })
 
   // 技能文件护栏：禁止模型用 write/edit 改插件里的 skills/ 与 ars/。

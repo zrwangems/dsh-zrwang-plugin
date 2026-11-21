@@ -158,7 +158,7 @@ check('ARS 许可是 CC-BY-NC', existsSync(join(ROOT, 'vendor', 'licenses', 'ars
 const requiredHost = [
   'index.mjs', 'routes.mjs', 'runtime.mjs', 'config.mjs', 'paths.mjs', 'platform.mjs',
   'params.mjs', 'object.mjs', 'state.mjs', 'python.mjs', 'env.mjs', 'settings.mjs',
-  'mcp.mjs', 'ars.mjs', 'skill-provider.mjs', 'legacy-links.mjs', 'migrate.mjs', 'skill-guard.mjs', 'catalog.mjs', 'presets.mjs',
+  'mcp.mjs', 'ars.mjs', 'skill-provider.mjs', 'session-selection.mjs', 'session-components.mjs', 'legacy-links.mjs', 'migrate.mjs', 'skill-guard.mjs', 'catalog.mjs', 'presets.mjs',
 ]
 const missingHost = requiredHost.filter(name => !existsSync(join(ROOT, 'host', name)))
 check('宿主模块齐全', missingHost.length === 0, missingHost.join(', '))

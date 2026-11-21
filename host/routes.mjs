@@ -11,12 +11,13 @@ import { catalogView, loadCatalog } from './catalog.mjs'
 import { resolveProjectRoot } from './project.mjs'
 import { ancestorDirIdsOfSkill, buildEffectiveGates, childBatch, desiredSkills, groupCounts, loadSelection, resetGroup, setSelection } from './selection.mjs'
 import { presetsPayload, loadPresets, applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, renameMode, saveActiveMode, saveMode, activeModeContent } from './presets.mjs'
-import { clearGates, loadGates, normalizeGates, setGates } from './gates.mjs'
+import { clearGates, loadGates, normalizeGates, replaceGates, setGates } from './gates.mjs'
 import { blockedSkills, openConfigTarget, presenceOf, runSettingCheck, saveSettingsCard, settingsCards } from './settings.mjs'
 import { checkArsDeps, loadArsManifest, mergeArsSkills } from './ars.mjs'
 import { componentViews, SERVER_NAMES, wantOf } from './mcp.mjs'
 import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mjs'
 import { invalidateSkillProvider } from './skill-provider.mjs'
+import { ensureSessionSelection, readSessionSelection, saveSessionSelection } from './session-selection.mjs'
 import { appendEvent, readEvents } from './state.mjs'
 import { loadUi, saveExpanded } from './ui-state.mjs'
 import { skillDoc } from './skill-doc.mjs'
@@ -96,11 +97,20 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
   const mcpStatusOf = () => (mcpController === undefined ? { available: false, servers: [] } : mcpController.status())
   const webServer = scope.webServer ?? scope.get?.('webServer')
 
-  async function modeState(catalog, projectRoot, workspace, persist) {
+  async function modeState(catalog, projectRoot, workspace, persist, sessionId) {
     const selection = await loadSelection(catalog)
     const gates = await loadGates()
     await loadPresets(catalog, selection, gates, projectRoot)
     const active = await activeModeContent(catalog, selection, gates, projectRoot, workspace, workspace.sessionId)
+    const snapshot = await readSessionSelection(sessionId)
+    if (snapshot !== undefined && persist !== true) {
+      const changes = {}
+      for (const name of Object.keys(catalog.skills)) changes[name] = snapshot.skills?.[name] === true
+      await setSelection(changes)
+      await replaceGates(snapshot.gates ?? {})
+      invalidateSkillProvider()
+      return { selection: await loadSelection(catalog), gates: await loadGates(), active }
+    }
     if (active.content === undefined) return { selection, gates, active }
     if (persist === true) {
       await applyModeContent(catalog, active.content)
@@ -135,7 +145,9 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
     const catalog = await loadCatalog()
     const scopeInfo = await contextOf(sessionId, cwd)
     const { projectRoot, workspace } = scopeInfo
-    const { selection, gates } = await modeState(catalog, projectRoot, workspace, persist)
+    const { selection, gates } = await modeState(catalog, projectRoot, workspace, persist, sessionId)
+    if (persist === true) await saveSessionSelection(sessionId, selection, gates)
+    else await ensureSessionSelection(sessionId, selection, gates)
     syncArsCommands(gates.ars === true)
     const params = runtime.effective()
     const blocked = await blockedSkills(params, catalog)

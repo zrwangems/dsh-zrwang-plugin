@@ -31,6 +31,8 @@ const { applySkillEnv, restoreSkillEnv } = await import('../host/env.mjs')
 const { registerSkillProvider } = await import('../host/skill-provider.mjs')
 const { loadPresets, ensureEditableMode } = await import('../host/presets.mjs')
 const { resolveWorkspaceByPath } = await import('../host/workspaces.mjs')
+const { saveSessionSelection } = await import('../host/session-selection.mjs')
+const { installComponentGuard } = await import('../host/session-components.mjs')
 const { loadGates, setGates, clearGates } = await import('../host/gates.mjs')
 
 let failures = 0
@@ -197,6 +199,34 @@ check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope
   dispose()
   await setSelection({ [sampleSkill.name]: false })
   await clearGates(['engineering'])
+}
+
+// ---- 按会话隔离 ----
+{
+  await saveSessionSelection('session-a', { skills: { [sampleSkill.name]: true } }, { engineering: true })
+  await saveSessionSelection('session-b', { skills: {} }, { engineering: false })
+  const listFor = async sessionId => {
+    let provider
+    const fake = {
+      registerProvider(factory) {
+        provider = factory({ invalidate() {} })
+        return () => {}
+      },
+    }
+    const dispose = registerSkillProvider({ get: name => (name === 'skills' ? fake : undefined) }, { effective: () => ({}) }, sessionId)
+    const items = await provider.list({ cwd: proj })
+    dispose()
+    return items.map(item => item.name)
+  }
+  const a = await listFor('session-a')
+  const b = await listFor('session-b')
+  check('不同会话的选择互不影响', a.includes(sampleSkill.name) && !b.includes(sampleSkill.name), JSON.stringify({ a: a.slice(0, 2), b: b.slice(0, 2) }))
+
+  const handlers = {}
+  installComponentGuard({ on: (name, fn) => { handlers[name] = fn } }, 'session-b')
+  const deny = await handlers['tools/pre-execute']({ name: 'mcp__windows-mcp__snapshot' }, async () => ({ kind: 'allow' }))
+  const pass = await handlers['tools/pre-execute']({ name: 'read_file' }, async () => ({ kind: 'allow' }))
+  check('会话没启用的 MCP 工具会被拒绝', deny.kind === 'deny' && pass.kind === 'allow', JSON.stringify({ deny, pass }))
 }
 
 // ---- 状态文件 ----

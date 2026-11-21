@@ -17,15 +17,16 @@ import { resolveWorkspaceByPath } from './workspaces.mjs'
 import { cleanupLegacyLinks } from './legacy-links.mjs'
 import { loadArsManifest, mergeArsSkills } from './ars.mjs'
 import { blockedSkills } from './settings.mjs'
+import { readSessionSelection } from './session-selection.mjs'
 
 export const PROVIDER_NAME = 'zrwang-plugin'
 export const PROVIDER_RANK = 300
 
-let invalidator = () => {}
+const invalidators = new Set()
 
 /** 选择态变化后让 DSH 重新发现技能目录。 */
 export function invalidateSkillProvider() {
-  invalidator()
+  for (const invalidate of invalidators) invalidate()
 }
 
 function candidateOf(name, dir, description, extra = {}) {
@@ -44,7 +45,7 @@ function candidateOf(name, dir, description, extra = {}) {
   }
 }
 
-async function activeSelection(cwd) {
+async function activeSelection(cwd, sessionId) {
   const catalog = await loadCatalog()
   const selection = await loadSelection(catalog)
   const gates = await loadGates()
@@ -54,9 +55,12 @@ async function activeSelection(cwd) {
   await loadPresets(catalog, selection, gates, projectRoot)
   const active = await activeModeContent(catalog, selection, gates, projectRoot, workspace, undefined)
   const content = active.content
-  const chosen = content === undefined
-    ? { selection: selection.skills, gates }
-    : { selection: content.selection ?? selection.skills, gates: content.gates ?? gates }
+  const snapshot = await readSessionSelection(sessionId)
+  const chosen = snapshot === undefined
+    ? (content === undefined
+      ? { selection: selection.skills, gates }
+      : { selection: content.selection ?? selection.skills, gates: content.gates ?? gates })
+    : { selection: snapshot.skills, gates: snapshot.gates }
   const desired = desiredSkills(catalog, { ...selection, skills: chosen.selection }, chosen.gates)
   mergeArsSkills(desired, chosen.gates.ars === true)
   return { catalog, desired }
@@ -66,17 +70,19 @@ async function activeSelection(cwd) {
  * @param {object} ctx
  * @param {object} runtime - createRuntime() 返回值
  */
-export function registerSkillProvider(ctx, runtime) {
+export function registerSkillProvider(ctx, runtime, sessionId) {
   const skills = ctx.get?.('skills')
   if (skills === undefined || typeof skills.registerProvider !== 'function') return () => {}
-  return skills.registerProvider(control => {
-    invalidator = () => control.invalidate()
+  let invalidate
+  const dispose = skills.registerProvider(control => {
+    invalidate = () => control.invalidate()
+    invalidators.add(invalidate)
     return {
       name: PROVIDER_NAME,
       async list(options = {}) {
         const cwd = typeof options.cwd === 'string' && options.cwd.length > 0 ? options.cwd : process.cwd()
         if (!existsSync(cwd)) return []
-        const { catalog, desired } = await activeSelection(cwd)
+        const { catalog, desired } = await activeSelection(cwd, sessionId)
         const blocked = await blockedSkills(runtime.effective(), catalog)
         const ars = loadArsManifest()
         const arsByName = new Map((ars?.skills ?? []).map(item => [item.name, item]))
@@ -105,4 +111,8 @@ export function registerSkillProvider(ctx, runtime) {
       },
     }
   })
+  return () => {
+    if (invalidate !== undefined) invalidators.delete(invalidate)
+    dispose?.()
+  }
 }
