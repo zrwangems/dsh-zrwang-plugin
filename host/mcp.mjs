@@ -40,6 +40,9 @@ export function resolveMatlabEntry() {
     toolCallTimeoutMs: 120000,
     startupTimeoutMs: 30000,
     closeTimeoutMs: CLOSE_TIMEOUT_MS,
+    // MATLAB 关掉/共享会话失效时 mcp-client 会按这个预算自动重连；30 次比默认
+    // 的 10 次更耐抖，最长间隔 10s，避免 30s 一次等太久。
+    reconnect: { enabled: true, initialDelayMs: 500, maxDelayMs: 10000, maxAttempts: 30 },
   }
 }
 
@@ -56,6 +59,7 @@ export function resolveWindowsEntry() {
     toolCallTimeoutMs: 120000,
     startupTimeoutMs: 30000,
     closeTimeoutMs: CLOSE_TIMEOUT_MS,
+    reconnect: { enabled: true, initialDelayMs: 500, maxDelayMs: 10000, maxAttempts: 30 },
   }
 }
 

@@ -18,6 +18,7 @@ import { componentViews, SERVER_NAMES, wantOf } from './mcp.mjs'
 import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mjs'
 import { invalidateSkillProvider } from './skill-provider.mjs'
 import { ensureSessionSelection, readSessionSelection, saveSessionSelection } from './session-selection.mjs'
+import { refreshToolRestrictions } from './tool-restrictions.mjs'
 import { appendEvent, readEvents } from './state.mjs'
 import { loadUi, saveExpanded } from './ui-state.mjs'
 import { skillDoc } from './skill-doc.mjs'
@@ -148,6 +149,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
     const { selection, gates } = await modeState(catalog, projectRoot, workspace, persist, sessionId, persist !== true)
     if (persist === true) await saveSessionSelection(sessionId, selection, gates)
     else await ensureSessionSelection(sessionId, selection, gates)
+    await refreshToolRestrictions(sessionId)
     syncArsCommands(gates.ars === true)
     const params = runtime.effective()
     const blocked = await blockedSkills(params, catalog)

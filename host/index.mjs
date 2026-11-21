@@ -22,6 +22,7 @@ import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-com
 import { createSkillGuard } from './skill-guard.mjs'
 import { registerSkillProvider } from './skill-provider.mjs'
 import { installComponentGuard } from './session-components.mjs'
+import { createToolRestrictions } from './tool-restrictions.mjs'
 import { ensureSessionSelection } from './session-selection.mjs'
 import { loadCatalog } from './catalog.mjs'
 import { loadSelection } from './selection.mjs'
@@ -60,6 +61,8 @@ export function apply(ctx, config) {
 
   const mcpController = createMcpController(ctx)
   effect(ctx, () => () => mcpController.disposeAll(), 'dsh-zrwang-plugin: mcp registrations')
+  const toolRestrictions = createToolRestrictions(ctx)
+  effect(ctx, () => () => toolRestrictions.disposeAll(), 'dsh-zrwang-plugin: mcp tool restrictions')
 
   // 官方扩展点：把本插件的配置作为每次 shell 调用的 DSH_* 事实注入。
   ctx.inject?.(['shellEnv'], scope => {
@@ -80,6 +83,11 @@ export function apply(ctx, config) {
     }
     registerSkillProvider(agent.ctx, runtime, sessionId)
     installComponentGuard(agent.ctx, sessionId)
+    toolRestrictions.attach(agent)
+  })
+
+  ctx.on?.('agent/disposed', ({ agent }) => {
+    toolRestrictions.detach(agent?.session?.id)
   })
 
   // 技能文件护栏：禁止模型用 write/edit 改插件里的 skills/ 与 ars/。

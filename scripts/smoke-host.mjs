@@ -33,6 +33,7 @@ const { loadPresets, ensureEditableMode } = await import('../host/presets.mjs')
 const { resolveWorkspaceByPath } = await import('../host/workspaces.mjs')
 const { saveSessionSelection } = await import('../host/session-selection.mjs')
 const { installComponentGuard } = await import('../host/session-components.mjs')
+const { createToolRestrictions } = await import('../host/tool-restrictions.mjs')
 const { loadGates, setGates, clearGates } = await import('../host/gates.mjs')
 
 let failures = 0
@@ -227,6 +228,23 @@ check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope
   const deny = await handlers['tools/pre-execute']({ name: 'mcp__windows-mcp__snapshot' }, async () => ({ kind: 'allow' }))
   const pass = await handlers['tools/pre-execute']({ name: 'read_file' }, async () => ({ kind: 'allow' }))
   check('会话没启用的 MCP 工具会被拒绝', deny.kind === 'deny' && pass.kind === 'allow', JSON.stringify({ deny, pass }))
+
+  const calls = []
+  const restrictions = createToolRestrictions({
+    get: name => (name === 'tools' ? { definitions: () => [{ name: 'mcp__matlab-mcp__eval' }, { name: 'mcp__windows-mcp__click' }, { name: 'read_file' }] } : undefined),
+    on() {},
+  })
+  const agent = {
+    session: { id: 'session-a' },
+    ctx: { get: () => ({ restrict: filter => { calls.push(filter); return () => {} } }) },
+  }
+  restrictions.attach(agent)
+  await restrictions.refresh('session-a')
+  check('未启用的 MCP 工具从会话工具表移除', calls[0]?.deny?.includes('mcp__matlab-mcp__eval') === true
+    && calls[0]?.deny?.includes('mcp__windows-mcp__click') === true
+    && calls[0]?.deny?.includes('read_file') !== true,
+    JSON.stringify(calls[0]))
+  restrictions.disposeAll()
 }
 
 // ---- 状态文件 ----

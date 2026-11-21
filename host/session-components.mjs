@@ -16,7 +16,7 @@ const TOOL_PREFIX = {
   [SERVER_NAMES.windows]: `mcp__${SERVER_NAMES.windows}__`,
 }
 
-async function componentWant(sessionId) {
+export async function componentWant(sessionId) {
   const catalog = await loadCatalog()
   const snapshot = await readSessionSelection(sessionId)
   const selection = snapshot === undefined ? await loadSelection(catalog) : { ...(await loadSelection(catalog)), skills: snapshot.skills }

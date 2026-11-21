@@ -30,7 +30,7 @@ DSH 默认从 `<项目根>/.agents/skills/` 发现技能，一个项目装几十
   - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；工程组关掉即注销。
   - **Windows MCP组件**：手动勾选后注册 `windows-mcp`（桌面截图、快照、点击、窗口操作），取消即注销；用系统 PATH 里已安装的 `windows-mcp`（`uv tool install windows-mcp` 等），插件不自带运行时。
   - 两者只在 Windows 上可用（MATLAB MCP 是 Windows 可执行文件，Windows MCP 依赖 Windows 桌面），其他平台显示不可用。两者走 DSH `ctx.mcpManager` 动态注册，不改 profile 补丁、不用重启；参数固定、无设置项（MATLAB MCP 用包内 exe + SATK 扩展文件，Windows MCP 用系统 PATH 里已安装的 `windows-mcp`）；组件行有「启动中 / 已启动（N 个工具）/ 启动失败」标识和「重启」按钮。
-  - 组件选择按对话保存。DSH 的 MCP 服务器本身注册在宿主级，插件在 agent 作用域加了工具守卫：本对话没启用的组件，对应 `mcp__*` 工具调用会被拒绝；别的对话仍可用自己的组件。详见 [docs/mcp-components.md](docs/mcp-components.md)。
+  - 组件选择按对话保存。两个服务器仍由 `ctx.mcpManager` 在宿主级启动/保持（多个会话取并集），但插件用官方的 `ctx.tools.restrict({ deny })` 在每个 agent 作用域把本对话没启用的 `mcp__*` 工具从工具列表、提示词上下文和执行里一起移除；不是等模型调用时才拒绝，而是这个对话根本看不到、也不会注入。别的对话勾了就在它自己的工具表里出现。详见 [docs/mcp-components.md](docs/mcp-components.md)。
 
 ## 安装
 
