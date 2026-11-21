@@ -1,13 +1,10 @@
-# 运行态：选择、会话、链接清单、备份、事件日志，不入库
-state/
-# 环境与密钥
+# 本机才会有的目录：过程文件、测试实例、技能挂载联接，不入库
+AgentsDo/*
+!AgentsDo/upstream-adaptation-record/
+.agents/
 **/.env
-**/.env.local
-!**/.env.example
-!**/config.example.*
 
-# 技能运行产物
-**/projects/
+# 本机运行期产物：Python 缓存、依赖目录、系统杂项
 **/__pycache__/
 **/*.pyc
 **/.pytest_cache/
@@ -15,27 +12,3 @@ state/
 **/node_modules/
 **/.DS_Store
 **/Thumbs.db
-
-# 过程文件
-*.log
-*.tmp
-# 本机测试实例（DSH_HOME、插件状态、ego 截图与脚本）都在这里，不入库；
-# 但上游适配记录要随仓库走，供每次升级前对照。
-AgentsDo/*
-!AgentsDo/upstream-adaptation-record/
-!AgentsDo/upstream-adaptation-record/**
-AgentsDo/upstream-adaptation-record/backup-*/
-AgentsDo/upstream-adaptation-record/.tmp/
-# 插件运行期在“被当作项目根”时生成：<项目根>/.agents/skills 目录联接与 ppt 项目目录
-.agents/
-
-# 由设置生成、可能含用户参数的技能运行时文件（都在技能目录里，不落 DSH 家目录）
-skills/research/nature-skills/nature-academic-search/mcp-server/config.toml
-skills/research/nature-skills/nature-image2ppt/config.yaml
-skills/research/nature-skills/nature-figure/config/nature-figure.json
-# 学校配置随 nature-downloader 技能目录分发；凭据类运行时文件不入库
-skills/research/nature-skills/nature-downloader/config/credentials.json
-skills/research/nature-skills/nature-downloader/config/settings.json
-
-# 运行期生成（含机器相关路径，由插件启动时重建），不入库
-ars/skills/*/_shared/dsh-runtime.md
