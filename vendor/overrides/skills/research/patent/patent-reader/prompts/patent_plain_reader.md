@@ -38,7 +38,7 @@ python ../patent-reader/tools/vault/check_obsidian_env.py --set "库路径" --se
 # PowerShell: $env:PATENT_READER_OBSIDIAN_VAULT = "库路径"
 ```
 
-库路径只来自 DSH 插件设置（科研服务 → 专利检索向量模型）注入的 `PATENT_READER_OBSIDIAN_VAULT`；不再有持久化文件。
+库路径只来自 DSH 插件设置（科研服务 → 专利数据目录 下的 `vault/`）注入的 `PATENT_READER_OBSIDIAN_VAULT`；不再有持久化文件。
 
 用户明确说「只要 Markdown / 不要 Obsidian」→ 跳过入库增强，写入 `outputs/` 即可。
 

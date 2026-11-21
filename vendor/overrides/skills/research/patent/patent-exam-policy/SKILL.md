@@ -3,7 +3,7 @@ name: patent-exam-policy
 description: "给交底用的政策简报：对照国知局近期口径，说明对交底写法/本稿的影响，并提示申请书式。技能进化仅为旁路，默认只改交底包，须另点名才改文件。"
 user-invocable: false
 ---
-> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的 oa / patent-map；不要写 `~/Documents/patent-disclosure-skill` 或 `~/.patent-disclosure-skill`。Obsidian 库路径由 DSH 插件设置（科研服务 → 专利检索向量模型）注入 `PATENT_READER_OBSIDIAN_VAULT`，本技能不读写 `obsidian_vault.txt`。
+> [dsh-zrwang-plugin] 本技能的数据都在插件设置「科研服务 → 专利数据目录」下面：Obsidian 库是它下面的 `vault/`（`PATENT_READER_OBSIDIAN_VAULT`），向量索引与模型在 `patent-map/`（`PATENT_MAP_HOME`），审查答复在 `oa/`（`PATENT_OA_HOME`），产物在 `outputs/`。不要写 `~/Documents/patent-disclosure-skill`、`~/.patent-disclosure-skill` 或工作区 `.agents/patent/`；没设置好时插件不会注入本技能。
 # 政策简报（交底用）
 
 ## 用途

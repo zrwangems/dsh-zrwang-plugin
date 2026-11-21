@@ -158,14 +158,14 @@
     },
     {
       "id": "patent-oa-project-home",
-      "reason": "默认写 ~/Documents/patent-disclosure-skill/oa；改为项目内 .agents/patent/oa 优先，符合输出只放项目目录的约束。",
+      "reason": "默认写 ~/Documents/patent-disclosure-skill/oa；改为只认插件注入的 PATENT_OA_HOME（专利数据目录下的 oa/），不写项目目录或用户主目录。",
       "files": [
         {
           "path": "research/patent/patent-oa/tools/config.py",
           "replace": [
             {
               "find": "def oa_home() -> Path:\n    env = (os.environ.get(\"PATENT_OA_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (documents_dir() / \"patent-disclosure-skill\" / \"oa\").resolve()",
-              "to": "def oa_home() -> Path:\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return (parent / \".agents\" / \"patent\" / \"oa\").resolve()\n    env = (os.environ.get(\"PATENT_OA_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (documents_dir() / \"patent-disclosure-skill\" / \"oa\").resolve()"
+              "to": "def oa_home() -> Path:\n    env = (os.environ.get(\"PATENT_OA_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    raise SystemExit(\n        \"PATENT_OA_HOME 未设置：请在 DSH 插件设置 → 科研服务 → 专利数据目录 里填目录，\"\n        \"插件会把审查答复数据放在它下面的 oa/。\"\n    )"
             }
           ]
         }
@@ -173,14 +173,14 @@
     },
     {
       "id": "patent-map-project-home",
-      "reason": "默认写 ~/Documents/patent-disclosure-skill/patent-map；改为项目内 .agents/patent/patent-map 优先。",
+      "reason": "默认写 ~/Documents/patent-disclosure-skill/patent-map；改为只认插件注入的 PATENT_MAP_HOME（专利数据目录下的 patent-map/）。",
       "files": [
         {
           "path": "research/patent/patent-map/tools/map_cache.py",
           "replace": [
             {
               "find": "def map_home() -> Path:\n    env = (os.environ.get(\"PATENT_MAP_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (skill_data_root() / \"patent-map\").resolve()",
-              "to": "def map_home() -> Path:\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return (parent / \".agents\" / \"patent\" / \"patent-map\").resolve()\n    env = (os.environ.get(\"PATENT_MAP_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (skill_data_root() / \"patent-map\").resolve()"
+              "to": "def map_home() -> Path:\n    env = (os.environ.get(\"PATENT_MAP_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    raise SystemExit(\n        \"PATENT_MAP_HOME 未设置：请在 DSH 插件设置 → 科研服务 → 专利数据目录 里填目录，\"\n        \"插件会把索引和向量模型放在它下面的 patent-map/。\"\n    )"
             }
           ]
         }
@@ -188,14 +188,14 @@
     },
     {
       "id": "patent-map-vault-project-home",
-      "reason": "Obsidian 库路径持久化文件默认写 C 盘主目录；改为项目内 .agents/patent/ 优先。",
+      "reason": "Obsidian 库路径只来自插件注入的 PATENT_READER_OBSIDIAN_VAULT（专利数据目录下的 vault/），删掉所有持久化文件回退。",
       "files": [
         {
           "path": "research/patent/patent-map/tools/vault_index.py",
           "replace": [
             {
               "find": "def persisted_vault_path() -> Path:\n    return Path.home() / \".patent-disclosure-skill\" / \"obsidian_vault.txt\"",
-              "to": "def persisted_vault_path() -> Path:\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return parent / \".agents\" / \"patent\" / \"obsidian_vault.txt\"\n    return Path.home() / \".patent-disclosure-skill\" / \"obsidian_vault.txt\""
+              "to": "def persisted_vault_path() -> Path | None:\n    \"\"\"库路径只来自插件设置（PATENT_READER_OBSIDIAN_VAULT）；不再有持久化文件。\"\"\"\n    return None"
             }
           ]
         }
@@ -203,14 +203,14 @@
     },
     {
       "id": "patent-reader-vault-project-home",
-      "reason": "Obsidian 库路径持久化文件默认写 C 盘主目录；改为项目内 .agents/patent/ 优先。",
+      "reason": "Obsidian 库路径只来自插件注入的环境变量（专利数据目录下的 vault/），删掉用户主目录/项目目录的持久化回退。",
       "files": [
         {
           "path": "research/patent/patent-reader/tools/shared/obsidian_env.py",
           "replace": [
             {
               "find": "def persisted_vault_config_path() -> Path:\n    \"\"\"用户级持久化：Obsidian 库路径（不强制依赖系统环境变量）。\"\"\"\n    home = Path.home()\n    return home / \".patent-disclosure-skill\" / \"obsidian_vault.txt\"",
-              "to": "def persisted_vault_config_path() -> Path:\n    \"\"\"用户级持久化：Obsidian 库路径（项目内优先，其次用户主目录）。\"\"\"\n    cwd = Path.cwd().resolve()\n    for parent in [cwd, *cwd.parents]:\n        if (parent / \".git\").exists():\n            return parent / \".agents\" / \"patent\" / \"obsidian_vault.txt\"\n    home = Path.home()\n    return home / \".patent-disclosure-skill\" / \"obsidian_vault.txt\""
+              "to": "def persisted_vault_config_path() -> Path | None:\n    \"\"\"库路径只来自插件设置（PATENT_READER_OBSIDIAN_VAULT）；不再有持久化文件。\"\"\"\n    return None"
             }
           ]
         }

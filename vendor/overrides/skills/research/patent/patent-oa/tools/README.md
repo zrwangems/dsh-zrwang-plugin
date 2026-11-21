@@ -21,7 +21,7 @@ python ../patent-oa/tools/config.py status
 python ../patent-oa/tools/rebuild_vectors.py --confirm
 ```
 
-- 配置与密钥：DSH 插件设置「科研服务 → 专利检索向量模型」（不写任何文件）  
+- 配置与密钥：DSH 插件设置「科研服务 → 专利检索向量模型」（不写任何文件；专利数据目录同卡片）  
 - 自检失败仍可用标签检索。
 
 ## Provider

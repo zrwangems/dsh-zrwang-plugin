@@ -11,27 +11,18 @@ from pathlib import Path
 SCHEMA_VERSION = 2
 
 
-def plugin_cache() -> Path | None:
-    raw = (os.environ.get("ZRWANG_PLUGIN_CACHE") or "").strip()
-    return Path(raw).expanduser().resolve() if raw else None
-
-
 def map_home() -> Path:
-    cwd = Path.cwd().resolve()
-    for parent in [cwd, *cwd.parents]:
-        if (parent / ".git").exists():
-            return (parent / ".agents" / "patent" / "patent-map").resolve()
     env = (os.environ.get("PATENT_MAP_HOME") or "").strip()
     if env:
         return Path(env).expanduser().resolve()
-    cache = plugin_cache()
-    if cache is None:
-        raise SystemExit("PATENT_MAP_HOME 未设置：请在 DSH 插件里运行本技能，或设置 PATENT_MAP_HOME。")
-    return (cache / "patent" / "patent-map").resolve()
+    raise SystemExit(
+        "PATENT_MAP_HOME 未设置：请在 DSH 插件设置 → 科研服务 → 专利数据目录 里填目录，"
+        "插件会把索引和向量模型放在它下面的 patent-map/。"
+    )
 
 
 def cache_dir_for_vault(vault: Path | None = None) -> Path:
-    """数据根：PATENT_MAP_HOME（插件缓存目录），与 oa 同级。"""
+    """数据根：PATENT_MAP_HOME（专利数据目录下的 patent-map/），与 oa 同级。"""
     return map_home()
 
 
@@ -49,7 +40,7 @@ def _connect(db: Path) -> sqlite3.Connection:
     if not readme.is_file():
         readme.write_text(
             "专利地图加速副本（可删，下次打开会重建）。\n"
-            "目录由 DSH 插件设置决定（PATENT_MAP_HOME），不要放进 Obsidian 库文件夹内。\n"
+            "目录由 DSH 插件设置决定（PATENT_MAP_HOME），在 Obsidian 库 vault/ 旁边。\n"
             "向量模型也装在本夹 models/。\n",
             encoding="utf-8",
         )

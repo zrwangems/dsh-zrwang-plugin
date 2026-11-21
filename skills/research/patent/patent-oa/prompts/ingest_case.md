@@ -41,7 +41,7 @@ python ../patent-oa/tools/ingest_case.py -i path/to/case.md --extra-name "客户
 
 | 有 Obsidian 库 | 无库 |
 |----------------|------|
-| `{vault}/oa/cases/history/{case_id}.md` | `{Documents}/…/oa/cases/history/` |
+| `{vault}/oa/cases/history/{case_id}.md` | `<专利数据目录>/oa/cases/history/` |
 | `{vault}/oa/pending/` · `{vault}/oa/drafts/` | 同左相对结构 |
 | `{vault}/oa/_OA索引.md` · `_OA看板.base` · `_OA关联.canvas` | 同左 |
-| 向量：`{Documents}/…/oa/data/oa_vectors.sqlite` | 同左 |
+| 向量：`<专利数据目录>/oa/data/oa_vectors.sqlite` | 同左 |

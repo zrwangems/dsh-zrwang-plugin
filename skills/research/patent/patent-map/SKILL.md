@@ -3,7 +3,7 @@ name: patent-map
 description: "专利地图：基于通俗解读已入库的 Obsidian 案例，点名后打开五种图。地形按 bge-small-zh 向量摊开。"
 user-invocable: false
 ---
-> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的 oa / patent-map；不要写 `~/Documents/patent-disclosure-skill` 或 `~/.patent-disclosure-skill`。Obsidian 库路径由 DSH 插件设置（科研服务 → 专利检索向量模型）注入 `PATENT_READER_OBSIDIAN_VAULT`，本技能不读写 `obsidian_vault.txt`。
+> [dsh-zrwang-plugin] 本技能的数据都在插件设置「科研服务 → 专利数据目录」下面：Obsidian 库是它下面的 `vault/`（`PATENT_READER_OBSIDIAN_VAULT`），向量索引与模型在 `patent-map/`（`PATENT_MAP_HOME`），审查答复在 `oa/`（`PATENT_OA_HOME`），产物在 `outputs/`。不要写 `~/Documents/patent-disclosure-skill`、`~/.patent-disclosure-skill` 或工作区 `.agents/patent/`；没设置好时插件不会注入本技能。
 # 专利地图
 
 ## 用途
@@ -30,7 +30,7 @@ python ../patent-map/tools/serve_map.py
 
 stdout 机读前缀：`MAP_URL:` / `MAP_PORT:` / `MAP_VAULT:` / `MAP_SOURCE:` / `MAP_CACHE:` / `MAP_MODEL:`。端口由系统随机分配（`127.0.0.1:0`）。对话里把 URL 发给用户。
 
-地形图按解读短文向量摊开。加载名 `BAAI/bge-small-zh-v1.5`，磁盘只装 **Qdrant ONNX**（见 `prompts/guardrails.md` 取数）。数据与模型默认目录：`{Documents}/patent-disclosure-skill/patent-map/`（与 oa 同级）。未装 `fastembed` 时图仍能开，地形退回 IPC 簇。
+地形图按解读短文向量摊开。加载名 `BAAI/bge-small-zh-v1.5`，磁盘只装 **Qdrant ONNX**（见 `prompts/guardrails.md` 取数）。数据与模型在插件设置的专利数据目录下 `patent-map/`（与 oa 同级，Obsidian 库在旁边的 `vault/`）。未装 `fastembed` 时图仍能开，地形退回 IPC 簇。
 
 可选：
 
@@ -47,4 +47,4 @@ python ../patent-map/tools/ensure_model.py
 
 ## 产出物
 
-本机页面 URL（`MAP_URL`）。索引与模型在 `{Documents}/patent-disclosure-skill/patent-map/`。本包**不设**「交付后请确认」。
+本机页面 URL（`MAP_URL`）。索引与模型在插件设置的专利数据目录下 `patent-map/`。本包**不设**「交付后请确认」。

@@ -5,11 +5,11 @@
  * 密钥字段只回显“已设置/未设置”，值只从 DSH 凭据库读。
  */
 import { execFile, execFileSync } from 'node:child_process'
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve, sep } from 'node:path'
 import { promisify } from 'node:util'
 import { SKILLS_DIR } from './config.mjs'
-import { cacheRoot } from './paths.mjs'
+import { defaultPatentRoot, patentPathsOf, storageRoot } from './paths.mjs'
 import { isMac, isWindows, openPath, processIds, listeningPid, which, registryDisplayIcon } from './platform.mjs'
 import { getPath, setPath, text } from './object.mjs'
 import { applySkillEnv, shellEnvValues } from './env.mjs'
@@ -92,7 +92,27 @@ export async function blockedSkills(params, catalog) {
       if (String(node.group ?? '').split('/').includes('polyspace')) blocked[name] = '本机未安装 Polyspace / 未注册 Polyspace MCP 服务器'
     }
   }
+  // 专利类技能全部围绕设置页那个“专利数据目录”工作（vault、向量库、产物都在它下面）。
+  // 没设置好就不注入，免得技能把索引或笔记写到工作区或家目录里。
+  const patentProblem = patentRootProblem(params)
+  if (patentProblem !== undefined) {
+    for (const [name, node] of Object.entries(catalog.skills ?? {})) {
+      const dir = String(node.dir ?? '').split(/[\\/]/).join('/')
+      if (dir.startsWith('research/patent/')) blocked[name] = patentProblem
+    }
+  }
   return blocked
+}
+
+/** 专利数据目录是否可用；返回置灰原因，undefined 表示可用。 */
+export function patentRootProblem(params) {
+  const root = text(params?.patent?.root)
+  if (root.length === 0) return '未设置专利数据目录（设置 → 科研服务 → 专利数据目录），专利类技能已停用'
+  const resolved = resolve(root)
+  const pkg = resolve(SKILLS_DIR, '..')
+  if (resolved === pkg || resolved.startsWith(`${pkg}${sep}`)) return '专利数据目录不能放在插件安装目录里'
+  if (existsSync(resolved) && !statSync(resolved).isDirectory()) return '专利数据目录指向的是文件，请改成目录'
+  return undefined
 }
 
 function cliExists(name) {
@@ -240,7 +260,8 @@ function pythonOptions(params) {
 /** 设置页要展示的卡片；`present` 是密钥是否存在（来自凭据库）。 */
 export function settingsCards(params, present = {}, mcpStatus = { available: false, servers: [] }) {
   return {
-    configDir: cacheRoot(),
+    dataDir: storageRoot(),
+    configDir: storageRoot(),
     cards: [
       {
         id: 'image',
@@ -308,7 +329,17 @@ export function settingsCards(params, present = {}, mcpStatus = { available: fal
         kind: 'fields',
         autoSave: true,
         fields: [
-          maskField({ id: 'vault', label: 'Obsidian 专利库路径', help: '可选；技能把案例索引写进这个库，留空只用插件缓存目录' }, params.patent?.vault),
+          maskField({ id: 'root', label: '专利数据目录', help: `必填绝对路径。Obsidian 库建在它下面的 vault/（用 Obsidian 打开这个子目录）；向量索引与模型在 patent-map/，审查答复在 oa/，产物在 outputs/。默认建议 ${defaultPatentRoot()}；清空或填错时专利类技能会置灰、不注入。` }, params.patent?.root),
+          {
+            id: 'patent-resolved',
+            control: 'status',
+            label: '实际路径',
+            value: patentPathsOf(params) === undefined
+              ? '未设置（专利技能不启用）'
+              : `vault/ · patent-map/ · oa/ · outputs/ 都在 ${patentPathsOf(params).root}`,
+            level: patentPathsOf(params) === undefined ? 'bad' : 'ok',
+            help: patentPathsOf(params) === undefined ? '在“专利数据目录”里填一个绝对路径' : patentPathsOf(params).vault,
+          },
           {
             id: 'provider',
             label: '向量服务',
@@ -375,7 +406,13 @@ export function saveSettingsCard(params, body) {
   const secret = value => typeof value === 'string' && value.trim().length > 0
 
   if (body?.cardId === 'patent') {
-    if (typeof values.vault === 'string') next.patent.vault = values.vault.trim()
+    if (typeof values.root === 'string') {
+      const root = values.root.trim()
+      if (root.length > 0 && !/^[A-Za-z]:[\\/]/.test(root) && !root.startsWith('/') && !root.startsWith('\\\\')) {
+        throw new Error('专利数据目录必须是绝对路径')
+      }
+      next.patent.root = root
+    }
     const provider = text(values.provider)
     if (!['', 'zhipu', 'dashscope', 'openai', 'local'].includes(provider)) throw new Error(`未知的向量服务：${provider}`)
     next.patent.embedding.provider = provider
@@ -572,11 +609,11 @@ export async function runSettingCheck(action, params, mcpController) {
   throw new Error(`未知检查动作：${action}`)
 }
 
-/** 打开运行期目录（只允许 cacheRoot 之内）。 */
+/** 打开运行期目录（只允许持久化根之内）。 */
 export function openConfigTarget(target) {
-  const base = resolve(cacheRoot())
+  const base = resolve(storageRoot())
   const dir = resolve(base, target === undefined || target === 'configDir' ? '' : String(target))
-  if (dir !== base && !dir.startsWith(`${base}${sep}`)) throw new Error('只能打开插件缓存目录')
+  if (dir !== base && !dir.startsWith(`${base}${sep}`)) throw new Error('只能打开插件持久化目录')
   if (!existsSync(dir)) throw new Error(`目录不存在：${dir}`)
   if (!openPath(dir)) throw new Error(`无法打开目录：${dir}`)
   return { opened: true, path: dir }

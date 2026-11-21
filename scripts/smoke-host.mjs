@@ -12,11 +12,11 @@ import { delimiter, join, resolve } from 'node:path'
 const WORK = mkdtempSync(join(tmpdir(), 'dsh-zrwang-smoke-'))
 process.env.DSH_HOME = join(WORK, 'home')
 process.env.ZRWANG_BASH = ''
-const CACHE = join(WORK, 'cache')
+const STORAGE = join(WORK, 'storages', 'dsh-zrwang-plugin')
 
-const { setCacheRootForTests, cacheRoot, stateRoot, legacyConfigRoot } = await import('../host/paths.mjs')
-setCacheRootForTests(CACHE)
-mkdirSync(CACHE, { recursive: true })
+const { setStorageRootForTests, storageRoot, stateRoot, defaultPatentRoot, patentPathsOf, legacyConfigRoot, legacyCacheRoot } = await import('../host/paths.mjs')
+setStorageRootForTests(STORAGE)
+mkdirSync(STORAGE, { recursive: true })
 
 const { loadCatalog, skillsInGroup } = await import('../host/catalog.mjs')
 const { loadSelection, desiredSkills, setSelection, childBatch } = await import('../host/selection.mjs')
@@ -25,9 +25,9 @@ const { resolveProjectRoot } = await import('../host/project.mjs')
 const { SKILLS_DIR } = await import('../host/config.mjs')
 const { guardReason } = await import('../host/skill-guard.mjs')
 const { defaultParams, normalizeConfig, configOfParams, withSecrets, persistParams } = await import('../host/params.mjs')
-const { settingsCards, saveSettingsCard } = await import('../host/settings.mjs')
+const { settingsCards, saveSettingsCard, blockedSkills, patentRootProblem } = await import('../host/settings.mjs')
 const { stateFile, writeJson } = await import('../host/state.mjs')
-const { applySkillEnv, restoreSkillEnv } = await import('../host/env.mjs')
+const { applySkillEnv, restoreSkillEnv, configEnv } = await import('../host/env.mjs')
 const { registerSkillProvider } = await import('../host/skill-provider.mjs')
 const { loadPresets, ensureEditableMode } = await import('../host/presets.mjs')
 const { resolveWorkspaceByPath } = await import('../host/workspaces.mjs')
@@ -50,10 +50,20 @@ function check(name, ok, detail) {
 }
 
 // ---- 缓存路径 ----
-check('缓存根指向测试目录', cacheRoot() === CACHE)
-check('状态目录在缓存下', stateRoot() === join(CACHE, 'state'))
-check('缓存里不再有 artifacts/backups', !existsSync(join(CACHE, 'artifacts')) && !existsSync(join(CACHE, 'backups')))
+check('持久化根在 DSH storages 下', storageRoot() === STORAGE)
+check('状态目录在持久化根下', stateRoot() === join(STORAGE, 'state'))
+check('默认专利目录也在持久化根下', defaultPatentRoot() === join(STORAGE, 'patent'))
+check('持久化根里不再有 artifacts/backups', !existsSync(join(STORAGE, 'artifacts')) && !existsSync(join(STORAGE, 'backups')))
+check('插件包内不再创建 cache', legacyCacheRoot() === join(SKILLS_DIR, '..', 'cache') && !existsSync(legacyCacheRoot()))
 check('旧配置目录只用于迁移', legacyConfigRoot() === join(process.env.DSH_HOME, 'zrwang-plugin-config'))
+const samplePatentRoot = join(WORK, 'patent-data')
+const samplePatent = patentPathsOf({ patent: { root: samplePatentRoot } })
+check('Obsidian 库是专利数据目录的子路径',
+  samplePatent.vault === join(samplePatentRoot, 'vault')
+  && samplePatent.map === join(samplePatentRoot, 'patent-map')
+  && samplePatent.oa === join(samplePatentRoot, 'oa')
+  && samplePatent.readerOutput === join(samplePatentRoot, 'outputs', 'patent-reader'))
+check('专利目录没配置时没有派生路径', patentPathsOf({ patent: { root: '' } }) === undefined)
 
 // ---- 目录树 ----
 const catalog = await loadCatalog()
@@ -124,6 +134,10 @@ const normalized = normalizeConfig({
 })
 check('参数归一化只保留白名单字段', normalized.params.image.model === 'gpt-image-1' && normalized.warnings.some(item => item.includes('imageApiKey')))
 check('非法 URL 被忽略', normalizeConfig({ image: { baseUrl: 'not a url' } }).params.image.baseUrl === '')
+check('专利数据目录默认在 storages 下', defaultParams().patent.root === join(STORAGE, 'patent'))
+check('相对专利目录被拒绝', normalizeConfig({ patent: { root: 'relative/patent' } }).params.patent.root === '')
+check('插件安装目录不能当专利目录', normalizeConfig({ patent: { root: join(SKILLS_DIR, '..') } }).params.patent.root === '')
+check('绝对专利目录被保留', normalizeConfig({ patent: { root: samplePatentRoot } }).params.patent.root === samplePatentRoot)
 check('MCP 自动恢复默认开启且只认 on/off',
   normalizeConfig({}).params.mcp.autoRecover === 'on'
   && normalizeConfig({ mcp: { autoRecover: 'off' } }).params.mcp.autoRecover === 'off'
@@ -161,13 +175,32 @@ const cards = settingsCards(normalized.params, { 'image.apiKey': true }).cards
 const byId = Object.fromEntries(cards.map(card => [card.id, card]))
 check('设置卡片齐全', ['image', 'nature-image2ppt', 'optional-search', 'nature-figure', 'nature-academic-search', 'nature-downloader', 'patent', 'mcp-stability', 'runtime'].every(id => byId[id] !== undefined), Object.keys(byId).join(','))
 check('MCP 稳定性卡片是开关', byId['mcp-stability'].fields.some(field => field.id === 'autoRecover' && field.control === 'select' && field.value === 'on'))
+check('专利卡片含数据目录与实际路径',
+  byId.patent.fields.some(field => field.id === 'root' && field.value.length > 0)
+  && byId.patent.fields.some(field => field.id === 'patent-resolved' && field.control === 'status'))
 check('密钥只回显是否已设置', JSON.stringify(cards).includes('secret-value') === false && byId.image.fields.some(field => field.secret === true && field.hasValue === true))
 const savedImage = saveSettingsCard(normalized.params, { cardId: 'image', values: { baseUrl: 'https://api.example.com/v1', model: 'gpt-image-1', apiKey: 'new-secret' } })
 check('保存生图卡片', savedImage.image.apiKey === 'new-secret' && savedImage.image.model === 'gpt-image-1')
-const savedPatent = saveSettingsCard(normalized.params, { cardId: 'patent', values: { provider: 'dashscope', vault: '/tmp/vault', apiKey: 'x' } })
-check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope' && savedPatent.patent.vault === '/tmp/vault' && savedPatent.patent.embedding.apiKey === 'x')
+const savedPatent = saveSettingsCard(normalized.params, { cardId: 'patent', values: { provider: 'dashscope', root: samplePatentRoot, apiKey: 'x' } })
+check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope' && savedPatent.patent.root === samplePatentRoot && savedPatent.patent.embedding.apiKey === 'x')
 const savedMcp = saveSettingsCard(normalized.params, { cardId: 'mcp-stability', values: { autoRecover: 'off' } })
 check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
+
+// ---- 专利目录：默认路径、置灰与注入 ----
+{
+  const patentSkill = Object.values(catalog.skills ?? {}).find(node => String(node.dir ?? '').startsWith('research/patent/'))
+  const withoutRoot = await blockedSkills({ ...defaultParams(), patent: { ...defaultParams().patent, root: '' } }, catalog)
+  check('没设置专利目录时专利技能置灰', patentSkill !== undefined && withoutRoot[patentSkill.name]?.includes('专利数据目录'), withoutRoot[patentSkill?.name])
+  const withRoot = await blockedSkills({ ...defaultParams(), patent: { ...defaultParams().patent, root: samplePatentRoot } }, catalog)
+  check('设置好专利目录后不再因路径置灰', patentSkill !== undefined && withRoot[patentSkill.name] === undefined, withRoot[patentSkill?.name])
+  check('专利目录指向文件时置灰', patentRootProblem({ patent: { root: process.execPath } }) !== undefined)
+  const env = configEnv({ ...defaultParams(), patent: { root: samplePatentRoot, embedding: { provider: '' } } })
+  check('环境注入把向量库和 vault 放在同一目录',
+    env.PATENT_MAP_HOME === join(samplePatentRoot, 'patent-map')
+    && env.PATENT_OA_HOME === join(samplePatentRoot, 'oa')
+    && env.PATENT_READER_OBSIDIAN_VAULT === join(samplePatentRoot, 'vault')
+    && env.PATENT_READER_OUTPUT_DIR === join(samplePatentRoot, 'outputs', 'patent-reader'))
+}
 
 // ---- 环境注入：静态 shim，不生成 artifacts ----
 {
@@ -177,7 +210,7 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
   check('环境注入使用所选解释器', applied.python.path === process.execPath && process.env.ZRWANG_SKILL_PYTHON === process.execPath)
   check('PATH 指向静态 shim 目录', process.env.PATH.split(delimiter).includes(resolve(SKILLS_DIR, '..', 'host', 'shim', 'python')), JSON.stringify(process.env.PATH.split(delimiter).slice(0, 4)))
   check('PYTHONPATH 指向静态启动钩子', process.env.PYTHONPATH.split(delimiter).includes(resolve(SKILLS_DIR, '..', 'host', 'pysite')), process.env.PYTHONPATH)
-  check('环境注入不生成 artifacts/backups', !existsSync(join(CACHE, 'artifacts')) && !existsSync(join(CACHE, 'backups')))
+  check('环境注入不生成 artifacts/backups', !existsSync(join(STORAGE, 'artifacts')) && !existsSync(join(STORAGE, 'backups')))
   restoreSkillEnv()
   check('卸载后恢复 PATH 并清掉注入变量', process.env.PATH === beforePath && process.env.ZRWANG_SKILL_PYTHON === undefined)
 }
@@ -343,9 +376,10 @@ const concurrentFile = stateFile('concurrent-writes.json')
 const results = await Promise.allSettled(Array.from({ length: 20 }, (_, index) => writeJson(concurrentFile, { index })))
 check('并发原子写不互相踩', results.every(result => result.status === 'fulfilled'))
 check('并发写后 JSON 完整', JSON.parse(readFileSync(concurrentFile, 'utf8')).index === 19)
-check('状态文件在缓存目录', concurrentFile.startsWith(stateRoot()))
+check('状态文件在持久化目录', concurrentFile.startsWith(stateRoot()))
 
 // ---- 卸载清理 ----
+check('整个冒烟过程没有在插件包里建 cache', !existsSync(legacyCacheRoot()))
 rmSync(WORK, { recursive: true, force: true })
 check('临时目录已清理', !existsSync(WORK))
 

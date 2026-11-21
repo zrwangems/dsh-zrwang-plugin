@@ -13,8 +13,8 @@ import { join } from 'node:path'
 
 const WORK = mkdtempSync(join(tmpdir(), 'dsh-zrwang-routes-'))
 process.env.DSH_HOME = join(WORK, 'home')
-const { setCacheRootForTests, stateRoot } = await import('../host/paths.mjs')
-setCacheRootForTests(join(WORK, 'cache'))
+const { setStorageRootForTests, stateRoot } = await import('../host/paths.mjs')
+setStorageRootForTests(join(WORK, 'storages', 'dsh-zrwang-plugin'))
 const { registerRoutes } = await import('../host/routes.mjs')
 
 let failures = 0

@@ -175,9 +175,11 @@ check('宿主/脚本语法', syntaxErrors.length === 0, syntaxErrors.join('；')
 
 const allHost = sourceFiles.filter(file => file.includes(`${join(ROOT, 'host')}`)).map(file => readFileSync(file, 'utf8')).join('\n')
 check('宿主不再引用旧状态目录', !allHost.includes('ZRWANG_PLUGIN_STATE_DIR'))
-check('运行时目录只在插件缓存', allHost.includes('dsh-zrwang-plugin') && allHost.includes('cache'))
+check('运行期数据只写 DSH storages', allHost.includes("'storages'") && allHost.includes('dsh-zrwang-plugin'))
+check('插件包内不再有 cache 目录', !existsSync(join(ROOT, 'cache')))
 check('不再生成 artifacts/backups', !allHost.includes("'artifacts'") && !allHost.includes("'backups'"))
 check('静态 shim 与 Python 钩子随包', ['host/shim/python/python', 'host/shim/python/python.cmd', 'host/shim/bash/bash', 'host/pysite/sitecustomize.py'].every(name => existsSync(join(ROOT, name))))
+check('Python 桥接会还原专利等插件变量', readFileSync(join(ROOT, 'host', 'pysite', 'sitecustomize.py'), 'utf8').includes('DSH_PATENT_'))
 check('不再用项目联接注入技能', !allHost.includes('reconcile({') && !allHost.includes('symlink('))
 check('不写 credentials.json/settings.json', !/writeFileSync\([^)]*credentials\.json/.test(allHost) && !/writeFileSync\([^)]*settings\.json/.test(allHost))
 const hostIndexSource = readFileSync(join(ROOT, 'host', 'index.mjs'), 'utf8')
@@ -261,6 +263,9 @@ check('README 说明设置写在 profile 补丁与凭据库', readme.includes('c
 check('README 说明 MCP 断线自动恢复', readme.includes('断线自动恢复'))
 const mcpDoc = existsSync(join(ROOT, 'docs', 'mcp-components.md')) ? readFileSync(join(ROOT, 'docs', 'mcp-components.md'), 'utf8') : ''
 check('MCP 文档说明自动恢复与官方状态事件', mcpDoc.includes('自动恢复') && mcpDoc.includes('mcp-manager/status'))
+check('README 说明持久化在 .dsh/storages 与专利数据目录', readme.includes('storages') && readme.includes('专利数据目录'))
+const pathsSource = readFileSync(join(ROOT, 'host', 'paths.mjs'), 'utf8')
+check('默认持久化根在 DSH_HOME/storages 下', pathsSource.includes("'storages'") && pathsSource.includes('dsh-zrwang-plugin') && pathsSource.includes('storageRoot'))
 
 // ---- 12 技能配置审计（只读）----
 if (existsSync(join(ROOT, 'scripts', 'audit-skill-config.mjs'))) {

@@ -3,12 +3,15 @@
  *
  * 用户 2026-11-21 的原则：
  *   - 所有需要填的配置都在插件设置栏里，保存即生效；
- *   - 密钥不写进任何配置文件，也不写进 `cache/`；
+ *   - 密钥不写进任何配置文件，也不写进持久化目录；
  *   - 上游技能/组件不再有自己的配置文件，全部读这里注入的字段。
  *
  * 本模块是唯一的读写入口：设置页、启动装配、技能环境注入都从这里取参数。
  */
+import { existsSync, statSync } from 'node:fs'
+import { resolve, sep } from 'node:path'
 import { getPath, setPath } from './object.mjs'
+import { PKG_DIR, defaultPatentRoot } from './paths.mjs'
 
 /**
  * 密钥字段 → DSH 凭据引用名。
@@ -74,7 +77,7 @@ export function defaultParams() {
     natureImage2ppt: {},
     natureFigure: { backend: 'python' },
     patent: {
-      vault: '',
+      root: defaultPatentRoot(),
       embedding: { provider: 'zhipu', model: '', baseUrl: '', dimensions: '' },
     },
     optional: {},
@@ -93,7 +96,7 @@ const TABLE = {
   'natureDownloader.elsevier.authToken': 'secret',
   'natureDownloader.ieee.fulltextEndpoint': 'string',
   'natureFigure.backend': 'string',
-  'patent.vault': 'string',
+  'patent.root': 'string',
   'patent.embedding.provider': 'string',
   'patent.embedding.model': 'string',
   'patent.embedding.baseUrl': 'string',
@@ -176,6 +179,28 @@ export function normalizeConfig(raw) {
     warnings.push('mcp.autoRecover 只能是 on 或 off，已回退为 on')
     params.mcp.autoRecover = 'on'
   }
+  // 专利数据目录：必须是绝对路径、不能指向插件安装目录、不能是已有文件。
+  // 清空或非法时保持空，用到它的专利技能会在设置页置灰并不注入。
+  if (params.patent.root.length > 0) {
+    if (!isAbsoluteLike(params.patent.root)) {
+      warnings.push('patent.root 必须是绝对路径，已忽略')
+      params.patent.root = ''
+    } else {
+      const root = resolve(params.patent.root)
+      if (root === PKG_DIR || root.startsWith(`${PKG_DIR}${sep}`)) {
+        warnings.push('patent.root 不能放在插件安装目录里，已忽略')
+        params.patent.root = ''
+      } else if (existsSync(root) && !statSync(root).isDirectory()) {
+        warnings.push('patent.root 指向的是文件而不是目录，已忽略')
+        params.patent.root = ''
+      } else {
+        params.patent.root = root
+      }
+    }
+  }
+  if (getPath(input, ['patent', 'vault']) !== undefined) {
+    warnings.push('patent.vault 已改为 patent.root（专利数据目录），Obsidian 库改为它下面的 vault/，请重新设置')
+  }
   return { params, legacySecrets, warnings }
 }
 
@@ -199,7 +224,8 @@ export function configOfParams(params) {
   for (const [path, kind] of Object.entries(TABLE)) {
     if (kind === 'secret') continue
     const value = text(getPath(params, path.split('.')))
-    if (value.length > 0) setPath(out, path.split('.'), value)
+    // patent.root 空值也要写：清空它表示“专利技能不启用”，不能被默认值盖回去。
+    if (value.length > 0 || path === 'patent.root') setPath(out, path.split('.'), value)
   }
   return out
 }

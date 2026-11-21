@@ -49,7 +49,7 @@ _UA = {"User-Agent": "patent-map/1.0 (fastembed; ONNX-only; Qdrant/bge-small-zh-
 
 
 def global_map_dir() -> Path:
-    """数据根，与 oa 同级：{Documents}/patent-disclosure-skill/patent-map/"""
+    """数据根，与 oa 同级：<专利数据目录>/patent-map/（PATENT_MAP_HOME）。"""
     from map_cache import map_home
 
     return map_home()
@@ -407,7 +407,7 @@ def write_pointer(vault: Path | None, model_dir: Path | None) -> None:
         f"模型默认目录：{default_model_dir()}\n"
         f"本次使用：{model_dir or '（未就绪）'}\n"
         f"格式：ONNX（{HF_ONNX_REPO}），不使用 PyTorch。\n"
-        "技能优先读文档目录 patent-disclosure-skill/patent-map/ 这份，避免每个项目下一遍。\n"
+        "技能优先读插件设置的专利数据目录下 patent-map/ 这份，避免每个项目下一遍。\n"
     )
     (parent / "MODEL_DIR.txt").write_text(text, encoding="utf-8")
 

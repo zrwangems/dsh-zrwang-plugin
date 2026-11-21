@@ -18,7 +18,7 @@ def read_persisted_vault() -> str:
 
 def write_persisted_vault(vault: str | Path) -> Path:
     raise SystemExit(
-        "Obsidian 库路径请在 DSH 插件设置 → 科研服务 → 专利检索向量模型 → Obsidian 专利库路径 里填写；"
+        "Obsidian 库请在 DSH 插件设置 → 科研服务 → 专利数据目录 里配置（库是它下面的 vault/）；"
         f"本技能不写持久化文件（收到：{vault}）。"
     )
 
@@ -301,8 +301,8 @@ def probe_obsidian_environment() -> dict:
         "resolved": resolved,
         "env_var": "PATENT_READER_OBSIDIAN_VAULT",
         "persisted_config": "",
-        "hint_powershell": '在 DSH 插件设置 → 科研服务 → 专利检索向量模型 里填写 Obsidian 专利库路径',
-        "hint_bash": '在 DSH 插件设置 → 科研服务 → 专利检索向量模型 里填写 Obsidian 专利库路径',
+        "hint_powershell": '在 DSH 插件设置 → 科研服务 → 专利数据目录 里填绝对路径，Obsidian 库是它下面的 vault/',
+        "hint_bash": '在 DSH 插件设置 → 科研服务 → 专利数据目录 里填绝对路径，Obsidian 库是它下面的 vault/',
     }
 
 

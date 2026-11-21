@@ -563,7 +563,7 @@
       "headerNotes": [
         {
           "files": "^SKILL\\.md$",
-          "text": "> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的对应子目录（oa / patent-map / obsidian_vault.txt），不要写 `~/Documents/patent-disclosure-skill`；Obsidian 库路径可用 `PATENT_READER_OBSIDIAN_VAULT` 覆盖。"
+          "text": "> [dsh-zrwang-plugin] 本技能的数据都在插件设置「科研服务 → 专利数据目录」下面：Obsidian 库是它下面的 `vault/`（`PATENT_READER_OBSIDIAN_VAULT`），向量索引与模型在 `patent-map/`（`PATENT_MAP_HOME`），审查答复在 `oa/`（`PATENT_OA_HOME`），产物在 `outputs/`。不要写 `~/Documents/patent-disclosure-skill`、`~/.patent-disclosure-skill` 或工作区 `.agents/patent/`；没设置好时插件不会注入本技能。"
         }
       ]
     }

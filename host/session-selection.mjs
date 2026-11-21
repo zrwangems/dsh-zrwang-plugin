@@ -1,6 +1,6 @@
 /**
  * 按会话保存技能/门禁选择：每个对话独立，切回旧对话时恢复它自己的选择。
- * 文件在插件 cache/state 下，不写项目目录。
+ * 文件在 DSH storages 下的 dsh-zrwang-plugin/state/，不写项目目录。
  */
 import { stateFile, readJson, writeJson } from './state.mjs'
 

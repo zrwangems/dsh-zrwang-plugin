@@ -1,25 +1,25 @@
 /**
- * 运行态读写：JSON 原子写、备份、事件日志。
+ * 运行态读写：JSON 原子写、事件日志。
  *
- * 全部落在插件的 `<插件目录>/cache/` 下，卸载插件时一起删除；
- * 不写 DSH profile，也不写用户主目录的其它位置。
+ * 全部落在 DSH 持久化根下的 `<DSH_HOME>/storages/dsh-zrwang-plugin/state/`，
+ * 插件升级不丢；不写 DSH profile，也不碰插件包目录。
  */
 import { appendFile, mkdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { randomUUID } from 'node:crypto'
-import { ensureCacheSync, stateRoot } from './paths.mjs'
+import { ensureStorageSync, stateRoot } from './paths.mjs'
 
-/** 事件日志路径随缓存根变化，不能在建模块时固定。 */
+/** 事件日志路径随持久化根变化，不能在建模块时固定。 */
 function eventsFile() {
   return join(stateRoot(), 'events.jsonl')
 }
 const EVENT_LIMIT = 512 * 1024
 const writeQueues = new Map()
 
-/** 同步确保运行期目录存在（插件装配早期、写 Python 启动钩子前调用）。 */
+/** 同步确保运行期目录存在（插件装配早期调用）。 */
 export function ensureStateDirSync() {
-  ensureCacheSync()
+  ensureStorageSync()
   mkdirSync(stateRoot(), { recursive: true })
   return stateRoot()
 }

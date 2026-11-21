@@ -29,4 +29,4 @@ python ../patent-map/tools/serve_map.py
 pip install -r ../patent-map/tools/requirements.txt
 ```
 
-模型装到 `{Documents}/patent-disclosure-skill/patent-map/models/`（与 oa 同级），只要 ONNX，不要下到当前工作区，也不要为本技能装 PyTorch。
+模型装到插件设置的专利数据目录下 `patent-map/models/`（与 oa 同级），只要 ONNX，不要下到当前工作区，也不要为本技能装 PyTorch。

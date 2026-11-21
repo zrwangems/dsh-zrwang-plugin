@@ -97,7 +97,7 @@
         "repoPath"
       ],
       "check": "各工具 --help 或 dry-run",
-      "note": "工作目录改到 <项目根>/.agents/patent；不写 ~/Documents；embedding 密钥按需配置。"
+      "note": "数据默认放在 <DSH_HOME>/storages/dsh-zrwang-plugin/patent（设置页「专利数据目录」可改）；Obsidian 库是它下面的 vault/；不写 ~/Documents、用户主目录或项目目录；embedding 密钥按需配置。"
     },
     "zotero": {
       "label": "zotero-cli",
@@ -289,7 +289,7 @@
         "patent-home",
         "optional-embedding"
       ],
-      "check": "PATENT_OA_HOME=<项目>/.agents/patent/oa；embedding 密钥可选"
+      "check": "PATENT_OA_HOME=<专利数据目录>/oa；embedding 密钥可选"
     },
     "patent-map": {
       "profile": "patent",
@@ -297,7 +297,7 @@
       "modules": [
         "patent-home"
       ],
-      "check": "PATENT_MAP_HOME=<项目>/.agents/patent/patent-map"
+      "check": "PATENT_MAP_HOME=<专利数据目录>/patent-map"
     },
     "patent-reader": {
       "profile": "patent",
@@ -306,7 +306,7 @@
         "patent-home",
         "obsidian"
       ],
-      "check": "Obsidian vault 探测或 PATENT_READER_OBSIDIAN_VAULT"
+      "check": "PATENT_READER_OBSIDIAN_VAULT=<专利数据目录>/vault"
     },
     "patent-disclosure": {
       "profile": "patent",

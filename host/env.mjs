@@ -13,7 +13,7 @@ import { existsSync } from 'node:fs'
 import { delimiter, dirname, join, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PKG_DIR, SKILLS_DIR } from './config.mjs'
-import { cacheRoot } from './paths.mjs'
+import { patentPathsOf, storageRoot } from './paths.mjs'
 import { which } from './platform.mjs'
 import { resolvePython } from './python.mjs'
 import { SECRET_ENV, SECRET_REFS } from './params.mjs'
@@ -107,6 +107,10 @@ const CONFIG_ENV_KEYS = [
   'ZRWANG_IEEE_FULLTEXT_ENDPOINT',
   'PATENT_OA_HOME',
   'PATENT_MAP_HOME',
+  'PATENT_READER_OUTPUT_DIR',
+  'PATENT_SEARCH_OUTPUT_DIR',
+  'PATENT_DOCKET_OUTPUT_DIR',
+  'PATENT_DISCLOSURE_OBSIDIAN_VAULT',
   'PATENT_EMBEDDING_PROVIDER',
   'PATENT_EMBEDDING_MODEL',
   'PATENT_EMBEDDING_BASE_URL',
@@ -168,7 +172,8 @@ export function configEnv(params) {
     if (next.length > 0) out[name] = next
   }
 
-  put('ZRWANG_PLUGIN_CACHE', cacheRoot())
+  // 名字保留 CACHE（上游技能已认这个变量），指向的是 DSH storages 下的持久化根。
+  put('ZRWANG_PLUGIN_CACHE', storageRoot())
   put('LIT_DL_SCHOOL_FILE', join(SKILLS_DIR, 'research', 'nature-skills', 'nature-downloader', 'config', 'school.json'))
   put('ARCHIFY_UPDATE_CHECK_DISABLED', '1')
 
@@ -202,14 +207,21 @@ export function configEnv(params) {
   put('PATENT_EMBEDDING_BASE_URL', text(embedding.baseUrl) || preset?.baseUrl)
   put('PATENT_EMBEDDING_DIMENSIONS', text(embedding.dimensions) || preset?.dimensions)
   put('PATENT_EMBEDDING_API_KEY_ENV', preset?.apiKeyEnv)
-  put('PATENT_READER_OBSIDIAN_VAULT', text(patent.vault))
+  // 专利数据全部在设置页那个“专利数据目录”下面：Obsidian 库是它的子路径，
+  // 索引、模型、审查答复和产物也都在里面。
+  const patentPaths = patentPathsOf(params)
+  put('PATENT_READER_OBSIDIAN_VAULT', patentPaths?.vault)
+  put('PATENT_DISCLOSURE_OBSIDIAN_VAULT', patentPaths?.vault)
+  put('PATENT_OA_HOME', patentPaths?.oa)
+  put('PATENT_MAP_HOME', patentPaths?.map)
+  put('PATENT_READER_OUTPUT_DIR', patentPaths?.readerOutput)
+  put('PATENT_SEARCH_OUTPUT_DIR', patentPaths?.searchOutput)
+  put('PATENT_DOCKET_OUTPUT_DIR', patentPaths?.docketOutput)
 
   for (const [path, ref] of Object.entries(SECRET_REFS)) {
     const envName = SECRET_ENV[ref]
     if (envName !== undefined) put(envName, getPath(params, path.split('.')))
   }
-  out.PATENT_OA_HOME = join(cacheRoot(), 'patent', 'oa')
-  out.PATENT_MAP_HOME = join(cacheRoot(), 'patent', 'patent-map')
   return out
 }
 

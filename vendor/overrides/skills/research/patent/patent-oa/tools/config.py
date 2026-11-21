@@ -5,8 +5,8 @@
 密钥只从环境变量 ZRWANG_PATENT_EMBEDDING_CRED（或 _API_KEY_ENV 指定的变量）读取，
 本模块不读写 embedding.config.yaml / embedding.secrets.yaml。
 
-数据目录：项目内 .agents/patent/oa（若在 git 仓库中），否则 PATENT_OA_HOME，
-最后回落到插件缓存目录 ZRWANG_PLUGIN_CACHE/patent/oa。
+数据目录：只认 PATENT_OA_HOME（插件设置 → 科研服务 → 专利数据目录 下的 oa/），
+不写项目目录，也不写用户主目录。
 """
 from __future__ import annotations
 
@@ -30,23 +30,14 @@ DEFAULT_PROVIDER = "openai_compatible"
 DEFAULT_API_KEY_ENV = "ZRWANG_PATENT_EMBEDDING_CRED"
 
 
-def plugin_cache() -> Path | None:
-    raw = (os.environ.get("ZRWANG_PLUGIN_CACHE") or "").strip()
-    return Path(raw).expanduser().resolve() if raw else None
-
-
 def oa_home() -> Path:
-    cwd = Path.cwd().resolve()
-    for parent in [cwd, *cwd.parents]:
-        if (parent / ".git").exists():
-            return (parent / ".agents" / "patent" / "oa").resolve()
     env = (os.environ.get("PATENT_OA_HOME") or "").strip()
     if env:
         return Path(env).expanduser().resolve()
-    cache = plugin_cache()
-    if cache is None:
-        raise SystemExit("PATENT_OA_HOME 未设置：请在 DSH 插件里运行本技能，或设置 PATENT_OA_HOME。")
-    return (cache / "patent" / "oa").resolve()
+    raise SystemExit(
+        "PATENT_OA_HOME 未设置：请在 DSH 插件设置 → 科研服务 → 专利数据目录 里填目录，"
+        "插件会把审查答复数据放在它下面的 oa/。"
+    )
 
 
 def default_sqlite_path() -> Path:
@@ -58,10 +49,7 @@ def default_cases_dir() -> Path:
 
 
 def embedding_state_path() -> Path:
-    cache = plugin_cache()
-    if cache is None:
-        return oa_home() / "embedding-state.json"
-    return cache / "patent" / "embedding-state.json"
+    return oa_home() / "embedding-state.json"
 
 
 def _env(name: str, default: str = "") -> str:

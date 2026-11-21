@@ -3,7 +3,7 @@ name: patent-docket
 description: "按发明人/工程师给的材料一趟写出交底书和申请文件；申请问题清单上的缺口最多改三轮。缺技术事实就问人，不编。触发：交底申请一起做、从零出交底和申请、一条龙、帮写交底再出申请、按清单改、会稿、案卷、/patent-docket。"
 user-invocable: false
 ---
-> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的 oa / patent-map；不要写 `~/Documents/patent-disclosure-skill` 或 `~/.patent-disclosure-skill`。Obsidian 库路径由 DSH 插件设置（科研服务 → 专利检索向量模型）注入 `PATENT_READER_OBSIDIAN_VAULT`，本技能不读写 `obsidian_vault.txt`。
+> [dsh-zrwang-plugin] 本技能的数据都在插件设置「科研服务 → 专利数据目录」下面：Obsidian 库是它下面的 `vault/`（`PATENT_READER_OBSIDIAN_VAULT`），向量索引与模型在 `patent-map/`（`PATENT_MAP_HOME`），审查答复在 `oa/`（`PATENT_OA_HOME`），产物在 `outputs/`。不要写 `~/Documents/patent-disclosure-skill`、`~/.patent-disclosure-skill` 或工作区 `.agents/patent/`；没设置好时插件不会注入本技能。
 # 案卷会稿
 
 ## 用途

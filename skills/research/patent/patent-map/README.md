@@ -12,7 +12,7 @@
 </thead>
 <tbody>
 <tr><td nowrap width="1%"><strong>五种图</strong></td><td>地形看技术扎堆在哪，四象限看申请人站位，引证网看同族怎么串，功效矩阵看手段对功效，仪表盘看这一库的家底</td></tr>
-<tr><td nowrap width="1%"><strong>本机页面</strong></td><td>说一声就起本机页，浏览器打开即可。图上的点来自已读解读笔记；加速副本在 <code>{Documents}/patent-disclosure-skill/patent-map/</code>（和 oa 同级，<code>PATENT_MAP_HOME</code> 可改）</td></tr>
+<tr><td nowrap width="1%"><strong>本机页面</strong></td><td>说一声就起本机页，浏览器打开即可。图上的点来自已读解读笔记；加速副本在 <code>&lt;专利数据目录&gt;/patent-map/</code>（和 oa 同级，Obsidian 库在旁边的 <code>vault/</code>）</td></tr>
 <tr><td nowrap width="1%"><strong>地形怎么摊</strong></td><td>按中文小模型把案例铺到沙盘上（<code>bge-small-zh</code>，本机 ONNX，不用 PyTorch）。模型也落在上面那个目录；没装也能开图，地形先按分类号簇</td></tr>
 </tbody>
 </table>

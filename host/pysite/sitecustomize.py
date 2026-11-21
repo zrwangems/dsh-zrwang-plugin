@@ -25,9 +25,27 @@ _MAP = {
 }
 
 
+# 插件通过 ctx.shellEnv 注入的是 DSH_* 事实；这里把非密钥的配置项还原成
+# 上游脚本认识的名字。只处理本插件声明的前缀，避免把 DSH_HOME / DSH_PROFILE_DIR
+# 这类宿主内置变量也剥掉前缀。
+_PLAIN_PREFIXES = (
+    "DSH_ZRWANG_",
+    "DSH_PATENT_",
+    "DSH_NCBI_",
+    "DSH_UNPAYWALL_",
+    "DSH_CROSSREF_",
+    "DSH_LIT_DL_",
+    "DSH_ARCHIFY_",
+    "DSH_IMAGE2PPT_",
+    "DSH_OPENROUTER_",
+    "DSH_SCHEMATIC_",
+    "DSH_NATURE_",
+)
+
+
 def _apply_plugin_credentials():
     for name, value in list(_os.environ.items()):
-        if name.startswith("DSH_ZRWANG_") and value:
+        if value and name.startswith(_PLAIN_PREFIXES):
             _os.environ.setdefault(name[4:], value)
     qwen = _os.environ.get("ZRWANG_IMAGE_BACKEND") == "qwen"
     for source, targets in _MAP.items():

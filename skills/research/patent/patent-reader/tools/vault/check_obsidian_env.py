@@ -8,7 +8,7 @@
 用法：
   python skills/patent-reader/tools/vault/check_obsidian_env.py
   python skills/patent-reader/tools/vault/check_obsidian_env.py --json
-库路径由 DSH 插件设置（科研服务 → 专利检索向量模型 → Obsidian 专利库路径）指定，
+库路径由 DSH 插件设置（科研服务 → 专利数据目录，库是它下面的 vault/）指定，
 本脚本只探测，不写任何持久化配置。
 """
 from __future__ import annotations
@@ -66,7 +66,7 @@ def _print_human(report: dict) -> None:
             print("SUGGESTED_DEFAULTS:")
             for d in defaults:
                 print(f"  - {d}")
-        print("ACTION: 在 DSH 插件设置 → 科研服务 → 专利检索向量模型 里填写 Obsidian 专利库路径。")
+        print("ACTION: 在 DSH 插件设置 → 科研服务 → 专利数据目录 里填绝对路径；Obsidian 库是它下面的 vault/。")
     print(f"PERSISTED_CONFIG: {report.get('persisted_config')}")
     print(f"ENV_VAR: {report.get('env_var')}")
 

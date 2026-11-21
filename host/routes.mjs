@@ -5,7 +5,7 @@
  */
 import { join } from 'node:path'
 import { ROUTE_PREFIX, SKILLS_DIR, VERSION } from './config.mjs'
-import { cacheRoot, stateRoot } from './paths.mjs'
+import { patentPathsOf, stateRoot, storageRoot } from './paths.mjs'
 import { openPath } from './platform.mjs'
 import { catalogView, loadCatalog } from './catalog.mjs'
 import { resolveProjectRoot } from './project.mjs'
@@ -370,8 +370,9 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
         ok: true,
         version: VERSION,
         packageDir: join(SKILLS_DIR, '..'),
-        cacheDir: cacheRoot(),
+        storageDir: storageRoot(),
         stateDir: stateRoot(),
+        patentRoot: patentPathsOf(runtime.effective())?.root ?? '',
         catalog: { total: catalog.stats.total, defaults: catalog.stats.defaults, generatedAt: catalog.generatedAt },
         arsCommands: arsCommandCount(),
         mcp: mcpStatusOf(),

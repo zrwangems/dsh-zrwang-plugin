@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { PKG_DIR } from './paths.mjs'
 
-export { PKG_DIR, cacheRoot, stateRoot } from './paths.mjs'
+export { PKG_DIR, storageRoot, stateRoot, defaultPatentRoot } from './paths.mjs'
 
 /** 技能实体根：由插件自己的 ctx.skills 提供方按需读取。 */
 export const SKILLS_DIR = join(PKG_DIR, 'skills')

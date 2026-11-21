@@ -5,7 +5,7 @@
  * 这里在新版本第一次启动时做三件事，然后删除旧目录：
  *   1. 把旧 settings.json 里的非密钥写进 profile 补丁的 config；
  *   2. 把密钥写进 DSH 凭据库；
- *   3. 把选择态/模式/界面状态复制到插件自己的 `cache/state/`。
+ *   3. 把选择态/模式/界面状态复制到 DSH storages 下的 `dsh-zrwang-plugin/state/`。
  *
  * 任何一步失败都不删旧目录，并写进日志，避免静默丢数据。
  */

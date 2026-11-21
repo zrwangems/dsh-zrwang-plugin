@@ -8,12 +8,12 @@
  *   4. 卸载时恢复进程环境、注销 MCP 与命令。
  *
  * 技能只在侧栏勾选后，才由 DSH 官方的 ctx.skills 提供方按会话列出；
- * 运行期文件全部在 `<插件目录>/cache/`。
+ * 运行期文件全部在 `$DSH_HOME/storages/dsh-zrwang-plugin/`，插件包内不产生 cache/。
  */
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { SKILLS_DIR, VERSION } from './config.mjs'
-import { cacheRoot } from './paths.mjs'
+import { storageRoot } from './paths.mjs'
 import { shellEnvValues, shellEnvVariables } from './env.mjs'
 import { createRuntime } from './runtime.mjs'
 import { registerRoutes } from './routes.mjs'
@@ -50,7 +50,7 @@ export function apply(ctx, config) {
       if (!existsSync(school)) await appendEvent('school-config-missing', { file: school })
       await appendEvent('host-applied', {
         version: VERSION,
-        cacheDir: cacheRoot(),
+        storageDir: storageRoot(),
         warnings: runtime.warnings(),
         imageModel: params?.image?.model ?? '',
       })

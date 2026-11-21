@@ -396,7 +396,7 @@
         <div class="ico">◎</div>
         <h3>每个对话一份选择快照</h3>
         <p>对话第一次打开侧栏时继承当前选择，之后勾技能、开分组、开 ARS 都只写这个对话。切回旧对话时，侧栏和技能提供方一起恢复它自己的状态，互不影响。</p>
-        <div class="tagline">snapshot 存在插件 <code>cache/state/session-selection.json</code></div>
+        <div class="tagline">snapshot 存在 <code>storages/dsh-zrwang-plugin/state/session-selection.json</code></div>
       </article>
       <article class="card reveal">
         <div class="ico">◈</div>
@@ -581,7 +581,7 @@
   <!-- 05 -->
   <section id="dsh">
     <div class="sec-head"><span class="sec-num">05</span><h2>安装之后，往 .dsh 里写了什么</h2></div>
-    <p class="sec-sub">默认 <code>$DSH_HOME</code> 是 <code>~/.dsh</code>，下面以 <code>web</code> profile 为例。<b>插件本体之外，没有插件自己的配置目录</b>；运行期产物都在插件安装目录的 <code>cache/</code> 里。</p>
+    <p class="sec-sub">默认 <code>$DSH_HOME</code> 是 <code>~/.dsh</code>，下面以 <code>web</code> profile 为例。<b>插件本体之外，没有插件自己的配置目录</b>；运行期数据都在 DSH 的持久化根 <code>$DSH_HOME/storages/dsh-zrwang-plugin/</code> 下，插件升级保留。</p>
 
     <div class="split" style="margin-bottom:16px">
       <pre class="tree reveal">~/.dsh/
@@ -596,17 +596,19 @@
 │               ├── <span class="d">catalog/</span> <span class="d">skills/</span> <span class="d">ars/</span>
 │               ├── <span class="d">mathworks/</span> <span class="d">vendor/licenses/</span>
 │               ├── <span class="d">docs/</span> <span class="d">locale/</span> <span class="f">cordis.patch.yml</span>
-│               └── <span class="d">cache/</span>              <span class="c"># 运行期，卸载即删</span>
-│                   ├── <span class="d">state/</span>          <span class="c"># 选择态/门禁/模式/事件</span>
-│                   └── <span class="d">patent/</span>         <span class="c"># 专利技能工作数据（用到才建）</span>
+│               └── <span class="c">（包内没有 cache/）</span>
+├── <span class="d">storages/</span>
+│   └── <span class="d">dsh-zrwang-plugin/</span>       <span class="c"># 运行期，插件升级保留</span>
+│       ├── <span class="d">state/</span>              <span class="c"># 选择态/门禁/模式/事件</span>
+│       └── <span class="d">patent/</span>             <span class="c"># 专利数据目录：vault/ patent-map/ oa/ outputs/</span>
 └── <span class="c">（没有 zrwang-plugin-config/）</span></pre>
       <div class="panel reveal">
         <h3>写入时机</h3>
         <ul>
           <li><strong>安装时</strong>：pnpm 把包装进 profile 的 <code>node_modules</code>，并在 <code>package.json</code> 里记录依赖与 bundle。</li>
           <li><strong>第一次改设置</strong>：非密钥写 <code>cordis.patch.yml</code> 的本插件条目；密钥写 <code>.credentials.yaml</code>。</li>
-          <li><strong>运行期</strong>：选择态、门禁、模式、界面展开、事件和专利数据只写插件自己的 <code>cache/</code>。</li>
-          <li><strong>卸载时</strong>：插件目录连同 <code>cache/</code> 一起删除；凭据库里的密钥不会被自动删除，需要的话手动清空。</li>
+          <li><strong>运行期</strong>：选择态、门禁、模式、界面展开、事件和专利数据只写 <code>$DSH_HOME/storages/dsh-zrwang-plugin/</code>（<code>state/</code> 与 <code>patent/</code>）。</li>
+          <li><strong>卸载时</strong>：插件目录删除；storages 下这份数据不随卸载自动删（插件升级也保留），要彻底清就手动删 <code>storages/dsh-zrwang-plugin/</code>；凭据库里的密钥不会自动删除。</li>
         </ul>
         <p style="margin:12px 0 0;color:var(--dim);font-size:12px">包体积主要来自 329 个技能的素材（PPT 模板、字体等）和随包分发的 MathWorks 运行时；安装前留足磁盘空间。</p>
       </div>
@@ -641,16 +643,16 @@
             <td><span class="tag amber">不自动删，需手动清</span></td>
           </tr>
           <tr>
-            <td><code>&lt;插件目录&gt;/cache/state/</code></td>
+            <td><code>$DSH_HOME/storages/dsh-zrwang-plugin/state/</code></td>
             <td><code>selection.json</code>、<code>gates.json</code>、<code>presets.json</code>、<code>session-selection.json</code>、<code>ui.json</code>、<code>events.jsonl</code>、<code>python-candidates.json</code>、<code>ars-deps.json</code>。</td>
             <td>插件运行期</td>
-            <td><span class="tag mint">随插件目录删除</span></td>
+            <td><span class="tag amber">升级保留，卸载后手动删</span></td>
           </tr>
           <tr>
-            <td><code>&lt;插件目录&gt;/cache/patent/</code></td>
+            <td><code>$DSH_HOME/storages/dsh-zrwang-plugin/patent/</code>（设置页可改）</td>
             <td>专利技能的向量索引与工作数据；只有用到专利技能时才创建。</td>
-            <td>专利技能（经插件缓存）</td>
-            <td><span class="tag mint">随插件目录删除</span></td>
+            <td>专利技能（vault/、patent-map/、oa/、outputs/）</td>
+            <td><span class="tag amber">升级保留，卸载后手动删</span></td>
           </tr>
           <tr>
             <td><code>&lt;项目根&gt;/.agents/skills/</code></td>
@@ -667,7 +669,7 @@
         </tbody>
       </table>
     </div>
-    <p style="margin:12px 0 0;color:var(--dim);font-size:12.5px">一句话：<b>插件本体在 profile 的 node_modules 里，配置在 profile 补丁和凭据库，状态在插件自己的 cache/ 里；不往项目目录写技能，也不再建第二个配置目录。</b>另外，pnpm 会在 profile 目录维护 <code>pnpm-lock.yaml</code> 和 <code>node_modules/.pnpm</code> 的依赖副本，这是 DSH 包管理的产物，不是插件自己写的。</p>
+    <p style="margin:12px 0 0;color:var(--dim);font-size:12.5px">一句话：<b>插件本体在 profile 的 node_modules 里，配置在 profile 补丁和凭据库，状态在 DSH storages 的 dsh-zrwang-plugin/ 里；不往项目目录写技能，也不再建第二个配置目录。</b>另外，pnpm 会在 profile 目录维护 <code>pnpm-lock.yaml</code> 和 <code>node_modules/.pnpm</code> 的依赖副本，这是 DSH 包管理的产物，不是插件自己写的。</p>
   </section>
 
   <!-- 06 -->

@@ -20,13 +20,14 @@
 ### 1.2 安装与开库
 
 1. 双击 `.exe` 按向导安装（一般无需管理员权限）。  
-2. 打开 Obsidian，**创建新库**或**打开文件夹作为库**（例如 `C:\Users\<用户名>\Documents\Obsidian Vault`）。  
+2. 在 DSH 插件设置 → 科研服务 → 专利数据目录 里填一个绝对路径；插件会在这个目录下建 `vault/`，用 Obsidian **打开这个 `vault/` 子目录作为库**即可。  
 3. 把库路径告诉技能（或设环境变量），例如：
 
-```powershell
-$env:PATENT_READER_OBSIDIAN_VAULT = "D:\你的库路径"
-# 可选持久化：
-python ../patent-reader/tools/vault/check_obsidian_env.py --set "D:\你的库路径" --setx
+```text
+专利数据目录 = D:\PatentData
+Obsidian 库   = D:\PatentData\vault
+向量索引/模型 = D:\PatentData\patent-map
+审查答复      = D:\PatentData\oa
 ```
 
 ### 1.3 与本技能
