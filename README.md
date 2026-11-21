@@ -85,10 +85,10 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 | 栏目 | 内容 |
 | --- | --- |
 | 模型服务 | 生图模型（URL / 模型 / API Key，按 OpenAI Images 兼容协议）、OCR 模型（百度 PaddleOCR-VL Token，可选） |
-| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE）、Nature 绘图后端（Python / R）、专利检索向量模型（智谱 / 通义 / OpenAI / 本地，可选）与专利数据目录（必填；Obsidian 库是它下面的 `vault/`，向量索引在同目录 `patent-map/`；不填或填错时专利技能置灰） |
+| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE）、Nature 绘图后端（Python / R）、专利向量模型（OpenAI 兼容的 URL / 模型 / Key / 维度，可选）与专利数据目录（必填；Obsidian 库是它下面的 `vault/`，向量索引在同目录 `patent-map/`；不填或填错时专利技能置灰） |
 | 运行环境 | Python 解释器下拉选择，以及 officecli、zotero-cli、lark-cli、draw.io、Polyspace、MATLAB、MathWorks MCP、Windows MCP 的可用性 |
 
-改动即生效：每张卡片下方有「保存」按钮；Nature 绘图、专利向量服务这类下拉选择选中即自动保存。保存后插件立即用新值重算环境变量，不需要重启 DSH。
+改动即生效：每张卡片下方有「保存」按钮；Nature 绘图这类下拉选择选中即自动保存。保存后插件立即用新值重算环境变量，不需要重启 DSH。
 
 ### 配置放在哪里
 

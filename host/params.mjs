@@ -79,7 +79,8 @@ export function defaultParams() {
     patent: {
       // 专利数据目录必须由用户在设置页指定；留空表示专利类技能不启用。
       root: '',
-      embedding: { provider: 'zhipu', model: '', baseUrl: '', dimensions: '' },
+      // 向量接口：OpenAI 兼容的 /embeddings，四项都由用户自己填。
+      embedding: { model: '', baseUrl: '', dimensions: '' },
     },
     optional: {},
     python: { path: '' },
@@ -98,7 +99,6 @@ const TABLE = {
   'natureDownloader.ieee.fulltextEndpoint': 'string',
   'natureFigure.backend': 'string',
   'patent.root': 'string',
-  'patent.embedding.provider': 'string',
   'patent.embedding.model': 'string',
   'patent.embedding.baseUrl': 'string',
   'patent.embedding.dimensions': 'string',
@@ -201,6 +201,9 @@ export function normalizeConfig(raw) {
   }
   if (getPath(input, ['patent', 'vault']) !== undefined) {
     warnings.push('patent.vault 已改为 patent.root（专利数据目录），Obsidian 库改为它下面的 vault/，请重新设置')
+  }
+  if (getPath(input, ['patent', 'embedding', 'provider']) !== undefined) {
+    warnings.push('patent.embedding.provider 已移除：向量接口统一按 OpenAI 兼容的 /embeddings 调用，只需填 URL、模型、Key 和维度')
   }
   return { params, legacySecrets, warnings }
 }

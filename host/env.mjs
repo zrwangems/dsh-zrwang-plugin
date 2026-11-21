@@ -129,37 +129,6 @@ export function shellEnvVariables() {
 }
 
 
-const PATENT_PRESETS = {
-  zhipu: {
-    provider: 'openai_compatible',
-    model: 'embedding-3',
-    dimensions: '1024',
-    baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
-    apiKeyEnv: 'ZHIPUAI_API_KEY',
-  },
-  dashscope: {
-    provider: 'openai_compatible',
-    model: 'text-embedding-v3',
-    dimensions: '1024',
-    baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-    apiKeyEnv: 'DASHSCOPE_API_KEY',
-  },
-  openai: {
-    provider: 'openai_compatible',
-    model: 'text-embedding-3-small',
-    dimensions: '1536',
-    baseUrl: 'https://api.openai.com/v1',
-    apiKeyEnv: 'OPENAI_API_KEY',
-  },
-  local: {
-    provider: 'local',
-    model: 'BAAI/bge-small-zh-v1.5',
-    dimensions: '512',
-    baseUrl: '',
-    apiKeyEnv: '',
-  },
-}
-
 /**
  * 由插件配置算出技能要的环境变量（旧名字）。
  * shellEnvValues() 会加 `DSH_` 前缀后交给 DSH 的 shellEnv；静态
@@ -198,15 +167,14 @@ export function configEnv(params) {
   put('CROSSREF_MAILTO', text(academic.crossref?.mailto) || text(pubmed.email) || contact)
   put('ZRWANG_IEEE_FULLTEXT_ENDPOINT', text(params?.natureDownloader?.ieee?.fulltextEndpoint))
 
+  // 专利向量只走 OpenAI 兼容的 /embeddings；URL、模型、Key、维度都由用户填。
   const patent = params?.patent ?? {}
   const embedding = patent.embedding ?? {}
-  const providerName = text(embedding.provider)
-  const preset = providerName === '' ? undefined : PATENT_PRESETS[providerName] ?? PATENT_PRESETS.zhipu
-  put('PATENT_EMBEDDING_PROVIDER', preset === undefined ? '' : preset.provider)
-  put('PATENT_EMBEDDING_MODEL', text(embedding.model) || preset?.model)
-  put('PATENT_EMBEDDING_BASE_URL', text(embedding.baseUrl) || preset?.baseUrl)
-  put('PATENT_EMBEDDING_DIMENSIONS', text(embedding.dimensions) || preset?.dimensions)
-  put('PATENT_EMBEDDING_API_KEY_ENV', preset?.apiKeyEnv)
+  put('PATENT_EMBEDDING_PROVIDER', 'openai_compatible')
+  put('PATENT_EMBEDDING_MODEL', text(embedding.model))
+  put('PATENT_EMBEDDING_BASE_URL', text(embedding.baseUrl))
+  put('PATENT_EMBEDDING_DIMENSIONS', text(embedding.dimensions))
+  put('PATENT_EMBEDDING_API_KEY_ENV', 'ZRWANG_PATENT_EMBEDDING_CRED')
   // 专利数据全部在设置页那个“专利数据目录”下面：Obsidian 库是它的子路径，
   // 索引、模型、审查答复和产物也都在里面。
   const patentPaths = patentPathsOf(params)

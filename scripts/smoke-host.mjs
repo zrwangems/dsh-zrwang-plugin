@@ -129,7 +129,7 @@ check('静态 shim 与启动钩子随包', [
 const normalized = normalizeConfig({
   image: { baseUrl: 'https://api.example.com/v1', model: 'gpt-image-1' },
   natureAcademic: { pubmed: { email: 'a@example.org' } },
-  patent: { embedding: { provider: 'zhipu' } },
+  patent: { embedding: { model: 'text-embedding-3-small' } },
   imageApiKey: 'should-be-ignored',
 })
 check('参数归一化只保留白名单字段', normalized.params.image.model === 'gpt-image-1' && normalized.warnings.some(item => item.includes('imageApiKey')))
@@ -182,8 +182,9 @@ check('清空专利目录会写进配置', configOfParams(defaultParams()).paten
 check('密钥只回显是否已设置', JSON.stringify(cards).includes('secret-value') === false && byId.image.fields.some(field => field.secret === true && field.hasValue === true))
 const savedImage = saveSettingsCard(normalized.params, { cardId: 'image', values: { baseUrl: 'https://api.example.com/v1', model: 'gpt-image-1', apiKey: 'new-secret' } })
 check('保存生图卡片', savedImage.image.apiKey === 'new-secret' && savedImage.image.model === 'gpt-image-1')
-const savedPatent = saveSettingsCard(normalized.params, { cardId: 'patent', values: { provider: 'dashscope', root: samplePatentRoot, apiKey: 'x' } })
-check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope' && savedPatent.patent.root === samplePatentRoot && savedPatent.patent.embedding.apiKey === 'x')
+const savedPatent = saveSettingsCard(normalized.params, { cardId: 'patent', values: { root: samplePatentRoot, baseUrl: 'https://api.example.com/v1', model: 'text-embedding-3-small', dimensions: '1536', apiKey: 'x' } })
+check('保存专利卡片', savedPatent.patent.root === samplePatentRoot && savedPatent.patent.embedding.baseUrl === 'https://api.example.com/v1' && savedPatent.patent.embedding.model === 'text-embedding-3-small' && savedPatent.patent.embedding.dimensions === '1536' && savedPatent.patent.embedding.apiKey === 'x')
+check('专利向量没有 provider 字段', savedPatent.patent.embedding.provider === undefined)
 const savedMcp = saveSettingsCard(normalized.params, { cardId: 'mcp-stability', values: { autoRecover: 'off' } })
 check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
 
@@ -195,7 +196,8 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
   const withRoot = await blockedSkills({ ...defaultParams(), patent: { ...defaultParams().patent, root: samplePatentRoot } }, catalog)
   check('设置好专利目录后不再因路径置灰', patentSkill !== undefined && withRoot[patentSkill.name] === undefined, withRoot[patentSkill?.name])
   check('专利目录指向文件时置灰', patentRootProblem({ patent: { root: process.execPath } }) !== undefined)
-  const env = configEnv({ ...defaultParams(), patent: { root: samplePatentRoot, embedding: { provider: '' } } })
+  const env = configEnv({ ...defaultParams(), patent: { root: samplePatentRoot, embedding: { baseUrl: 'https://api.example.com/v1', model: 'text-embedding-3-small', dimensions: '1536' } } })
+  check('专利向量固定走 OpenAI 兼容接口', env.PATENT_EMBEDDING_PROVIDER === 'openai_compatible' && env.PATENT_EMBEDDING_BASE_URL === 'https://api.example.com/v1' && env.PATENT_EMBEDDING_MODEL === 'text-embedding-3-small' && env.PATENT_EMBEDDING_DIMENSIONS === '1536' && env.PATENT_EMBEDDING_API_KEY_ENV === 'ZRWANG_PATENT_EMBEDDING_CRED')
   check('环境注入把向量库和 vault 放在同一目录',
     env.PATENT_MAP_HOME === join(samplePatentRoot, 'patent-map')
     && env.PATENT_OA_HOME === join(samplePatentRoot, 'oa')

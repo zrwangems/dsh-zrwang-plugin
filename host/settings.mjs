@@ -343,24 +343,10 @@ export function settingsCards(params, present = {}, mcpStatus = { available: fal
             level: patentPathsOf(params) === undefined ? 'bad' : 'ok',
             help: patentPathsOf(params) === undefined ? '在“专利数据目录”里填一个绝对路径' : patentPathsOf(params).vault,
           },
-          {
-            id: 'provider',
-            label: '向量服务',
-            control: 'select',
-            options: [
-              { value: '', label: '不启用（只用标签/字段检索）' },
-              { value: 'zhipu', label: '智谱 embedding-3' },
-              { value: 'dashscope', label: '通义 text-embedding-v3' },
-              { value: 'openai', label: 'OpenAI text-embedding-3-small' },
-              { value: 'local', label: '本地 sentence-transformers（bge-small-zh）' },
-            ],
-            value: text(params.patent?.embedding?.provider),
-            help: '可选；启用后重建索引才能做语义检索',
-          },
-          maskField({ id: 'model', label: '模型', help: '留空用所选服务的默认模型' }, params.patent?.embedding?.model),
-          maskField({ id: 'baseUrl', label: '接口地址（URL）', help: '留空用所选服务的默认地址' }, params.patent?.embedding?.baseUrl),
-          maskField({ id: 'dimensions', label: '向量维度', help: '留空用所选服务的默认维度' }, params.patent?.embedding?.dimensions),
-          maskField({ id: 'apiKey', label: 'API Key', secret: true, help: '只存进 DSH 凭据库；本地模型不需要' }, '', present['patent.embedding.apiKey']),
+          maskField({ id: 'baseUrl', label: '接口地址（URL）', help: 'OpenAI 兼容的接口根地址，插件会拼 /embeddings；例如 https://api.openai.com/v1' }, params.patent?.embedding?.baseUrl),
+          maskField({ id: 'model', label: '模型', help: '文本嵌入模型名，原样传给接口；只用文本向量，不需要多模态模型' }, params.patent?.embedding?.model),
+          maskField({ id: 'apiKey', label: 'API Key', secret: true, help: '只存进 DSH 凭据库，不写任何配置文件' }, '', present['patent.embedding.apiKey']),
+          maskField({ id: 'dimensions', label: '维度', help: '模型输出的向量维度，例如 1536 / 1024 / 512；留空按接口返回值' }, params.patent?.embedding?.dimensions),
         ],
       },
       {
@@ -416,9 +402,6 @@ export function saveSettingsCard(params, body) {
       }
       next.patent.root = root
     }
-    const provider = text(values.provider)
-    if (!['', 'zhipu', 'dashscope', 'openai', 'local'].includes(provider)) throw new Error(`未知的向量服务：${provider}`)
-    next.patent.embedding.provider = provider
     for (const key of ['model', 'baseUrl', 'dimensions']) {
       if (typeof values[key] === 'string') next.patent.embedding[key] = values[key].trim()
     }
