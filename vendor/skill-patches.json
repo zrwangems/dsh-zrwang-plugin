@@ -73,21 +73,6 @@
       ]
     },
     {
-      "id": "ppt-master-image-bridge",
-      "reason": "插件设置通过 ZRWANG_IMAGE_* 注入生图配置；在技能进程内映射成 ppt-master 期望的 OPENAI_*。DSH shell 子进程会清洗 *KEY* 等变量名，所以密钥再从插件 settings.json 兜底读取，不依赖环境变量。",
-      "files": [
-        {
-          "path": "office/ppt-master/scripts/image_gen.py",
-          "replace": [
-            {
-              "find": "configure_utf8_stdio()\n\nENV_PATH = resolve_env_path()",
-              "to": "configure_utf8_stdio()\n\n# >>> dsh-zrwang-plugin image bridge\ndef _plugin_image_values():\n    # DSH 的 shell 子进程会按变量名清洗 *KEY*/*TOKEN*/*SECRET*/*PASSWORD*，\n    # 密钥不能只靠环境变量传给技能进程；这里从插件 settings.json 兜底读取。\n    root = os.environ.get(\"ZRWANG_PLUGIN_CONFIG_DIR\", \"\").strip()\n    if not root:\n        return {}\n    try:\n        with open(os.path.join(root, \"settings.json\"), \"r\", encoding=\"utf-8\") as handle:\n            image = (json.load(handle) or {}).get(\"image\") or {}\n        return image if isinstance(image, dict) else {}\n    except Exception:\n        return {}\n\n\ndef _apply_plugin_image_env():\n    image = _plugin_image_values()\n    pairs = (\n        (\"ZRWANG_IMAGE_BASE_URL\", \"OPENAI_BASE_URL\", \"baseUrl\"),\n        (\"ZRWANG_IMAGE_MODEL\", \"OPENAI_MODEL\", \"model\"),\n        (\"ZRWANG_IMAGE_API_KEY\", \"OPENAI_API_KEY\", \"apiKey\"),\n    )\n    for source, target_env, key in pairs:\n        value = os.environ.get(source, \"\").strip() or str(image.get(key) or \"\").strip()\n        if value:\n            os.environ[target_env] = value\n            os.environ.setdefault(source, value)\n    if (\n        os.environ.get(\"ZRWANG_IMAGE_API_KEY\")\n        or os.environ.get(\"ZRWANG_IMAGE_BASE_URL\")\n        or image.get(\"apiKey\")\n        or image.get(\"baseUrl\")\n    ):\n        os.environ[\"IMAGE_BACKEND\"] = \"openai\"\n        os.environ.setdefault(\"OPENAI_QUALITY\", \"omit\")\n\n\n_apply_plugin_image_env()\n# <<< dsh-zrwang-plugin image bridge\n\nENV_PATH = resolve_env_path()"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "ppt-master-projects-root",
       "reason": "插件把技能目录的 projects/ 联接到 <项目根>/.agents/ppt-master/projects；paths.py 以技能目录为基准。",
       "files": [
@@ -196,40 +181,6 @@
             {
               "find": "def persisted_vault_path() -> Path:\n    return Path.home() / \".patent-disclosure-skill\" / \"obsidian_vault.txt\"",
               "to": "def persisted_vault_path() -> Path | None:\n    \"\"\"库路径只来自插件设置（PATENT_READER_OBSIDIAN_VAULT）；不再有持久化文件。\"\"\"\n    return None"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "patent-reader-vault-project-home",
-      "reason": "Obsidian 库路径只来自插件注入的环境变量（专利数据目录下的 vault/），删掉用户主目录/项目目录的持久化回退。",
-      "files": [
-        {
-          "path": "research/patent/patent-reader/tools/shared/obsidian_env.py",
-          "replace": [
-            {
-              "find": "def persisted_vault_config_path() -> Path:\n    \"\"\"用户级持久化：Obsidian 库路径（不强制依赖系统环境变量）。\"\"\"\n    home = Path.home()\n    return home / \".patent-disclosure-skill\" / \"obsidian_vault.txt\"",
-              "to": "def persisted_vault_config_path() -> Path | None:\n    \"\"\"库路径只来自插件设置（PATENT_READER_OBSIDIAN_VAULT）；不再有持久化文件。\"\"\"\n    return None"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "ppt-master-no-dotenv-config",
-      "reason": "插件已禁止兼容上游 .env：生图配置只从进程环境读取；把 .env 候选清空并让 resolve_env_path 返回一个必然不存在的 cwd/.env。",
-      "files": [
-        {
-          "path": "office/ppt-master/scripts/config.py",
-          "replace": [
-            {
-              "find": "def get_env_candidates() -> list[Path]:\n    \"\"\"Return the supported .env lookup order.\"\"\"\n    return [\n        Path.cwd() / '.env',\n        PROJECT_ROOT / '.env',\n        REPO_ROOT / '.env',\n        USER_ENV_FILE,\n    ]",
-              "to": "def get_env_candidates() -> list[Path]:\n    \"\"\"DSH 插件集成：禁用上游 .env 查找，配置只来自进程环境。\"\"\"\n    return []"
-            },
-            {
-              "find": "    return candidates[0]",
-              "to": "    return Path.cwd() / '.env.disabled-by-dsh-zrwang-plugin'"
             }
           ]
         }

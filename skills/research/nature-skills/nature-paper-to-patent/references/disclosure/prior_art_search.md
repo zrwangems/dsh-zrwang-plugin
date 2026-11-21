@@ -3,7 +3,7 @@
 ## Contents
 
 - [必做时机](#必做时机)
-- [检索渠道（优先国知局公布公告站，再降级 WebSearch）](#检索渠道优先国知局公布公告站再降级-websearch)
+- [检索渠道（优先国知局公布公告站，再降级 web_search）](#检索渠道优先国知局公布公告站再降级-websearch)
 - [分析要求](#分析要求)
 - [记录习惯](#记录习惯)
 
@@ -12,7 +12,7 @@
 
 生成交底书全文**之前或生成过程中**必须执行；检索结论写入第一章 **1.1 现有技术** 及与本案的**区别论述**。
 
-## 检索渠道（**优先国知局公布公告站，再降级 WebSearch**）
+## 检索渠道（**优先国知局公布公告站，再降级 web_search**）
 
 ### A. 中国专利公布公告（**优先**，官方站点）
 
@@ -44,7 +44,7 @@
 
    - **合并责任在 Agent**：每次调用解析 **stdout** 上**唯一一行** **`EPUB_HITS_JSON:`** 后的 JSON 数组；在推理中按 **`pub_number`** 为主键去重合并（无则 **`link`**，再否则可用标题前缀），得到**一份**总表后再写入查新笔记与 1.1。
    - **`cnipa_epub_search.py`** 若人工单次传入多词，会按空白拆段、进程内**一段一查**并去重（**stderr** 可出现 **`EPUB_MERGE:`**）；与 Agent **分多次调用**策略无关。
-   - 成功时 **stdout 仅一行** **`EPUB_HITS_JSON:`** + JSON 数组（UTF-8，含中文 `abstract`）；**`EPUB_MERGE:`** / **`EPUB_NOTE:`** / **`EPUB_HINT:`** 等在 **stderr** 且为 **ASCII**（减轻 PowerShell 把中文 stderr 当成错误流）。解析命中时请以 **stdout 该行 JSON 为准**，勿因 stderr 或终端编码误判「未命中」而不必要地降级 WebSearch。Windows 乱码与 PowerShell 注意见 **`references/disclosure/tooling.md`**（`chcp 65001` / `PYTHONUTF8=1`、勿滥用 `2>&1`）。
+   - 成功时 **stdout 仅一行** **`EPUB_HITS_JSON:`** + JSON 数组（UTF-8，含中文 `abstract`）；**`EPUB_MERGE:`** / **`EPUB_NOTE:`** / **`EPUB_HINT:`** 等在 **stderr** 且为 **ASCII**（减轻 PowerShell 把中文 stderr 当成错误流）。解析命中时请以 **stdout 该行 JSON 为准**，勿因 stderr 或终端编码误判「未命中」而不必要地降级 web_search。Windows 乱码与 PowerShell 注意见 **`references/disclosure/tooling.md`**（`chcp 65001` / `PYTHONUTF8=1`、勿滥用 `2>&1`）。
    - 将 JSON 中**可核验**的公开号、标题、**国知局站点内详情链接**写入查新笔记与 1.1（见下 **`abstract` 必用**）。
    - **降级条件**（满足任一则进入 **B**）：命令非 0 退出、超时、无 Playwright、**`EPUB_HITS_JSON` 为空数组**、或条目经人工核对明显与主题无关。
 
@@ -66,9 +66,9 @@
 1. **中文文献与学术**：[Google 学术搜索](https://scholar.google.com)（`scholar.google.com`）。
    - 用**中文关键词**、技术方案核心术语、应用场景；可组合 2–3 组查询。
    - 强化「中国」语境时可加：`中国`、`site:.cn`、`专利`、`CN`（与专利号区分使用）等，以实际命中为准。
-   - 通过 **WebSearch** 或浏览器可用能力检索 Scholar；结果中优先选用**可打开、与标题/作者匹配**的条目链接。
+   - 通过 **web_search** 或浏览器可用能力检索 Scholar；结果中优先选用**可打开、与标题/作者匹配**的条目链接。
 2. **中国专利公开文献（补充）**：[Google Patents](https://patents.google.com/) 检索中文标题、申请人或公开号（`CN…A` / `CN…B` 等），每条使用**稳定著录页 URL**。
-3. **其它来源**：英文文献、非中国专利等可继续用 Google Patents、出版社页面、DOI、arXiv 等 + WebSearch。
+3. **其它来源**：英文文献、非中国专利等可继续用 Google Patents、出版社页面、DOI、arXiv 等 + web_search。
 4. **关键词构造**：技术方案核心术语、应用场景与方法名称，可组合 2–3 组查询。
 
 ## 分析要求
@@ -102,9 +102,9 @@
 写入交底书 **1.1** 开头的「检索说明」时，面向**代理人/审查员**表述，**不要**暴露 Agent 查新流程或本技能工具实现。
 
 - **须写**：实际使用的**公开数据库或渠道名称**（如「国家知识产权局专利公布公告系统」）、本案**主要检索词**（与 Step 5 用词一致或概括）；若部分条目经 **Google Patents** 等公开页复核著录项，可一句带过。
-- **禁止写入 1.1 正文**：脚本/文件名（如 **`cnipa_epub_search.py`**、**`cnipa_epub_crawler.py`**）、「查新优先使用…检索工具」「是否触发 Google 学术降级」、Playwright、WebSearch、Agent、技能仓库名等**内部或流程元信息**。
+- **禁止写入 1.1 正文**：脚本/文件名（如 **`cnipa_epub_search.py`**、**`cnipa_epub_crawler.py`**）、「查新优先使用…检索工具」「是否触发 Google 学术降级」、Playwright、web_search、Agent、技能仓库名等**内部或流程元信息**。
 - **示例（须按本案替换检索词与渠道）**：
 
   > 检索说明：在**国家知识产权局专利公布公告系统**及 **Google Patents** 中，以「批任务调度」「异构集群调度」「任务队列重排」「负载感知调度」等为检索词进行检索；部分条目的公开文本与著录项以 Google Patents 页面复核。
 
-查新笔记（Agent 内部或对话留档）仍可记录是否调用脚本、是否降级 WebSearch；**上述内容不得原样抄进交底书 1.1**。
+查新笔记（Agent 内部或对话留档）仍可记录是否调用脚本、是否降级 web_search；**上述内容不得原样抄进交底书 1.1**。

@@ -150,7 +150,7 @@ In the HDL function wrapper, declare all `dsphdl` objects as `persistent` and in
 
 ## Interactive Requirements Gathering (REQUIRED)
 
-**Before generating any code, ALWAYS use AskUserQuestion to gather the user's DDC specifications. Ask exactly ONE question per AskUserQuestion call.** Do not assume defaults.
+**Before generating any code, ALWAYS use ask_user_question to gather the user's DDC specifications. Ask exactly ONE question per ask_user_question call.** Do not assume defaults.
 
 ### Questions to ask (one at a time, in order):
 

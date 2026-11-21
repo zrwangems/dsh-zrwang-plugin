@@ -24,7 +24,7 @@
 | `nature-figure` | 绘图后端偏好写 `~/.config/nature-skills` | `scripts/nature_figure_backend.py` 只打印 `NATURE_FIGURE_BACKEND`（`get` 不再 `set/clear`）；后端偏好只由设置页「科研服务 → Nature 绘图」决定，删除 `~/.config/nature-skills` 持久化与相关文档表述 |
 | `nature-downloader`（yuan1z0825/nature-skills） | 默认读 `~/.dsh/zrwang-plugin-config/nature-downloader/school.json` | 学校信息固定为北航，直接随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`；插件通过 `LIT_DL_SCHOOL_FILE` 指向它，不复制到 `~/.dsh`；出版社凭据只从设置页写入 DSH 凭据库，再以 `ZRWANG_*_CRED` 注入；删除 `src/wizard.py`、`src/schools_loader.py`、`scripts/configure_credentials.py`、`scripts/configure_school.py`、`data/schools.yaml`、`lib/settings.mjs` 与 `credentials.json`/`settings.json` 读写 |
 | `patent`（handsomestWei/patent-disclosure-skill） | 默认写 `~/Documents/patent-disclosure-skill/`、`~/.patent-disclosure-skill/` | oa / patent-map / patent-reader 三个配置解析器补丁：只认插件注入的 `PATENT_OA_HOME` / `PATENT_MAP_HOME` / `PATENT_READER_OBSIDIAN_VAULT`（都在设置页「科研服务 → 专利数据目录」下，Obsidian 库是 `vault/`）；删除 `~/Documents/patent-disclosure-skill`、`~/.patent-disclosure-skill`、项目 `.agents/patent/` 三类回退，以及 `embedding.config.yaml`/`embedding.secrets.yaml` 读写，向量模型改由设置页「科研服务 → 专利检索向量模型」的 URL / 模型 / Key / 维度注入 `PATENT_EMBEDDING_*` 与 `ZRWANG_PATENT_EMBEDDING_CRED`（provider 固定为 OpenAI 兼容的 `openai_compatible`，预设下拉已删除），索引指纹存在 `<专利数据目录>/oa/embedding-state.json`；删除 `obsidian_vault.txt` 持久化与 `--set/--setx`；`patent-search`、`patent-docket` 的 `config.yaml` 删除，默认值写进代码；SKILL.md 顶部说明数据目录；没设置专利数据目录时插件不注入这些技能；整仓路径改 `../<子技能>/` |
-| `MATLAB / Simulink / playground`（MathWorks） | 依赖 MATLAB MCP | 本机 profile 的 MCP 是 existing 模式：SKILL.md 顶部说明需先启动 MATLAB 并 `shareMATLABSession()`，不要绕开 MCP |
+| `MATLAB / Simulink / playground`（MathWorks） | 依赖 MATLAB MCP；正文用 Claude 工具名 | 本机 profile 的 MCP 是 existing 模式：SKILL.md 顶部说明需先启动 MATLAB 并 `shareMATLABSession()`，不要绕开 MCP；`AskUserQuestion` 统一改写成 DSH 的 `ask_user_question`；Simulink 运行时（`mathworks/simulink-agentic-toolkit`）随包更新到上游 2026.11.c（tools 1.0.35），MATLAB MCP 可执行文件更新到 v0.16.1 |
 | `Polyspace`（mathworks/polyspace-agentic-toolkit） | 依赖 Polyspace MCP 与 Polyspace 安装 | 本机未安装：技能置灰；setup 技能顶部说明 DSH 的 MCP 配置在 profile `cordis.patch.yml`，不要改 Claude/Cursor/Codex 配置 |
 | `ARS`（Imbad0202/academic-research-skills） | 整仓 `shared/`、`scripts/`，工具名面向 Claude Code，繁体中文输出；当前 pin v3.24.4 / `00315df` | 逐个文件复制后只做机械适配：`shared/`→`_shared/`、跨技能路径改 `../<技能>/`、`python3`→`python`、`AskUserQuestion`→`ask_user_question`、`WebSearch`/`WebFetch`→`web_search`/`web_fetch`、繁体→简体；`headerNote` 强制简体中文与 Agent Team 多角色；每个技能补 `_shared/`（含 `MODE_REGISTRY`、`ARCHITECTURE`）与 `.md`/`.json` 引用到的 `scripts/` 闭包（测试/fixture 不分发）；16 个 `/ars-*` 命令保留上游模式说明，清掉 Claude Skill 工具与 `${CLAUDE_PLUGIN_ROOT}` 写法；`vendor/ars/descriptions.json` 覆盖描述；写作用域清单原样复制并在 `tools/pre-execute` 里实现上游 `PreToolUse` 护栏；`_shared/dsh-runtime.md` 构建时生成。对齐审计：`node scripts/audit-ars-alignment.mjs --upstream=<ARS 检出> --strict`，结果与 Claude hooks 对照写在 `docs/ars-alignment.md` |
 | `Supervisor Skills`（HKUSTDial/Supervisor-Skills） | 上游技能名 `deep-research` 与 ARS 重名 | `renames` 落盘为 `supervisor-deep-research`，frontmatter 由 `vendor/skill-patches.json` 同步 |
@@ -72,6 +72,7 @@
 
 - `README.md`：升级前必读、更新流程；
 - `upstream-modifications.md`：每个仓库/技能改了什么、为什么、怎么验证；
+- `upstream-inventory.md`：22 个上游项目的当前 pin、技能数、适配方式与关键改动（版本盘点）；
 - `skill-config-matrix.md`：329 个技能 + 16 个组件的状态；
 - `records.json`：最后审计的上游 SHA，`verify` 会与 lock 比对；
 - `verification-log.md`：检查命令与结果。

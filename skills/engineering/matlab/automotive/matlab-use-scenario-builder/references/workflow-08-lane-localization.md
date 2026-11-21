@@ -286,7 +286,7 @@ else
 end
 % startLaneIdx must come from the user — they know how many lanes the
 % road actually has and which one the ego is in. The agent must ASK in chat
-% (use AskUserQuestion or the equivalent), not infer.
+% (use ask_user_question or the equivalent), not infer.
 startLaneIdx = <ASK USER — leftmost lane = 1, excluding shoulders>;
 
 %% Step 6 — Localize. Pass laneData directly — NOT egoToWorldLaneBoundarySegments output.

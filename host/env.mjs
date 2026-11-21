@@ -13,7 +13,7 @@ import { existsSync } from 'node:fs'
 import { delimiter, dirname, join, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PKG_DIR, SKILLS_DIR } from './config.mjs'
-import { patentPathsOf, storageRoot } from './paths.mjs'
+import { patentPathsOf, stateRoot, storageRoot } from './paths.mjs'
 import { which } from './platform.mjs'
 import { resolvePython } from './python.mjs'
 import { SECRET_ENV, SECRET_REFS } from './params.mjs'
@@ -143,6 +143,8 @@ export function configEnv(params) {
 
   // 名字保留 CACHE（上游技能已认这个变量），指向的是 DSH storages 下的持久化根。
   put('ZRWANG_PLUGIN_CACHE', storageRoot())
+  // ARS 的引用校验缓存默认写 ~/.cache/ars，改到插件 state 下。
+  put('ARS_VERIFICATION_CACHE_PATH', join(stateRoot(), 'ars', 'verification.db'))
   put('LIT_DL_SCHOOL_FILE', join(SKILLS_DIR, 'research', 'nature-skills', 'nature-downloader', 'config', 'school.json'))
   put('ARCHIFY_UPDATE_CHECK_DISABLED', '1')
 

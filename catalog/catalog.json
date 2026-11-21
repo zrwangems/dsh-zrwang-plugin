@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-21T08:41:53.947Z",
+  "generatedAt": "2026-11-21T13:29:26.946Z",
   "repos": [
     {
       "id": "matlab-agentic",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2",
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9",
       "label": "MATLAB Agentic Toolkit"
     },
     {
       "id": "simulink",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588",
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7",
       "label": "Simulink Agentic Toolkit"
     },
     {
@@ -29,19 +29,19 @@
     {
       "id": "nature",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018",
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb",
       "label": "Nature Skills"
     },
     {
       "id": "officecli",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912",
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417",
       "label": "OfficeCLI"
     },
     {
       "id": "ppt-master",
       "repo": "hugohe3/ppt-master",
-      "sha": "e2820d326d049f1fcbe90523983def3d52280233",
+      "sha": "63a03673d5c3c928e7f52983a2c8ec65bac30002",
       "label": "PPT Master"
     },
     {
@@ -59,7 +59,7 @@
     {
       "id": "ars",
       "repo": "Imbad0202/academic-research-skills",
-      "sha": "c67a7be53f23d9dbba4030bbcd6f5ccfeda3afa9",
+      "sha": "00315dfea67cba974583debae32b77bdce659301",
       "label": "Academic Research Skills (ARS)"
     },
     {
@@ -83,13 +83,13 @@
     {
       "id": "supervisor",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8",
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5",
       "label": "Supervisor Skills"
     },
     {
       "id": "lieflat-charts",
       "repo": "larashero3-dotcom/lieflat-charts",
-      "sha": "61697e4d5bad90d253e230e1f6cbda8f1db155cf",
+      "sha": "4b4e75bde11cbef44263de769f3705db54bbb277",
       "label": "Lieflat Charts"
     },
     {
@@ -119,7 +119,7 @@
     {
       "id": "patent",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98",
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304",
       "label": "Patent Skills"
     },
     {
@@ -137,7 +137,7 @@
   ],
   "stats": {
     "total": 329,
-    "defaults": 68,
+    "defaults": 67,
     "byGroup": {
       "engineering": 230,
       "research": 52,
@@ -150,7 +150,6 @@
     "building-architecture-models",
     "building-simulink-models",
     "checking-model-compliance",
-    "configuring-block-policy",
     "create-sdi-run",
     "filing-bug-reports",
     "fix-sldv-incompatibility",
@@ -648,68 +647,36 @@
                   "dir": "engineering/matlab/automotive/matlab-use-scenario-builder"
                 },
                 {
-                  "id": "skill:roadrunner-asset-mapping",
+                  "id": "skill:roadrunner-author-scenario",
                   "kind": "skill",
-                  "title": "roadrunner-asset-mapping",
-                  "zh": "RoadRunner 资产与素材映射",
-                  "name": "roadrunner-asset-mapping",
-                  "dir": "engineering/matlab/automotive/roadrunner-asset-mapping"
+                  "title": "roadrunner-author-scenario",
+                  "zh": "在 RoadRunner 中按场景描述编写 OpenSCENARIO 剧本，配置车辆、行为与触发条件。",
+                  "name": "roadrunner-author-scenario",
+                  "dir": "engineering/matlab/automotive/roadrunner-author-scenario"
                 },
                 {
-                  "id": "skill:roadrunner-build-scenario-from-osc",
+                  "id": "skill:roadrunner-build-rrhd-map",
                   "kind": "skill",
-                  "title": "roadrunner-build-scenario-from-osc",
-                  "zh": "由 OpenSCENARIO 文件建场景",
-                  "name": "roadrunner-build-scenario-from-osc",
-                  "dir": "engineering/matlab/automotive/roadrunner-build-scenario-from-osc"
+                  "title": "roadrunner-build-rrhd-map",
+                  "zh": "从 OSM / Lanelet2 构建 RoadRunner HD Map，处理车道、路口、标志与高程对齐。",
+                  "name": "roadrunner-build-rrhd-map",
+                  "dir": "engineering/matlab/automotive/roadrunner-build-rrhd-map"
                 },
                 {
-                  "id": "skill:roadrunner-convert-lanelet2-to-rrhd",
+                  "id": "skill:roadrunner-manage-project",
                   "kind": "skill",
-                  "title": "roadrunner-convert-lanelet2-to-rrhd",
-                  "zh": "Lanelet2 地图转 RRHD",
-                  "name": "roadrunner-convert-lanelet2-to-rrhd",
-                  "dir": "engineering/matlab/automotive/roadrunner-convert-lanelet2-to-rrhd"
+                  "title": "roadrunner-manage-project",
+                  "zh": "用 MATLAB 命令管理 RoadRunner 工程：启动、打开场景、保存与导出。",
+                  "name": "roadrunner-manage-project",
+                  "dir": "engineering/matlab/automotive/roadrunner-manage-project"
                 },
                 {
-                  "id": "skill:roadrunner-core",
+                  "id": "skill:roadrunner-simulate-scenario",
                   "kind": "skill",
-                  "title": "roadrunner-core",
-                  "zh": "RoadRunner 基础操作",
-                  "name": "roadrunner-core",
-                  "dir": "engineering/matlab/automotive/roadrunner-core"
-                },
-                {
-                  "id": "skill:roadrunner-import-scene",
-                  "kind": "skill",
-                  "title": "roadrunner-import-scene",
-                  "zh": "导入道路场景",
-                  "name": "roadrunner-import-scene",
-                  "dir": "engineering/matlab/automotive/roadrunner-import-scene"
-                },
-                {
-                  "id": "skill:roadrunner-rrhd-authoring",
-                  "kind": "skill",
-                  "title": "roadrunner-rrhd-authoring",
-                  "zh": "编写 RRHD 道路描述文件",
-                  "name": "roadrunner-rrhd-authoring",
-                  "dir": "engineering/matlab/automotive/roadrunner-rrhd-authoring"
-                },
-                {
-                  "id": "skill:roadrunner-scenario-authoring",
-                  "kind": "skill",
-                  "title": "roadrunner-scenario-authoring",
-                  "zh": "编写 RoadRunner 场景",
-                  "name": "roadrunner-scenario-authoring",
-                  "dir": "engineering/matlab/automotive/roadrunner-scenario-authoring"
-                },
-                {
-                  "id": "skill:roadrunner-scenario-simulating",
-                  "kind": "skill",
-                  "title": "roadrunner-scenario-simulating",
-                  "zh": "仿真 RoadRunner 场景",
-                  "name": "roadrunner-scenario-simulating",
-                  "dir": "engineering/matlab/automotive/roadrunner-scenario-simulating"
+                  "title": "roadrunner-simulate-scenario",
+                  "zh": "在 RoadRunner 中回放和仿真场景，检查车辆轨迹、碰撞与传感器表现。",
+                  "name": "roadrunner-simulate-scenario",
+                  "dir": "engineering/matlab/automotive/roadrunner-simulate-scenario"
                 }
               ]
             },
@@ -830,6 +797,14 @@
                   "zh": "金融工具定价",
                   "name": "matlab-price-instrument",
                   "dir": "engineering/matlab/computational-finance/matlab-price-instrument"
+                },
+                {
+                  "id": "skill:matlab-specify-ssm",
+                  "kind": "skill",
+                  "title": "matlab-specify-ssm",
+                  "zh": "用 MATLAB 指定、估计并检验状态空间模型，覆盖线性化与标准模型结构。",
+                  "name": "matlab-specify-ssm",
+                  "dir": "engineering/matlab/computational-finance/matlab-specify-ssm"
                 },
                 {
                   "id": "skill:matlab-use-spreadsheet-link",
@@ -1062,6 +1037,14 @@
                   "zh": "设计雷达发射波形",
                   "name": "matlab-design-radar-waveform",
                   "dir": "engineering/matlab/radar/matlab-design-radar-waveform"
+                },
+                {
+                  "id": "skill:matlab-design-scenario",
+                  "kind": "skill",
+                  "title": "matlab-design-scenario",
+                  "zh": "用 MATLAB 搭建雷达与相机仿真场景，配置平台轨迹、姿态和可见性分析。",
+                  "name": "matlab-design-scenario",
+                  "dir": "engineering/matlab/radar/matlab-design-scenario"
                 },
                 {
                   "id": "skill:matlab-import-tracking-data",
@@ -1640,6 +1623,14 @@
                   "dir": "engineering/matlab/wireless-communications/matlab-set-up-usrp-radio"
                 },
                 {
+                  "id": "skill:matlab-simulate-6g-system",
+                  "kind": "skill",
+                  "title": "matlab-simulate-6g-system",
+                  "zh": "用 MATLAB 搭建并仿真 6G 系统链路，覆盖波形、信道与收发处理。",
+                  "name": "matlab-simulate-6g-system",
+                  "dir": "engineering/matlab/wireless-communications/matlab-simulate-6g-system"
+                },
+                {
                   "id": "skill:matlab-simulate-bluetooth-network",
                   "kind": "skill",
                   "title": "matlab-simulate-bluetooth-network",
@@ -1816,14 +1807,6 @@
                   "dir": "engineering/simulink/model-based-design-core/building-simulink-models"
                 },
                 {
-                  "id": "skill:configuring-block-policy",
-                  "kind": "skill",
-                  "title": "configuring-block-policy",
-                  "zh": "配置 Simulink 端口与求解器参数策略",
-                  "name": "configuring-block-policy",
-                  "dir": "engineering/simulink/model-based-design-core/configuring-block-policy"
-                },
-                {
                   "id": "skill:filing-bug-reports",
                   "kind": "skill",
                   "title": "filing-bug-reports",
@@ -1894,6 +1877,14 @@
                   "zh": "写被控对象模型规格",
                   "name": "specifying-plant-models",
                   "dir": "engineering/simulink/model-based-design-core/specifying-plant-models"
+                },
+                {
+                  "id": "skill:stateflow-apply-layout",
+                  "kind": "skill",
+                  "title": "stateflow-apply-layout",
+                  "zh": "自动整理 Stateflow 状态图布局，处理层级、连线与可读性。",
+                  "name": "stateflow-apply-layout",
+                  "dir": "engineering/simulink/model-based-design-core/stateflow-apply-layout"
                 }
               ]
             },
@@ -1922,12 +1913,28 @@
               ]
             },
             {
-              "id": "skill:simscape-write-ssc",
-              "kind": "skill",
-              "title": "simscape-write-ssc",
-              "zh": "编写 Simscape 组件 ssc 文件",
-              "name": "simscape-write-ssc",
-              "dir": "engineering/simulink/physical-modeling/simscape-write-ssc"
+              "id": "physical-modeling",
+              "title": "物理建模",
+              "desc": "Simscape 物理网络建模与自定义组件",
+              "kind": "node",
+              "children": [
+                {
+                  "id": "skill:simscape-diagnose-simulation-error",
+                  "kind": "skill",
+                  "title": "simscape-diagnose-simulation-error",
+                  "zh": "定位 Simscape 仿真失败原因：初始化、刚度、变量缩放与求解器设置。",
+                  "name": "simscape-diagnose-simulation-error",
+                  "dir": "engineering/simulink/physical-modeling/simscape-diagnose-simulation-error"
+                },
+                {
+                  "id": "skill:simscape-write-ssc",
+                  "kind": "skill",
+                  "title": "simscape-write-ssc",
+                  "zh": "编写 Simscape 组件 ssc 文件",
+                  "name": "simscape-write-ssc",
+                  "dir": "engineering/simulink/physical-modeling/simscape-write-ssc"
+                }
+              ]
             },
             {
               "id": "real-time-simulation-and-testing",
@@ -3220,7 +3227,7 @@
       "group": "engineering/matlab/aerospace",
       "path": "engineering/matlab/aerospace/matlab-compute-aerospace-environment",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-convert-aerospace-coordinates": {
       "name": "matlab-convert-aerospace-coordinates",
@@ -3230,7 +3237,7 @@
       "group": "engineering/matlab/aerospace",
       "path": "engineering/matlab/aerospace/matlab-convert-aerospace-coordinates",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-reliability": {
       "name": "matlab-analyze-reliability",
@@ -3240,17 +3247,17 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-analyze-reliability",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-classify-tabular-data": {
       "name": "matlab-classify-tabular-data",
       "dir": "engineering/matlab/ai-and-statistics/matlab-classify-tabular-data",
       "zh": "表格数据分类建模",
-      "en": "Use this skill to classify tabular data end-to-end in MATLAB — load a dataset, prepare and clean it, select promising classifiers, train them, and compare accuracies with cross-validation, holdout, or hyperparameter optimization plus statistical tests. TRIGGER when: user asks to classify tabular data, pick classifiers for a dataset, compare classifier accuracy, run cross-validation or a holdout ev",
+      "en": "Use this skill to classify tabular data end-to-end in MATLAB — load a dataset, prepare and clean it, select promising classifiers, train them, and compare accuracies with cross-validation, holdout, or hyperparameter optimization plus statistical tests. TRIGGER when: user asks to classify tabular data, pick classifiers for a dataset, compare the accuracy of several classifiers by cross-validation o",
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-classify-tabular-data",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-deploy-embedded-ai": {
       "name": "matlab-deploy-embedded-ai",
@@ -3260,7 +3267,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-deploy-embedded-ai",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-engineer-tabular-features": {
       "name": "matlab-engineer-tabular-features",
@@ -3270,7 +3277,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-engineer-tabular-features",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-fit-curve": {
       "name": "matlab-fit-curve",
@@ -3280,7 +3287,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-fit-curve",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-import-external-ai-model": {
       "name": "matlab-import-external-ai-model",
@@ -3290,7 +3297,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-import-external-ai-model",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-interpret-machine-learning-model": {
       "name": "matlab-interpret-machine-learning-model",
@@ -3300,7 +3307,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-interpret-machine-learning-model",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-train-network": {
       "name": "matlab-train-network",
@@ -3310,7 +3317,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-train-network",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-experiment-manager": {
       "name": "matlab-use-experiment-manager",
@@ -3320,7 +3327,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-use-experiment-manager",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-machine-learning-apps": {
       "name": "matlab-use-machine-learning-apps",
@@ -3330,7 +3337,7 @@
       "group": "engineering/matlab/ai-and-statistics",
       "path": "engineering/matlab/ai-and-statistics/matlab-use-machine-learning-apps",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-cosimulate-sumo-simulink": {
       "name": "matlab-cosimulate-sumo-simulink",
@@ -3340,7 +3347,7 @@
       "group": "engineering/matlab/automotive",
       "path": "engineering/matlab/automotive/matlab-cosimulate-sumo-simulink",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-fit-tire-model": {
       "name": "matlab-fit-tire-model",
@@ -3350,7 +3357,7 @@
       "group": "engineering/matlab/automotive",
       "path": "engineering/matlab/automotive/matlab-fit-tire-model",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-import-driving-data": {
       "name": "matlab-import-driving-data",
@@ -3360,7 +3367,7 @@
       "group": "engineering/matlab/automotive",
       "path": "engineering/matlab/automotive/matlab-import-driving-data",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-ncap-protocol": {
       "name": "matlab-use-ncap-protocol",
@@ -3370,7 +3377,7 @@
       "group": "engineering/matlab/automotive",
       "path": "engineering/matlab/automotive/matlab-use-ncap-protocol",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-scenario-builder": {
       "name": "matlab-use-scenario-builder",
@@ -3380,87 +3387,47 @@
       "group": "engineering/matlab/automotive",
       "path": "engineering/matlab/automotive/matlab-use-scenario-builder",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
-    "roadrunner-asset-mapping": {
-      "name": "roadrunner-asset-mapping",
-      "dir": "engineering/matlab/automotive/roadrunner-asset-mapping",
-      "zh": "RoadRunner 资产与素材映射",
-      "en": "RoadRunner asset path lookup tables for map format conversions in MATLAB. Maps lane markings, signs, signals, barriers, objects, and lane types to RoadRunner asset paths. Use when converting map formats to RRHD, resolving asset paths, or assigning visual assets to HD Map objects.",
+    "roadrunner-author-scenario": {
+      "name": "roadrunner-author-scenario",
+      "dir": "engineering/matlab/automotive/roadrunner-author-scenario",
+      "zh": "在 RoadRunner 中按场景描述编写 OpenSCENARIO 剧本，配置车辆、行为与触发条件。",
+      "en": "Create and edit RoadRunner scenarios in MATLAB with roadrunnerAPI: add actors, routes and phase logic, validate and repair a scenario, or recreate an OpenSCENARIO 1.x (.xosc) file as an editable scenario. Use when building a RoadRunner scenario from a description (cut-in, pedestrian crossing, lead-follow and similar), fixing one that fails validation, or rebuilding, recreating or converting a .xos",
       "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-asset-mapping",
+      "path": "engineering/matlab/automotive/roadrunner-author-scenario",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
-    "roadrunner-build-scenario-from-osc": {
-      "name": "roadrunner-build-scenario-from-osc",
-      "dir": "engineering/matlab/automotive/roadrunner-build-scenario-from-osc",
-      "zh": "由 OpenSCENARIO 文件建场景",
-      "en": "Build a RoadRunner Scenario programmatically from an OpenSCENARIO 1.x (.xosc) file using the `roadrunner-scenario-authoring` skill. Use when the user wants to recreate a scenario from a .xosc file, interpret an OpenSCENARIO file and build it programmatically, reconstruct a .xosc as a RoadRunner scenario, generate a MATLAB script from a .xosc file, or convert an OpenSCENARIO file to MATLAB code. Do",
+    "roadrunner-build-rrhd-map": {
+      "name": "roadrunner-build-rrhd-map",
+      "dir": "engineering/matlab/automotive/roadrunner-build-rrhd-map",
+      "zh": "从 OSM / Lanelet2 构建 RoadRunner HD Map，处理车道、路口、标志与高程对齐。",
+      "en": "Build, convert, and import RoadRunner HD Maps (.rrhd) in MATLAB. Author lanes, lane boundaries, markings, junctions, signs, barriers, and speed limits with roadrunnerHDMap; convert Lanelet2 (.osm, Autoware) maps to RRHD; resolve RoadRunner road asset paths for markings, crosswalks, signs, signals, and barriers; and import or build .rrhd or OpenDRIVE (.xodr) files into a RoadRunner scene. Use when ",
       "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-build-scenario-from-osc",
+      "path": "engineering/matlab/automotive/roadrunner-build-rrhd-map",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
-    "roadrunner-convert-lanelet2-to-rrhd": {
-      "name": "roadrunner-convert-lanelet2-to-rrhd",
-      "dir": "engineering/matlab/automotive/roadrunner-convert-lanelet2-to-rrhd",
-      "zh": "Lanelet2 地图转 RRHD",
-      "en": "Convert Lanelet2 maps (.osm) to RoadRunner HD Map (.rrhd) format using MATLAB. Use when converting Lanelet2 maps into RoadRunner Scene Builder, building driving scenes from open-source map data, or transforming road network definitions for simulation.",
-      "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-convert-lanelet2-to-rrhd",
-      "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
-    },
-    "roadrunner-core": {
-      "name": "roadrunner-core",
-      "dir": "engineering/matlab/automotive/roadrunner-core",
-      "zh": "RoadRunner 基础操作",
+    "roadrunner-manage-project": {
+      "name": "roadrunner-manage-project",
+      "dir": "engineering/matlab/automotive/roadrunner-manage-project",
+      "zh": "用 MATLAB 命令管理 RoadRunner 工程：启动、打开场景、保存与导出。",
       "en": "Foundation skill for all RoadRunner workflows: MATLAB path setup, connection, project/scene/scenario lifecycle, world settings, handle management, status, and close. Use when connecting to RoadRunner, managing projects/scenes/scenarios, setting world origin, checking status, closing RoadRunner, or when any downstream RoadRunner skill needs initialization.",
       "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-core",
+      "path": "engineering/matlab/automotive/roadrunner-manage-project",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
-    "roadrunner-import-scene": {
-      "name": "roadrunner-import-scene",
-      "dir": "engineering/matlab/automotive/roadrunner-import-scene",
-      "zh": "导入道路场景",
-      "en": "Import HD Map or OpenDRIVE files into a RoadRunner scene using MATLAB. Use when loading driving scenes in RoadRunner or RoadRunner Scene Builder, importing RRHD, OpenDRIVE, or other RoadRunner-supported formats for simulation, or verifying Lanelet2-to-RRHD conversion results visually. Requires rrApp handle from roadrunner-core.",
-      "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-import-scene",
-      "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
-    },
-    "roadrunner-rrhd-authoring": {
-      "name": "roadrunner-rrhd-authoring",
-      "dir": "engineering/matlab/automotive/roadrunner-rrhd-authoring",
-      "zh": "编写 RRHD 道路描述文件",
-      "en": "Build RoadRunner HD Map entities in MATLAB — lanes, boundaries, markings, junctions, signs, signals, barriers, parking. Use when creating driving scenes from scratch, authoring road networks for simulation and testing automated driving systems, or assembling RRHD maps from Lanelet2 or other HD map sources.",
-      "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-rrhd-authoring",
-      "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
-    },
-    "roadrunner-scenario-authoring": {
-      "name": "roadrunner-scenario-authoring",
-      "dir": "engineering/matlab/automotive/roadrunner-scenario-authoring",
-      "zh": "编写 RoadRunner 场景",
-      "en": "Programmatically author RoadRunner scenarios from MATLAB using roadrunnerAPI. Use when adding actors, creating routes, building scenario logic (phases, conditions, actions), placing vehicles/pedestrians, defining cut-in/crossing/ follow scenarios, or any programmatic scenario creation in RoadRunner. Triggers on: roadrunnerAPI, scenario authoring, add actor, create route, phase logic, cut-in scenar",
-      "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-scenario-authoring",
-      "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
-    },
-    "roadrunner-scenario-simulating": {
-      "name": "roadrunner-scenario-simulating",
-      "dir": "engineering/matlab/automotive/roadrunner-scenario-simulating",
-      "zh": "仿真 RoadRunner 场景",
+    "roadrunner-simulate-scenario": {
+      "name": "roadrunner-simulate-scenario",
+      "dir": "engineering/matlab/automotive/roadrunner-simulate-scenario",
+      "zh": "在 RoadRunner 中回放和仿真场景，检查车辆轨迹、碰撞与传感器表现。",
       "en": "Expert guidance for simulating RoadRunner scenarios via the MATLAB programmatic API and Simulink co-simulation. Use when the user wants to run a simulation, step through a simulation, control actors during co-simulation, add observers, attach sensors, retrieve simulation logs, or read/write scenario variables. Covers simulateScenario, createSimulation, ScenarioSimulation set/get, ActorSimulation g",
       "group": "engineering/matlab/automotive",
-      "path": "engineering/matlab/automotive/roadrunner-scenario-simulating",
+      "path": "engineering/matlab/automotive/roadrunner-simulate-scenario",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-share-content": {
       "name": "matlab-share-content",
@@ -3470,7 +3437,7 @@
       "group": "engineering/matlab/cloud-solutions",
       "path": "engineering/matlab/cloud-solutions/matlab-share-content",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-deploy-ai-model": {
       "name": "matlab-deploy-ai-model",
@@ -3480,7 +3447,7 @@
       "group": "engineering/matlab/code-generation",
       "path": "engineering/matlab/code-generation/matlab-deploy-ai-model",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-deploy-embedded-code": {
       "name": "matlab-deploy-embedded-code",
@@ -3490,7 +3457,7 @@
       "group": "engineering/matlab/code-generation",
       "path": "engineering/matlab/code-generation/matlab-deploy-embedded-code",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-generate-code": {
       "name": "matlab-generate-code",
@@ -3500,7 +3467,7 @@
       "group": "engineering/matlab/code-generation",
       "path": "engineering/matlab/code-generation/matlab-generate-code",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-optimize-gpu-codegen": {
       "name": "matlab-optimize-gpu-codegen",
@@ -3510,7 +3477,7 @@
       "group": "engineering/matlab/code-generation",
       "path": "engineering/matlab/code-generation/matlab-optimize-gpu-codegen",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-review-fi-object-code": {
       "name": "matlab-review-fi-object-code",
@@ -3520,7 +3487,7 @@
       "group": "engineering/matlab/code-generation",
       "path": "engineering/matlab/code-generation/matlab-review-fi-object-code",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "simbiology-build-model": {
       "name": "simbiology-build-model",
@@ -3530,7 +3497,7 @@
       "group": "engineering/matlab/computational-biology",
       "path": "engineering/matlab/computational-biology/simbiology-build-model",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "simbiology-fit-model": {
       "name": "simbiology-fit-model",
@@ -3540,7 +3507,7 @@
       "group": "engineering/matlab/computational-biology",
       "path": "engineering/matlab/computational-biology/simbiology-fit-model",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "simbiology-simulate-model": {
       "name": "simbiology-simulate-model",
@@ -3550,7 +3517,7 @@
       "group": "engineering/matlab/computational-biology",
       "path": "engineering/matlab/computational-biology/simbiology-simulate-model",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-access-datafeed": {
       "name": "matlab-access-datafeed",
@@ -3560,17 +3527,17 @@
       "group": "engineering/matlab/computational-finance",
       "path": "engineering/matlab/computational-finance/matlab-access-datafeed",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-optimize-portfolio": {
       "name": "matlab-optimize-portfolio",
       "dir": "engineering/matlab/computational-finance/matlab-optimize-portfolio",
       "zh": "投资组合优化",
-      "en": "Help users formulate and solve portfolio optimization problems using Financial Toolbox's Portfolio object. Covers mean-variance (Markowitz), maximum Sharpe ratio (tangency), and efficient frontier workflows. Use when users ask about portfolio optimization, Markowitz, efficient frontier, Sharpe ratio, or attempt to use generic solvers (quadprog, fmincon, ga, problem-based optimize) for portfolio pr",
+      "en": "Formulate and solve portfolio optimization problems in MATLAB. Routes to the Financial Toolbox Portfolio object for mean-variance (Markowitz), minimum- variance, target-return, maximum Sharpe ratio, and efficient frontier problems with bounds, budget, group, turnover, tracking-error, or cardinality constraints; or to the problem-based framework (optimproblem/optimvar/solve) when constraints exceed",
       "group": "engineering/matlab/computational-finance",
       "path": "engineering/matlab/computational-finance/matlab-optimize-portfolio",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-price-instrument": {
       "name": "matlab-price-instrument",
@@ -3580,7 +3547,17 @@
       "group": "engineering/matlab/computational-finance",
       "path": "engineering/matlab/computational-finance/matlab-price-instrument",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
+    },
+    "matlab-specify-ssm": {
+      "name": "matlab-specify-ssm",
+      "dir": "engineering/matlab/computational-finance/matlab-specify-ssm",
+      "zh": "用 MATLAB 指定、估计并检验状态空间模型，覆盖线性化与标准模型结构。",
+      "en": "Convert state-space equations, given as an image or as text, into a MATLAB Econometrics Toolbox ssm object. Use only when the request contains the model equations and asks to convert, implement, or create ssm code. Do not use when no equations are given; for estimating, filtering, smoothing, forecasting, or diagnosing an existing or estimated ssm model; for explaining equations without code; or fo",
+      "group": "engineering/matlab/computational-finance",
+      "path": "engineering/matlab/computational-finance/matlab-specify-ssm",
+      "repo": "matlab/matlab-agentic-toolkit",
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-spreadsheet-link": {
       "name": "matlab-use-spreadsheet-link",
@@ -3590,7 +3567,7 @@
       "group": "engineering/matlab/computational-finance",
       "path": "engineering/matlab/computational-finance/matlab-use-spreadsheet-link",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-extract-battery-features": {
       "name": "matlab-extract-battery-features",
@@ -3600,7 +3577,7 @@
       "group": "engineering/matlab/control-systems",
       "path": "engineering/matlab/control-systems/matlab-extract-battery-features",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-extract-rotating-machinery-features": {
       "name": "matlab-extract-rotating-machinery-features",
@@ -3610,7 +3587,7 @@
       "group": "engineering/matlab/control-systems",
       "path": "engineering/matlab/control-systems/matlab-extract-rotating-machinery-features",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-identify-linear-system": {
       "name": "matlab-identify-linear-system",
@@ -3620,7 +3597,7 @@
       "group": "engineering/matlab/control-systems",
       "path": "engineering/matlab/control-systems/matlab-identify-linear-system",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-spectral-images": {
       "name": "matlab-analyze-spectral-images",
@@ -3630,7 +3607,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-analyze-spectral-images",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-display-image": {
       "name": "matlab-display-image",
@@ -3640,7 +3617,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-display-image",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-display-volume": {
       "name": "matlab-display-volume",
@@ -3650,7 +3627,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-display-volume",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-integrate-pytorch-vision": {
       "name": "matlab-integrate-pytorch-vision",
@@ -3660,7 +3637,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-integrate-pytorch-vision",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-model-optics": {
       "name": "matlab-model-optics",
@@ -3670,7 +3647,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-model-optics",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-process-images": {
       "name": "matlab-process-images",
@@ -3680,7 +3657,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-process-images",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-read-write-point-cloud-file": {
       "name": "matlab-read-write-point-cloud-file",
@@ -3690,7 +3667,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-read-write-point-cloud-file",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-recognize-text": {
       "name": "matlab-recognize-text",
@@ -3700,7 +3677,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-recognize-text",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-register-point-clouds": {
       "name": "matlab-register-point-clouds",
@@ -3710,7 +3687,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-register-point-clouds",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-visual-inspection": {
       "name": "matlab-use-visual-inspection",
@@ -3720,7 +3697,7 @@
       "group": "engineering/matlab/image-processing-and-computer-vision",
       "path": "engineering/matlab/image-processing-and-computer-vision/matlab-use-visual-inspection",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-solve-optimization": {
       "name": "matlab-solve-optimization",
@@ -3730,7 +3707,7 @@
       "group": "engineering/matlab/math-and-optimization",
       "path": "engineering/matlab/math-and-optimization/matlab-solve-optimization",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-solve-pde": {
       "name": "matlab-solve-pde",
@@ -3740,7 +3717,7 @@
       "group": "engineering/matlab/math-and-optimization",
       "path": "engineering/matlab/math-and-optimization/matlab-solve-pde",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-symbolic-math": {
       "name": "matlab-use-symbolic-math",
@@ -3750,7 +3727,7 @@
       "group": "engineering/matlab/math-and-optimization",
       "path": "engineering/matlab/math-and-optimization/matlab-use-symbolic-math",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-apply-theme": {
       "name": "matlab-apply-theme",
@@ -3760,7 +3737,7 @@
       "group": "engineering/matlab/matlab-app-building",
       "path": "engineering/matlab/matlab-app-building/matlab-apply-theme",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-build-app": {
       "name": "matlab-build-app",
@@ -3770,7 +3747,7 @@
       "group": "engineering/matlab/matlab-app-building",
       "path": "engineering/matlab/matlab-app-building/matlab-build-app",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-build-chart": {
       "name": "matlab-build-chart",
@@ -3780,7 +3757,7 @@
       "group": "engineering/matlab/matlab-app-building",
       "path": "engineering/matlab/matlab-app-building/matlab-build-chart",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-create-live-script": {
       "name": "matlab-create-live-script",
@@ -3790,7 +3767,7 @@
       "group": "engineering/matlab/matlab-core",
       "path": "engineering/matlab/matlab-core/matlab-create-live-script",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-debug-code": {
       "name": "matlab-debug-code",
@@ -3800,7 +3777,7 @@
       "group": "engineering/matlab/matlab-core",
       "path": "engineering/matlab/matlab-core/matlab-debug-code",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-install-products": {
       "name": "matlab-install-products",
@@ -3810,7 +3787,7 @@
       "group": "engineering/matlab/matlab-core",
       "path": "engineering/matlab/matlab-core/matlab-install-products",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-list-products": {
       "name": "matlab-list-products",
@@ -3820,7 +3797,7 @@
       "group": "engineering/matlab/matlab-core",
       "path": "engineering/matlab/matlab-core/matlab-list-products",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-read-documentation": {
       "name": "matlab-read-documentation",
@@ -3830,7 +3807,7 @@
       "group": "engineering/matlab/matlab-core",
       "path": "engineering/matlab/matlab-core/matlab-read-documentation",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-review-code": {
       "name": "matlab-review-code",
@@ -3840,7 +3817,7 @@
       "group": "engineering/matlab/matlab-core",
       "path": "engineering/matlab/matlab-core/matlab-review-code",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-data": {
       "name": "matlab-analyze-data",
@@ -3850,7 +3827,7 @@
       "group": "engineering/matlab/matlab-data-import-and-analysis",
       "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-analyze-data",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-choose-big-data-solution": {
       "name": "matlab-choose-big-data-solution",
@@ -3860,7 +3837,7 @@
       "group": "engineering/matlab/matlab-data-import-and-analysis",
       "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-choose-big-data-solution",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-import-export-data": {
       "name": "matlab-import-export-data",
@@ -3870,7 +3847,7 @@
       "group": "engineering/matlab/matlab-data-import-and-analysis",
       "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-import-export-data",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-secure-credentials": {
       "name": "matlab-secure-credentials",
@@ -3880,7 +3857,7 @@
       "group": "engineering/matlab/matlab-data-import-and-analysis",
       "path": "engineering/matlab/matlab-data-import-and-analysis/matlab-secure-credentials",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-call-python": {
       "name": "matlab-call-python",
@@ -3890,7 +3867,7 @@
       "group": "engineering/matlab/matlab-external-language-interfaces",
       "path": "engineering/matlab/matlab-external-language-interfaces/matlab-call-python",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-configure-java": {
       "name": "matlab-configure-java",
@@ -3900,7 +3877,7 @@
       "group": "engineering/matlab/matlab-external-language-interfaces",
       "path": "engineering/matlab/matlab-external-language-interfaces/matlab-configure-java",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-upgrade-mex-ic": {
       "name": "matlab-upgrade-mex-ic",
@@ -3910,7 +3887,7 @@
       "group": "engineering/matlab/matlab-external-language-interfaces",
       "path": "engineering/matlab/matlab-external-language-interfaces/matlab-upgrade-mex-ic",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-validate-function-arguments": {
       "name": "matlab-validate-function-arguments",
@@ -3920,7 +3897,7 @@
       "group": "engineering/matlab/matlab-programming",
       "path": "engineering/matlab/matlab-programming/matlab-validate-function-arguments",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-configure-toml-project": {
       "name": "matlab-configure-toml-project",
@@ -3930,7 +3907,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-configure-toml-project",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-instrument-opentelemetry-tracing": {
       "name": "matlab-instrument-opentelemetry-tracing",
@@ -3940,7 +3917,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-instrument-opentelemetry-tracing",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-modernize-code": {
       "name": "matlab-modernize-code",
@@ -3950,7 +3927,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-modernize-code",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-optimize-memory": {
       "name": "matlab-optimize-memory",
@@ -3960,7 +3937,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-optimize-memory",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-optimize-performance": {
       "name": "matlab-optimize-performance",
@@ -3970,7 +3947,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-optimize-performance",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-package-toolbox": {
       "name": "matlab-package-toolbox",
@@ -3980,7 +3957,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-package-toolbox",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-run-tests": {
       "name": "matlab-run-tests",
@@ -3990,7 +3967,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-run-tests",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-package-manager": {
       "name": "matlab-use-package-manager",
@@ -4000,7 +3977,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-use-package-manager",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-write-help": {
       "name": "matlab-write-help",
@@ -4010,7 +3987,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-write-help",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-write-performance-tests": {
       "name": "matlab-write-performance-tests",
@@ -4020,7 +3997,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-write-performance-tests",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-write-tests": {
       "name": "matlab-write-tests",
@@ -4030,7 +4007,7 @@
       "group": "engineering/matlab/matlab-software-development",
       "path": "engineering/matlab/matlab-software-development/matlab-write-tests",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-diagnose-parfor": {
       "name": "matlab-diagnose-parfor",
@@ -4040,7 +4017,7 @@
       "group": "engineering/matlab/parallel-computing",
       "path": "engineering/matlab/parallel-computing/matlab-diagnose-parfor",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-discover-clusters": {
       "name": "matlab-discover-clusters",
@@ -4050,7 +4027,7 @@
       "group": "engineering/matlab/parallel-computing",
       "path": "engineering/matlab/parallel-computing/matlab-discover-clusters",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-set-up-worker-state": {
       "name": "matlab-set-up-worker-state",
@@ -4060,7 +4037,7 @@
       "group": "engineering/matlab/parallel-computing",
       "path": "engineering/matlab/parallel-computing/matlab-set-up-worker-state",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-setup-gpu": {
       "name": "matlab-setup-gpu",
@@ -4070,7 +4047,7 @@
       "group": "engineering/matlab/parallel-computing",
       "path": "engineering/matlab/parallel-computing/matlab-setup-gpu",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-thread-pool": {
       "name": "matlab-use-thread-pool",
@@ -4080,7 +4057,7 @@
       "group": "engineering/matlab/parallel-computing",
       "path": "engineering/matlab/parallel-computing/matlab-use-thread-pool",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-radar": {
       "name": "matlab-design-radar",
@@ -4090,7 +4067,7 @@
       "group": "engineering/matlab/radar",
       "path": "engineering/matlab/radar/matlab-design-radar",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-radar-waveform": {
       "name": "matlab-design-radar-waveform",
@@ -4100,7 +4077,17 @@
       "group": "engineering/matlab/radar",
       "path": "engineering/matlab/radar/matlab-design-radar-waveform",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
+    },
+    "matlab-design-scenario": {
+      "name": "matlab-design-scenario",
+      "dir": "engineering/matlab/radar/matlab-design-scenario",
+      "zh": "用 MATLAB 搭建雷达与相机仿真场景，配置平台轨迹、姿态和可见性分析。",
+      "en": "Design, simulate, and analyze 3D scenarios with terrain, buildings, actors, trajectories, and analyses. Use when evaluating visibility or geometric paths between moving actors, planning sensor or antenna placement in urban environments, simulating vehicle or aircraft routes, or analyzing line-of-sight and geometric ray trace propagation over terrain and buildings. Also use when the user mentions 3",
+      "group": "engineering/matlab/radar",
+      "path": "engineering/matlab/radar/matlab-design-scenario",
+      "repo": "matlab/matlab-agentic-toolkit",
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-import-tracking-data": {
       "name": "matlab-import-tracking-data",
@@ -4110,7 +4097,7 @@
       "group": "engineering/matlab/radar",
       "path": "engineering/matlab/radar/matlab-import-tracking-data",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-simulate-radar-detections": {
       "name": "matlab-simulate-radar-detections",
@@ -4120,7 +4107,7 @@
       "group": "engineering/matlab/radar",
       "path": "engineering/matlab/radar/matlab-simulate-radar-detections",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-connect-databricks": {
       "name": "matlab-connect-databricks",
@@ -4130,7 +4117,7 @@
       "group": "engineering/matlab/reporting-and-database-access",
       "path": "engineering/matlab/reporting-and-database-access/matlab-connect-databricks",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-generate-report": {
       "name": "matlab-generate-report",
@@ -4140,7 +4127,7 @@
       "group": "engineering/matlab/reporting-and-database-access",
       "path": "engineering/matlab/reporting-and-database-access/matlab-generate-report",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-database": {
       "name": "matlab-use-database",
@@ -4150,7 +4137,7 @@
       "group": "engineering/matlab/reporting-and-database-access",
       "path": "engineering/matlab/reporting-and-database-access/matlab-use-database",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-duckdb": {
       "name": "matlab-use-duckdb",
@@ -4160,7 +4147,7 @@
       "group": "engineering/matlab/reporting-and-database-access",
       "path": "engineering/matlab/reporting-and-database-access/matlab-use-duckdb",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-ams-waveform": {
       "name": "matlab-analyze-ams-waveform",
@@ -4170,7 +4157,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-ams-waveform",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-antenna-structures": {
       "name": "matlab-analyze-antenna-structures",
@@ -4180,7 +4167,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-antenna-structures",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-em": {
       "name": "matlab-analyze-em",
@@ -4190,7 +4177,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-em",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-pcb-pdn": {
       "name": "matlab-analyze-pcb-pdn",
@@ -4200,7 +4187,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-analyze-pcb-pdn",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-assemble-pcb-layout": {
       "name": "matlab-assemble-pcb-layout",
@@ -4210,7 +4197,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-assemble-pcb-layout",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-antenna": {
       "name": "matlab-design-antenna",
@@ -4220,7 +4207,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-antenna",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-pcb-coupler": {
       "name": "matlab-design-pcb-coupler",
@@ -4230,7 +4217,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-coupler",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-pcb-filter": {
       "name": "matlab-design-pcb-filter",
@@ -4240,7 +4227,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-filter",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-pcb-passive": {
       "name": "matlab-design-pcb-passive",
@@ -4250,7 +4237,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-passive",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-pcb-transmission-line": {
       "name": "matlab-design-pcb-transmission-line",
@@ -4260,7 +4247,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-design-pcb-transmission-line",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-export-session-script": {
       "name": "matlab-export-session-script",
@@ -4270,7 +4257,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-export-session-script",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-integrate-antenna": {
       "name": "matlab-integrate-antenna",
@@ -4280,7 +4267,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-integrate-antenna",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-integrate-pcb-circuit": {
       "name": "matlab-integrate-pcb-circuit",
@@ -4290,7 +4277,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-integrate-pcb-circuit",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-manage-pcb-material": {
       "name": "matlab-manage-pcb-material",
@@ -4300,7 +4287,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-manage-pcb-material",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-model-ams-systems": {
       "name": "matlab-model-ams-systems",
@@ -4310,7 +4297,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-ams-systems",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-model-rf": {
       "name": "matlab-model-rf",
@@ -4320,7 +4307,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-rf",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-model-serdes-systems": {
       "name": "matlab-model-serdes-systems",
@@ -4330,7 +4317,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-serdes-systems",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-model-via": {
       "name": "matlab-model-via",
@@ -4340,7 +4327,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-model-via",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-optimize-pcb-design": {
       "name": "matlab-optimize-pcb-design",
@@ -4350,7 +4337,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-optimize-pcb-design",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-read-pcb-layout": {
       "name": "matlab-read-pcb-layout",
@@ -4360,7 +4347,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-read-pcb-layout",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-write-pcb-layout": {
       "name": "matlab-write-pcb-layout",
@@ -4370,7 +4357,7 @@
       "group": "engineering/matlab/rf-and-mixed-signal",
       "path": "engineering/matlab/rf-and-mixed-signal/matlab-write-pcb-layout",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-compute-gnss-position": {
       "name": "matlab-compute-gnss-position",
@@ -4380,7 +4367,7 @@
       "group": "engineering/matlab/robotics-and-autonomous-systems",
       "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-compute-gnss-position",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-connect-mavlink": {
       "name": "matlab-connect-mavlink",
@@ -4390,7 +4377,7 @@
       "group": "engineering/matlab/robotics-and-autonomous-systems",
       "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-connect-mavlink",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-create-uav-scenario": {
       "name": "matlab-create-uav-scenario",
@@ -4400,7 +4387,7 @@
       "group": "engineering/matlab/robotics-and-autonomous-systems",
       "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-create-uav-scenario",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-fuse-inertial-sensors": {
       "name": "matlab-fuse-inertial-sensors",
@@ -4410,7 +4397,7 @@
       "group": "engineering/matlab/robotics-and-autonomous-systems",
       "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-fuse-inertial-sensors",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-model-robot-kinematics": {
       "name": "matlab-model-robot-kinematics",
@@ -4420,7 +4407,7 @@
       "group": "engineering/matlab/robotics-and-autonomous-systems",
       "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-model-robot-kinematics",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-plan-robot-motion": {
       "name": "matlab-plan-robot-motion",
@@ -4430,7 +4417,7 @@
       "group": "engineering/matlab/robotics-and-autonomous-systems",
       "path": "engineering/matlab/robotics-and-autonomous-systems/matlab-plan-robot-motion",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-spectrum": {
       "name": "matlab-analyze-spectrum",
@@ -4440,7 +4427,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-analyze-spectrum",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-analyze-time-frequency-content": {
       "name": "matlab-analyze-time-frequency-content",
@@ -4450,7 +4437,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-analyze-time-frequency-content",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-configure-scope-object": {
       "name": "matlab-configure-scope-object",
@@ -4460,7 +4447,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-configure-scope-object",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-adaptive-filter": {
       "name": "matlab-design-adaptive-filter",
@@ -4470,7 +4457,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-design-adaptive-filter",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-digital-filter": {
       "name": "matlab-design-digital-filter",
@@ -4480,7 +4467,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-design-digital-filter",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-dsphdl-ddc": {
       "name": "matlab-design-dsphdl-ddc",
@@ -4490,7 +4477,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-design-dsphdl-ddc",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-evaluate-acoustic-metrics": {
       "name": "matlab-evaluate-acoustic-metrics",
@@ -4500,7 +4487,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-evaluate-acoustic-metrics",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-extract-signal-features": {
       "name": "matlab-extract-signal-features",
@@ -4510,7 +4497,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-extract-signal-features",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-play-record-audio": {
       "name": "matlab-play-record-audio",
@@ -4520,7 +4507,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-play-record-audio",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-prepare-signal-data": {
       "name": "matlab-prepare-signal-data",
@@ -4530,7 +4517,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-prepare-signal-data",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-process-streaming-audio": {
       "name": "matlab-process-streaming-audio",
@@ -4540,7 +4527,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-process-streaming-audio",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-write-audio-plugin": {
       "name": "matlab-write-audio-plugin",
@@ -4550,7 +4537,7 @@
       "group": "engineering/matlab/signal-processing",
       "path": "engineering/matlab/signal-processing/matlab-write-audio-plugin",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-build-industrial-hmi": {
       "name": "matlab-build-industrial-hmi",
@@ -4560,7 +4547,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-build-industrial-hmi",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-call-nidaqmx": {
       "name": "matlab-call-nidaqmx",
@@ -4570,7 +4557,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-call-nidaqmx",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-connect-arduino": {
       "name": "matlab-connect-arduino",
@@ -4580,7 +4567,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-connect-arduino",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-connect-bluetooth-low-energy-device": {
       "name": "matlab-connect-bluetooth-low-energy-device",
@@ -4590,7 +4577,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-connect-bluetooth-low-energy-device",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-create-custom-arduino-library": {
       "name": "matlab-create-custom-arduino-library",
@@ -4600,7 +4587,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-create-custom-arduino-library",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-discover-hardware": {
       "name": "matlab-discover-hardware",
@@ -4610,7 +4597,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-discover-hardware",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-enhance-camera-image": {
       "name": "matlab-enhance-camera-image",
@@ -4620,7 +4607,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-enhance-camera-image",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-find-pi-assets": {
       "name": "matlab-find-pi-assets",
@@ -4630,7 +4617,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-find-pi-assets",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-import-export-vehicle-data": {
       "name": "matlab-import-export-vehicle-data",
@@ -4640,7 +4627,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-import-export-vehicle-data",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-modernize-daq": {
       "name": "matlab-modernize-daq",
@@ -4650,7 +4637,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-modernize-daq",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-cameras": {
       "name": "matlab-use-cameras",
@@ -4660,7 +4647,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-use-cameras",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-opcua-client": {
       "name": "matlab-use-opcua-client",
@@ -4670,7 +4657,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-use-opcua-client",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-use-vehicle-network": {
       "name": "matlab-use-vehicle-network",
@@ -4680,7 +4667,7 @@
       "group": "engineering/matlab/test-and-measurement",
       "path": "engineering/matlab/test-and-measurement/matlab-use-vehicle-network",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-add-awgn": {
       "name": "matlab-add-awgn",
@@ -4690,7 +4677,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-add-awgn",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-design-ofdm-system": {
       "name": "matlab-design-ofdm-system",
@@ -4700,7 +4687,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-design-ofdm-system",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-detect-capture-usrp": {
       "name": "matlab-detect-capture-usrp",
@@ -4710,7 +4697,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-detect-capture-usrp",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-generate-5g-waveform": {
       "name": "matlab-generate-5g-waveform",
@@ -4720,7 +4707,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-generate-5g-waveform",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-generate-ble-waveform": {
       "name": "matlab-generate-ble-waveform",
@@ -4730,7 +4717,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-generate-ble-waveform",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-generate-gnss-waveform": {
       "name": "matlab-generate-gnss-waveform",
@@ -4740,7 +4727,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-generate-gnss-waveform",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-generate-wlan-waveform": {
       "name": "matlab-generate-wlan-waveform",
@@ -4750,7 +4737,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-generate-wlan-waveform",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-set-up-usrp-radio": {
       "name": "matlab-set-up-usrp-radio",
@@ -4760,7 +4747,17 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-set-up-usrp-radio",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
+    },
+    "matlab-simulate-6g-system": {
+      "name": "matlab-simulate-6g-system",
+      "dir": "engineering/matlab/wireless-communications/matlab-simulate-6g-system",
+      "zh": "用 MATLAB 搭建并仿真 6G 系统链路，覆盖波形、信道与收发处理。",
+      "en": "Build 6G and pre-6G simulations with the 6G Exploration Library for 5G Toolbox, starting from the closest shipped example and its helpers, and avoid silent pre6G API traps. Use for any 6G, pre-6G or pre6G* work, including waveforms and impairments, EVM, sub-THz, custom modulation, custom reference signals (RS overhead) and link-level throughput or BLER; for 5G or 6G ISAC (integrated sensing and co",
+      "group": "engineering/matlab/wireless-communications",
+      "path": "engineering/matlab/wireless-communications/matlab-simulate-6g-system",
+      "repo": "matlab/matlab-agentic-toolkit",
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-simulate-bluetooth-network": {
       "name": "matlab-simulate-bluetooth-network",
@@ -4770,7 +4767,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-simulate-bluetooth-network",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-simulate-wireless-network": {
       "name": "matlab-simulate-wireless-network",
@@ -4780,7 +4777,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-simulate-wireless-network",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "matlab-transmit-capture-usrp": {
       "name": "matlab-transmit-capture-usrp",
@@ -4790,7 +4787,7 @@
       "group": "engineering/matlab/wireless-communications",
       "path": "engineering/matlab/wireless-communications/matlab-transmit-capture-usrp",
       "repo": "matlab/matlab-agentic-toolkit",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2"
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9"
     },
     "simulink-compose-multi-vehicle-system": {
       "name": "simulink-compose-multi-vehicle-system",
@@ -4800,7 +4797,7 @@
       "group": "engineering/simulink/aerospace",
       "path": "engineering/simulink/aerospace/simulink-compose-multi-vehicle-system",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-author-classic-autosar-swc": {
       "name": "simulink-author-classic-autosar-swc",
@@ -4810,7 +4807,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/simulink-author-classic-autosar-swc",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-configure-code-interfaces": {
       "name": "simulink-configure-code-interfaces",
@@ -4820,7 +4817,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/simulink-configure-code-interfaces",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-configure-model-for-code-generation": {
       "name": "simulink-configure-model-for-code-generation",
@@ -4830,7 +4827,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/simulink-configure-model-for-code-generation",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-customize-a2l": {
       "name": "simulink-customize-a2l",
@@ -4840,7 +4837,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/simulink-customize-a2l",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-optimizing-embedded-code": {
       "name": "simulink-optimizing-embedded-code",
@@ -4850,7 +4847,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/simulink-optimizing-embedded-code",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-single-precision-conversion": {
       "name": "simulink-single-precision-conversion",
@@ -4860,7 +4857,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/simulink-single-precision-conversion",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "slci-compatibility-analysis": {
       "name": "slci-compatibility-analysis",
@@ -4870,7 +4867,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/slci-compatibility-analysis",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "slci-inspection-incompatibility-analysis": {
       "name": "slci-inspection-incompatibility-analysis",
@@ -4880,7 +4877,7 @@
       "group": "engineering/simulink/code-generation",
       "path": "engineering/simulink/code-generation/slci-inspection-incompatibility-analysis",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-control-motors": {
       "name": "simulink-control-motors",
@@ -4890,7 +4887,7 @@
       "group": "engineering/simulink/control-systems",
       "path": "engineering/simulink/control-systems/simulink-control-motors",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-frequency-response": {
       "name": "simulink-frequency-response",
@@ -4900,7 +4897,7 @@
       "group": "engineering/simulink/control-systems",
       "path": "engineering/simulink/control-systems/simulink-frequency-response",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-linearize": {
       "name": "simulink-linearize",
@@ -4910,7 +4907,7 @@
       "group": "engineering/simulink/control-systems",
       "path": "engineering/simulink/control-systems/simulink-linearize",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "arranging-simulink-layouts": {
       "name": "arranging-simulink-layouts",
@@ -4920,7 +4917,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/arranging-simulink-layouts",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "building-simulink-models": {
       "name": "building-simulink-models",
@@ -4930,17 +4927,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/building-simulink-models",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
-    },
-    "configuring-block-policy": {
-      "name": "configuring-block-policy",
-      "dir": "engineering/simulink/model-based-design-core/configuring-block-policy",
-      "zh": "配置 Simulink 端口与求解器参数策略",
-      "en": "Guide users through creating and managing .satk/block-policy.json for controlling which blocks the agent can use, which are excluded, and which block parameters the agent should not modify. Use when setting up block usage policy for a project.",
-      "group": "engineering/simulink/model-based-design-core",
-      "path": "engineering/simulink/model-based-design-core/configuring-block-policy",
-      "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "filing-bug-reports": {
       "name": "filing-bug-reports",
@@ -4950,7 +4937,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/filing-bug-reports",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "generate-requirement-drafts": {
       "name": "generate-requirement-drafts",
@@ -4960,7 +4947,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/generate-requirement-drafts",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "managing-simulink-projects": {
       "name": "managing-simulink-projects",
@@ -4970,7 +4957,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/managing-simulink-projects",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "setup-custom-libraries": {
       "name": "setup-custom-libraries",
@@ -4980,7 +4967,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/setup-custom-libraries",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulating-simulink-models": {
       "name": "simulating-simulink-models",
@@ -4990,7 +4977,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/simulating-simulink-models",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-curating-library-kg": {
       "name": "simulink-curating-library-kg",
@@ -5000,7 +4987,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/simulink-curating-library-kg",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-sanitize-model": {
       "name": "simulink-sanitize-model",
@@ -5010,7 +4997,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/simulink-sanitize-model",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "specifying-mbd-algorithms": {
       "name": "specifying-mbd-algorithms",
@@ -5020,7 +5007,7 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/specifying-mbd-algorithms",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "specifying-plant-models": {
       "name": "specifying-plant-models",
@@ -5030,7 +5017,17 @@
       "group": "engineering/simulink/model-based-design-core",
       "path": "engineering/simulink/model-based-design-core/specifying-plant-models",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
+    },
+    "stateflow-apply-layout": {
+      "name": "stateflow-apply-layout",
+      "dir": "engineering/simulink/model-based-design-core/stateflow-apply-layout",
+      "zh": "自动整理 Stateflow 状态图布局，处理层级、连线与可读性。",
+      "en": "Use when a Stateflow diagram needs arranging — after adding states, transitions, or junctions through the Stateflow API has left elements overlapping, or when someone opens an existing chart, subchart state, box or function, atomic subchart, or atomic box and wants a messy diagram cleaned up, organized, reorganized, or tidied with no edit involved. Also use when a user names applySFAutolayout dire",
+      "group": "engineering/simulink/model-based-design-core",
+      "path": "engineering/simulink/model-based-design-core/stateflow-apply-layout",
+      "repo": "matlab/simulink-agentic-toolkit",
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "building-architecture-models": {
       "name": "building-architecture-models",
@@ -5040,7 +5037,7 @@
       "group": "engineering/simulink/model-based-system-engineering",
       "path": "engineering/simulink/model-based-system-engineering/building-architecture-models",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-manage-variant-configuration": {
       "name": "simulink-manage-variant-configuration",
@@ -5050,7 +5047,17 @@
       "group": "engineering/simulink/model-based-system-engineering",
       "path": "engineering/simulink/model-based-system-engineering/simulink-manage-variant-configuration",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
+    },
+    "simscape-diagnose-simulation-error": {
+      "name": "simscape-diagnose-simulation-error",
+      "dir": "engineering/simulink/physical-modeling/simscape-diagnose-simulation-error",
+      "zh": "定位 Simscape 仿真失败原因：初始化、刚度、变量缩放与求解器设置。",
+      "en": "Triage Simscape simulation errors and solver warnings and dispatch to the appropriate diagnostic surface. Covers transient/runtime failures — min step size violations (stiffness, parasitics, event-time), transient initialization failures, and index reduction (\\\"Cannot solve for one or more variables\\\"), including errors that appear only with run-time parameters. Use whenever a Simscape model fails",
+      "group": "engineering/simulink/physical-modeling",
+      "path": "engineering/simulink/physical-modeling/simscape-diagnose-simulation-error",
+      "repo": "matlab/simulink-agentic-toolkit",
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simscape-write-ssc": {
       "name": "simscape-write-ssc",
@@ -5060,7 +5067,7 @@
       "group": "engineering/simulink/physical-modeling",
       "path": "engineering/simulink/physical-modeling/simscape-write-ssc",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-configure-real-time-model": {
       "name": "simulink-configure-real-time-model",
@@ -5070,7 +5077,7 @@
       "group": "engineering/simulink/real-time-simulation-and-testing",
       "path": "engineering/simulink/real-time-simulation-and-testing/simulink-configure-real-time-model",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-configure-real-time-target": {
       "name": "simulink-configure-real-time-target",
@@ -5080,7 +5087,7 @@
       "group": "engineering/simulink/real-time-simulation-and-testing",
       "path": "engineering/simulink/real-time-simulation-and-testing/simulink-configure-real-time-target",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-instrument-real-time-application": {
       "name": "simulink-instrument-real-time-application",
@@ -5090,7 +5097,7 @@
       "group": "engineering/simulink/real-time-simulation-and-testing",
       "path": "engineering/simulink/real-time-simulation-and-testing/simulink-instrument-real-time-application",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-run-real-time-application": {
       "name": "simulink-run-real-time-application",
@@ -5100,7 +5107,7 @@
       "group": "engineering/simulink/real-time-simulation-and-testing",
       "path": "engineering/simulink/real-time-simulation-and-testing/simulink-run-real-time-application",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-streaming-dsp": {
       "name": "simulink-streaming-dsp",
@@ -5110,7 +5117,7 @@
       "group": "engineering/simulink/signal-processing",
       "path": "engineering/simulink/signal-processing/simulink-streaming-dsp",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-create-block-icon": {
       "name": "simulink-create-block-icon",
@@ -5120,7 +5127,7 @@
       "group": "engineering/simulink/simulink-block-and-blockset-authoring",
       "path": "engineering/simulink/simulink-block-and-blockset-authoring/simulink-create-block-icon",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "finding-simulink-examples": {
       "name": "finding-simulink-examples",
@@ -5130,7 +5137,7 @@
       "group": "engineering/simulink/simulink-environment-fundamentals",
       "path": "engineering/simulink/simulink-environment-fundamentals/finding-simulink-examples",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-integrate-python-code": {
       "name": "simulink-integrate-python-code",
@@ -5140,7 +5147,7 @@
       "group": "engineering/simulink/simulink-modeling",
       "path": "engineering/simulink/simulink-modeling/simulink-integrate-python-code",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-use-c-function-block": {
       "name": "simulink-use-c-function-block",
@@ -5150,7 +5157,7 @@
       "group": "engineering/simulink/simulink-modeling",
       "path": "engineering/simulink/simulink-modeling/simulink-use-c-function-block",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "authoring-simulink-inputs": {
       "name": "authoring-simulink-inputs",
@@ -5160,7 +5167,7 @@
       "group": "engineering/simulink/simulink-simulation",
       "path": "engineering/simulink/simulink-simulation/authoring-simulink-inputs",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "create-sdi-run": {
       "name": "create-sdi-run",
@@ -5170,7 +5177,7 @@
       "group": "engineering/simulink/simulink-simulation",
       "path": "engineering/simulink/simulink-simulation/create-sdi-run",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-check-rapid-accelerator-compatibility": {
       "name": "simulink-check-rapid-accelerator-compatibility",
@@ -5180,7 +5187,7 @@
       "group": "engineering/simulink/simulink-simulation",
       "path": "engineering/simulink/simulink-simulation/simulink-check-rapid-accelerator-compatibility",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-run-parallel-simulations": {
       "name": "simulink-run-parallel-simulations",
@@ -5190,7 +5197,7 @@
       "group": "engineering/simulink/simulink-simulation",
       "path": "engineering/simulink/simulink-simulation/simulink-run-parallel-simulations",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "author-modeladvisor-checks": {
       "name": "author-modeladvisor-checks",
@@ -5200,7 +5207,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/author-modeladvisor-checks",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "checking-model-compliance": {
       "name": "checking-model-compliance",
@@ -5210,7 +5217,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/checking-model-compliance",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "fix-sldv-incompatibility": {
       "name": "fix-sldv-incompatibility",
@@ -5220,7 +5227,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/fix-sldv-incompatibility",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "inject-faults": {
       "name": "inject-faults",
@@ -5230,7 +5237,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/inject-faults",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "manage-safety-analysis": {
       "name": "manage-safety-analysis",
@@ -5240,7 +5247,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/manage-safety-analysis",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "resolve-design-errors": {
       "name": "resolve-design-errors",
@@ -5250,7 +5257,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/resolve-design-errors",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-collect-metrics": {
       "name": "simulink-collect-metrics",
@@ -5260,7 +5267,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/simulink-collect-metrics",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "simulink-explain-missing-coverage": {
       "name": "simulink-explain-missing-coverage",
@@ -5270,7 +5277,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/simulink-explain-missing-coverage",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "testing-simulink-models": {
       "name": "testing-simulink-models",
@@ -5280,7 +5287,7 @@
       "group": "engineering/simulink/verification-validation-and-test",
       "path": "engineering/simulink/verification-validation-and-test/testing-simulink-models",
       "repo": "matlab/simulink-agentic-toolkit",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588"
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7"
     },
     "generate-polyspace-test-xunit-tests": {
       "name": "generate-polyspace-test-xunit-tests",
@@ -5810,7 +5817,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-academic-search",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-citation": {
       "name": "nature-citation",
@@ -5820,7 +5827,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-citation",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-data": {
       "name": "nature-data",
@@ -5830,7 +5837,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-data",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-downloader": {
       "name": "nature-downloader",
@@ -5840,7 +5847,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-downloader",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-experiment-log": {
       "name": "nature-experiment-log",
@@ -5850,7 +5857,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-experiment-log",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-figure": {
       "name": "nature-figure",
@@ -5860,7 +5867,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-figure",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-image2ppt": {
       "name": "nature-image2ppt",
@@ -5870,7 +5877,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-image2ppt",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-literature-pipeline": {
       "name": "nature-literature-pipeline",
@@ -5880,7 +5887,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-literature-pipeline",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-paper-card": {
       "name": "nature-paper-card",
@@ -5890,7 +5897,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-paper-card",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-paper-to-patent": {
       "name": "nature-paper-to-patent",
@@ -5900,7 +5907,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-paper-to-patent",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-paper-trans": {
       "name": "nature-paper-trans",
@@ -5910,7 +5917,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-paper-trans",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-paper-xray": {
       "name": "nature-paper-xray",
@@ -5920,7 +5927,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-paper-xray",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-paper2ppt": {
       "name": "nature-paper2ppt",
@@ -5930,7 +5937,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-paper2ppt",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-paper2word": {
       "name": "nature-paper2word",
@@ -5940,7 +5947,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-paper2word",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-polishing": {
       "name": "nature-polishing",
@@ -5950,7 +5957,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-polishing",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "researchwrite": {
       "name": "researchwrite",
@@ -5960,7 +5967,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-proposal-writer",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-reader": {
       "name": "nature-reader",
@@ -5970,7 +5977,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-reader",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-ref-verifier": {
       "name": "nature-ref-verifier",
@@ -5980,7 +5987,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-ref-verifier",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-response": {
       "name": "nature-response",
@@ -5990,7 +5997,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-response",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-reviewer": {
       "name": "nature-reviewer",
@@ -6000,7 +6007,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-reviewer",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-shared": {
       "name": "nature-shared",
@@ -6010,7 +6017,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-shared",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-social-science": {
       "name": "nature-social-science",
@@ -6020,7 +6027,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-social-science",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-statistics": {
       "name": "nature-statistics",
@@ -6030,7 +6037,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-statistics",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "nature-writing": {
       "name": "nature-writing",
@@ -6040,7 +6047,7 @@
       "group": "research/nature-skill",
       "path": "research/nature-skills/nature-writing",
       "repo": "yuan1z0825/nature-skills",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018"
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb"
     },
     "zotero-cli": {
       "name": "zotero-cli",
@@ -6060,7 +6067,7 @@
       "group": "office/officecli",
       "path": "office/officecli/morph-ppt",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "morph-ppt-3d": {
       "name": "morph-ppt-3d",
@@ -6070,7 +6077,7 @@
       "group": "office/officecli",
       "path": "office/officecli/morph-ppt-3d",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli": {
       "name": "officecli",
@@ -6080,7 +6087,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-academic-paper": {
       "name": "officecli-academic-paper",
@@ -6090,7 +6097,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-academic-paper",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-data-dashboard": {
       "name": "officecli-data-dashboard",
@@ -6100,7 +6107,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-data-dashboard",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-docx": {
       "name": "officecli-docx",
@@ -6110,7 +6117,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-docx",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-financial-model": {
       "name": "officecli-financial-model",
@@ -6120,7 +6127,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-financial-model",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-pitch-deck": {
       "name": "officecli-pitch-deck",
@@ -6130,7 +6137,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-pitch-deck",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-pptx": {
       "name": "officecli-pptx",
@@ -6140,7 +6147,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-pptx",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-word-form": {
       "name": "officecli-word-form",
@@ -6150,7 +6157,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-word-form",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "officecli-xlsx": {
       "name": "officecli-xlsx",
@@ -6160,7 +6167,7 @@
       "group": "office/officecli",
       "path": "office/officecli/officecli-xlsx",
       "repo": "iOfficeAI/OfficeCLI",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912"
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417"
     },
     "ppt-master": {
       "name": "ppt-master",
@@ -6170,7 +6177,7 @@
       "group": "office/skill:ppt-master",
       "path": "office/ppt-master",
       "repo": "hugohe3/ppt-master",
-      "sha": "e2820d326d049f1fcbe90523983def3d52280233"
+      "sha": "63a03673d5c3c928e7f52983a2c8ec65bac30002"
     },
     "html-ppt": {
       "name": "html-ppt",
@@ -6250,7 +6257,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/benchmark-paper-template",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "drawio-reconstruction": {
       "name": "drawio-reconstruction",
@@ -6260,7 +6267,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/drawio-reconstruction",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "figure-designer": {
       "name": "figure-designer",
@@ -6270,7 +6277,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/figure-designer",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "idea-evaluator": {
       "name": "idea-evaluator",
@@ -6280,7 +6287,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/idea-evaluator",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "intro-drafter": {
       "name": "intro-drafter",
@@ -6290,7 +6297,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/intro-drafter",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "paper-polish": {
       "name": "paper-polish",
@@ -6300,7 +6307,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/paper-polish",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "paper-writer": {
       "name": "paper-writer",
@@ -6310,7 +6317,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/paper-writer",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "pre-submission-reviewer": {
       "name": "pre-submission-reviewer",
@@ -6320,7 +6327,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/pre-submission-reviewer",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "rebuttal-guidance": {
       "name": "rebuttal-guidance",
@@ -6330,7 +6337,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/rebuttal-guidance",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "supervisor-deep-research": {
       "name": "supervisor-deep-research",
@@ -6340,7 +6347,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/supervisor-deep-research",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "tech-paper-template": {
       "name": "tech-paper-template",
@@ -6350,7 +6357,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/tech-paper-template",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "vibe-research-workflow": {
       "name": "vibe-research-workflow",
@@ -6360,7 +6367,7 @@
       "group": "research/supervisor",
       "path": "research/supervisor-skills/vibe-research-workflow",
       "repo": "HKUSTDial/Supervisor-Skills",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8"
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5"
     },
     "lieflat-charts": {
       "name": "lieflat-charts",
@@ -6370,7 +6377,7 @@
       "group": "office/skill:lieflat-charts",
       "path": "office/lieflat-charts",
       "repo": "larashero3-dotcom/lieflat-charts",
-      "sha": "61697e4d5bad90d253e230e1f6cbda8f1db155cf"
+      "sha": "4b4e75bde11cbef44263de769f3705db54bbb277"
     },
     "writing-dna-skill": {
       "name": "writing-dna-skill",
@@ -6420,7 +6427,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-application",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-chart": {
       "name": "patent-chart",
@@ -6430,7 +6437,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-chart",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-disclosure": {
       "name": "patent-disclosure",
@@ -6440,7 +6447,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-disclosure",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-docket": {
       "name": "patent-docket",
@@ -6450,7 +6457,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-docket",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-exam-policy": {
       "name": "patent-exam-policy",
@@ -6460,7 +6467,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-exam-policy",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-map": {
       "name": "patent-map",
@@ -6470,7 +6477,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-map",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-oa": {
       "name": "patent-oa",
@@ -6480,7 +6487,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-oa",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-reader": {
       "name": "patent-reader",
@@ -6490,7 +6497,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-reader",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     },
     "patent-search": {
       "name": "patent-search",
@@ -6500,7 +6507,7 @@
       "group": "research/patent",
       "path": "research/patent/patent-search",
       "repo": "handsomestWei/patent-disclosure-skill",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98"
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304"
     }
   }
 }

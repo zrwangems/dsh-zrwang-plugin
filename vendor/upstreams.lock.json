@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-21T12:48:03.057Z",
+  "generatedAt": "2026-11-21T13:29:17.562Z",
   "repos": [
     {
       "id": "matlab-agentic",
       "repo": "matlab/matlab-agentic-toolkit",
       "ref": "main",
-      "sha": "b58be8124631cccb03a67aa79dcef1c9720243e2",
+      "sha": "863b2489e5ad7c90122bfba086ccec97c468bfd9",
       "label": "MATLAB Agentic Toolkit",
       "target": "engineering/matlab",
-      "count": 158,
+      "count": 157,
       "aliases": 0,
       "outsideCatalog": false,
       "skills": [
@@ -133,59 +133,31 @@
           "description": "Generate driving scenes, scenarios, road surfaces, and 3D content from scenariobuilder.* sensor data (GPS, camera, lidar, actor tracks) using Scenario Builder for Automated Driving Toolbox. BUILD, EXPORT, or AUGMENT a virtual scenario/scene/map: ego or actor trajectories, trajectory smoothing, OpenCRG road-surface extraction, 3D asset generation, static-object placement, point-cloud georeferencing + elevation, lane-based ego localization, sensor-fusion tracking, scenario-event extraction (cut-ins, hard brakes, near-misses, ADAS disengagements), or export to RoadRunner, drivingScenario, OpenDRIVE, OpenCRG, OpenSCENARIO, or Unreal Engine. Also: log-to-scenario, scenario harvesting, accident/near-miss reconstruction, SOTIF (ISO 21448) and ISO 26262 scenario coverage, USGS-aerial-lidar augmentation, traffic-sign placement, vision-based vehicle classification for actor assets. NOT for raw-data import or multi-sensor sync/crop/offset/timestamp normalization — route those to matlab-import-driving-data."
         },
         {
-          "dir": "roadrunner-asset-mapping",
-          "name": "roadrunner-asset-mapping",
+          "dir": "roadrunner-author-scenario",
+          "name": "roadrunner-author-scenario",
           "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-asset-mapping",
+          "path": "engineering/matlab/automotive/roadrunner-author-scenario",
           "description": ">"
         },
         {
-          "dir": "roadrunner-build-scenario-from-osc",
-          "name": "roadrunner-build-scenario-from-osc",
+          "dir": "roadrunner-build-rrhd-map",
+          "name": "roadrunner-build-rrhd-map",
           "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-build-scenario-from-osc",
+          "path": "engineering/matlab/automotive/roadrunner-build-rrhd-map",
           "description": ">"
         },
         {
-          "dir": "roadrunner-convert-lanelet2-to-rrhd",
-          "name": "roadrunner-convert-lanelet2-to-rrhd",
+          "dir": "roadrunner-manage-project",
+          "name": "roadrunner-manage-project",
           "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-convert-lanelet2-to-rrhd",
-          "description": ">"
-        },
-        {
-          "dir": "roadrunner-core",
-          "name": "roadrunner-core",
-          "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-core",
+          "path": "engineering/matlab/automotive/roadrunner-manage-project",
           "description": "Foundation skill for all RoadRunner workflows: MATLAB path setup, connection, project/scene/scenario lifecycle, world settings, handle management, status, and close. Use when connecting to RoadRunner, managing projects/scenes/scenarios, setting world origin, checking status, closing RoadRunner, or when any downstream RoadRunner skill needs initialization."
         },
         {
-          "dir": "roadrunner-import-scene",
-          "name": "roadrunner-import-scene",
+          "dir": "roadrunner-simulate-scenario",
+          "name": "roadrunner-simulate-scenario",
           "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-import-scene",
-          "description": ">"
-        },
-        {
-          "dir": "roadrunner-rrhd-authoring",
-          "name": "roadrunner-rrhd-authoring",
-          "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-rrhd-authoring",
-          "description": ">"
-        },
-        {
-          "dir": "roadrunner-scenario-authoring",
-          "name": "roadrunner-scenario-authoring",
-          "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-scenario-authoring",
-          "description": ">"
-        },
-        {
-          "dir": "roadrunner-scenario-simulating",
-          "name": "roadrunner-scenario-simulating",
-          "category": "automotive",
-          "path": "engineering/matlab/automotive/roadrunner-scenario-simulating",
+          "path": "engineering/matlab/automotive/roadrunner-simulate-scenario",
           "description": ">"
         },
         {
@@ -263,7 +235,7 @@
           "name": "matlab-optimize-portfolio",
           "category": "computational-finance",
           "path": "engineering/matlab/computational-finance/matlab-optimize-portfolio",
-          "description": "Help users formulate and solve portfolio optimization problems using Financial Toolbox's Portfolio object. Covers mean-variance (Markowitz), maximum Sharpe ratio (tangency), and efficient frontier workflows. Use when users ask about portfolio optimization, Markowitz, efficient frontier, Sharpe ratio, or attempt to use generic solvers (quadprog, fmincon, ga, problem-based optimize) for portfolio problems."
+          "description": ">"
         },
         {
           "dir": "matlab-price-instrument",
@@ -271,6 +243,13 @@
           "category": "computational-finance",
           "path": "engineering/matlab/computational-finance/matlab-price-instrument",
           "description": ">"
+        },
+        {
+          "dir": "matlab-specify-ssm",
+          "name": "matlab-specify-ssm",
+          "category": "computational-finance",
+          "path": "engineering/matlab/computational-finance/matlab-specify-ssm",
+          "description": ">-"
         },
         {
           "dir": "matlab-use-spreadsheet-link",
@@ -634,6 +613,13 @@
           "name": "matlab-design-radar-waveform",
           "category": "radar",
           "path": "engineering/matlab/radar/matlab-design-radar-waveform",
+          "description": ">"
+        },
+        {
+          "dir": "matlab-design-scenario",
+          "name": "matlab-design-scenario",
+          "category": "radar",
+          "path": "engineering/matlab/radar/matlab-design-scenario",
           "description": ">"
         },
         {
@@ -1099,6 +1085,13 @@
           "description": ">"
         },
         {
+          "dir": "matlab-simulate-6g-system",
+          "name": "matlab-simulate-6g-system",
+          "category": "wireless-communications",
+          "path": "engineering/matlab/wireless-communications/matlab-simulate-6g-system",
+          "description": ">"
+        },
+        {
           "dir": "matlab-simulate-bluetooth-network",
           "name": "matlab-simulate-bluetooth-network",
           "category": "wireless-communications",
@@ -1125,10 +1118,10 @@
       "id": "simulink",
       "repo": "matlab/simulink-agentic-toolkit",
       "ref": "main",
-      "sha": "632f560f34259cad5ef9a6f523c29b0ac3caa588",
+      "sha": "bdfaf9ac37876dc38276325a6b2919fa522b33c7",
       "label": "Simulink Agentic Toolkit",
       "target": "engineering/simulink",
-      "count": 49,
+      "count": 50,
       "aliases": 0,
       "outsideCatalog": false,
       "skills": [
@@ -1231,13 +1224,6 @@
           "description": "Builds and edits Simulink, System Composer, Stateflow, and Simscape models. Use when modifying model structure, parameters, ports, connections, or Stateflow chart internals."
         },
         {
-          "dir": "configuring-block-policy",
-          "name": "configuring-block-policy",
-          "category": "model-based-design-core",
-          "path": "engineering/simulink/model-based-design-core/configuring-block-policy",
-          "description": "Guide users through creating and managing .satk/block-policy.json for controlling which blocks the agent can use, which are excluded, and which block parameters the agent should not modify. Use when setting up block usage policy for a project."
-        },
-        {
           "dir": "filing-bug-reports",
           "name": "filing-bug-reports",
           "category": "model-based-design-core",
@@ -1301,6 +1287,13 @@
           "description": "Specify plant models for closed-loop simulation: system specs, architecture, build plans, validation plans. Use when creating, updating, or reviewing plant model specifications, planning plant model architecture, or planning plant model validation."
         },
         {
+          "dir": "stateflow-apply-layout",
+          "name": "stateflow-apply-layout",
+          "category": "model-based-design-core",
+          "path": "engineering/simulink/model-based-design-core/stateflow-apply-layout",
+          "description": ">"
+        },
+        {
           "dir": "building-architecture-models",
           "name": "building-architecture-models",
           "category": "model-based-system-engineering",
@@ -1313,6 +1306,13 @@
           "category": "model-based-system-engineering",
           "path": "engineering/simulink/model-based-system-engineering/simulink-manage-variant-configuration",
           "description": ">"
+        },
+        {
+          "dir": "simscape-diagnose-simulation-error",
+          "name": "simscape-diagnose-simulation-error",
+          "category": "physical-modeling",
+          "path": "engineering/simulink/physical-modeling/simscape-diagnose-simulation-error",
+          "description": "Triage Simscape simulation errors and solver warnings and dispatch to the appropriate diagnostic surface. Covers transient/runtime failures — min step size violations (stiffness, parasitics, event-time), transient initialization failures, and index reduction (\\\"Cannot solve for one or more variables\\\"), including errors that appear only with run-time parameters. Use whenever a Simscape model fails to simulate or warns while simulating, even if the user doesn't quote the message and it only shows up after you run the model or read a warnings log; load it before attempting a fix."
         },
         {
           "dir": "simscape-write-ssc",
@@ -1668,7 +1668,7 @@
       "id": "nature",
       "repo": "yuan1z0825/nature-skills",
       "ref": "main",
-      "sha": "a1a8220366e82ecd8584ea3d7f46cb3969f4b018",
+      "sha": "a65a8364b419e05f7d8d5d96842a1ff7e544b1bb",
       "label": "Nature Skills",
       "target": "research/nature-skills",
       "count": 24,
@@ -1849,7 +1849,7 @@
       "id": "officecli",
       "repo": "iOfficeAI/OfficeCLI",
       "ref": "main",
-      "sha": "7c33491934e8adfeddaa648a934240606801e912",
+      "sha": "fecece3ee6054f419d2e8ecca899d7498142d417",
       "label": "OfficeCLI",
       "target": "office/officecli",
       "count": 11,
@@ -1903,7 +1903,7 @@
           "name": "officecli-financial-model",
           "category": null,
           "path": "office/officecli/officecli-financial-model",
-          "description": "Use this skill when the user wants to build a financial model — 3-statement model, DCF valuation, LBO, SaaS unit economics, sensitivity / scenario analysis, debt schedule, or fundraising projections — in Excel. Trigger on: 'financial model', '3-statement model', 'P&L + BS + CF', 'DCF', 'WACC', 'NPV', 'terminal value', 'LBO', 'debt schedule', 'cash sweep', 'MOIC', 'IRR / XIRR', 'sensitivity table', 'scenario analysis', 'ARR model', 'unit economics', 'CAC / LTV', 'cap table forecast'. Output is a single formula-driven .xlsx. This skill is a scene layer on top of officecli-xlsx — it inherits every xlsx v2 rule (4-color code, visual floor, number formats, cache-drift, Known Issues, Delivery Gate minimum cycle). DO NOT invoke for a simple budget tracker, CSV dump, or operational KPI sheet — route those to officecli-xlsx base."
+          "description": "Use this skill when the user wants to build a financial model — 3-statement model, DCF valuation, LBO, SaaS unit economics, sensitivity / scenario analysis, debt schedule, or fundraising projections — in Excel. Trigger on: 'financial model', '3-statement model', 'P&L + BS + CF', 'DCF', 'WACC', 'NPV', 'terminal value', 'LBO', 'debt schedule', 'cash sweep', 'MOIC', 'IRR / XIRR', 'sensitivity table', 'scenario analysis', 'ARR model', 'unit economics', 'CAC / LTV', 'cap table forecast'. Output is a single formula-driven .xlsx. This skill is a scene layer on top of officecli-xlsx — it inherits every officecli-xlsx rule (4-color code, visual floor, number formats, Known Issues, QA minimum cycle). DO NOT invoke for a simple budget tracker, CSV dump, or operational KPI sheet — route those to officecli-xlsx base."
         },
         {
           "dir": "officecli-pitch-deck",
@@ -1939,7 +1939,7 @@
       "id": "ppt-master",
       "repo": "hugohe3/ppt-master",
       "ref": "main",
-      "sha": "e2820d326d049f1fcbe90523983def3d52280233",
+      "sha": "63a03673d5c3c928e7f52983a2c8ec65bac30002",
       "label": "PPT Master",
       "target": "office/ppt-master",
       "count": 1,
@@ -2128,7 +2128,7 @@
       "id": "supervisor",
       "repo": "HKUSTDial/Supervisor-Skills",
       "ref": "main",
-      "sha": "4bd3fef393e5ffc891c74309a5ef6c5ad3ad12c8",
+      "sha": "4c718106bd5d0891cd49a942f714a95e6f499fa5",
       "label": "Supervisor Skills",
       "target": "research/supervisor-skills",
       "count": 12,
@@ -2225,7 +2225,7 @@
       "id": "lieflat-charts",
       "repo": "larashero3-dotcom/lieflat-charts",
       "ref": "main",
-      "sha": "61697e4d5bad90d253e230e1f6cbda8f1db155cf",
+      "sha": "4b4e75bde11cbef44263de769f3705db54bbb277",
       "label": "Lieflat Charts",
       "target": "office/lieflat-charts",
       "count": 1,
@@ -2325,7 +2325,7 @@
       "id": "patent",
       "repo": "handsomestWei/patent-disclosure-skill",
       "ref": "main",
-      "sha": "b4bbec6f0a1c3c32a904faabeb249639c0b30d98",
+      "sha": "91e3b43a3e6b568c627bc83ffcb73ff453bf0304",
       "label": "Patent Skills",
       "target": "research/patent",
       "count": 9,

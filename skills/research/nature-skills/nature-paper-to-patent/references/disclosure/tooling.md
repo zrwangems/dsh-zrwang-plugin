@@ -25,7 +25,7 @@
 
 依赖：`pip install -r scripts/disclosure/requirements-cnipa.txt` 与 `python -m playwright install chromium`。环境变量见各脚本文件头。默认结果 HTML 落在 **`scripts/disclosure/_last_result_*.html`**（已 `.gitignore`）。
 
-抓取失败或解析无命中时，Agent 按 **`references/disclosure/prior_art_search.md`** 降级 **WebSearch**（如 Google 学术 / Google Patents）。
+抓取失败或解析无命中时，Agent 按 **`references/disclosure/prior_art_search.md`** 降级 **web_search**（如 Google 学术 / Google Patents）。
 
 ---
 

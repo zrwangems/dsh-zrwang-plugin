@@ -341,3 +341,22 @@ node scripts/audit-upstreams.mjs       -> 上游完整性：全部通过（已�
 ```
 
 本次改造把设置统一到 profile `cordis.patch.yml` 的 `config` + DSH 凭据库，运行期文件只放插件 `cache/`；上游技能自己的 `.env`、`config.yaml`、`credentials.json`、`settings.json`、向导与读写代码已删除，技能改由插件注入的环境变量取参数。技能适配文件放在 `vendor/overrides/`，删除项登记在 `vendor/removals.json`。
+
+## 2026-11-21 上游对齐与运行时更新
+
+```text
+git ls-remote（19 个 GitHub 上游）        -> 全部与 lock SHA 一致
+node scripts/vendor-skills.mjs --only=matlab-agentic,simulink,nature,officecli,ppt-master,patent,supervisor,lieflat-charts
+node scripts/vendor-skills.mjs --only=matlab-agentic,simulink,nature,academic-humanizer
+node scripts/gen-catalog.mjs              -> 329 个技能，默认 67
+node scripts/build-client.mjs             -> built lib/client.js
+node scripts/verify.mjs                   -> 通过 81 项
+node scripts/smoke-host.mjs               -> 通过 82 项，失败 0 项
+node scripts/smoke-routes.mjs             -> 全部通过
+node scripts/audit-skill-config.mjs --check -> 329 技能，16 组件，待处置 0
+node scripts/audit-upstreams.mjs          -> 缺技能 0、缺文件 0、上游完整性全部通过
+node scripts/smoke-ars-guard.mjs          -> 通过 25 项
+node scripts/audit-ars-alignment.mjs --upstream=... --strict -> 975 文件：原样 657、已知适配 318，通过
+```
+
+Simulink 运行时更新到 2026.11.c（tools 1.0.35），MATLAB MCP exe 更新到 v0.16.1；新增 `AskUserQuestion`/`WebSearch`/`WebFetch` 的 DSH 工具名改写；ARS 引用校验缓存改到 `<state>/ars/verification.db`。详细差异见 `upstream-inventory.md` 与 `upstream-modifications.md` 的 NEW-11~NEW-14。

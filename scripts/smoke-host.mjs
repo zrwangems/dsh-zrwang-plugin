@@ -202,6 +202,7 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
   check('专利目录指向文件时置灰', patentRootProblem({ patent: { root: process.execPath } }) !== undefined)
   const env = configEnv({ ...defaultParams(), patent: { root: samplePatentRoot, embedding: { baseUrl: 'https://api.example.com/v1', model: 'text-embedding-3-small', dimensions: '1536' } } })
   check('专利向量固定走 OpenAI 兼容接口', env.PATENT_EMBEDDING_PROVIDER === 'openai_compatible' && env.PATENT_EMBEDDING_BASE_URL === 'https://api.example.com/v1' && env.PATENT_EMBEDDING_MODEL === 'text-embedding-3-small' && env.PATENT_EMBEDDING_DIMENSIONS === '1536' && env.PATENT_EMBEDDING_API_KEY_ENV === 'ZRWANG_PATENT_EMBEDDING_CRED')
+  check('ARS 引用校验缓存写进插件 state', env.ARS_VERIFICATION_CACHE_PATH === join(STORAGE, 'state', 'ars', 'verification.db'))
   check('环境注入把向量库和 vault 放在同一目录',
     env.PATENT_MAP_HOME === join(samplePatentRoot, 'patent-map')
     && env.PATENT_OA_HOME === join(samplePatentRoot, 'oa')

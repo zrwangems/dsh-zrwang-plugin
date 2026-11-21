@@ -37,7 +37,7 @@ You are a state machine that controls the ENTIRE workflow. Procedure reference f
 
 **There are 3 REVIEW GATES and 1 CONDITIONAL GATE where you pause and ask the user to choose before continuing. If the user provides feedback, incorporate it. If the user selects the recommended option, continue immediately.**
 
-**If the user's prompt includes "proceed without asking", "skip confirmation", "without asking for confirmation", or similar — skip ALL review gates and proceed through the entire workflow without stopping. Do NOT use AskUserQuestion or any interactive tool in this mode.**
+**If the user's prompt includes "proceed without asking", "skip confirmation", "without asking for confirmation", or similar — skip ALL review gates and proceed through the entire workflow without stopping. Do NOT use ask_user_question or any interactive tool in this mode.**
 
 **Review Gates (use descriptive names — NEVER say "Gate 1", "Gate 2", "Gate 3"):**
 1. **Guideline ID & Scope Review** — after deriving IDs and before writing the guideline

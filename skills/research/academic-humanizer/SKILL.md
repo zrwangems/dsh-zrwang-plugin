@@ -9,7 +9,7 @@ description: |
   AI-use disclosure. Use when editing AI-assisted academic prose or grant proposals.
 license: MIT
 compatibility: claude-code codex morphmind opencode
-allowed-tools: [Read, Write, Edit, Grep, Glob, AskUserQuestion]
+allowed-tools: [Read, Write, Edit, Grep, Glob, ask_user_question]
 ---
 
 # Academic Humanizer

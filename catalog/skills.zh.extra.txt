@@ -327,3 +327,12 @@ lark-whiteboard	飞书画板：导出预览图、原始节点结构与编辑画�
 lark-wiki	飞书知识库：知识空间、成员与文档节点管理
 lark-workflow-meeting-summary	会议纪要工作流：汇总一段时间纪要并生成报告
 lark-workflow-standup-report	日程待办摘要：今天/明天/本周安排与未完成任务
+matlab-specify-ssm	用 MATLAB 指定、估计并检验状态空间模型，覆盖线性化与标准模型结构。
+matlab-design-scenario	用 MATLAB 搭建雷达与相机仿真场景，配置平台轨迹、姿态和可见性分析。
+roadrunner-author-scenario	在 RoadRunner 中按场景描述编写 OpenSCENARIO 剧本，配置车辆、行为与触发条件。
+roadrunner-build-rrhd-map	从 OSM / Lanelet2 构建 RoadRunner HD Map，处理车道、路口、标志与高程对齐。
+roadrunner-simulate-scenario	在 RoadRunner 中回放和仿真场景，检查车辆轨迹、碰撞与传感器表现。
+roadrunner-manage-project	用 MATLAB 命令管理 RoadRunner 工程：启动、打开场景、保存与导出。
+matlab-simulate-6g-system	用 MATLAB 搭建并仿真 6G 系统链路，覆盖波形、信道与收发处理。
+simscape-diagnose-simulation-error	定位 Simscape 仿真失败原因：初始化、刚度、变量缩放与求解器设置。
+stateflow-apply-layout	自动整理 Stateflow 状态图布局，处理层级、连线与可读性。

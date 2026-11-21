@@ -1,9 +1,5 @@
 > [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search / pubmed MCP 服务器：不要调用 `search_papers` 等 MCP 工具。可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`；需要 PubMed/Crossref/arXiv 时用 `web_fetch` 直接查 REST API，并明确告诉用户检索已降级。
 
-> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search / pubmed MCP 服务器：不要调用 `search_papers` 等 MCP 工具。可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`；需要 PubMed/Crossref/arXiv 时用 `web_fetch` 直接查 REST API，并明确告诉用户检索已降级。
-
-> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search / pubmed MCP 服务器：不要调用 `search_papers` 等 MCP 工具。可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`；需要 PubMed/Crossref/arXiv 时用 `web_fetch` 直接查 REST API，并明确告诉用户检索已降级。
-
 # MCP tools and shared modules
 
 Multi-source literature search, citation verification, citation format conversion, and reference management via MCP tools.

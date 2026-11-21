@@ -28,7 +28,8 @@
 | --- | --- |
 | `README.md` | 本文件：用途、流程、格式 |
 | `upstream-modifications.md` | 上游改动台账：仓库、技能、文件、改动类型、原因、验证方式 |
-| `skill-config-matrix.md` | 301 个技能 + 14 个组件的配置接入状态矩阵（人读） |
+| `upstream-inventory.md` | 22 个上游项目的版本盘点：当前 pin、技能数、适配方式、关键改动 |
+| `skill-config-matrix.md` | 329 个技能 + 16 个组件的配置接入状态矩阵（人读） |
 | `skill-config-matrix.json` | 同上的机器可读版本，由 `scripts/audit-skill-config.mjs` 生成 |
 | `nature-config-matrix.md` | 24 个 nature 技能的逐项配置面审计（源码依据、插件落点、未暴露项原因） |
 | `component-status.md` | 组件级状态：ARS、officecli、zotero、MATLAB MCP、Polyspace、draw.io、运行时等 |

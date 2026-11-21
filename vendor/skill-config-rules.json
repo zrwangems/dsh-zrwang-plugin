@@ -371,6 +371,12 @@
         "drawio"
       ],
       "check": "安装 draw.io 桌面版后重试"
+    },
+    "roadrunner-build-rrhd-map": {
+      "ignore": [
+        "configFile"
+      ],
+      "note": "map_config.yaml / map_projector_info.yaml 是 OSM 数据文件，不是插件配置文件。"
     }
   },
   "dispositions": {

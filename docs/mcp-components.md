@@ -9,8 +9,8 @@
   - MATLAB 基础 5 个：`check_matlab_code`、`detect_matlab_toolboxes`、`evaluate_matlab_code`、`run_matlab_file`、`run_matlab_test_file`；
   - Simulink 9 个（扩展文件 `mathworks/simulink-agentic-toolkit/tools/tools.json`）：`model_overview`、`model_read`、`model_query_params`、`model_resolve_params`、`model_edit`、`model_read_diagnostics`、`model_check`、`model_scan`、`model_test`。
 - 包内 `mathworks/` 的结构：
-  - `matlab-mcp-server-windows-x64.exe`：MathWorks 官方 MATLAB MCP 服务器；
-  - `simulink-agentic-toolkit/`：完整的 Simulink Agentic Toolkit 运行时（`satk_initialize.p`、`satk-libraries.json`、`validate_installation.p`、`tools/` 里的 MATLAB 函数与 `tools.json`、`toolbox-kb/`），由 MIT 风格许可分发，许可说明另存 `vendor/licenses/mathworks/`。
+  - `matlab-mcp-server-windows-x64.exe`：MathWorks 官方 MATLAB MCP 服务器（v0.16.1）；
+  - `simulink-agentic-toolkit/`：完整的 Simulink Agentic Toolkit 运行时 2026.11.c（`VERSION`、`satk_initialize.p`、`tools/VERSION` 1.0.35、`satk-libraries.json`、`validate_installation.p`、`tools/` 里的 MATLAB 函数与 `tools.json`、`toolbox-kb/`），由 BSD-2 变体许可分发，许可说明另存 `vendor/licenses/mathworks/`。
 - **MATLAB 侧初始化**：组件本身只负责启动 MCP 服务器；MATLAB 每次启动后需要在 MATLAB 里执行一次：
 
   ```matlab

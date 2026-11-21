@@ -49,6 +49,13 @@
           ],
           "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件提供：路径见 `ZRWANG_SKILL_PYTHON`（或插件包 `runtime/python/venv/Scripts/python.exe`）；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统 Python 或另建 venv。"
         }
+      ],
+      "rewrite": [
+        {
+          "find": "AskUserQuestion",
+          "to": "ask_user_question",
+          "optional": true
+        }
       ]
     },
     {
@@ -85,6 +92,13 @@
             "simulink-integrate-python-code"
           ],
           "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件提供：路径见 `ZRWANG_SKILL_PYTHON`（或插件包 `runtime/python/venv/Scripts/python.exe`）；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统 Python 或另建 venv。"
+        }
+      ],
+      "rewrite": [
+        {
+          "find": "AskUserQuestion",
+          "to": "ask_user_question",
+          "optional": true
         }
       ]
     },
@@ -165,6 +179,18 @@
           ],
           "files": "^SKILL\\.md$",
           "text": "> [dsh-zrwang-plugin] Crossref/NCBI 礼貌邮箱和 Firecrawl Key 由插件设置注入（`CROSSREF_MAILTO`/`NCBI_EMAIL`/`FIRECRAWL_API_KEY`）；脚本没显式传参时优先用这些环境变量。"
+        }
+      ],
+      "rewrite": [
+        {
+          "find": "WebSearch",
+          "to": "web_search",
+          "optional": true
+        },
+        {
+          "find": "WebFetch",
+          "to": "web_fetch",
+          "optional": true
         }
       ]
     },
@@ -405,7 +431,14 @@
       "layout": "root",
       "target": "research/academic-humanizer",
       "label": "Academic Humanizer",
-      "download": "git"
+      "download": "git",
+      "rewrite": [
+        {
+          "find": "AskUserQuestion",
+          "to": "ask_user_question",
+          "optional": true
+        }
+      ]
     },
     {
       "id": "lieflat-less-ai-tone",

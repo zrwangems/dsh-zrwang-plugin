@@ -50,7 +50,7 @@ description: >-
 |------|---------|-----------|
 | **Crossref** | 有 DOI 的外文期刊 | ~70%（IEEE 老文献、中文期刊常有缺失）|
 | **IEEE Xplore** | IEEE 期刊/会议 | IEEE DOI 404 时的备选 |
-| **WebSearch (Bing/Google)** | 无 DOI 或来源缺失的文献 | 兜底方案 |
+| **web_search (Bing/Google)** | 无 DOI 或来源缺失的文献 | 兜底方案 |
 | **CNKI/万方** (kimi-datasource / webbridge) | 中文期刊、学位论文 | 中文文献必查 |
 | **Zotero 本地库** (zotero-mcp) | 已入库文献 | 快速比对已有数据 |
 
@@ -157,7 +157,7 @@ description: >-
            ┌──────────────┼──────────────┐
            ▼              ▼              ▼
     ┌──────────┐   ┌──────────┐   ┌──────────┐
-    │ CrossRef │   │  IEEE   │   │ WebSearch│
+    │ CrossRef │   │  IEEE   │   │ web_search│
     │  (DOI)  │   │ Xplore  │   │ (Bing/GG)│
     └────┬─────┘   └────┬─────┘   └────┬─────┘
          │              │              │
@@ -179,7 +179,7 @@ description: >-
 
 | 局限 | 应对 |
 |------|------|
-| **中文 DOI 不在 Crossref 中** | 降级到 CNKI/万方（通过 webbridge 或 WebSearch）|
+| **中文 DOI 不在 Crossref 中** | 降级到 CNKI/万方（通过 webbridge 或 web_search）|
 | **IEEE 老文献 DOI 返回 404** | 用 IEEE Xplore 直接搜（其 DOI 不在 Crossref 注册）|
 | **学位论文无 DOI** | 用 CNKI / 万方 / ProQuest 验证标题+作者+年份 |
 | **产品手册/专利** | 不验证元数据，只确认来源可访问 |
@@ -193,4 +193,4 @@ description: >-
 - `zotero-cli` / `zotero-mcp`：Zotero 库读写（本地包装层，实测稳定性较差）
 - `kimi-datasource`（scholar）：学术搜索
 - `kimi-webbridge`：带登录态的 CNKI 查询
-- 基础 WebSearch / FetchURL：通用兜底
+- 基础 web_search / FetchURL：通用兜底
