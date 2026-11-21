@@ -359,4 +359,4 @@ node scripts/smoke-ars-guard.mjs          -> 通过 25 项
 node scripts/audit-ars-alignment.mjs --upstream=... --strict -> 975 文件：原样 657、已知适配 318，通过
 ```
 
-Simulink 运行时更新到 2026.11.c（tools 1.0.35），MATLAB MCP exe 更新到 v0.16.1；新增 `AskUserQuestion`/`WebSearch`/`WebFetch` 的 DSH 工具名改写；ARS 引用校验缓存改到 `<state>/ars/verification.db`。详细差异见 `upstream-inventory.md` 与 `upstream-modifications.md` 的 NEW-11~NEW-14。
+Simulink 运行时更新到 2026.11.c（tools 1.0.35），MATLAB MCP exe 更新到 v0.16.1；新增 `AskUserQuestion`/`WebSearch`/`WebFetch` 的 DSH 工具名改写；ARS 引用校验缓存改到 `<state>/ars/verification.db`。详细差异见 `upstream-modifications.md` 的 NEW-11~NEW-14 与 `SKILL-ADAPTATIONS.md`。

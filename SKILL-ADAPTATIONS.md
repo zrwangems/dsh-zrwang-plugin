@@ -239,7 +239,7 @@
 1. 在 `vendor/upstreams.json` 加仓库、pin、落盘路径和需要的 `rewrite`/`headerNotes` 等规则。
 2. 需要小范围字面替换的，写进 `vendor/skill-patches.json`；需要整文件改的，放 `vendor/overrides/`；要删的上游文件登记到 `vendor/removals.json`；没有仓库形态的做 `vendor/local/` 副本。
 3. 跑 `node scripts/vendor-skills.mjs --only=<id>`，再跑 `npm run catalog`、`npm run build`。
-4. 更新本文件对应项目、`AgentsDo/upstream-adaptation-record/upstream-inventory.md`、`upstream-modifications.md`、`records.json` 和 `verification-log.md`。
+4. 更新本文件对应项目、`upstream-modifications.md`、`records.json` 和 `verification-log.md`。
 5. 跑完整检查：
 
 ```text
