@@ -1,80 +1,267 @@
 # 技能适配记录
 
-`skills/` 下的技能**不是上游仓库的原样副本**。每个技能接入前都要按本插件（DSH + 插件门禁/注入机制）的特性做适配，不能直接照搬上游代码与内容；适配过程与结果记录在本文件，新接入、升级或修改技能时同步更新。
+这份文档按项目记录 `dsh-zrwang-plugin` 对每个上游技能仓库做了什么改动。原则只有一条：**`skills/` 是生成物，不手工修改**；所有适配都写进 `vendor/`，重跑 `scripts/vendor-skills.mjs` 时重放，升级上游不会丢。
 
-## 适配原则
+核对时间：2026-11-21。当前收录 22 个上游项目、329 个技能树技能，加上 ARS 5 个流水线技能共 334 个；19 个 GitHub 仓库的 pin 与上游分支 HEAD 一致，3 个是本地副本。
 
-1. 技能内容以「由 DSH 的 `ctx.skills` 提供方单独加载后仍能正常工作」为准，不能依赖上游仓库的整仓结构，也不依赖项目里的 `.agents/skills`。
-2. 需要配置的东西（API Key、模型、账号、学校信息等）优先走插件设置页或随包固定配置，不让用户手改技能里的 `.env`、`config.*`。
-3. 上游用 Claude Code / Codex 的工具名、命令名、多角色方式，要换成 DSH 的对应能力（`ask_user_question`、`web_search`、`web_fetch`、`skill`、`subagent` / Agent Team 等）。
-4. 所有改写必须通过 vendor 机制重放：
-   - `vendor/upstreams.json`：`rewrite`、`renames`、`aliases`、`headerNote`、`extraDirs`、`sharedFiles`、`scriptClosure`、`descriptions`、`runtimeRoot`；
-   - `vendor/skill-patches.json`：字面替换类小改动；
-   - `vendor/overrides/`：整文件适配版本，vendor 最后一步覆盖到 `skills/`、`ars/`；`vendor/removals.json` 列出要删掉的上游多余文件。大改（删除配置读写、改数据目录、重写脚本）放这里，重跑 vendor 不会丢；
-   - `vendor/local/*`：以 release 包/本地副本形式维护的上游（archify、zotero-cli）。
-5. 每次适配在本文件登记：改了什么、为什么、涉及哪些文件或规则。
+## 一、所有项目共用的改动
 
-## 逐技能适配记录
+### 1. 数据与配置的落点
 
-| 技能 / 仓库 | 上游形态 | 适配内容 |
+- 插件运行数据只放 `$DSH_HOME/storages/dsh-zrwang-plugin/`：`state/` 放选择态、会话快照、门禁、模式和缓存；专利数据在用户设置页指定的目录，插件不设默认值。
+- 可编辑配置只在 profile 的 `cordis.patch.yml` 的 `config` 段，密钥只在 DSH 凭据库；上游的 `.env`、`config.yaml`、`config.toml`、`credentials.json`、`settings.json` 不再作为配置入口。
+- 需要密钥的技能统一读 `ZRWANG_*_CRED`（DSH 的 shell 会清洗名字里带 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 的变量），再由 `host/pysite/sitecustomize.py` 在 Python 进程里映射回上游标准名。
+- 上游技能自己写用户主目录、项目 `.agents/`、插件安装目录的代码，逐项删除或改到插件注入了环境变量的位置。
+
+### 2. 统一裁剪
+
+`vendor/removals.json` 删除 102 个不参与运行的文件/目录，按项目分布：
+
+| 项目 | 删除数 | 内容 |
 | --- | --- | --- |
-| `ppt-master`（hugohe3/ppt-master） | 用 `.env` 配置生图模型与 Key；项目目录按仓库根/`cwd` 算 | 设置页「模型服务 → 生图模型」只保留 URL / 模型 / API Key（OpenAI Images 兼容协议，不分厂商）；插件通过 `ctx.shellEnv` 注入 `DSH_ZRWANG_IMAGE_*` 与 `DSH_ZRWANG_IMAGE_CRED`；DSH 的 shell 子进程会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，所以密钥用 `_CRED`，再由 `host/pysite/sitecustomize.py` 映射回 `OPENAI_*`/`QWEN_*`；`config.py` 删除了 `.env` 查找与 `ENV_PATH`，`image_gen.py`/`image_search.py`/`notes_to_audio.py` 删除全部 `.env` 加载代码，**不写 `~/.ppt-master/.env`**；`PROJECTS_DIR` 改为 `ZRWANG_PPT_PROJECTS` 或 `<cwd>/.agents/ppt-master/projects`；删除 `.env.example` 与 `update_repo.py`；SKILL.md 与配置文档顶部加说明 |
-| `nature-image2ppt` | 读 `config.yaml` 的 OCR/生图配置；用 `shutil.which("convert")` 判断 ImageMagick | 删除 `runtime_env.py` 的配置路径/读写与 `config` 子命令、`image_gen.py` 的运行时 env 加载、`config.example.yaml`；OCR/生图参数只从插件注入的环境变量读（`PADDLE_OCR_TOKEN`、`IMAGE2PPT_IMAGE_*`）；`doctor` 纳入设置页检查；补丁排除 `C:\Windows\System32\convert.exe` 的假 ImageMagick |
-| `nature-academic-search` | 主路径依赖 academic-search / paper-search / pubmed MCP | 本 DSH 未注册这些 MCP：`static/core/tools.md` 与 SKILL.md 顶部写明降级为 `web_search`/`web_fetch` + OpenAlex CLI + preflight；`mcp-server/utils/config.py` 只读 `NCBI_EMAIL`/`PUBMED_EMAIL`/`NCBI_API_KEY`/`CROSSREF_MAILTO`，删除 `config/` 目录与 `install.sh`，不再有 `config.toml` |
-| `nature-figure` | 绘图后端偏好写 `~/.config/nature-skills` | `scripts/nature_figure_backend.py` 只打印 `NATURE_FIGURE_BACKEND`（`get` 不再 `set/clear`）；后端偏好只由设置页「科研服务 → Nature 绘图」决定，删除 `~/.config/nature-skills` 持久化与相关文档表述 |
-| `nature-downloader`（yuan1z0825/nature-skills） | 默认读 `~/.dsh/zrwang-plugin-config/nature-downloader/school.json` | 学校信息固定为北航，直接随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`；插件通过 `LIT_DL_SCHOOL_FILE` 指向它，不复制到 `~/.dsh`；出版社凭据只从设置页写入 DSH 凭据库，再以 `ZRWANG_*_CRED` 注入；删除 `src/wizard.py`、`src/schools_loader.py`、`scripts/configure_credentials.py`、`scripts/configure_school.py`、`data/schools.yaml`、`lib/settings.mjs` 与 `credentials.json`/`settings.json` 读写 |
-| `patent`（handsomestWei/patent-disclosure-skill） | 默认写 `~/Documents/patent-disclosure-skill/`、`~/.patent-disclosure-skill/` | oa / patent-map / patent-reader 三个配置解析器补丁：只认插件注入的 `PATENT_OA_HOME` / `PATENT_MAP_HOME` / `PATENT_READER_OBSIDIAN_VAULT`（都在设置页「科研服务 → 专利数据目录」下，Obsidian 库是 `vault/`）；删除 `~/Documents/patent-disclosure-skill`、`~/.patent-disclosure-skill`、项目 `.agents/patent/` 三类回退，以及 `embedding.config.yaml`/`embedding.secrets.yaml` 读写，向量模型改由设置页「科研服务 → 专利检索向量模型」的 URL / 模型 / Key / 维度注入 `PATENT_EMBEDDING_*` 与 `ZRWANG_PATENT_EMBEDDING_CRED`（provider 固定为 OpenAI 兼容的 `openai_compatible`，预设下拉已删除），索引指纹存在 `<专利数据目录>/oa/embedding-state.json`；删除 `obsidian_vault.txt` 持久化与 `--set/--setx`；`patent-search`、`patent-docket` 的 `config.yaml` 删除，默认值写进代码；SKILL.md 顶部说明数据目录；没设置专利数据目录时插件不注入这些技能；整仓路径改 `../<子技能>/` |
-| `MATLAB / Simulink / playground`（MathWorks） | 依赖 MATLAB MCP；正文用 Claude 工具名 | 本机 profile 的 MCP 是 existing 模式：SKILL.md 顶部说明需先启动 MATLAB 并 `shareMATLABSession()`，不要绕开 MCP；`AskUserQuestion` 统一改写成 DSH 的 `ask_user_question`；Simulink 运行时（`mathworks/simulink-agentic-toolkit`）随包更新到上游 2026.11.c（tools 1.0.35），MATLAB MCP 可执行文件更新到 v0.16.1 |
-| `Polyspace`（mathworks/polyspace-agentic-toolkit） | 依赖 Polyspace MCP 与 Polyspace 安装 | 本机未安装：技能置灰；setup 技能顶部说明 DSH 的 MCP 配置在 profile `cordis.patch.yml`，不要改 Claude/Cursor/Codex 配置 |
-| `ARS`（Imbad0202/academic-research-skills） | 整仓 `shared/`、`scripts/`，工具名面向 Claude Code，繁体中文输出；当前 pin v3.24.4 / `00315df` | 逐个文件复制后只做机械适配：`shared/`→`_shared/`、跨技能路径改 `../<技能>/`、`python3`→`python`、`AskUserQuestion`→`ask_user_question`、`WebSearch`/`WebFetch`→`web_search`/`web_fetch`、繁体→简体；`headerNote` 强制简体中文与 Agent Team 多角色；每个技能补 `_shared/`（含 `MODE_REGISTRY`、`ARCHITECTURE`）与 `.md`/`.json` 引用到的 `scripts/` 闭包（测试/fixture 不分发）；16 个 `/ars-*` 命令保留上游模式说明，清掉 Claude Skill 工具与 `${CLAUDE_PLUGIN_ROOT}` 写法；`vendor/ars/descriptions.json` 覆盖描述；写作用域清单原样复制并在 `tools/pre-execute` 里实现上游 `PreToolUse` 护栏；`_shared/dsh-runtime.md` 构建时生成。对齐审计：`node scripts/audit-ars-alignment.mjs --upstream=<ARS 检出> --strict`，结果与 Claude hooks 对照写在 `docs/ars-alignment.md` |
-| `Supervisor Skills`（HKUSTDial/Supervisor-Skills） | 上游技能名 `deep-research` 与 ARS 重名 | `renames` 落盘为 `supervisor-deep-research`，frontmatter 由 `vendor/skill-patches.json` 同步 |
-| 专利技能（handsomestWei/patent-disclosure-skill） | 正文按仓库根路径 `skills/<子技能>/` 引用 | 13 条 rewrite 改成 `../<子技能>/`，保证每个子技能单独注入时路径仍成立 |
-| `飞书 Lark`（open.feishu.cn lark-cli skills，28 技能） | 官方 agent skills，正文面向 Claude/Codex/Aily 等 harness，跨技能按 `../lark-shared/` 等相对路径引用 | 固定本地副本 `vendor/local/lark-skills`（MIT，Lark Technologies，许可证归档 `vendor/licenses/lark/`）；每个 `SKILL.md` 顶部 headerNotes 说明：文件用 DSH `read`/`write`/`edit`、命令用 `pwsh`/`bash` 执行 `lark-cli`、需先安装并 `lark-cli auth login`、harness 对照表仅参考、相关技能一起勾选；四个基础技能默认勾选，其余默认关闭 |
-| 其余仓库 | 技能可单独运行 | 只做描述中文化与必要路径处理；如发现问题按上面的原则补适配并登记到本表与 `AgentsDo/upstream-adaptation-record/upstream-modifications.md` |
+| frontend-slides | 80 | `plugins/frontend-slides/` 下与根 `SKILL.md` 重复的 Claude 插件打包树 |
+| nature-skills | 17 | academic-search 的 `config/`、`install.sh`、`config.toml`；downloader 的旧 README、school schema、设计文档、`configure_credentials.py` |
+| ppt-master | 2 | `.env.example`、`scripts/update_repo.py` |
+| patent | 2 | `patent-docket/config.yaml`、`patent-search/config.yaml` |
+| writing-dna | 1 | 嵌套的 `skills/lieflat-less-ai-tone/SKILL.md`（该仓库独立收录） |
 
-## 新增 / 升级技能检查清单
+`vendor-skills.mjs` 另外排除 `.git`、`.github`、`node_modules`、`__pycache__`、`.venv`、tests/CI、包锁、CHANGELOG、`.gitignore` 等；这是所有项目共同执行的规则。
 
-1. `SKILL.md` 的 `name` / `description` 可用，中文短说明与详情已生成。
-2. 正文里的相对路径在「技能单独注入」时成立；需要时补 `extraDirs` / `sharedFiles` / `scriptClosure` / `rewrite`。
-3. 上游专用工具名、命令名已换成 DSH 对应能力；多角色流程写明用 Agent Team。
-4. 需要配置的项已改走插件设置页或随包固定配置，不要求用户改技能目录里的文件。
-5. 对技能的大改已放进 `vendor/overrides/`，删除的上游文件已登记到 `vendor/removals.json`；重跑 `npm run vendor` 后 `git status` 不应出现技能内容漂移。
-6. 上游许可已归档到 `vendor/licenses/<仓库>/`，并在 README「技能来源」标注协议。
-7. 跑 `vendor --only=…`、`gen-catalog`、`gen-skill-details`、`verify`、`smoke-host`，通过后更新本文件。
+### 3. 描述、语言和工具名
 
-## 上游文件的裁剪
+- 329 个技能都有中文短说明，由 `scripts/gen-catalog.mjs` 生成 `catalog/catalog.json`；新增上游技能必须补 `catalog/skills.zh.extra.txt`，否则生成直接失败。
+- Claude 工具名按项目改写：`AskUserQuestion` → `ask_user_question`，`WebSearch` → `web_search`，`WebFetch` → `web_fetch`，`python3` → `python`（只改 Markdown 正文；Python 注释里的字面量不影响调用）。
+- 每个改过行为的技能在 `SKILL.md` 顶部加一行 `> [dsh-zrwang-plugin] …` 说明，模型先看到的是插件里的真实入口，不是上游默认路径。
 
-技能包里只保留运行需要的内容：`SKILL.md`、正文/脚本实际引用的资源、脚本闭包、许可文件。以下上游内容在 vendor 时会删掉（移到 `AgentsDo` 的 trash，可回滚，规则见 `scripts/vendor-skills.mjs` 的 `PRUNE_*`）：
+## 二、逐项目说明
 
-- `tests/`、`test/`、`__pycache__/`、`.pytest_cache/`、`.venv/`、`.github/`、`ci/`、`.vscode/`
-- `package-lock.json`、`pnpm-lock.yaml`、`yarn.lock`、`.gitignore`、`.gitattributes`
-- `CHANGELOG*`、`CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`codecov.yml`、`requirements-dev.txt`、`requirements-test.txt`、`.pre-commit-config.yaml`、`.eslintrc*`、`*.pyc`
+### 1. MATLAB Agentic Toolkit
 
-需要时也可以手动跑 `node scripts/vendor-skills.mjs --prune-only` 对现有 `skills/` 做一次裁剪。
+- 上游：`matlab/matlab-agentic-toolkit`，pin `863b2489e5ad`，157 个技能，落盘 `skills/engineering/matlab/`。
+- 改动：
+  - `vendor/upstreams.json` 的 `rewrite`：Markdown 里的 `AskUserQuestion` 改成 `ask_user_question`。
+  - `headerNotes`：每个 `SKILL.md` 顶部说明 MATLAB MCP 是 existing 模式，必须先启动 MATLAB 并 `shareMATLABSession()`，不要因为 `failed to attach` 就绕开 MCP；`matlab-call-python`、`matlab-import-external-ai-model` 另加一条：Python 用插件设置选择的解释器（`ZRWANG_SKILL_PYTHON`），不要在 MATLAB 里另建 venv。
+  - 本轮上游新增的 `matlab-specify-ssm`、`matlab-design-scenario`、`roadrunner-author-scenario`、`roadrunner-build-rrhd-map`、`roadrunner-simulate-scenario`、`roadrunner-manage-project`、`matlab-simulate-6g-system` 等补了中文说明；被上游删掉的 `configuring-block-policy` 等已从目录和默认集合移除。
+- 没改：技能脚本和 MATLAB 代码本身；它们只通过 MCP 调用 MATLAB。
+- 验证：`npm run verify`、`npm run smoke`；`audit-upstreams` 157/157。
 
-## 运行环境适配
+### 2. Simulink Agentic Toolkit
 
-以下不是对某个上游技能的改写，而是让所有技能在 DSH（Web / Desktop）下可运行的环境适配：
+- 上游：`matlab/simulink-agentic-toolkit`，pin `bdfaf9ac3787`，50 个技能，落盘 `skills/engineering/simulink/`。
+- 改动：
+  - 与 MATLAB 相同的 `AskUserQuestion` 改写和 existing 模式说明。
+  - `simulink-integrate-python-code` 增加 Python 解释器说明。
+  - 新增 `simscape-diagnose-simulation-error`、`stateflow-apply-layout` 的中文说明；上游删除的 `configuring-block-policy` 不再收录。
+  - 技能树之外的运行时 `mathworks/simulink-agentic-toolkit/` 同步到上游 2026.11.c（`tools/VERSION` 1.0.35），包含 `satk_initialize.p`、`tools/`、`toolbox-kb/`；这部分是 MCP 扩展工具的运行环境，不是技能。
+- 没改：MATLAB 函数和 `.p` 文件本身。
+- 验证：`VERSION`/`tools/VERSION` 与上游 release 一致；`tools/tools.json` 仍是 9 个 Simulink 工具；`audit-upstreams` 50/50。
 
-- **配置只有一个来源**：非密钥写进当前 profile 的 `cordis.patch.yml`（`- id: dsh-zrwang-plugin` 的 `config`），密钥写进 DSH 凭据库；没有 `settings.json`、没有插件配置目录、没有上游 `.env`/`config.*`。设置页的所有字段保存后立即重新注入环境变量。
-- **技能注入**：不再使用 `<项目根>/.agents/skills` 目录联接；插件在每个 agent 的 `agent/created` 里用 `ctx.skills.registerProvider` 注册提供方，闭包绑定该会话的 sessionId；选择快照存在 `$DSH_HOME/storages/dsh-zrwang-plugin/state/session-selection.json`，`get()` 按需读取插件包内 `SKILL.md`。旧版本留下的、指回插件 `skills/`/`ars/` 的联接会在首次按项目列出时自动摘掉。DSH 官方查找参数只有 `cwd`，但提供方注册在 agent 作用域，所以不同对话各用各的选择。
-- **MCP 组件会话隔离**：组件开关按会话保存；服务器仍由 `ctx.mcpManager` 宿主级注册（DSH 的工具表是宿主级），插件在每个 agent 作用域调用 `ctx.tools.restrict({ deny })`，把本会话没启用的 `mcp__matlab-mcp__*` / `mcp__windows-mcp__*` 从工具列表、提示词上下文和执行里一起移除；`tools/change` 时按当前工具名重算，MATLAB 重连换了工具名也能跟上。
-- **配置注入**：不再手工改宿主进程环境；插件通过 DSH 官方 `ctx.shellEnv.register` 注册 `DSH_ZRWANG_*`，每次 shell 调用由 DSH 注入。DSH shell 会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，所以密钥用 `_CRED` 结尾的名字；`host/pysite/sitecustomize.py` 在 Python 启动时把它们映射回 `OPENAI_API_KEY`、`QWEN_API_KEY`、`NCBI_API_KEY`、`ELSEVIER_API_KEY`、`ZHIPUAI_API_KEY` 等上游标准名，非密钥的 `DSH_ZRWANG_*`、`DSH_PATENT_*`、`DSH_NCBI_*` 等插件声明的前缀则去掉 `DSH_` 还原成上游变量名（只处理这些前缀，不动 `DSH_HOME` 这类宿主内置）。Nature 生图复用模型服务的生图 URL/模型/Key，不再单独设置，不设全局 `OPENAI_API_KEY`。
-- **系统 Python（不自带、不安装）**：插件不再自带 `runtime/python`，也不提供任何安装功能；`host/python.mjs` 检测本机 Python（PATH、`py` 启动器、Conda、常见目录），设置 → 运行环境 → Python 解释器 里下拉选择并只读校验依赖（缺包只提示）。所有技能的 `python`/`python3` 由静态的 `host/shim/python` 指向所选解释器，`bash`/`sh` 由 `host/shim/bash` 指向 Git Bash（Windows）或系统 bash；不在 `skills/`/`ars/` 下建 venv。
-- **运行期文件只在 DSH storages**：`$DSH_HOME/storages/dsh-zrwang-plugin/state/`（选择态、门禁、模式、事件）与 `.../patent/` 只是建议的专利数据位置；设置页「专利数据目录」填了才用，目录里是 `vault/`、`patent-map/`、`oa/`、`outputs/`。这是 DSH `storage-json` 后端的根，插件升级不丢；插件包内不再产生 `cache/`，`~/.dsh` 里也不再出现 `zrwang-plugin-config/` 之类的旁目录。旧版 `cache/` 首次启动时搬到 storages 后删除。
-- **MATLAB MCP**：profile 使用 existing 模式；MATLAB/Simulink/playground 技能顶部注明需先启动 MATLAB 并 `shareMATLABSession()`；`matlab-mcp` 与 `windows-mcp` 只在 Windows 上可用，其他平台组件显示不可用。
-- **专利工作目录**：只认设置页的「专利数据目录」；Obsidian 库固定是它下面的 `vault/`，索引与模型在 `patent-map/`，审查答复在 `oa/`，产物在 `outputs/`。目录没设置、是相对路径、指向文件或放在插件安装目录里时，9 个专利技能一律置灰、不注入。
-- **组件置灰**：本机未安装 draw.io、Polyspace 时，对应技能在侧栏置灰并给出原因，不静默失败。
+### 3. Polyspace Agentic Toolkit
 
-## 适配记录
+- 上游：`mathworks/polyspace-agentic-toolkit`，pin `7d242a24c9f8`，19 个技能，落盘 `skills/engineering/polyspace/`。
+- 改动：只给 `polyspace-agentic-toolkit-setup` 加了顶部说明——DSH 的 MCP 配置在 profile 的 `cordis.patch.yml`，不要改 Claude Code / Cursor / Codex 的配置文件；本机没装 Polyspace 时直接报告不可用，不要下载二进制硬装。
+- 没改：技能源码。
+- 验证：本机未装 Polyspace，19 个技能在侧栏置灰；`audit-skill-config` 标为 unavailable。
 
-以上所有改动的详细台账、逐技能覆盖矩阵与验证日志在 `AgentsDo/upstream-adaptation-record/`：
+### 4. MATLAB Agent Skills Playground
 
-- `README.md`：升级前必读、更新流程；
-- `upstream-modifications.md`：每个仓库/技能改了什么、为什么、怎么验证；
-- `upstream-inventory.md`：22 个上游项目的当前 pin、技能数、适配方式与关键改动（版本盘点）；
-- `skill-config-matrix.md`：329 个技能 + 16 个组件的状态；
-- `records.json`：最后审计的上游 SHA，`verify` 会与 lock 比对；
-- `verification-log.md`：检查命令与结果。
+- 上游：`matlab/agent-skills-playground`，pin `f93265a6477e`，4 个技能，落盘 `skills/engineering/playground/`。
+- 改动：每个 `SKILL.md` 加 existing 模式说明，其余不动。
+- 验证：`audit-upstreams` 4/4。
 
-升级任何上游前必须先读该目录；改完 vendor 规则后必须同步更新，否则 `node scripts/verify.mjs` 会失败。
+### 5. Nature Skills
+
+- 上游：`yuan1z0825/nature-skills`，pin `a65a8364b419`，24 个技能，落盘 `skills/research/nature-skills/`。
+- 改动：
+  - `vendor/overrides/` 覆盖 28 个文件：
+    - `nature-image2ppt`：删除技能内 `config.yaml`/`~/.image2ppt` 的配置读写，OCR 与生图参数只读 `PADDLE_OCR_TOKEN`、`IMAGE2PPT_IMAGE_*`；运行时、生图、manifest、README 一起改。
+    - `nature-figure`：绘图后端只读 `NATURE_FIGURE_BACKEND`，不再写 `~/.config/nature-skills`；OpenRouter 配置复用模型服务的生图 URL/模型/Key。
+    - `nature-academic-search`：配置类只读 `NCBI_EMAIL`/`NCBI_API_KEY`/`CROSSREF_MAILTO`，不再读 `config.toml`；PubMed 源补丁随上游更新。
+    - `nature-downloader`：学校固定北航，读随技能的 `config/school.json`；出版社凭据只读 `DSH_ZRWANG_*_CRED`，不写 credentials/settings 文件。
+  - `vendor/skill-patches.json` 保留 3 条小补丁：ImageMagick 探测排除 Windows 的 `convert.exe`（`runtime_env.py`、`formula_renderer.py`）；`nature-academic-search` 的工具清单顶部写明 MCP 未注册、改用 `web_search`/OpenAlex；`nature-citation` 的邮箱默认读 `CROSSREF_MAILTO`/`NCBI_EMAIL`。
+  - `rewrite`：Markdown 里的 `WebSearch`/`WebFetch` 改成 `web_search`/`web_fetch`。
+  - `headerNotes`：5 个技能各一条，分别说明 image2ppt、学术检索降级、下载器学校/凭据、绘图后端、引用邮箱的来源。
+  - 删除 17 个上游文件（academic-search 的 config/安装脚本、downloader 的旧文档和 `configure_credentials.py`），避免模型照旧去找 C 盘配置。
+- 验证：`image2ppt doctor`、`preflight.py`、`--list-backends` 显示 process environment；`audit-upstreams` 24/24；配置矩阵 24 项。
+
+### 6. 中国专利技能（patent-disclosure-skill）
+
+- 上游：`handsomestWei/patent-disclosure-skill`，pin `91e3b43a3e6b`，9 个技能，落盘 `skills/research/patent/`。
+- 改动：
+  - 数据目录统一：设置页「科研服务 → 专利数据目录」是必填项，没有默认值；插件由它派生 `vault/`（Obsidian 库）、`patent-map/`（索引与本地模型）、`oa/`（审查答复）、`outputs/`（三类产物）。没填或路径无效时，9 个专利技能全部不注入并在侧栏置灰。
+  - `vendor/overrides/` 覆盖 33 个文件：`patent-oa/tools/config.py`、`patent-map/tools/{map_cache,vault_index,model_store}.py`、`patent-reader/tools/shared/obsidian_env.py` 及 setup/check 脚本、`patent-search`/`patent-docket` 的配置解析、9 个 `SKILL.md` 和相关 prompts/docs。
+    - oa / patent-map / patent-reader 只认 `PATENT_OA_HOME` / `PATENT_MAP_HOME` / `PATENT_READER_OBSIDIAN_VAULT`；
+    - 删除 `~/Documents/patent-disclosure-skill`、`~/.patent-disclosure-skill`、工作区 `.agents/patent` 三类回退；
+    - 删除 `embedding.config.yaml`、`embedding.secrets.yaml`、`obsidian_vault.txt` 的读写，向量模型改由设置页注入；
+    - `patent-search`、`patent-docket` 的 `config.yaml` 删除，默认值写进代码。
+  - 向量设置改成四项：URL、模型、API Key、维度；provider 固定为 OpenAI 兼容的 `openai_compatible`，插件请求 `<URL>/embeddings`，不再有厂商下拉和预设。
+  - `rewrite`：13 条，把正文里的整仓路径 `skills/<子技能>/` 改成同级 `../<子技能>/`，并把 `python3`、`WebSearch`、`WebFetch`、`AskUserQuestion` 换成 DSH 的写法。
+  - `headerNotes`：9 个 `SKILL.md` 顶部说明四个子目录和“没设置目录就不注入”。
+- 验证：`oa_home()`/`map_home()` 在未设置时直接报错；`smoke` 覆盖“默认无目录时置灰”“空值持久化”“设置后恢复”；`audit-upstreams` 9/9。
+
+### 7. Academic Research Skills（ARS）
+
+- 上游：`Imbad0202/academic-research-skills`，pin `00315dfea67c`（v3.24.4），5 个流水线技能，落盘 `ars/skills/`。
+- 改动：
+  - `rewrite`：`shared/` → `_shared/`；跨技能路径改 `../<技能>/`；`python3 ` → `python `；`AskUserQuestion`/`WebSearch`/`WebFetch` → `ask_user_question`/`web_search`/`web_fetch`；繁体中文描述改简体。
+  - `extraDirs`/`sharedFiles`/`scriptClosure`：每个技能内补 `_shared/`（含 `MODE_REGISTRY.md`、`ARCHITECTURE.md`）和它引用的 `scripts/` 闭包，保证单独注入也能跑。
+  - `aliases`：生成 16 个 `/ars-*` 命令；`descriptions`：用 `vendor/ars/descriptions.json` 覆盖过长描述；`runtimeRoot`：构建时写 `_shared/dsh-runtime.md`。
+  - `headerNote`：所有技能强制简体中文、多角色用 Agent Team。
+  - `vendor/overrides/` 覆盖 5 个 `_shared/dsh-runtime.md`，写清 DSH 的 Python 与工具名。
+  - 写作用域：上游的 `PreToolUse` 清单在 `tools/pre-execute` 里实现，写文件前校验允许的目录；详见 `docs/ars-write-scope.md`。
+  - 插件注入 `ARS_VERIFICATION_CACHE_PATH=<state>/ars/verification.db`，避免上游默认写 `~/.cache/ars`。
+- 验证：`smoke:ars` 25 项；`audit-ars-alignment --strict` 975 个文件中 657 个原样、318 个已知适配；`audit-upstreams` 5/5。
+
+### 8. Zotero CLI
+
+- 上游：`54yyyu/zotero-mcp` 没有 `skills/` 目录，使用 `vendor/local/zotero-cli` 本地副本，落盘 `skills/research/zotero-cli/`。
+- 改动：只有 `SKILL.md` 和 `reference.md` 两个文件；使用 Zotero 桌面版本地 API（`ZOTERO_LOCAL=true`），不引入第二套 Zotero 凭据。
+- 验证：`zotero-cli config`；Zotero 未启动时由技能提示。
+
+### 9. Academic Humanizer
+
+- 上游：`AIScientists-Dev/academic-humanizer`，pin `94b88b23703b`，1 个技能，落盘 `skills/research/academic-humanizer/`。
+- 改动：Markdown 里 `AskUserQuestion` → `ask_user_question`；其余源码不动。
+- 验证：`audit-upstreams` 1/1。
+
+### 10. Lieflat Less AI Tone
+
+- 上游：`larashero3-dotcom/lieflat-less-ai-tone`，pin `fe77df00a27c`，1 个技能，落盘 `skills/research/lieflat-less-ai-tone/`。
+- 改动：无项目专属改动；只做全局裁剪和描述中文化。
+- 验证：`audit-upstreams` 1/1。
+
+### 11. NSFC Agent Skills
+
+- 上游：`njzjz/nsfc-agent-skills`，pin `ac06208c6aa1`，4 个技能，落盘 `skills/research/nsfc/`。
+- 改动：无项目专属改动。
+- 验证：`audit-upstreams` 4/4。
+
+### 12. Supervisor Skills
+
+- 上游：`HKUSTDial/Supervisor-Skills`，pin `4c718106bd5d`，12 个技能，落盘 `skills/research/supervisor-skills/`。
+- 改动：
+  - `renames`：上游 `deep-research` 与 ARS 的 `deep-research` 重名，落盘改名 `supervisor-deep-research`。
+  - `skill-patches.json` 同步改该技能 frontmatter 的 `name`。
+  - `handbook/` 与仓库根 `scripts/` 不收录（不是技能）。
+- 验证：`verify` 技能名唯一；`audit-upstreams` 12/12。
+
+### 13. OfficeCLI
+
+- 上游：`iOfficeAI/OfficeCLI`，pin `fecece3ee605`（1.0.163），11 个技能，落盘 `skills/office/officecli/`。
+- 改动：技能正文随上游更新，插件不捆绑 `officecli` 命令；没有配置/路径改写。CLI 本身是本机外部安装，版本取决于用户机器。
+- 验证：侧栏检查 `officecli --version`；`audit-upstreams` 11/11。
+
+### 14. PPT Master
+
+- 上游：`hugohe3/ppt-master`，pin `63a03673d5c3`，1 个技能，落盘 `skills/office/ppt-master/`。
+- 改动：
+  - `vendor/overrides/` 覆盖 22 个文件：`scripts/image_gen.py`、`config.py`、`image_search.py`、`notes_to_audio.py`、14 个 `image_backends/*.py`、2 个 `image_sources/*.py`、`scripts/README.md`。
+    - 删除 `.env` 查找和加载；生图配置只读插件注入的 `ZRWANG_IMAGE_*`，密钥从 `ZRWANG_IMAGE_CRED` 映射为 `OPENAI_API_KEY`，`IMAGE_BACKEND=openai`；
+    - `image_search`/`notes_to_audio` 去掉上游的 `.env` 依赖；
+    - 各厂商 backend 保留，但默认走 OpenAI Images 兼容协议。
+  - `skill-patches.json` 2 条：`project_management/paths.py` 的 `PROJECTS_ROOT` 改为技能目录 `projects/`，`cli.py` 的默认项目根优先用它；插件把该目录联接到 `<当前项目根>/.agents/ppt-master/projects`。
+  - `headerNotes` 3 条：说明生图配置来自插件、`.env` 已禁用、项目输出目录和并发时的绝对路径建议。
+  - 删除 `.env.example` 和 `scripts/update_repo.py`。
+- 验证：`python scripts/image_gen.py --list-backends` 显示 `process environment`；`project_manager.py init demo` 写到项目 `.agents`；`audit-upstreams` 1/1。
+
+### 15. HTML PPT Skill
+
+- 上游：`lewislulu/html-ppt-skill`，pin `fd1629067909`，1 个技能，落盘 `skills/office/html-ppt/`。
+- 改动：无项目专属改动。
+- 验证：`audit-upstreams` 1/1。
+
+### 16. 飞书 Lark
+
+- 上游：lark-cli 官方 agent skills（open.feishu.cn well-known 源，MIT），本地副本 `vendor/local/lark-skills`，28 个技能，落盘 `skills/office/lark/`。
+- 改动：
+  - 每个 `SKILL.md` 顶部说明：文件用 DSH 的 `read`/`write`/`edit`，命令用 `pwsh`/`bash` 执行 `lark-cli`；先安装并 `lark-cli auth login`；文中的 Claude/Codex/Aily harness 对照表仅参考；`../lark-shared/` 等跨技能引用要求一起勾选。
+  - 四个基础技能（contact/event/im/shared）默认勾选，其余默认关闭。
+  - `lark-cli` 是外部命令，插件不捆绑、不固定版本。
+- 验证：`lark-cli --version`、`lark-cli auth status`；缺命令时 28 个技能置灰。
+
+### 17. Archify
+
+- 上游：`tt-a1i/archify` 以 release 包分发、仓库根没有 `SKILL.md`，本地副本固定 v3.2.0，116 个文件，落盘 `skills/office/archify/`。
+- 改动：`scripts/check-update.mjs` 覆盖为读取 `ARCHIFY_UPDATE_CHECK_DISABLED` / `DSH_ARCHIFY_UPDATE_CHECK_DISABLED`，插件注入后不再联网检查更新。
+- 验证：渲染自检；`audit-upstreams` 标为本地副本。
+
+### 18. Lieflat Charts
+
+- 上游：`larashero3-dotcom/lieflat-charts`，pin `4b4e75bde11c`，1 个技能，落盘 `skills/office/lieflat-charts/`。
+- 改动：无项目专属改动；本轮上游删除了 6 个旧 deck 模板并调整了 Lupi 图表集，按上游原样收录。
+- 验证：`audit-upstreams` 1/1。
+
+### 19. Writing DNA
+
+- 上游：`larashero3-dotcom/writing-dna-skill`，pin `1335568bfd11`，1 个技能，落盘 `skills/office/writing-dna-skill/`。
+- 改动：`vendor/overrides/` 覆盖 4 个文件（`SKILL.md`、`README.md`、`README.en.md`、`references/workflow.en.md`），做中文说明和 DSH 入口适配；删除仓库里嵌套的 `lieflat-less-ai-tone` 副本（该仓库已独立收录）。
+- 验证：`audit-upstreams` 1/1。
+
+### 20. Lieflat Gongwen
+
+- 上游：`larashero3-dotcom/lieflat-gongwen`，pin `c17e885c5579`，1 个技能，落盘 `skills/office/lieflat-gongwen/`。
+- 改动：无项目专属改动。
+- 验证：`audit-upstreams` 1/1。
+
+### 21. Guizang PPT Skill
+
+- 上游：`op7418/guizang-ppt-skill`，pin `93d21bf4a73a`，1 个技能，落盘 `skills/office/guizang-ppt-skill/`。
+- 改动：无项目专属改动。
+- 验证：`audit-upstreams` 1/1。
+
+### 22. Frontend Slides
+
+- 上游：`zarazhangrui/frontend-slides`，pin `9906a34d640d`，1 个技能，落盘 `skills/office/frontend-slides/`。
+- 改动：仓库按 Claude 插件打包，技能本体在根 `SKILL.md`；只收录根技能，删除 `plugins/frontend-slides/` 下重复的 80 个文件。技能正文本身不改。
+- 验证：`audit-upstreams` 1/1。
+
+## 三、MCP 组件
+
+技能之外还有两个 MCP 组件，不按技能计数：
+
+### MathWorks（`matlab-mcp`）
+
+- 包内 `mathworks/matlab-mcp-server-windows-x64.exe` 是 MathWorks 官方 MATLAB MCP 服务器，已更新到 **v0.16.1**（sha256 `7feca987…`，与官方 release 一致）。
+- 包内 `mathworks/simulink-agentic-toolkit/` 是 Simulink Agentic Toolkit 运行时 **2026.11.c**（`tools/VERSION` 1.0.35），提供 `tools/tools.json` 里的 9 个 Simulink 工具；加上 MCP 服务器的 5 个 MATLAB 工具，共 14 个。
+- 注册参数固定：existing 会话模式、`--extension-file=<包内 tools.json>`、关闭 telemetry；工程技能组打开且确有工程技能注入时才动态注册，MATLAB 没启动时只报连接状态，不拖垮插件装配。
+- MATLAB 侧需要用户执行一次 `satk_initialize(MCPServerPath=...)` 共享会话；插件不会自动拉起 MATLAB。
+
+### Windows MCP（`windows-mcp`）
+
+- 插件只负责在侧栏勾选后注册 `windows-mcp`（`serve` + 两个固定 env），**不捆绑、不固定版本**；命令必须由用户自己安装到 PATH（例如 `uv tool install windows-mcp`）。版本是否最新取决于用户机器，插件无法替它升级。
+
+### 外部依赖（不是 MCP）
+
+- `officecli`、`lark-cli`、`zotero-cli`、draw.io、Polyspace 都是本机外部安装或商业软件，插件只检测可用性并在缺失时置灰，不会自动下载安装。
+
+## 四、升级或新增项目时怎么做
+
+1. 在 `vendor/upstreams.json` 加仓库、pin、落盘路径和需要的 `rewrite`/`headerNotes` 等规则。
+2. 需要小范围字面替换的，写进 `vendor/skill-patches.json`；需要整文件改的，放 `vendor/overrides/`；要删的上游文件登记到 `vendor/removals.json`；没有仓库形态的做 `vendor/local/` 副本。
+3. 跑 `node scripts/vendor-skills.mjs --only=<id>`，再跑 `npm run catalog`、`npm run build`。
+4. 更新本文件对应项目、`AgentsDo/upstream-adaptation-record/upstream-inventory.md`、`upstream-modifications.md`、`records.json` 和 `verification-log.md`。
+5. 跑完整检查：
+
+```text
+npm run verify
+npm run smoke
+node scripts/smoke-routes.mjs
+node scripts/audit-skill-config.mjs --check
+node scripts/audit-upstreams.mjs
+node scripts/smoke-ars-guard.mjs
+```
+
+当前结果：`verify` 81 项、`smoke` 82 项、路由 smoke 全过、配置审计 329 技能/16 组件待处置 0、上游完整性缺技能 0 缺文件 0、ARS 护栏 25 项、ARS 对齐 975 文件中原样 657/已知适配 318。
+
+## 五、为什么很多上游文件看起来没改
+
+这是有意的。只改 DSH 与上游真正不兼容的地方：配置入口、数据目录、密钥传递、工具名、Windows 兼容性和跨技能路径。其余文件保持逐字节一致，升级时 diff 才看得清哪些是上游变化、哪些是插件改动。
+
+`audit-upstreams` 会按 lock SHA 重新下载每个上游，逐个技能对比文件清单：少文件才算不完整，多文件允许（`_shared`、脚本闭包、运行说明、补丁产物）。ARS 的 975 个文件里 657 个原样保留，318 个是有记录的适配，说明“没改”和“改了”都有账可查。
+
+## 六、已知限制
+
+- 没有在真实 Windows + MATLAB 上跑 Simulink 的 `.p` 工具和 MCP 连接，只核对了版本、文件结构和工具清单；最终要在用户的 MATLAB 会话里验证。
+- `officecli`、`lark-cli`、`windows-mcp`、draw.io、Polyspace 的版本由用户机器决定，插件只检测、不升级。
+- 专利向量接口没有在真实服务上调用过，只验证了配置解析和请求构造；文本嵌入即可，不需要多模态。
+- 上游默认分支会继续移动；本文件记录的是 2026-11-21 的 pin，升级时以 `vendor/upstreams.lock.json` 为准。

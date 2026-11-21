@@ -270,11 +270,7 @@ def default_projects_root() -> Path:
     """
     if PROJECTS_ROOT.is_dir():
         return PROJECTS_ROOT
-    if PROJECTS_ROOT.is_dir():
-        return PROJECTS_ROOT
-    if is_within_path(Path.cwd(), REPO_ROOT):
-        return PROJECTS_ROOT
-    return Path.cwd() / "projects"
+    return PROJECTS_ROOT
 
 
 class ProjectManager:

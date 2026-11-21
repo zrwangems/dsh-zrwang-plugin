@@ -18,61 +18,6 @@
       ]
     },
     {
-      "id": "nature-downloader-config-dir",
-      "reason": "把下载器的配置目录从 ~/.config/lit-dl 收到 DSH 家目录 zrwang-plugin-config/nature-downloader",
-      "files": [
-        {
-          "path": "research/nature-skills/nature-downloader/src/config.py",
-          "replace": [
-            {
-              "find": "配置路径：~/.config/lit-dl/school.json",
-              "to": "配置路径：~/.dsh/zrwang-plugin-config/nature-downloader/school.json"
-            },
-            {
-              "find": "Path.home() / \".config\" / \"lit-dl\"",
-              "to": "Path.home() / \".dsh\" / \"zrwang-plugin-config\" / \"nature-downloader\""
-            }
-          ]
-        },
-        {
-          "path": "research/nature-skills/nature-downloader/scripts/configure_credentials.py",
-          "replace": [
-            {
-              "find": "Path.home() / \".config\" / \"lit-dl\"",
-              "to": "Path.home() / \".dsh\" / \"zrwang-plugin-config\" / \"nature-downloader\""
-            }
-          ]
-        },
-        {
-          "path": "research/nature-skills/nature-downloader/scripts/lib/credentials.mjs",
-          "replace": [
-            {
-              "find": "path.join(os.homedir(), \".config\", \"lit-dl\")",
-              "to": "path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\")"
-            }
-          ]
-        },
-        {
-          "path": "research/nature-skills/nature-downloader/scripts/lib/school-config.mjs",
-          "replace": [
-            {
-              "find": "path.join(os.homedir(), \".config\", \"lit-dl\")",
-              "to": "path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\")"
-            }
-          ]
-        },
-        {
-          "path": "research/nature-skills/nature-downloader/scripts/lib/settings.mjs",
-          "replace": [
-            {
-              "find": "path.join(os.homedir(), \".config\", \"lit-dl\")",
-              "to": "path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\")"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "ppt-master-projects-root",
       "reason": "插件把技能目录的 projects/ 联接到 <项目根>/.agents/ppt-master/projects；paths.py 以技能目录为基准。",
       "files": [
@@ -96,7 +41,7 @@
           "replace": [
             {
               "find": "    if is_within_path(Path.cwd(), REPO_ROOT):\n        return PROJECTS_ROOT\n    return Path.cwd() / \"projects\"",
-              "to": "    if PROJECTS_ROOT.is_dir():\n        return PROJECTS_ROOT\n    if is_within_path(Path.cwd(), REPO_ROOT):\n        return PROJECTS_ROOT\n    return Path.cwd() / \"projects\""
+              "to": "    if PROJECTS_ROOT.is_dir():\n        return PROJECTS_ROOT\n    return PROJECTS_ROOT"
             }
           ]
         }
@@ -142,66 +87,6 @@
       ]
     },
     {
-      "id": "patent-oa-project-home",
-      "reason": "默认写 ~/Documents/patent-disclosure-skill/oa；改为只认插件注入的 PATENT_OA_HOME（专利数据目录下的 oa/），不写项目目录或用户主目录。",
-      "files": [
-        {
-          "path": "research/patent/patent-oa/tools/config.py",
-          "replace": [
-            {
-              "find": "def oa_home() -> Path:\n    env = (os.environ.get(\"PATENT_OA_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (documents_dir() / \"patent-disclosure-skill\" / \"oa\").resolve()",
-              "to": "def oa_home() -> Path:\n    env = (os.environ.get(\"PATENT_OA_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    raise SystemExit(\n        \"PATENT_OA_HOME 未设置：请在 DSH 插件设置 → 科研服务 → 专利数据目录 里填目录，\"\n        \"插件会把审查答复数据放在它下面的 oa/。\"\n    )"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "patent-map-project-home",
-      "reason": "默认写 ~/Documents/patent-disclosure-skill/patent-map；改为只认插件注入的 PATENT_MAP_HOME（专利数据目录下的 patent-map/）。",
-      "files": [
-        {
-          "path": "research/patent/patent-map/tools/map_cache.py",
-          "replace": [
-            {
-              "find": "def map_home() -> Path:\n    env = (os.environ.get(\"PATENT_MAP_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    return (skill_data_root() / \"patent-map\").resolve()",
-              "to": "def map_home() -> Path:\n    env = (os.environ.get(\"PATENT_MAP_HOME\") or \"\").strip()\n    if env:\n        return Path(env).expanduser().resolve()\n    raise SystemExit(\n        \"PATENT_MAP_HOME 未设置：请在 DSH 插件设置 → 科研服务 → 专利数据目录 里填目录，\"\n        \"插件会把索引和向量模型放在它下面的 patent-map/。\"\n    )"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "patent-map-vault-project-home",
-      "reason": "Obsidian 库路径只来自插件注入的 PATENT_READER_OBSIDIAN_VAULT（专利数据目录下的 vault/），删掉所有持久化文件回退。",
-      "files": [
-        {
-          "path": "research/patent/patent-map/tools/vault_index.py",
-          "replace": [
-            {
-              "find": "def persisted_vault_path() -> Path:\n    return Path.home() / \".patent-disclosure-skill\" / \"obsidian_vault.txt\"",
-              "to": "def persisted_vault_path() -> Path | None:\n    \"\"\"库路径只来自插件设置（PATENT_READER_OBSIDIAN_VAULT）；不再有持久化文件。\"\"\"\n    return None"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "nature-academic-config-from-plugin",
-      "reason": "配置集中到插件配置目录：优先读 ZRWANG_NATURE_ACADEMIC_CONFIG，其次保留技能目录默认值。",
-      "files": [
-        {
-          "path": "research/nature-skills/nature-academic-search/mcp-server/utils/config.py",
-          "replace": [
-            {
-              "find": "        if config_path is None:\n            config_path = Path(__file__).parent.parent / \"config.toml\"",
-              "to": "        if config_path is None:\n            env_path = os.environ.get(\"ZRWANG_NATURE_ACADEMIC_CONFIG\", \"\").strip()\n            config_path = Path(env_path) if env_path else Path(__file__).parent.parent / \"config.toml\""
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "nature-citation-env-defaults",
       "reason": "插件设置里的 Crossref/NCBI 邮箱通过环境变量注入，脚本未显式传参时默认使用。",
       "files": [
@@ -219,30 +104,6 @@
             {
               "find": "    parser.add_argument(\"--ncbi-email\", help=\"Contact email sent to NCBI E-utilities for PMID requests.\")",
               "to": "    parser.add_argument(\"--ncbi-email\", default=os.environ.get(\"NCBI_EMAIL\") or os.environ.get(\"CROSSREF_MAILTO\"), help=\"Contact email sent to NCBI E-utilities (defaults to NCBI_EMAIL/CROSSREF_MAILTO).\")"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "nature-downloader-school-file",
-      "reason": "学校配置固定随技能分发：school.json 读 LIT_DL_SCHOOL_FILE；credentials/settings 仍走 LIT_DL_CONFIG_DIR。",
-      "files": [
-        {
-          "path": "research/nature-skills/nature-downloader/src/config.py",
-          "replace": [
-            {
-              "find": "CONFIG_FILE = CONFIG_DIR / \"school.json\"",
-              "to": "CONFIG_FILE = Path(os.environ.get(\"LIT_DL_SCHOOL_FILE\", str(CONFIG_DIR / \"school.json\")))"
-            }
-          ]
-        },
-        {
-          "path": "research/nature-skills/nature-downloader/scripts/lib/school-config.mjs",
-          "replace": [
-            {
-              "find": "export function configPathFromEnv(env = process.env) {\n  const dir = env.LIT_DL_CONFIG_DIR || path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\");\n  return path.join(dir, \"school.json\");\n}",
-              "to": "export function configPathFromEnv(env = process.env) {\n  if (env.LIT_DL_SCHOOL_FILE) return env.LIT_DL_SCHOOL_FILE;\n  const dir = env.LIT_DL_CONFIG_DIR || path.join(os.homedir(), \".dsh\", \"zrwang-plugin-config\", \"nature-downloader\");\n  return path.join(dir, \"school.json\");\n}"
             }
           ]
         }

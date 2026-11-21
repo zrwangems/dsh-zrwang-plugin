@@ -138,6 +138,9 @@ function applySkillPatches(root) {
           if (text.includes(to)) continue
           fail(`补丁不适用（上游结构变了）：${entry.path}`)
         }
+        // to 里包含 find 的补丁（例如“在标题前插说明”），第二次应用时 find 仍在；
+        // 如果成段结果已经存在，直接跳过，避免重复插入。
+        if (to.includes(find) && text.includes(to)) continue
         text = text.split(find).join(to)
       }
       writeFileSync(target, crlf ? text.replace(/\n/g, '\r\n') : text, 'utf8')

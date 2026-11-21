@@ -47,7 +47,7 @@
             "matlab-call-python",
             "matlab-import-external-ai-model"
           ],
-          "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件提供：路径见 `ZRWANG_SKILL_PYTHON`（或插件包 `runtime/python/venv/Scripts/python.exe`）；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统 Python 或另建 venv。"
+          "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件设置里选择的解释器提供：路径见 `ZRWANG_SKILL_PYTHON`；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统默认 Python 或另建 venv。"
         }
       ],
       "rewrite": [
@@ -91,7 +91,7 @@
           "skills": [
             "simulink-integrate-python-code"
           ],
-          "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件提供：路径见 `ZRWANG_SKILL_PYTHON`（或插件包 `runtime/python/venv/Scripts/python.exe`）；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统 Python 或另建 venv。"
+          "text": "> [dsh-zrwang-plugin] 本机 Python 统一由 DSH 插件设置里选择的解释器提供：路径见 `ZRWANG_SKILL_PYTHON`；MATLAB 里需要 `pyenv` 时用这个路径，不要用系统默认 Python 或另建 venv。"
         }
       ],
       "rewrite": [
@@ -150,28 +150,28 @@
             "nature-image2ppt"
           ],
           "files": "^SKILL\\.md$",
-          "text": "> [dsh-zrwang-plugin] 配置由 DSH 插件设置写入本技能 `config.yaml`（OCR + 通用生图 URL/模型/Key），不要改 `~/.image2ppt/config.yaml`；检查用 `python cli/image2ppt/cli.py doctor`。"
+          "text": "> [dsh-zrwang-plugin] OCR 与通用生图配置由 DSH 插件设置注入环境变量（`PADDLE_OCR_TOKEN`、`IMAGE2PPT_IMAGE_*`），不写技能内 `config.yaml`，也不要改 `~/.image2ppt/config.yaml`；检查用 `python cli/image2ppt/cli.py doctor`。"
         },
         {
           "skills": [
             "nature-academic-search"
           ],
           "files": "^SKILL\\.md$",
-          "text": "> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search MCP 服务器：不要调用 `search_papers` 等 MCP 工具；可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`，并明确告诉用户检索已降级。PubMed/Crossref 等参数在插件设置「科研服务」里，配置在插件配置目录（`ZRWANG_NATURE_ACADEMIC_CONFIG`）。"
+          "text": "> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search MCP 服务器：不要调用 `search_papers` 等 MCP 工具；可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`，并明确告诉用户检索已降级。PubMed/Crossref 邮箱与 Key 由插件设置「科研服务」直接注入环境变量（`NCBI_EMAIL`、`NCBI_API_KEY`、`CROSSREF_MAILTO`）。"
         },
         {
           "skills": [
             "nature-downloader"
           ],
           "files": "^SKILL\\.md$",
-          "text": "> [dsh-zrwang-plugin] 学校配置固定为北航，直接随技能放在 `config/school.json`（无需设置）；插件通过 `LIT_DL_SCHOOL_FILE` 指向它。`credentials.json`、`settings.json` 仍在插件配置目录（`LIT_DL_CONFIG_DIR`），出版社凭据由设置页「科研服务」维护；不要写 `~/.config/lit-dl`。"
+          "text": "> [dsh-zrwang-plugin] 学校配置固定为北航，随技能放在 `config/school.json`（`LIT_DL_SCHOOL_FILE` 指向它）；出版社凭据由设置页「科研服务」写入 DSH 凭据库，以 `ZRWANG_*_CRED` 注入。不要写 `~/.config/lit-dl`，也不要自己维护 credentials/settings 文件。"
         },
         {
           "skills": [
             "nature-figure"
           ],
           "files": "^SKILL\\.md$",
-          "text": "> [dsh-zrwang-plugin] 绘图后端偏好写在插件配置目录（`NATURE_FIGURE_CONFIG`）；OpenRouter/生图网关的 Key、模型、接口地址不再单独设置，直接复用模型服务的生图 URL/模型/Key（插件注入 `OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`），不要写 `~/.config/nature-skills`。"
+          "text": "> [dsh-zrwang-plugin] 绘图后端由插件设置「科研服务 → Nature 绘图」注入 `NATURE_FIGURE_BACKEND`，不写 `~/.config/nature-skills`。OpenRouter/生图网关的 Key、模型、接口地址复用模型服务的生图 URL/模型/Key（插件注入 `OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`）。"
         },
         {
           "skills": [
