@@ -97,13 +97,13 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
   const mcpStatusOf = () => (mcpController === undefined ? { available: false, servers: [] } : mcpController.status())
   const webServer = scope.webServer ?? scope.get?.('webServer')
 
-  async function modeState(catalog, projectRoot, workspace, persist, sessionId) {
+  async function modeState(catalog, projectRoot, workspace, persist, sessionId, restoreSnapshot = persist !== true) {
     const selection = await loadSelection(catalog)
     const gates = await loadGates()
     await loadPresets(catalog, selection, gates, projectRoot)
     const active = await activeModeContent(catalog, selection, gates, projectRoot, workspace, workspace.sessionId)
     const snapshot = await readSessionSelection(sessionId)
-    if (snapshot !== undefined && persist !== true) {
+    if (snapshot !== undefined && restoreSnapshot === true) {
       const changes = {}
       for (const name of Object.keys(catalog.skills)) changes[name] = snapshot.skills?.[name] === true
       await setSelection(changes)
@@ -121,8 +121,8 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
     return { selection: { ...selection, skills }, gates: normalizeGates(active.content.gates), active }
   }
 
-  async function activateMode(catalog, projectRoot, workspace) {
-    return modeState(catalog, projectRoot, workspace, true)
+  async function activateMode(catalog, projectRoot, workspace, sessionId) {
+    return modeState(catalog, projectRoot, workspace, true, sessionId, true)
   }
 
   async function contextOf(sessionId, cwd) {
@@ -145,7 +145,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
     const catalog = await loadCatalog()
     const scopeInfo = await contextOf(sessionId, cwd)
     const { projectRoot, workspace } = scopeInfo
-    const { selection, gates } = await modeState(catalog, projectRoot, workspace, persist, sessionId)
+    const { selection, gates } = await modeState(catalog, projectRoot, workspace, persist, sessionId, persist !== true)
     if (persist === true) await saveSessionSelection(sessionId, selection, gates)
     else await ensureSessionSelection(sessionId, selection, gates)
     syncArsCommands(gates.ars === true)
@@ -204,7 +204,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
       const scopeInfo = await contextOf(body.sessionId, body.cwd)
       const catalog = await loadCatalog()
       const selection = await loadSelection(catalog)
-      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace, scopeInfo.sessionId)
       await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
       const patch = body.gates ?? Object.fromEntries(Object.entries(body.categories ?? {}))
       const nextGates = await setGates(patch)
@@ -239,7 +239,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
       }
       if (Object.keys(changes).length === 0) throw new Error('没有可应用的选择变更')
       const scopeInfo = await contextOf(body.sessionId, body.cwd)
-      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace, scopeInfo.sessionId)
       await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
       await setSelection(changes)
       await resetDerivedGatesForSkills(catalog, Object.keys(changes))
@@ -255,7 +255,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
       const only = Array.isArray(body.only) ? body.only.filter(item => typeof item === 'string') : undefined
       const { skillChanges, gates } = childBatch(catalog, nodeId, value, { only })
       const scopeInfo = await contextOf(body.sessionId, body.cwd)
-      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace, scopeInfo.sessionId)
       await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
       const blocked = await blockedSkills(runtime.effective(), catalog)
       const changes = Object.fromEntries(Object.entries(skillChanges).filter(([name]) => blocked[name] === undefined))
@@ -272,7 +272,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
       const group = catalog.groups.find(item => item.id === body.group)
       if (group === undefined) throw new Error(`未知一级目录：${body.group}`)
       const scopeInfo = await contextOf(body.sessionId, body.cwd)
-      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace, scopeInfo.sessionId)
       await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
       const changedNames = await resetGroup(catalog, group.id)
       await resetDerivedGatesForSkills(catalog, changedNames)
@@ -283,7 +283,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
       const scopeInfo = await contextOf(body.sessionId, body.cwd)
       const catalog = await loadCatalog()
       const selection = await loadSelection(catalog)
-      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace, scopeInfo.sessionId)
       const gates = live.gates
       const action = typeof body.action === 'string' ? body.action : ''
       const name = typeof body.name === 'string' ? body.name.trim() : ''
