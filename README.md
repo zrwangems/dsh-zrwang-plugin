@@ -26,8 +26,8 @@ DSH 默认从 `<项目根>/.agents/skills/` 发现技能，一个项目装几十
 - **逐层与批量**：目录行的「全选 / 全关」只作用于**直接下一层**（子技能勾选、子目录门禁），不会递归下钻；**一级目录（工程/科研/办公）的「全选」会同时打开本组门禁**，点一次就能真正开始注入。搜索过滤时「全选 / 全关」只处理当前看得见的直接子节点。目录复选框按“子树里有没有勾选技能”自下而上推导：空子树显示未勾选并置灰；最上层四个（工程/科研/办公/ARS）仍是注入开关，默认都不勾。
 - **技能详情**：中文短说明一行、详情按 Markdown 渲染，含表格、列表、代码与链接；详情读不出来时提示打开 SKILL.md。
 - **上游链接**：每个「项目根」（如 MATLAB、中国专利技能、ARS）右侧有 **↗**，在浏览器打开对应 GitHub 仓库；项目内部的子目录/技能不重复显示。
-- **写操作护栏**：模型用 write/edit 改插件内 `skills/`、`ars/` 一律拒绝，避免跑任务时改坏技能。
-- **ARS 学术研究（独立功能区块）**：目录 `ars/`，不进 `skills/`、不计入 329 个技能；默认关闭，勾选后注入 5 个流水线技能（35 个模式）并提供 16 个 `/ars-*` 命令；多角色流程会在执行前自动打开 DSH 的「智能体团队协作」。技能与命令对齐上游 **v3.24.4**（`00315df`），复制后只做 DSH 路径/工具名/语言适配，逐文件对照与未搬的 Claude hooks 见 [docs/ars-alignment.md](docs/ars-alignment.md)。
+- **写操作护栏**：模型用 `write` / `edit` / `apply_patch` / `str_replace_editor` 改插件内 `skills/`、`ars/` 一律拒绝，避免跑任务时改坏技能。
+- **ARS 学术研究（独立功能区块）**：目录 `ars/`，不进 `skills/`、不计入 329 个技能；默认关闭，勾选后注入 5 个流水线技能（35 个模式）并提供 16 个 `/ars-*` 命令；多角色流程会在执行前自动打开 DSH 的「智能体团队协作」。技能与命令对齐上游 **v3.24.4**（`00315df`），复制后只做 DSH 路径/工具名/语言适配，逐文件对照、Claude hooks 对照与写作用域护栏见 [docs/ars-alignment.md](docs/ars-alignment.md)、[docs/ars-write-scope.md](docs/ars-write-scope.md)。
 - **MCP 组件（与 ARS 并列的两行）**：
   - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；工程组关掉即注销。
   - **Windows MCP组件**：手动勾选后注册 `windows-mcp`（桌面截图、快照、点击、窗口操作），取消即注销；用系统 PATH 里已安装的 `windows-mcp`（`uv tool install windows-mcp` 等），插件不自带运行时。
@@ -145,7 +145,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 ## 功能区块
 
-ARS 用法见 [docs/ars-usage.md](docs/ars-usage.md)，与上游的对齐范围和差异见 [docs/ars-alignment.md](docs/ars-alignment.md)，技能按插件特性做的改造记录见 [SKILL-ADAPTATIONS.md](SKILL-ADAPTATIONS.md)。
+ARS 用法见 [docs/ars-usage.md](docs/ars-usage.md)，与上游的对齐范围和差异见 [docs/ars-alignment.md](docs/ars-alignment.md)，单阶段角色的写作用域护栏见 [docs/ars-write-scope.md](docs/ars-write-scope.md)，技能按插件特性做的改造记录见 [SKILL-ADAPTATIONS.md](SKILL-ADAPTATIONS.md)。
 
 - [Academic Research Skills（ARS）](https://github.com/Imbad0202/academic-research-skills)——CC BY-NC 4.0
 
@@ -156,6 +156,7 @@ node --check host\*.mjs            # 语法
 node scripts/build-client.mjs      # 改了 client/ 必须重新构建
 node scripts/verify.mjs            # 包/目录/中文/默认集合/客户端语法全检
 node scripts/smoke-host.mjs        # 宿主冒烟（不装 DSH）
+node scripts/smoke-ars-guard.mjs   # ARS 写作用域护栏（25 项）
 node scripts/smoke-routes.mjs      # 路由层回归（假 ctx + 假 workspaceRegistry）
 
 npm run build && npm run verify && npm run smoke   # 对应快捷脚本

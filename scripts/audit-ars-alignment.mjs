@@ -42,6 +42,8 @@ else {
 const skills = (manifest.skills ?? []).map(item => item.name)
 if (skills.length !== 5) fail(`技能数不是 5：${skills.length}`)
 const SHARED_REQUIRED = ['MODE_REGISTRY.md', 'ARCHITECTURE.md', 'dsh-runtime.md']
+const PHASE_SCOPE = 'scripts/ars_phase_scope_manifest.json'
+const phaseScopeCopies = []
 for (const name of skills) {
   const dir = join(ARS, 'skills', name)
   if (!existsSync(join(dir, 'SKILL.md'))) {
@@ -54,10 +56,14 @@ for (const name of skills) {
   for (const sub of ['agents', 'references', 'templates']) {
     if (!existsSync(join(dir, sub))) fail(`${name}: 缺 ${sub}/`)
   }
+  const phaseScope = join(dir, ...PHASE_SCOPE.split('/'))
+  if (!existsSync(phaseScope)) fail(`${name}: 缺 ${PHASE_SCOPE}`)
+  else phaseScopeCopies.push(readFileSync(phaseScope, 'utf8'))
   if (existsSync(join(dir, '_scripts'))) fail(`${name}: 残留 _scripts/`)
   const skillText = readFileSync(join(dir, 'SKILL.md'), 'utf8')
   if (!/^---\r?\n[\s\S]*?name:\s*[a-z0-9-]+/m.test(skillText)) fail(`${name}: SKILL.md frontmatter 缺少 name`)
 }
+if (new Set(phaseScopeCopies).size > 1) fail('五个技能里的 phase-scope 清单内容不一致')
 
 // ---- 3 16 个命令与正文 ----
 const commands = manifest.commands ?? []
@@ -183,6 +189,11 @@ if (hasUpstream) {
       if (strict) fail(message)
       else notes.push(message)
     }
+  }
+  const upstreamPhaseScope = join(UPSTREAM, 'scripts', 'ars_phase_scope_manifest.json')
+  if (!existsSync(upstreamPhaseScope)) fail('上游检出里没有 scripts/ars_phase_scope_manifest.json')
+  else if (phaseScopeCopies.length > 0 && readFileSync(upstreamPhaseScope, 'utf8') !== phaseScopeCopies[0]) {
+    fail('phase-scope 清单与上游不同（这个文件应当原样复制）')
   }
   notes.push(`上游对照：${compared} 个文件，原样 ${identical}，已知适配 ${adapted}`)
 } else {

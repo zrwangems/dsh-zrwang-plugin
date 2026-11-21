@@ -63,4 +63,4 @@
 - `/ars-*` 命令保留上游的模式说明和脚本步骤，去掉 Claude Code 的 Skill 工具写法与插件根占位符；
 - `WebSearch`/`WebFetch`/`AskUserQuestion` 换成 DSH 的 `web_search`/`web_fetch`/`ask_user_question`。
 
-逐文件对照结果、每个命令对应的技能/模式，以及没有搬过来的 Claude Code hooks，写在 [ars-alignment.md](ars-alignment.md)。同步与核对：`node scripts/vendor-skills.mjs --only=ars`、`npm run verify:ars`。
+逐文件对照结果、每个命令对应的技能/模式、Claude Code hooks 对照写在 [ars-alignment.md](ars-alignment.md)；单阶段角色的写作用域护栏见 [ars-write-scope.md](ars-write-scope.md)。同步与核对：`node scripts/vendor-skills.mjs --only=ars`、`npm run verify:ars`、`npm run smoke:ars`。

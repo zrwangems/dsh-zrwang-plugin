@@ -153,12 +153,24 @@ for (const skill of arsManifest.skills ?? []) {
 check('ARS 技能目录自足', arsProblems.length === 0, arsProblems.slice(0, 4).join('；'))
 check('ARS 许可是 CC-BY-NC', existsSync(join(ROOT, 'vendor', 'licenses', 'ars', 'LICENSE'))
   && /NonCommercial|CC BY-NC|Attribution-NonCommercial/i.test(readFileSync(join(ROOT, 'vendor', 'licenses', 'ars', 'LICENSE'), 'utf8')))
+const phaseScopeFiles = [...arsSkillNames].map(name => join(ROOT, 'ars', 'skills', name, 'scripts', 'ars_phase_scope_manifest.json'))
+const phaseScopeTexts = phaseScopeFiles.filter(existsSync).map(file => readFileSync(file, 'utf8'))
+check('ARS 写作用域清单随五个技能分发', phaseScopeTexts.length === arsSkillNames.size && new Set(phaseScopeTexts).size === 1,
+  `${phaseScopeTexts.length}/${arsSkillNames.size}`)
+check('ARS 写作用域清单含 23 个单阶段角色', (() => {
+  if (phaseScopeTexts.length === 0) return false
+  try {
+    return Object.keys(JSON.parse(phaseScopeTexts[0]).agents ?? {}).length === 23
+  } catch {
+    return false
+  }
+})())
 
 // ---- 7 宿主模块 ----
 const requiredHost = [
   'index.mjs', 'routes.mjs', 'runtime.mjs', 'config.mjs', 'paths.mjs', 'platform.mjs',
   'params.mjs', 'object.mjs', 'state.mjs', 'python.mjs', 'env.mjs', 'settings.mjs',
-  'mcp.mjs', 'ars.mjs', 'skill-provider.mjs', 'session-selection.mjs', 'session-components.mjs', 'tool-restrictions.mjs', 'legacy-links.mjs', 'migrate.mjs', 'skill-guard.mjs', 'catalog.mjs', 'presets.mjs',
+  'mcp.mjs', 'ars.mjs', 'ars-write-scope.mjs', 'write-targets.mjs', 'path-utils.mjs', 'skill-provider.mjs', 'session-selection.mjs', 'session-components.mjs', 'tool-restrictions.mjs', 'legacy-links.mjs', 'migrate.mjs', 'skill-guard.mjs', 'catalog.mjs', 'presets.mjs',
 ]
 const missingHost = requiredHost.filter(name => !existsSync(join(ROOT, 'host', name)))
 check('宿主模块齐全', missingHost.length === 0, missingHost.join(', '))
@@ -186,6 +198,9 @@ const hostIndexSource = readFileSync(join(ROOT, 'host', 'index.mjs'), 'utf8')
 check('凭据走 DSH 凭据库 + configEditor', readFileSync(join(ROOT, 'host', 'runtime.mjs'), 'utf8').includes('persistParams') && readFileSync(join(ROOT, 'host', 'params.mjs'), 'utf8').includes('credentials'))
 check('MCP 自愈走官方状态事件与重启', allHost.includes('mcp-manager/status') && allHost.includes('mcp.restart') && allHost.includes('RECOVER_DELAYS_MS'))
 check('MCP 自动恢复开关在配置白名单里', readFileSync(join(ROOT, 'host', 'params.mjs'), 'utf8').includes("'mcp.autoRecover'"))
+check('ARS 写作用域护栏挂在 tools/pre-execute', hostIndexSource.includes('installArsWriteScopeGuard')
+  && readFileSync(join(ROOT, 'host', 'ars-write-scope.mjs'), 'utf8').includes("'tools/pre-execute'"))
+check('技能护栏覆盖 apply_patch', readFileSync(join(ROOT, 'host', 'skill-guard.mjs'), 'utf8').includes('writeTargets'))
 
 // ---- 7.1 适配覆盖与仓库一致 ----
 const overridesRoot = join(ROOT, 'vendor', 'overrides')

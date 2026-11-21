@@ -42,11 +42,11 @@ node scripts/audit-ars-alignment.mjs --upstream=<ARS 仓库检出> --strict
 1. **技能正文原样复制**：五个技能目录（`SKILL.md`、`agents/`、`references/`、`templates/`、`examples/`、`scripts/`）整目录复制，不删文件、不改方法步骤。
 2. **`shared/` 变成技能内的 `_shared/`**：DSH 的技能资源根是技能目录本身，所以每个技能带一份上游根 `shared/`，正文里的 `shared/...` 改成 `_shared/...`。
 3. **跨技能引用改相对技能根**：`deep-research/...` 改成 `../deep-research/...`，五个技能一起勾选时能互相读到。
-4. **根文件随技能分发**：`MODE_REGISTRY.md` 与 `docs/ARCHITECTURE.md` 复制到每个技能的 `_shared/`。
+4. **根文件随技能分发**：`MODE_REGISTRY.md`、`docs/ARCHITECTURE.md` 复制到每个技能的 `_shared/`；写作用域清单 `scripts/ars_phase_scope_manifest.json` 原样复制到每个技能的 `scripts/`。
 5. **脚本闭包**：扫描技能内 `.md`/`.json` 里点名的 `scripts/*.py`，只带运行时会用到的脚本及其本地 import；测试、fixture、设计文档里的脚本不随包。上游 `sr-screener/scripts/` 本身就在技能里，直接保留。
-6. **顶部运行说明**：`SKILL.md`、`agents/*.md`、`references/*.md` 顶部加两行 DSH 事实：输出简体中文；多角色流程用 DSH Agent Team 工具，不要退化成单会话扮演。
+6. **顶部运行说明**：`SKILL.md`、`agents/*.md`、`references/*.md` 顶部加两行 DSH 事实：输出简体中文；多角色流程用 DSH Agent Team 工具，不要退化成单会话扮演；派发单阶段子代理时在 prompt 首行写 `ARS-ROLE: <角色名>`，供写作用域护栏识别。
 7. **描述换短版**：DSH 技能目录只显示前 500 字，上游 2–3 KB 的 description 会把触发词挤掉，所以 frontmatter 换成 `vendor/ars/descriptions.json` 里的双语短描述；原文留档 `_shared/description-original.md`。
-8. **`_shared/dsh-runtime.md`**：构建时写入的 DSH 运行说明（Python/bash 由插件注入、hooks 不生效、路径约定）。
+8. **`_shared/dsh-runtime.md`**：构建时写入的 DSH 运行说明（Python/bash 由插件注入、写作用域护栏如何生效、路径约定）。
 9. **命令重新生成**：上游 `commands/ars-*.md` 是 Claude Code 的薄包装（调用 Skill 工具、指向 `${CLAUDE_PLUGIN_ROOT}`）。插件保留它的模式说明和脚本步骤，把开头换成“加载对应技能”，清掉 Claude 占位路径，`python3` 改成 `python`，`$ARGUMENTS` 改成 `<用户输入>`，再加一条 DSH 运行说明。
 10. **工具名对齐 DSH**：`WebSearch`/`WebFetch`/`AskUserQuestion` 改成 DSH 的 `web_search`/`web_fetch`/`ask_user_question`。
 
@@ -73,12 +73,12 @@ node scripts/audit-ars-alignment.mjs --upstream=<ARS 仓库检出> --strict
 
 模式总表在每个技能的 `_shared/MODE_REGISTRY.md`，与上游同一份（只做了路径改写）。
 
-## 没有搬过来的 Claude Code 专有能力
+## Claude Code 专有能力对照
 
 | Claude Code | DSH 里的替代 | 影响 |
 | --- | --- | --- |
 | `SessionStart` 钩子（公告 ARS 已加载） | 不需要；技能目录会列出 ARS | 无 |
-| `PreToolUse` 写作用域守卫（`hooks/run_guard.sh` + `scripts/ars_write_scope_guard.py`） | 插件有 `skill-guard`：禁止模型改插件内 `skills/`、`ars/`；流水线阶段写作用域靠技能正文约束 | 少一层“按阶段目录硬拦写”的钩子；上游自己也把该钩子标为可选硬化层，正文规则仍在 |
+| `PreToolUse` 写作用域守卫（`hooks/run_guard.sh` + `scripts/ars_write_scope_guard.py`） | 已用 DSH 官方 `tools/pre-execute` 重写为 [`host/ars-write-scope.mjs`](../host/ars-write-scope.mjs)：Bucket A 子代理只能写 `phaseN_*/**`，`bash`/`pwsh`/`terminal_send` 全拒绝；角色由任务 prompt 的 `ARS-ROLE:` 标记识别。详见 [ars-write-scope.md](ars-write-scope.md) | 行为与上游一致；DSH 没有 `agent_type`，改成 prompt 标记 + frontmatter/角色声明兜底 |
 | 插件市场清单、根 `agents/` 子代理声明 | 五个技能内的 `agents/` 角色提示原样保留；多角色由 DSH Agent Team 拉起 | 角色内容不丢，编排方式从 Claude subagent 换成 Agent Team |
 | `/plugin` 安装与更新 | DSH 插件安装/升级 | 升级后需重新 vendor 同步 ARS |
 

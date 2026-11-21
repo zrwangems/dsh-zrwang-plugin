@@ -4,7 +4,7 @@
  * 职责：
  *   1. 装配运行期参数（profile 补丁 config + DSH 凭据库），注入技能环境；
  *   2. 在 Web/Desktop 里注册 `/dsh-zrwang-plugin/*` 接口，供侧栏与设置页读写；
- *   3. MCP 组件、技能文件护栏、ARS 命令；
+ *   3. MCP 组件、技能文件护栏、ARS 写作用域护栏与命令；
  *   4. 卸载时恢复进程环境、注销 MCP 与命令。
  *
  * 技能只在侧栏勾选后，才由 DSH 官方的 ctx.skills 提供方按会话列出；
@@ -20,6 +20,7 @@ import { registerRoutes } from './routes.mjs'
 import { appendEvent, ensureStateDirSync } from './state.mjs'
 import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-commands.mjs'
 import { createSkillGuard } from './skill-guard.mjs'
+import { installArsWriteScopeGuard } from './ars-write-scope.mjs'
 import { registerSkillProvider } from './skill-provider.mjs'
 import { installComponentGuard } from './session-components.mjs'
 import { createToolRestrictions } from './tool-restrictions.mjs'
@@ -88,6 +89,7 @@ export function apply(ctx, config) {
     }
     registerSkillProvider(agent.ctx, runtime, sessionId)
     installComponentGuard(agent.ctx, sessionId)
+    installArsWriteScopeGuard(agent.ctx, { sessionId, session: agent.session })
     toolRestrictions.attach(agent)
   })
 
@@ -95,7 +97,7 @@ export function apply(ctx, config) {
     toolRestrictions.detach(agent?.session?.id)
   })
 
-  // 技能文件护栏：禁止模型用 write/edit 改插件里的 skills/ 与 ars/。
+  // 技能文件护栏：禁止模型用写入工具改插件里的 skills/ 与 ars/。
   ctx.inject?.(['tools'], scope => {
     const guard = createSkillGuard(scope)
     effect(scope, () => scope.tools.guard(guard), 'dsh-zrwang-plugin: skill guard')

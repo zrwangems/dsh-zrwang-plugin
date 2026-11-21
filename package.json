@@ -35,6 +35,7 @@
     "build": "node scripts/gen-ars-notes.mjs && node scripts/build-client.mjs",
     "verify": "node scripts/verify.mjs",
     "smoke": "node scripts/smoke-host.mjs",
+    "smoke:ars": "node scripts/smoke-ars-guard.mjs",
     "verify:ars": "node scripts/audit-ars-alignment.mjs"
   },
   "keywords": [
