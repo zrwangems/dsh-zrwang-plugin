@@ -523,8 +523,60 @@ export async function cloneMode(catalog, selection, gates, projectRoot, workspac
   return { name: auto.name, createdFrom: sourceName }
 }
 
-/** 重命名：自动模式 → 升级为项目级命名模式；命名模式 → 直接改名；默认不可改。 */
-export async function renameMode(catalog, selection, gates, projectRoot, workspace, name, nextName) {
+/**
+ * 保存：把某个模式的内容存成**项目级命名模式**，同项目所有工作区可见、可「基于此新建」取用。
+ *
+ * - nextName 省略/为空 → 用被保存模式的原名；「默认」的原名被占用，退回「默认 (2)」这类唯一名；
+ * - 源是当前工作区的自动模式 → 升级为项目级模式（自动模式随之移除，避免同名两份）；
+ * - 源已经是项目级模式且用原名保存 → 就地更新内容（重复点「保存」不会产生副本）；
+ * - 源是项目级模式但改了名 → 另存一份，原模式保留。
+ * 保存后当前工作区切到该模式，后续改动直接写进这份共享内容。
+ */
+export async function saveMode(catalog, selection, gates, projectRoot, workspace, name, nextName) {
+  const { entry } = ensureEntry(catalog, selection, gates, projectRoot)
+  const source = modeContent(entry, workspace, name)
+  if (source === undefined) throw new Error(`没有这个模式：${name}`)
+  syncWorkspaceTitle(entry, workspace)
+  const typed = String(nextName ?? '').trim()
+  const auto = autoOf(entry, workspace)
+  const isOwnAuto = auto !== undefined && auto.name === name
+  let target = typed
+  if (target.length === 0) {
+    target = name === DEFAULT_PRESET ? uniquePresetName(DEFAULT_PRESET, takenNames(entry)) : name
+  }
+  if (target.length > 20) throw new Error('模式名称最多 20 个字')
+  if (target === DEFAULT_PRESET) throw new Error(`不能命名为「${target}」`)
+  const othersAuto = Object.values(entry.auto).some(item => item !== auto && item.name === target)
+  if (othersAuto) throw new Error(`名称已被其它工作区的模式占用：${target}`)
+
+  const existing = namedMode(entry, target)
+  if (existing !== undefined) {
+    existing.gates = gateMap(source.gates)
+    existing.selection = { ...source.selection }
+    existing.updatedAt = now()
+    if (isOwnAuto) delete entry.auto[workspace.key]
+    entry.active[workspace.key] = target
+    await applyModeContent(catalog, { gates: existing.gates, selection: existing.selection })
+    await persist()
+    return { name: target, updated: true, copied: false }
+  }
+  const stamp = now()
+  entry.modes.push({
+    name: target,
+    builtin: false,
+    gates: gateMap(source.gates),
+    selection: { ...source.selection },
+    createdAt: stamp,
+    updatedAt: stamp,
+  })
+  if (isOwnAuto) delete entry.auto[workspace.key]
+  entry.active[workspace.key] = target
+  await applyModeContent(catalog, { gates: source.gates, selection: source.selection })
+  await persist()
+  return { name: target, updated: false, copied: target !== name }
+}
+
+/** 重命名：自动模式 → 升级为项目级命名模式；命名模式 → 直接改名；默认不可改。 */export async function renameMode(catalog, selection, gates, projectRoot, workspace, name, nextName) {
   const { entry } = ensureEntry(catalog, selection, gates, projectRoot)
   const trimmed = String(nextName ?? '').trim()
   if (trimmed.length === 0) throw new Error('模式名称不能为空')

@@ -143,16 +143,19 @@ const engStats = (bulk.data.groups ?? {}).engineering ?? {}
 check('工程组全选后本组门禁打开且有注入', bulk.status === 200 && engStats.enabled === true && engStats.injected > 0,
   JSON.stringify(engStats))
 
-// ---- 3.3 搜索过滤下全选只改可见子节点 ----
+// ---- 3.3 搜索过滤下全选只改可见技能及其所在目录 ----
 await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: false })
-const filtered = await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: true, only: ['matlab'] })
+const filtered = await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: true, only: ['matlab-create-live-script'] })
 const gatesFile = JSON.parse(readFileSync(join(WORK, 'state', 'gates.json'), 'utf8')).gates
-check('过滤后全选只打开可见子目录',
+const selectionAfterFilter = JSON.parse(readFileSync(selectionFile, 'utf8')).skills
+check('过滤后全选只打开可见技能所在目录',
   filtered.status === 200
   && gatesFile.engineering === true
   && gatesFile.matlab === true
-  && gatesFile.simulink !== true,
-  JSON.stringify({ engineering: gatesFile.engineering, matlab: gatesFile.matlab, simulink: gatesFile.simulink }))
+  && gatesFile.simulink !== true
+  && selectionAfterFilter['matlab-create-live-script'] === true
+  && selectionAfterFilter['matlab-validate-function-arguments'] !== true,
+  JSON.stringify({ engineering: gatesFile.engineering, matlab: gatesFile.matlab, simulink: gatesFile.simulink, picked: selectionAfterFilter['matlab-create-live-script'] }))
 await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: false })
 
 // ---- 4. 另一工作区隔离 ----

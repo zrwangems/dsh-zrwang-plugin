@@ -104,28 +104,12 @@ const runtimeHome = typeof process.env.DSH_HOME === 'string' && process.env.DSH_
   ? process.env.DSH_HOME.trim()
   : join(process.env.USERPROFILE ?? '', '.dsh')
 const runtimeConfigDir = join(runtimeHome, 'zrwang-plugin-config')
-const settingsFile = join(runtimeConfigDir, 'settings.json')
-// 设置只能由插件设置页写；仓库自检在“插件未安装/未配置”时应跳过这些检查，而不是报失败。
-if (existsSync(settingsFile)) {
-  check('设置文件在配置目录', true)
-  let patchConfig
-  try { patchConfig = JSON.parse(readFileSync(settingsFile, 'utf8')) } catch { patchConfig = undefined }
-  check('设置是合法 JSON', patchConfig !== undefined)
-  check('配置目录不作为参数', patchConfig?.configDir === undefined)
-  check('设置含生图配置（v2 image 或 v1 pptMaster）', patchConfig?.image !== undefined || patchConfig?.pptMaster?.providers !== undefined)
-  if (patchConfig?.image !== undefined) {
-    check('v2 设置不含旧 runtime/Python 配置', patchConfig?.runtime === undefined && patchConfig?.ars === undefined)
-  }
-  check('设置含 natureAcademic', patchConfig?.natureAcademic?.pubmed !== undefined)
-  check('设置含 natureImage2ppt', patchConfig?.natureImage2ppt !== undefined)
-  if (existsSync(runtimeConfigDir)) {
-    // state/ 是插件运行态目录（选择态、模式、MCP 暂存 exe、shim），本来就该在这里。
-    const allowed = new Set(['catalog.json', 'defaults.json', 'settings.json', 'nature-figure.json', 'state', 'patent', 'nature-academic-search', 'nature-image2ppt', 'nature-downloader'])
-    const unexpected = readdirSync(runtimeConfigDir).filter(name => !allowed.has(name))
-    check('配置目录只放文件与设置', unexpected.length === 0, unexpected.join(', '))
-  }
-} else {
-  skipped.push('插件尚未安装/未配置：跳过 settings.json 相关检查')
+// 配置与密钥交给 DSH：非密钥进 profile 补丁（configEditor）、密钥进 $DSH_HOME/.credentials.yaml。
+// 这里只检查“插件自己的目录里没有多余文件”——它只该放侧边栏选项组合（state/*.json）。
+if (existsSync(runtimeConfigDir)) {
+  const allowed = new Set(['state'])
+  const unexpected = readdirSync(runtimeConfigDir).filter(name => !allowed.has(name))
+  check('配置目录只放侧边栏选项组合（state/）', unexpected.length === 0, unexpected.join(', '))
 }
 check('skill-settings 模块存在', existsSync(join(ROOT, 'host', 'skill-settings.mjs')))
 
@@ -316,8 +300,9 @@ check('Firecrawl CLI shim 已接入',
 check('Python 技能密钥有 sitecustomize 兜底',
   readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8').includes('sitecustomize.py')
   && readFileSync(join(ROOT, 'host', 'skill-settings.mjs'), 'utf8').includes('applyPythonSecretBridge'))
-check('设置文件跨实例热加载',
-  hostIndexSource.includes("filename !== 'settings.json'") && hostIndexSource.includes('settings hot reload'))
+check('配置与密钥交给 DSH（configEditor + credentials）',
+  hostIndexSource.includes('readSecrets') && hostIndexSource.includes('persistParams')
+    && !hostIndexSource.includes('settings hot reload'))
 const details = readJson(join(ROOT, 'catalog', 'skill-details.zh.json'))
 const detailNames = Object.keys(details)
 check('静态中文详情覆盖全部技能', detailNames.length === skillNodes.length && skillNodes.every(node => typeof details[node.name] === 'string' && details[node.name].trim().length > 0))

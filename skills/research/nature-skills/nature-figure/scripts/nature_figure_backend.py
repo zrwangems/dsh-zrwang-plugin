@@ -11,6 +11,8 @@ from pathlib import Path
 
 
 VALID_BACKENDS = {"python", "r"}
+# 没有配置文件时的默认后端；插件不再生成 nature-figure.json。
+DEFAULT_BACKEND = os.environ.get("NATURE_FIGURE_BACKEND", "python").strip().lower() or "python"
 
 
 def config_path() -> Path:
@@ -39,7 +41,9 @@ def write_config(path: Path, data: dict) -> None:
 
 def get_backend(path: Path) -> int:
     backend = read_config(path).get("backend")
-    if isinstance(backend, str) and backend in VALID_BACKENDS:
+    if not (isinstance(backend, str) and backend in VALID_BACKENDS):
+        backend = DEFAULT_BACKEND
+    if backend in VALID_BACKENDS:
         print(backend)
         return 0
     return 1

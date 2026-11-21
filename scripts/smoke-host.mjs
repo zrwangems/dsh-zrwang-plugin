@@ -44,14 +44,14 @@ function isInside(parent, child) {
 
 const catalog = await loadCatalog()
 // 上面预置了 2000 年的旧运行时目录树，loadCatalog 应该已经用包内种子刷新它。
-const seedCatalog = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'catalog', 'catalog.json'), 'utf8'))
-const refreshedRuntimeCatalog = JSON.parse(readFileSync(join(runtimeConfigDir, 'catalog.json'), 'utf8'))
-check(
-  '旧运行时目录树被包内种子自动刷新',
-  catalog.stats.total === seedCatalog.stats.total && refreshedRuntimeCatalog.generatedAt === seedCatalog.generatedAt,
-  `runtime=${catalog.stats.total}/${refreshedRuntimeCatalog.generatedAt} seed=${seedCatalog.stats.total}/${seedCatalog.generatedAt}`,
-)
-const selection = await loadSelection(catalog)
+  // 目录树直接读包内文件，不再复制运行副本：读到的就是包里那一份。
+  const seedCatalog = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'catalog', 'catalog.json'), 'utf8'))
+  check(
+    '目录树直接来自包内文件',
+    catalog.stats.total === seedCatalog.stats.total && catalog.generatedAt === seedCatalog.generatedAt,
+    `catalog=${catalog.stats.total}/${catalog.generatedAt} seed=${seedCatalog.stats.total}/${seedCatalog.generatedAt}`,
+  )
+  const selection = await loadSelection(catalog)
 // 目录复选框显示：按“子树里有没有勾选技能”自下而上推导；一级目录保持显式门禁
 const effectiveDefault = buildEffectiveGates(catalog, {}, selection)
 const engineeringChildren = catalog.groups.find(group => group.id === 'engineering').children ?? []
@@ -252,35 +252,62 @@ check('同一状态文件并发原子写不撞临时文件', concurrentWrites.ev
 const concurrentResult = JSON.parse(readFileSync(concurrentFile, 'utf8'))
 check('并发写后 JSON 完整且最后一次调用落盘', concurrentResult.index === 19, JSON.stringify(concurrentResult))
 
-// ---- 全选/全关：只对直接子节点生效，一级目录同时打开本组门禁 ----
+// ---- 全选/全关：递归覆盖整棵子树（含下下层），一级目录同时打开本组门禁 ----
 const { childBatch } = await import('../host/selection.mjs')
+const dirIdsIn = node => {
+  const out = []
+  const walk = child => {
+    if (child.kind === 'skill') return
+    out.push(child.id)
+    for (const grand of child.children ?? []) walk(grand)
+  }
+  for (const child of node.children ?? []) walk(child)
+  return out
+}
+const skillNamesIn = node => {
+  const out = []
+  const walk = child => {
+    if (child.kind === 'skill') { out.push(child.name); return }
+    for (const grand of child.children ?? []) walk(grand)
+  }
+  for (const child of node.children ?? []) walk(child)
+  return out
+}
+const engNode = catalog.groups.find(group => group.id === 'engineering')
 const engBatch = childBatch(catalog, 'engineering', true)
-const engChildIds = (catalog.groups.find(group => group.id === 'engineering').children ?? []).map(child => child.id).sort()
-check('全选一级组作用直接子目录并打开本组门禁',
-  Object.keys(engBatch.gates).sort().join(',') === [...engChildIds, 'engineering'].sort().join(',')
-  && engBatch.gates.engineering === true
-  && Object.keys(engBatch.skillChanges).length === 0,
-  JSON.stringify(engBatch.gates))
+check('全选一级组递归覆盖子树里的全部技能与目录',
+  Object.keys(engBatch.skillChanges).sort().join(',') === skillNamesIn(engNode).sort().join(',')
+  && Object.keys(engBatch.gates).sort().join(',') === [...new Set([...dirIdsIn(engNode), 'engineering'])].sort().join(',')
+  && Object.values(engBatch.gates).every(value => value === true),
+  `skills=${Object.keys(engBatch.skillChanges).length}/${skillNamesIn(engNode).length} gates=${Object.keys(engBatch.gates).length}/${new Set(dirIdsIn(engNode)).size + 1}`)
+const nsfcNode = catalog.groups.find(group => group.id === 'research').children.find(node => node.id === 'nsfc')
 const nsfcBatch = childBatch(catalog, 'nsfc', true)
-check('全选项目节点只作用直接子技能', Object.keys(nsfcBatch.skillChanges).length === 4 && Object.keys(nsfcBatch.gates).length === 0,
-  String(Object.keys(nsfcBatch.skillChanges).length))
-const engVisible = ['matlab', 'simulink']
+check('全选项目节点覆盖全部子技能并打开自身门禁',
+  Object.keys(nsfcBatch.skillChanges).sort().join(',') === skillNamesIn(nsfcNode).sort().join(',')
+  && Object.keys(nsfcBatch.gates).join(',') === 'nsfc',
+  JSON.stringify(nsfcBatch))
+const engVisible = skillNamesIn(engNode).slice(0, 2)
 const engFiltered = childBatch(catalog, 'engineering', true, { only: engVisible })
-check('搜索过滤时全选只处理可见子节点',
-  Object.keys(engFiltered.gates).filter(id => id !== 'engineering').sort().join(',') === engVisible.sort().join(',')
-  && engFiltered.gates.engineering === true,
-  JSON.stringify(engFiltered.gates))
-const matlabGroupNode = (catalog.groups.find(group => group.id === 'engineering').children ?? []).find(node => node.id === 'matlab')
+check('搜索过滤时全选只处理可见技能及其所在目录',
+  Object.keys(engFiltered.skillChanges).sort().join(',') === [...engVisible].sort().join(',')
+  && engFiltered.gates.engineering === true
+  && Object.values(engFiltered.gates).every(value => value === true),
+  JSON.stringify({ skills: Object.keys(engFiltered.skillChanges), gates: Object.keys(engFiltered.gates) }))
+const matlabGroupNode = engNode.children.find(node => node.id === 'matlab')
 const matlabBatch = childBatch(catalog, 'matlab', false)
-const matlabChildDirs = (matlabGroupNode.children ?? []).filter(child => child.kind !== 'skill')
-const matlabChildSkills = (matlabGroupNode.children ?? []).filter(child => child.kind === 'skill')
 check(
-  '全关多级目录只关直接子节点不下钻',
-  Object.keys(matlabBatch.gates).length === matlabChildDirs.length
-    && Object.values(matlabBatch.gates).every(value => value === false)
-    && Object.keys(matlabBatch.skillChanges).length === matlabChildSkills.length,
-  `gates=${Object.keys(matlabBatch.gates).length}/${matlabChildDirs.length} skills=${Object.keys(matlabBatch.skillChanges).length}/${matlabChildSkills.length}`,
+  '全关多级目录递归关掉整棵子树',
+  Object.keys(matlabBatch.skillChanges).sort().join(',') === skillNamesIn(matlabGroupNode).sort().join(',')
+    && Object.keys(matlabBatch.gates).sort().join(',') === [...new Set([...dirIdsIn(matlabGroupNode), 'matlab'])].sort().join(',')
+    && Object.values(matlabBatch.gates).every(value => value === false),
+  `gates=${Object.keys(matlabBatch.gates).length}/${new Set(dirIdsIn(matlabGroupNode)).size + 1} skills=${Object.keys(matlabBatch.skillChanges).length}/${skillNamesIn(matlabGroupNode).length}`,
 )
+// 之前被显式关掉的目录，点全选后要跟着打开（否则“勾上了却不注入”）
+const gatesEarly = await import('../host/gates.mjs')
+await gatesEarly.setGates({ matlab: false })
+const reopened = childBatch(catalog, 'matlab', true)
+check('全选会打开被显式关掉的自身目录', reopened.gates.matlab === true, JSON.stringify(reopened.gates))
+await gatesEarly.clearGates(['matlab'])
 
 // ---- 技能选择态 v3（项目 + DSH 工作区；默认只读、改动建立以工作区命名的模式）----
 const presets = await import('../host/presets.mjs')
@@ -396,6 +423,39 @@ await presets.deleteMode(catalog, await loadSelection(catalog), await gatesModul
 const cleaned = presets.presetsPayload(catalog, {}, projRoot, wsRenamed)
 check('删除模式后只剩默认', cleaned.items.length === 1 && cleaned.items[0].name === '默认' && cleaned.active === '默认', JSON.stringify(cleaned))
 
+// ---- 保存：把某个模式的内容存成项目级共享组，同项目其他工作区可用 ----
+await setSelection({ [pickSkill.name]: true })
+await presets.ensureEditableMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsA)
+// 跳过命名 = 用原名：工作区自动模式升级为项目级共享组
+const savedOwn = await presets.saveMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsA, wsA.title, '')
+const savedPayloadA = presets.presetsPayload(catalog, {}, projRoot, wsA)
+check(
+  '保存用原名把工作区模式升级为共享组',
+  savedOwn.name === wsA.title
+    && savedPayloadA.active === wsA.title
+    && savedPayloadA.items.some(item => item.name === wsA.title && item.workspace === false)
+    && !savedPayloadA.items.some(item => item.workspace === true),
+  JSON.stringify({ savedOwn, items: savedPayloadA.items }),
+)
+check('共享组在其他工作区可见',
+  presets.presetsPayload(catalog, {}, projRoot, wsB).items.some(item => item.name === wsA.title && item.workspace === false))
+// 另起名字保存 = 存一份副本，原共享组保留
+const savedCopy = await presets.saveMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB, wsA.title, '乙的副本')
+const afterCopy = presets.presetsPayload(catalog, {}, projRoot, wsB)
+check(
+  '保存时可以另起名字存副本',
+  savedCopy.name === '乙的副本' && savedCopy.copied === true && afterCopy.active === '乙的副本'
+    && afterCopy.items.filter(item => item.name === wsA.title).length === 1,
+  JSON.stringify({ savedCopy, items: afterCopy.items }),
+)
+// 同名再保存 = 就地更新，不产生第二份
+const savedAgain = await presets.saveMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB, '乙的副本', '')
+check('同名的重复保存就地更新',
+  savedAgain.updated === true && presets.presetsPayload(catalog, {}, projRoot, wsB).items.filter(item => item.name === '乙的副本').length === 1,
+  JSON.stringify(savedAgain))
+await presets.deleteMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB, '乙的副本')
+await presets.deleteMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsA, wsA.title)
+
 // 切回「默认」后再编辑：旧工作区模式内容要归档成项目级副本，不能静默覆盖
 await presets.applyMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB, '默认')
 await presets.ensureEditableMode(catalog, await loadSelection(catalog), await gatesModule.loadGates(), projRoot, wsB)
@@ -426,11 +486,15 @@ check('生图配置写入插件专用环境变量', process.env.ZRWANG_IMAGE_BAS
   && process.env.ZRWANG_IMAGE_MODEL === 'demo-image-1'
   && process.env.ZRWANG_IMAGE_API_KEY === 'test-image-key')
 check('发热图配置不污染全局 OPENAI_API_KEY', process.env.OPENAI_API_KEY === undefined)
-check('Nature 绘图偏好指向配置目录', typeof process.env.NATURE_FIGURE_CONFIG === 'string'
-  && process.env.NATURE_FIGURE_CONFIG.includes('nature-figure.json'))
+check('Nature 绘图偏好指向技能目录里的默认位置', typeof process.env.NATURE_FIGURE_CONFIG === 'string'
+  && process.env.NATURE_FIGURE_CONFIG.includes('nature-figure.json')
+  && process.env.NATURE_FIGURE_CONFIG.includes('skills'))
 check('archify 关闭自动更新', process.env.ARCHIFY_UPDATE_CHECK_DISABLED === '1')
 check('PubMed 配置写入环境变量', process.env.NCBI_EMAIL === 'smoke@example.com' && process.env.NCBI_API_KEY === 'test-key')
-check('学校配置指向插件配置目录', process.env.LIT_DL_CONFIG_DIR === join(runtimeConfigDir, 'nature-downloader'),
+check('学校配置指向技能目录（不落 DSH 家目录）',
+  typeof process.env.LIT_DL_CONFIG_DIR === 'string'
+    && process.env.LIT_DL_CONFIG_DIR.includes('skills')
+    && !process.env.LIT_DL_CONFIG_DIR.includes(runtimeConfigDir),
   process.env.LIT_DL_CONFIG_DIR)
 applySkillEnv({ natureAcademic: { pubmed: { email: '', apiKey: '' } } })
 check('清空后移除环境变量', process.env.NCBI_EMAIL === undefined && process.env.NCBI_API_KEY === undefined)

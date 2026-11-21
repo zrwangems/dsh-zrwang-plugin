@@ -80,13 +80,13 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 | 栏目 | 内容 |
 | --- | --- |
-| 模型服务 | 生图模型（URL / 模型 / API Key，按 OpenAI Images 兼容协议，不再分厂商）、OCR 模型 |
+| 模型服务 | 生图模型（URL / 模型 / API Key，按 OpenAI Images 兼容协议，不再分厂商）、OCR 模型（百度 PaddleOCR-VL Token，可选；不填时 `nature-image2ppt` 退回技能内置的离线文字检测，只量位置和字号、读不出文字） |
 | 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key；缓存/超时/条数已改为内部固定值，不再暴露）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE，对应主要出版社）；学校配置随包固定分发（`skills/research/nature-skills/nature-downloader/config/school.json`），无需填写；Nature 生图复用模型服务的生图模型，不再单独设置；改动自动保存 |
 | 运行环境 | 顶部一个「检查运行环境」按钮，下面一行一项：Python 解释器（下拉选择）、officecli、zotero-cli、lark-cli、draw.io、Polyspace、MATLAB、MathWorks MCP（可用性＝MATLAB 是否已 shareMATLABSession）、Windows MCP（可用性＝PATH 里是否装了 windows-mcp）；全部自动保存 |
 
 **所有设置项改动即自动保存**（保存后同一个 DSH 进程立即生效；注意 DSH 的 shell 工具会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，插件会生成 Python 启动钩子从配置文件补回密钥；Web 与 Desktop 是独立进程，每个运行中的实例都会监听共享的 `settings.json`，其他实例保存后约 0.3 秒内也会重新注入环境变量，不用重启）（文本框失焦、下拉选择即生效，页面没有「保存」按钮）；「运行环境」合并成一个区块：顶部「检查运行环境」按钮同时做系统 Python 检测/依赖校验、组件状态和 MCP 检查，下面按行显示各环境项状态。`settings.json` 里存有 API Key，插件在写入后和启动时都会把文件权限收紧到当前账户（Windows 用 `icacls` 去掉权限继承，其它平台 `chmod 600`），失败时保持原样。
 
-保存的设置会同步写进宿主进程环境：生图配置用插件专用 `ZRWANG_IMAGE_*`，由 ppt-master 技能内的桥接映射成 `OPENAI_*`；Nature 学术检索、Unpaywall/Crossref 邮箱、Firecrawl 等分别注入 `NCBI_EMAIL` / `UNPAYWALL_EMAIL` / `CROSSREF_MAILTO` / `FIRECRAWL_API_KEY`。Nature 生图的 `OPENROUTER_*` / `SCHEMATIC_IMAGE_API_URL` 直接复用模型服务的生图 URL/模型/Key。Nature 的配置集中写在 `~/.dsh/zrwang-plugin-config/`：`nature-academic-search/config.toml`、`nature-image2ppt/config.yaml`、`nature-figure.json`，以及 `nature-downloader/` 下的 `credentials.json`、`settings.json`；`school.json` 直接随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`，通过 `LIT_DL_SCHOOL_FILE` 读取。**不再读取或写入任何上游 `.env` / 旧配置文件**。
+保存的设置会同步写进宿主进程环境：生图配置用插件专用 `ZRWANG_IMAGE_*`，由 ppt-master 技能内的桥接映射成 `OPENAI_*`；Nature 学术检索、Unpaywall/Crossref 邮箱、Firecrawl 等分别注入 `NCBI_EMAIL` / `UNPAYWALL_EMAIL` / `CROSSREF_MAILTO` / `FIRECRAWL_API_KEY`。Nature 生图的 `OPENROUTER_*` / `SCHEMATIC_IMAGE_API_URL` 直接复用模型服务的生图 URL/模型/Key。**技能的默认参数直接写在技能代码里**（学术检索默认值、image2ppt 后端、nature-figure 后端），设置页没填过的项不会生成任何配置文件；只有你确实填了出版社凭据或 Unpaywall 邮箱时，才会写进 `skills/research/nature-skills/nature-downloader/config/` 下的 `credentials.json` / `settings.json`（已 `.gitignore`）。`school.json` 同目录随技能分发，通过 `LIT_DL_SCHOOL_FILE` 读取。**不再读取或写入任何上游 `.env` / 旧配置文件**。
 
 ## 系统 Python
 

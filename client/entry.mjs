@@ -298,6 +298,7 @@ function ZrPanel(props) {
       onApply: function (name) { presetAction('apply', name) },
       onClone: function (name) { presetAction('create-from', name) },
       onRename: function (name, next) { presetAction('rename', name, next) },
+  onSave: function (name, next) { presetAction('save', name, next) },
       onDelete: function (name) { presetAction('delete', name) },
     })
   )

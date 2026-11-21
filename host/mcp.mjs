@@ -12,7 +12,7 @@
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { PKG_DIR, STATE_DIR } from './config.mjs'
+import { ARTIFACT_DIR, PKG_DIR } from './config.mjs'
 
 /** MathWorks 组件目录：MATLAB MCP exe + 完整的 Simulink Agentic Toolkit 运行时。 */
 export const MATHWORKS_DIR = join(PKG_DIR, 'mathworks')
@@ -26,7 +26,7 @@ export const SIMULINK_TOOLS_FILE = join(SIMULINK_TOOLKIT_DIR, 'tools', 'tools.js
 export const SERVER_NAMES = { mathworks: 'matlab-mcp', windows: 'windows-mcp' }
 
 /** MATLAB MCP 的运行副本目录（在配置目录下，永远在工作区之外）。 */
-export const MCP_RUNTIME_DIR = join(STATE_DIR, 'mcp')
+export const MCP_RUNTIME_DIR = join(ARTIFACT_DIR, 'mcp')
 
 /** mcp-client 的关闭预算；官方默认 5000。 */
 const CLOSE_TIMEOUT_MS = 5000

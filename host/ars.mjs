@@ -14,7 +14,8 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { delimiter, dirname, join } from 'node:path'
-import { PKG_DIR, SKILLS_DIR, STATE_DIR } from './config.mjs'
+import { ARTIFACT_DIR, PKG_DIR, SKILLS_DIR, STATE_DIR } from './config.mjs'
+import { dshHome } from './plugin-params.mjs'
 import { DEPENDENCIES, probePython, selectPython } from './python-detect.mjs'
 
 /** ARS 功能区块的元数据（由 vendor 生成，见 scripts/vendor-skills.mjs）。 */
@@ -54,7 +55,7 @@ export function resolvePython(params) {
 }
 
 /** 运行时 shim 目录：<state>/bin，仅由本插件管理。 */
-export const SHIM_DIR = join(STATE_DIR, 'bin')
+export const SHIM_DIR = join(ARTIFACT_DIR, 'bin')
 
 function pathKeyOf(env) {
   return Object.keys(env).find(key => key.toLowerCase() === 'path') ?? 'PATH'
@@ -104,8 +105,7 @@ export function resolveGitBash() {
  * 生成/更新 python、python3、bash、sh 的 shim，并把 shim 目录放到 PATH 最前。
  * 指向用户选定（或自动选定）的系统 Python；没有可用解释器时不动 PATH。
  */
-export function applyRuntimeEnv(params, options = {}) {
-  const settingsFile = typeof options.settingsFile === 'string' ? options.settingsFile : ''
+export function applyRuntimeEnv(params) {
   const python = resolvePython(params)
   const bashEnvFile = join(SHIM_DIR, 'bash-env.sh')
   try {
@@ -159,7 +159,7 @@ export function applyRuntimeEnv(params, options = {}) {
     // 忽略 shim 写入失败
   }
   try {
-    applyFirecrawlShim(settingsFile)
+    applyFirecrawlShim()
   } catch {
     // Firecrawl 未安装或 shim 生成失败时忽略
   }
@@ -171,7 +171,7 @@ export function applyRuntimeEnv(params, options = {}) {
  * 由 scripts/firecrawl-shim.mjs 从插件 settings.json 读取 Key 后再调用真实 CLI。
  * 真实 CLI 来自 npm 全局安装（firecrawl-cli）；未安装时移除旧 shim。
  */
-export function applyFirecrawlShim(settingsFile) {
+export function applyFirecrawlShim() {
   const shimCmd = join(SHIM_DIR, 'firecrawl.cmd')
   const shimSh = join(SHIM_DIR, 'firecrawl')
   const removeShims = () => {
@@ -183,10 +183,7 @@ export function applyFirecrawlShim(settingsFile) {
       }
     }
   }
-  if (typeof settingsFile !== 'string' || settingsFile.length === 0) {
-    removeShims()
-    return
-  }
+
   let real
   try {
     const probe = process.platform === 'win32' ? 'where.exe' : 'which'
@@ -220,12 +217,12 @@ export function applyFirecrawlShim(settingsFile) {
   const toPosix = value => value.replace(/\\/g, '/')
   writeFileSync(
     shimCmd,
-    `@echo off\r\nset "ELECTRON_RUN_AS_NODE=1"\r\n"${process.execPath}" "${shimScript}" "${settingsFile}" "${launcher}" %*\r\n`,
+    `@echo off\r\nset "ELECTRON_RUN_AS_NODE=1"\r\n"${process.execPath}" "${shimScript}" "${launcher}" %*\r\n`,
     { encoding: 'utf8', mode: 0o755 },
   )
   writeFileSync(
     shimSh,
-    `#!/bin/sh\nexport ELECTRON_RUN_AS_NODE=1\nexec "${toPosix(process.execPath)}" "${toPosix(shimScript)}" "${toPosix(settingsFile)}" "${toPosix(launcher)}" "$@"\n`,
+    `#!/bin/sh\nexport ELECTRON_RUN_AS_NODE=1\nexec "${toPosix(process.execPath)}" "${toPosix(shimScript)}" "${toPosix(launcher)}" "$@"\n`,
     { encoding: 'utf8', mode: 0o755 },
   )
   prependShimToPath(process.env)
@@ -235,19 +232,25 @@ export function applyFirecrawlShim(settingsFile) {
 export function arsRuntimeNote(params) {
   const python = resolvePython(params)
   const bash = resolveGitBash()
-  // 包内路径用相对形式写，避免把安装者机器的绝对路径固化进技能文件
-  const display = python.path.startsWith(PKG_DIR)
-    ? python.path.slice(PKG_DIR.length + 1).split('\\').join('/')
-    : python.path
+  // 只写符号路径：包内用相对路径、家目录用 ~，不把安装者机器的绝对路径固化进技能文件。
+  const symbolic = value => {
+    if (typeof value !== 'string' || value.length === 0) return '（未配置）'
+    if (value.startsWith(PKG_DIR)) return value.slice(PKG_DIR.length + 1).split('\\').join('/')
+    if (value.startsWith(dshHome())) return `~/.dsh${value.slice(dshHome().length).split('\\').join('/')}`
+    return value.toLowerCase().includes('\\python') || value.toLowerCase().endsWith('python.exe')
+      ? '（系统 Python）'
+      : (/(^|\\)(git|usr)(\\|$)/i.test(value) ? '（系统 Git Bash）' : '（系统程序）')
+  }
+  const display = symbolic(python.path)
   const missing = Array.isArray(python.missing) ? python.missing : []
   const lines = [
     '# DSH 下的 ARS 运行说明（由 dsh-zrwang-plugin 生成，不要手改）',
     '',
-    `- Python 解释器：${python.path.length > 0 ? `系统 Python（\`${display || python.path}\`，来源：${python.source}）` : '未选择可用的系统 Python（设置 → 运行环境 → Python 解释器）'}。插件不自带 Python，也不安装任何依赖。`,
+    `- Python 解释器：${python.path.length > 0 ? `系统 Python（\`${display}\`，来源：${python.source}）` : '未选择可用的系统 Python（设置 → 运行环境 → Python 解释器）'}。插件不自带 Python，也不安装任何依赖。`,
     missing.length > 0
       ? `- 该环境缺少模块：${missing.join(', ')}；插件不会安装，请在该 Python 环境里自行补齐后重试。`
       : '- 依赖检查通过；插件已把 python / python3 指向上面的解释器，不要另建 venv。',
-    `- bash：${bash === undefined ? '未找到 Git Bash' : `已指向 \`${bash}\``}；bash 代码块可以直接执行，不要依赖没有发行版的 WSL。`,
+    `- bash：${bash === undefined ? '未找到 Git Bash' : `已指向 \`${symbolic(bash)}\``}；bash 代码块可以直接执行，不要依赖没有发行版的 WSL。`,
     '- 本环境没有 Claude Code 的 hooks：上游的写作用域硬护栏不生效，请把上游的 `PreToolUse` 约束当作正文规则遵守。',
     '- 多角色流程（评审团、十阶段流水线、角色扮演）必须用 DSH 的 Agent Team 工具（`spawn_teammate`、`team_task_*`、`wait_agent`、`send_message`）；当前会话没有这些工具时，先提示用户开启 Agent Team，不要退化成单会话顺序扮演。',
     '- 子代理角色默认在同一会话内顺序扮演；确实需要并行时用 DSH 的 `subagent` 或 Agent Team。',

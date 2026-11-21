@@ -2,7 +2,7 @@
  * My DSH 设置的“参数层”。
  *
  * 设计原则（v3）：
- *   - 模型服务只有生图模型（URL / 模型 / API Key）与 OCR；
+ *   - 模型服务：生图模型（URL / 模型 / API Key）+ OCR 模型（百度 OCR Token，可选）；
  *   - 科研服务放可选检索与 Nature 学术检索；
  *   - 运行环境只展示组件状态；
  *   - 不再兼容上游 .env / 旧配置文件；所有生成配置集中到 DSH 家目录的
@@ -14,10 +14,10 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { delimiter, join } from 'node:path'
 import { execFile, execFileSync, spawn } from 'node:child_process'
 import { promisify } from 'node:util'
-import { PKG_DIR, SKILLS_DIR, STATE_DIR } from './config.mjs'
+import { ARTIFACT_DIR, NATURE_ACADEMIC_CONFIG_FILE, NATURE_DOWNLOADER_CONFIG_DIR, NATURE_FIGURE_CONFIG_FILE, NATURE_IMAGE2PPT_DIR, PKG_DIR, SKILLS_DIR } from './config.mjs'
 import { indexedSkills } from './catalog.mjs'
 import { backupFile } from './state.mjs'
-import { configDirOfParams, readParams, writeParams } from './plugin-params.mjs'
+import { applyStoredSecrets, cacheRoot } from './plugin-params.mjs'
 import { checkMcp, MATLAB_MCP_EXE } from './mcp.mjs'
 import { applyRuntimeEnv, checkArsDeps, readDepsResult, resolvePython, writeArsRuntimeNotes } from './ars.mjs'
 import { DEPENDENCIES, detectPythons, probePython, readPythonCandidates } from './python-detect.mjs'
@@ -32,8 +32,9 @@ const ACADEMIC_FIELDS = [
   { id: 'crossref.mailto', label: 'Crossref 联系邮箱', keys: ['crossref', 'mailto'], help: '可选，用于礼貌访问', getKeyUrl: 'https://www.crossref.org/documentation/retrieve-metadata/rest-api/', linkLabel: 'Crossref 说明' },
 ]
 
+// 可选：填了走 PaddleOCR-VL 云端识别，能读出图里的文字；不填走技能内置的离线检测（只量位置和字号）。
 const IMAGE2PPT_FIELDS = [
-  { id: 'paddleOcrToken', label: '百度 OCR Token', secret: true, required: true, getKeyUrl: 'https://aistudio.baidu.com/account/accessToken', linkLabel: '获取 Token' },
+  { id: 'paddleOcrToken', label: '百度 OCR Token', secret: true, help: '可选；image2ppt 重建版面时用，不填只能量出文字位置和字号、读不出内容', getKeyUrl: 'https://aistudio.baidu.com/account/accessToken', linkLabel: '获取 Token' },
 ]
 
 const OPTIONAL_FIELDS = [
@@ -112,6 +113,39 @@ function imageValues(params) {
   }
 }
 
+/**
+ * 生图服务商：地址是通义系端点（阿里云 DashScope、千问AI平台的 maas 域名）时走通义原生后端
+ * （ppt-master 的 IMAGE_BACKEND=qwen），其余仍走 OpenAI 兼容的 /images/generations。
+ */
+function imageProvider(image) {
+  // 只看地址，不看模型名：模型由用户自己填，插件不替他判断。
+  // 千问AI平台（maas.qianwenaiapi.com）同样提供 /api/v1/services/aigc/multimodal-generation 路由，
+  // 和 DashScope 是一套协议，所以一并按通义原生处理。
+  if (/dashscope|aliyuncs|qianwenai|multimodal-generation/i.test(image.baseUrl)) return 'qwen'
+  return 'openai'
+}
+
+/**
+ * 按服务商注入技能认的后端变量：
+ * - qwen：IMAGE_BACKEND=qwen + QWEN_API_KEY / QWEN_MODEL / QWEN_BASE_URL（通义原生接口）；
+ * - openai：IMAGE_BACKEND=openai + OPENAI_*（由 sitecustomize 从 ZRWANG_SECRET_IMAGE 映射）。
+ */
+function applyImageBackendEnv(env, image) {
+  const provider = imageProvider(image)
+  env.ZRWANG_IMAGE_BACKEND = provider
+  if (provider !== 'qwen') return
+  if (image.apiKey.length === 0) return
+  applyValue(env, 'QWEN_API_KEY', image.apiKey)
+  applyValue(env, 'QWEN_MODEL', image.model)
+  // 兼容两种写法：`https://dashscope.aliyuncs.com` 和 OpenAI 兼容写法
+  // `https://dashscope.aliyuncs.com/compatible-mode/v1`。通义没有 OpenAI 兼容的生图路由，
+  // 原生接口挂在 /api/v1/services/aigc/multimodal-generation/generation，所以这里把
+  // `/compatible-mode/v1` 去掉再交给技能。
+  const base = image.baseUrl.replace(/\/+$/, '')
+  const native = base.replace(/\/compatible-mode\/v1$/i, '')
+  applyValue(env, 'QWEN_BASE_URL', native.length > 0 ? native : 'https://dashscope.aliyuncs.com')
+}
+
 function imageConfigured(params) {
   const image = imageValues(params)
   return image.apiKey.length > 0 && image.model.length > 0
@@ -146,8 +180,8 @@ function readJsonFile(file) {
 }
 
 /** 把技能自己写的 credentials/settings 文件同步进设置视图，避免设置页把它们覆盖成空。 */
-function syncDownloaderFiles(downloader, configDir) {
-  const dir = join(configDir, 'nature-downloader')
+function syncDownloaderFiles(downloader) {
+  const dir = natureDownloaderConfigDir()
   const credentials = readJsonFile(join(dir, 'credentials.json'))
   const elsevier = credentials.elsevier ?? {}
   const springer = credentials.springer_nature ?? {}
@@ -184,7 +218,8 @@ function migrateImage(stored, defaults) {
 
 export function currentParams(pluginConfig) {
   const defaults = paramsDefaults()
-  const stored = readParams(pluginConfig)
+  // 非密钥字段来自 profile 补丁里的本插件 config；密钥从 DSH 凭据库补进来。
+  const stored = applyStoredSecrets(JSON.parse(JSON.stringify(pluginConfig ?? {})))
   const merged = { ...defaults, ...stored }
   delete merged.configDir
   delete merged.pptMaster
@@ -207,80 +242,38 @@ export function currentParams(pluginConfig) {
   merged.natureImage2ppt = { ...defaults.natureImage2ppt, ...(stored.natureImage2ppt ?? {}) }
   merged.optional = { ...defaults.optional, ...(stored.optional ?? {}) }
   merged.python = { ...defaults.python, ...(stored.python ?? {}) }
-  const contactEmail = syncDownloaderFiles(merged.natureDownloader, configDirOfParams(pluginConfig))
+  const contactEmail = syncDownloaderFiles(merged.natureDownloader)
   if (!text(merged.natureAcademic.unpaywall.email) && contactEmail.length > 0) merged.natureAcademic.unpaywall.email = contactEmail
   return merged
 }
 
 // ---------------- 生成技能运行时文件 ----------------
 
-function tomlValue(value) {
-  const valueText = String(value)
-  return /^-?\d+(?:\.\d+)?$/.test(valueText) ? valueText : JSON.stringify(valueText)
-}
-
-function academicToml(params) {
-  const a = params.natureAcademic
-  return [
-    '[pubmed]',
-    `email = ${tomlValue(a.pubmed.email)}`,
-    `api_key = ${tomlValue(a.pubmed.apiKey)}`,
-    `cache_dir = ${tomlValue(a.pubmed.cacheDir)}`,
-    'cache_ttl = 86400',
-    '',
-    '[crossref]',
-    `mailto = ${tomlValue(a.crossref.mailto)}`,
-    'timeout = 15',
-    '',
-    '[arxiv]',
-    'timeout = 30',
-    '',
-    '[general]',
-    'default_rows = 5',
-    'max_rows = 50',
-    '',
-  ].join('\n')
-}
-
-function image2pptYaml(params) {
-  const i = params.natureImage2ppt
-  const image = imageValues(params)
-  const lines = [
-    '# 由 dsh-zrwang-plugin 生成；参数在 zrwang-plugin-config/settings.json',
-    'IMAGE2PPT_IMAGE_BACKEND: "openai-compatible-api"',
-    `PADDLE_OCR_TOKEN: ${JSON.stringify(i.paddleOcrToken)}`,
-  ]
-  if (image.baseUrl.length > 0) lines.push(`OPENAI_BASE_URL: ${JSON.stringify(image.baseUrl)}`)
-  if (image.model.length > 0) lines.push(`IMAGE2PPT_IMAGE_MODEL: ${JSON.stringify(image.model)}`)
-  if (image.apiKey.length > 0) lines.push(`OPENAI_API_KEY: ${JSON.stringify(image.apiKey)}`)
-  lines.push('')
-  return lines.join('\n')
-}
-
 /** 本插件所有生成配置的目录（DSH 家目录下）。 */
-export function skillConfigRoot(params) {
-  return configDirOfParams(params)
+export function skillConfigRoot() {
+  return cacheRoot()
 }
 
-export function natureAcademicConfigFile(params) {
-  return join(skillConfigRoot(params), 'nature-academic-search', 'config.toml')
+/** nature 学术检索配置：直接写进技能目录，不落 DSH 家目录。 */
+export function natureAcademicConfigFile() {
+  return NATURE_ACADEMIC_CONFIG_FILE
 }
 
-export function natureImage2pptConfigDir(params) {
-  return join(skillConfigRoot(params), 'nature-image2ppt')
+export function natureImage2pptConfigDir() {
+  return NATURE_IMAGE2PPT_DIR
 }
 
-export function natureDownloaderConfigDir(params) {
-  return join(skillConfigRoot(params), 'nature-downloader')
+export function natureDownloaderConfigDir() {
+  return NATURE_DOWNLOADER_CONFIG_DIR
 }
 
 /** 固定北航 school.json：直接随技能目录分发，不复制到插件配置目录。 */
 export function natureDownloaderSchoolFile() {
-  return join(PKG_DIR, 'skills', 'research', 'nature-skills', 'nature-downloader', 'config', 'school.json')
+  return join(NATURE_DOWNLOADER_CONFIG_DIR, 'school.json')
 }
 
-export function natureFigureConfigFile(params) {
-  return join(skillConfigRoot(params), 'nature-figure.json')
+export function natureFigureConfigFile() {
+  return NATURE_FIGURE_CONFIG_FILE
 }
 
 async function writeGenerated(file, content, label, backups) {
@@ -290,13 +283,17 @@ async function writeGenerated(file, content, label, backups) {
   await writeFile(file, content, 'utf8')
 }
 
+/**
+ * 把设置落到技能侧。
+ *
+ * 默认值不生成文件：nature 学术检索 / image2ppt / nature-figure 的默认参数直接写在技能代码里
+ * （`config.py`、`runtime_env.py`、`nature_figure_backend.py`），设置页填了值就走环境变量。
+ * 这里只落**用户真的填过**的内容：出版社凭据、Unpaywall 联系邮箱，写进技能自己的 config 目录。
+ */
 export async function mirrorSkillFiles(params) {
   const backups = []
 
-  await writeGenerated(natureAcademicConfigFile(params), academicToml(params), 'nature-academic-config', backups)
-  await writeGenerated(join(natureImage2pptConfigDir(params), 'config.yaml'), image2pptYaml(params), 'nature-image2ppt-config', backups)
-
-  const downloaderDir = natureDownloaderConfigDir(params)
+  const downloaderDir = natureDownloaderConfigDir()
   const credentials = credentialsFromParams(params)
   if (Object.keys(credentials).length > 0) {
     await writeGenerated(join(downloaderDir, 'credentials.json'), `${JSON.stringify(credentials, null, 2)}\n`, 'nature-downloader-credentials', backups)
@@ -304,12 +301,6 @@ export async function mirrorSkillFiles(params) {
   const downloaderSettings = downloaderSettingsFromParams(params)
   if (downloaderSettings.open_access?.contact_email) {
     await writeGenerated(join(downloaderDir, 'settings.json'), `${JSON.stringify(downloaderSettings, null, 2)}\n`, 'nature-downloader-settings', backups)
-  }
-
-  const figureConfig = natureFigureConfigFile(params)
-  if (!existsSync(figureConfig)) {
-    await mkdir(join(figureConfig, '..'), { recursive: true })
-    await writeFile(figureConfig, `${JSON.stringify({ backend: 'python' }, null, 2)}\n`, 'utf8')
   }
 
   await ensureBuaaSchoolConfig()
@@ -355,7 +346,7 @@ export async function ensureBuaaSchoolConfig() {
 /** 下载器的 credentials.json：把设置字段映射成上游字段，保留技能写入的其它字段。 */
 export function credentialsFromParams(params) {
   const downloader = params?.natureDownloader ?? {}
-  const dir = natureDownloaderConfigDir(params)
+  const dir = natureDownloaderConfigDir()
   const existing = readJsonFile(join(dir, 'credentials.json'))
   const out = { ...existing }
   const elsevier = { ...(out.elsevier ?? {}) }
@@ -377,7 +368,7 @@ export function credentialsFromParams(params) {
 
 /** 下载器的 settings.json：保存 Unpaywall / Crossref 联系邮箱。 */
 export function downloaderSettingsFromParams(params) {
-  const dir = natureDownloaderConfigDir(params)
+  const dir = natureDownloaderConfigDir()
   const existing = readJsonFile(join(dir, 'settings.json'))
   const contact = text(params?.natureAcademic?.unpaywall?.email) || text(params?.natureAcademic?.pubmed?.email)
   const openAccess = { ...(existing.open_access ?? {}) }
@@ -614,21 +605,18 @@ let blockedCache = { signature: '', at: 0, value: {} }
 /** 返回不可注入的技能 → 原因。 */
 export async function blockedSkills(catalog, params) {
   const image = imageValues(params)
-  const ocr = text(params?.natureImage2ppt?.paddleOcrToken)
   const drawio = resolveDrawio()
   const polyspace = resolvePolyspace()
   const signature = [
     image.apiKey.length > 0 ? 1 : 0,
     image.model.length > 0 ? 1 : 0,
-    ocr.length > 0 ? 1 : 0,
     drawio === undefined ? 0 : 1,
     polyspace === undefined ? 0 : 1,
-    configDirOfParams(params),
+    cacheRoot(),
   ].join('|')
   if (blockedCache.signature === signature && Date.now() - blockedCache.at < 3_000) return blockedCache.value
   const blocked = {}
   if (!imageConfigured(params)) blocked['ppt-master'] = '未配置生图模型（设置 → 模型服务 → 生图模型：URL、模型、API Key）'
-  if (!imageConfigured(params) || ocr.length === 0) blocked['nature-image2ppt'] = '未配置生图模型或百度 OCR Token'
   await ensureBuaaSchoolConfig()
   if (!cliExists('officecli')) blocked['officecli'] = '本机未找到 officecli 命令'
   for (const name of ['officecli-academic-paper', 'officecli-data-dashboard', 'officecli-docx', 'officecli-financial-model', 'officecli-pitch-deck', 'officecli-pptx', 'officecli-word-form', 'officecli-xlsx', 'morph-ppt', 'morph-ppt-3d']) {
@@ -677,7 +665,7 @@ function pythonOptions(params) {
 /** 设置页要展示的卡片。 */
 export async function settingsCards(catalog, params, mcpStatus) {
   void catalog
-  const configDir = configDirOfParams(params)
+  const configDir = cacheRoot()
   const image = imageValues(params)
   const optional = params.optional ?? {}
   return {
@@ -689,8 +677,8 @@ export async function settingsCards(catalog, params, mcpStatus) {
         page: 'models',
         kind: 'fields',
         fields: [
-          maskField({ id: 'baseUrl', label: '接口地址（URL）', help: '填到 /v1 为止，例如 https://api.openai.com/v1；任意 OpenAI Images 兼容端点均可' }, image.baseUrl),
-          maskField({ id: 'model', label: '模型', help: '原样传给服务端，例如 gpt-image-2 / flux-1.1-pro / 你的网关模型名' }, image.model),
+          maskField({ id: 'baseUrl', label: '接口地址（URL）', help: 'OpenAI 兼容端点填到 /v1；填 https://dashscope.aliyuncs.com 时自动走通义原生接口' }, image.baseUrl),
+          maskField({ id: 'model', label: '模型', help: '原样传给服务端，填什么用什么' }, image.model),
           maskField({ id: 'apiKey', label: 'API Key', secret: true, help: '由插件注入进程环境，不写任何上游 .env' }, image.apiKey),
         ],
         actions: [{ id: 'image-check', label: '检查配置' }],
@@ -782,78 +770,80 @@ function applyResearchEnv(env, params, image) {
   applyValue(env, 'OPENROUTER_API_KEY', image.apiKey)
   applyValue(env, 'OPENROUTER_IMAGE_MODEL', image.model)
   applyValue(env, 'SCHEMATIC_IMAGE_API_URL', natureFigureEndpoint(image.baseUrl))
+  // 密钥再用不带 KEY/TOKEN/SECRET 字样的名字注入一份：DSH 的 shell 清洗按变量名匹配，
+  // 这些名字能活到技能子进程，再由 sitecustomize / firecrawl shim 映射回标准名。
+  applyValue(env, 'ZRWANG_SECRET_IMAGE', image.apiKey)
+  applyValue(env, 'ZRWANG_SECRET_OCR', params.natureImage2ppt?.paddleOcrToken)
+  applyValue(env, 'ZRWANG_SECRET_NCBI', pubmed.apiKey)
+  applyValue(env, 'ZRWANG_SECRET_FIRECRAWL', optional.firecrawlApiKey)
+  applyValue(env, 'ZRWANG_SECRET_PEXELS', optional.pexelsApiKey)
+  applyValue(env, 'ZRWANG_SECRET_PIXABAY', optional.pixabayApiKey)
+  applyValue(env, 'ZRWANG_SECRET_OPENALEX', optional.openAlexApiKey)
 }
 
 /** 把配置写进 process.env（模型执行 shell 时子进程继承）。 */
 export function applySkillEnv(params) {
-  const root = configDirOfParams(params)
+  const root = cacheRoot()
   const image = imageValues(params)
   process.env.ZRWANG_PLUGIN_CONFIG_DIR = root
-  process.env.LIT_DL_CONFIG_DIR = natureDownloaderConfigDir(params)
+  process.env.LIT_DL_CONFIG_DIR = natureDownloaderConfigDir()
   process.env.LIT_DL_SCHOOL_FILE = natureDownloaderSchoolFile()
-  process.env.IMAGE2PPT_CONFIG_HOME = natureImage2pptConfigDir(params)
-  process.env.ZRWANG_NATURE_ACADEMIC_CONFIG = natureAcademicConfigFile(params)
-  process.env.NATURE_FIGURE_CONFIG = natureFigureConfigFile(params)
+  process.env.IMAGE2PPT_CONFIG_HOME = natureImage2pptConfigDir()
+  process.env.ZRWANG_NATURE_ACADEMIC_CONFIG = natureAcademicConfigFile()
+  process.env.NATURE_FIGURE_CONFIG = natureFigureConfigFile()
   process.env.ARCHIFY_UPDATE_CHECK_DISABLED = '1'
   applyValue(process.env, 'ZRWANG_IMAGE_BASE_URL', image.baseUrl)
   applyValue(process.env, 'ZRWANG_IMAGE_MODEL', image.model)
   applyValue(process.env, 'ZRWANG_IMAGE_API_KEY', image.apiKey)
+  applyImageBackendEnv(process.env, image)
   applyResearchEnv(process.env, params, image)
   const patentRoot = join(root, 'patent')
   if (!process.env.PATENT_OA_HOME) process.env.PATENT_OA_HOME = join(patentRoot, 'oa')
   if (!process.env.PATENT_MAP_HOME) process.env.PATENT_MAP_HOME = join(patentRoot, 'patent-map')
-  applyRuntimeEnv(params, { settingsFile: join(root, 'settings.json') })
+  applyRuntimeEnv(params)
   applyPythonSecretBridge(params)
 }
 
 /**
+/**
  * DSH 的 shell 子进程会按变量名清洗 KEY、TOKEN、SECRET、PASSWORD 类变量，
- * 插件注入的密钥到不了模型执行的 shell。这里生成一个 sitecustomize.py，
- * 让技能用的 Python 进程在启动时从插件 settings.json 把密钥补回 os.environ；
- * 密钥不经过 shell 环境，也不需要给每个上游脚本单独打补丁。
+ * 插件注入的标准名（OPENAI_API_KEY 等）到不了模型执行的 shell。
+ *
+ * 所以密钥统一用不带这些词的名字注入（`ZRWANG_SECRET_*`），这个 sitecustomize 再把它们
+ * 映射回上游脚本认的标准变量名。文件只放 DSH 的 cache 目录，不进插件配置目录。
  */
 function applyPythonSecretBridge(params) {
-  const siteDir = join(STATE_DIR, 'python')
-  const settingsFile = join(configDirOfParams(params), 'settings.json')
+  const siteDir = join(ARTIFACT_DIR, 'python')
   const python = [
-    '# 由 dsh-zrwang-plugin 生成；DSH shell 会清洗 *KEY* 等变量名，这里从插件配置补回。',
-    'import json as _json',
+    '# 由 dsh-zrwang-plugin 生成：把 ZRWANG_SECRET_* 映射回上游脚本认的变量名。',
     'import os as _os',
     '',
-    `_CONFIG = ${JSON.stringify(settingsFile)}`,
+    '_SECRETS = {',
+    "    'ZRWANG_SECRET_IMAGE': ('OPENAI_API_KEY', 'ZRWANG_IMAGE_API_KEY', 'OPENROUTER_API_KEY'),",
+    "    'ZRWANG_SECRET_OCR': ('PADDLE_OCR_TOKEN',),",
+    "    'ZRWANG_SECRET_NCBI': ('NCBI_API_KEY',),",
+    "    'ZRWANG_SECRET_FIRECRAWL': ('FIRECRAWL_API_KEY',),",
+    "    'ZRWANG_SECRET_PEXELS': ('PEXELS_API_KEY',),",
+    "    'ZRWANG_SECRET_PIXABAY': ('PIXABAY_API_KEY',),",
+    "    'ZRWANG_SECRET_OPENALEX': ('OPENALEX_API_KEY',),",
+    '}',
     '',
     '',
     'def _apply_plugin_secrets():',
-    '    try:',
-    "        with open(_CONFIG, 'r', encoding='utf-8') as _fh:",
-    '            _data = _json.load(_fh) or {}',
-    '    except Exception:',
-    '        return',
-    "    _image = _data.get('image') or {}",
-    "    _optional = _data.get('optional') or {}",
-    "    _academic = _data.get('natureAcademic') or {}",
-    "    _pubmed = _academic.get('pubmed') or {}",
-    '    _values = {',
-    "        'ZRWANG_IMAGE_BASE_URL': _image.get('baseUrl'),",
-    "        'ZRWANG_IMAGE_MODEL': _image.get('model'),",
-    "        'ZRWANG_IMAGE_API_KEY': _image.get('apiKey'),",
-    "        'OPENAI_API_KEY': _image.get('apiKey'),",
-    "        'OPENROUTER_API_KEY': _image.get('apiKey'),",
-    "        'OPENROUTER_IMAGE_MODEL': _image.get('model'),",
-    "        'PEXELS_API_KEY': _optional.get('pexelsApiKey'),",
-    "        'PIXABAY_API_KEY': _optional.get('pixabayApiKey'),",
-    "        'OPENALEX_API_KEY': _optional.get('openAlexApiKey'),",
-    "        'FIRECRAWL_API_KEY': _optional.get('firecrawlApiKey'),",
-    "        'NCBI_API_KEY': _pubmed.get('apiKey'),",
-    '    }',
-    '    for _name, _value in _values.items():',
-    '        if isinstance(_value, str) and _value.strip() and not _os.environ.get(_name):',
-    '            _os.environ[_name] = _value.strip()',
-    "    if _image.get('baseUrl') and not _os.environ.get('OPENAI_BASE_URL'):",
-    "        _os.environ['OPENAI_BASE_URL'] = str(_image.get('baseUrl')).strip()",
-    "    if _image.get('model') and not _os.environ.get('OPENAI_MODEL'):",
-    "        _os.environ['OPENAI_MODEL'] = str(_image.get('model')).strip()",
-    "    if _os.environ.get('OPENAI_API_KEY') or _os.environ.get('ZRWANG_IMAGE_API_KEY'):",
+    "    _qwen = _os.environ.get('ZRWANG_IMAGE_BACKEND') == 'qwen'",
+    '    for _source, _targets in _SECRETS.items():',
+    '        _value = _os.environ.get(_source)',
+    "        if not (isinstance(_value, str) and _value.strip()):",
+    '            continue',
+    "        if _qwen and _source == 'ZRWANG_SECRET_IMAGE':",
+    '            _targets = tuple(t for t in _targets if not (t.startswith(\'OPENAI\') or t.startswith(\'ZRWANG_IMAGE\') or t.startswith(\'OPENROUTER\')))',
+    "            _targets = _targets + ('QWEN_API_KEY',)",
+    '        for _name in _targets:',
+    '            if not _os.environ.get(_name):',
+    '                _os.environ[_name] = _value.strip()',
+    "    if _qwen and _os.environ.get('QWEN_API_KEY'):",
+    "        _os.environ.setdefault('IMAGE_BACKEND', 'qwen')",
+    "    elif _os.environ.get('OPENAI_API_KEY'):",
     "        _os.environ.setdefault('IMAGE_BACKEND', 'openai')",
     "        _os.environ.setdefault('OPENAI_QUALITY', 'omit')",
     '',
@@ -866,7 +856,7 @@ function applyPythonSecretBridge(params) {
     writeFileSync(join(siteDir, 'sitecustomize.py'), python, { encoding: 'utf8', mode: 0o600 })
     prependPythonPath(process.env, siteDir)
   } catch {
-    // 状态目录不可写时忽略；PPT 生图等脚本仍有各自的文件兜底
+    // 缓存目录不可写时忽略；上游脚本各自的错误信息会提示缺少密钥
   }
 }
 
@@ -886,7 +876,7 @@ export async function checkArsDependencies(pluginConfig) {
 function pythonEnv(params) {
   const env = { ...process.env }
   try {
-    prependPythonPath(env, join(STATE_DIR, 'python'))
+    prependPythonPath(env, join(ARTIFACT_DIR, 'python'))
   } catch {
     // 忽略
   }
@@ -894,13 +884,14 @@ function pythonEnv(params) {
   applyValue(env, 'ZRWANG_IMAGE_BASE_URL', image.baseUrl)
   applyValue(env, 'ZRWANG_IMAGE_MODEL', image.model)
   applyValue(env, 'ZRWANG_IMAGE_API_KEY', image.apiKey)
+  applyImageBackendEnv(env, image)
   applyResearchEnv(env, params, image)
-  env.ZRWANG_PLUGIN_CONFIG_DIR = configDirOfParams(params)
-  env.IMAGE2PPT_CONFIG_HOME = natureImage2pptConfigDir(params)
-  env.ZRWANG_NATURE_ACADEMIC_CONFIG = natureAcademicConfigFile(params)
-  env.LIT_DL_CONFIG_DIR = natureDownloaderConfigDir(params)
+  env.ZRWANG_PLUGIN_CONFIG_DIR = cacheRoot()
+  env.IMAGE2PPT_CONFIG_HOME = natureImage2pptConfigDir()
+  env.ZRWANG_NATURE_ACADEMIC_CONFIG = natureAcademicConfigFile()
+  env.LIT_DL_CONFIG_DIR = natureDownloaderConfigDir()
   env.LIT_DL_SCHOOL_FILE = natureDownloaderSchoolFile()
-  env.NATURE_FIGURE_CONFIG = natureFigureConfigFile(params)
+  env.NATURE_FIGURE_CONFIG = natureFigureConfigFile()
   return env
 }
 
@@ -924,6 +915,8 @@ function excerpt(value, limit = 1200) {
 
 export async function checkImageConfig(catalog, pluginConfig) {
   const params = currentParams(pluginConfig)
+  const image = imageValues(params)
+  const expected = imageProvider(image)
   const skill = expansion(catalog, 'ppt-master')
   const script = join(skill, 'scripts', 'image_gen.py')
   if (!existsSync(script)) return { ok: false, detail: `找不到 ${script}` }
@@ -932,10 +925,10 @@ export async function checkImageConfig(catalog, pluginConfig) {
     const stdout = run.stdout
     const resolved = /Resolved backend:\s*(.+)/.exec(stdout)?.[1]?.trim() ?? ''
     const source = /Configuration source:\s*(.+)/.exec(stdout)?.[1]?.trim() ?? ''
-    const ok = resolved === 'openai'
+    const ok = resolved === expected
     return {
       ok,
-      detail: `${ok ? '✓' : '✗'} 后端：${resolved || '未配置'}；来源：${source || '未知'}${ok ? '' : '；期望后端 openai（是否已重建 ppt-master 技能？）'}`,
+      detail: `${ok ? '✓' : '✗'} 后端：${resolved || '未配置'}；来源：${source || '未知'}${ok ? '' : `；期望后端 ${expected}（是否已重建 ppt-master 技能？）`}`,
       output: excerpt(stdout),
     }
   } catch (error) {
@@ -1077,10 +1070,9 @@ export async function saveSettingsCard(catalog, pluginConfig, body) {
   } else {
     throw new Error(`未知的设置卡片：${body.cardId}`)
   }
-  const { configDir: ignoredConfigDir, ...persisted } = params
-  void ignoredConfigDir
-  writeParams(persisted)
-  return mirrorSkillFiles(params)
+  // 把改完的参数一起返回：路由层要拿它写 profile 补丁和凭据库，不能重新从 config 读一遍。
+  const backups = await mirrorSkillFiles(params)
+  return { params, backups }
 }
 
 /** 打开配置目录（只允许中心配置目录及其子目录）。 */

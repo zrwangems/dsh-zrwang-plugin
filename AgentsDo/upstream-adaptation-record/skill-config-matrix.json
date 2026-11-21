@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-17T11:11:17.267Z",
+  "generatedAt": "2026-11-21T07:30:22.225Z",
   "totalSkills": 329,
   "totalComponents": 16,
   "summary": {
@@ -3785,7 +3785,7 @@
         "hostTool": 1,
         "python3": 2,
         "bash": 4,
-        "home": 4,
+        "home": 5,
         "env": 2,
         "cli": 1
       },
@@ -3808,6 +3808,7 @@
         ],
         "home": [
           "mcp-server/README.md",
+          "mcp-server/utils/config.py",
           "README.md",
           "README_EN.md",
           "static/core/routing-and-ops.md"

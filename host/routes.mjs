@@ -10,10 +10,10 @@ import { catalogView, loadCatalog } from './catalog.mjs'
 import { reconcile, readLinks } from './farm.mjs'
 import { resolveProjectRoot } from './project.mjs'
 import { ancestorDirIdsOfSkill, buildEffectiveGates, childBatch, desiredSkills, groupCounts, loadSelection, resetGroup, setSelection } from './selection.mjs'
-import { presetsPayload, loadPresets, applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, renameMode, saveActiveMode, activeModeContent } from './presets.mjs'
+import { presetsPayload, loadPresets, applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, renameMode, saveActiveMode, saveMode, activeModeContent } from './presets.mjs'
 import { clearGates, loadGates, normalizeGates, setGates } from './gates.mjs'
 import { blockedSkills, applySkillEnv, checkArsDependencies, currentParams, openConfigTarget, runSettingCheck, saveSettingsCard, settingsCards } from './skill-settings.mjs'
-import { configDirOfParams } from './plugin-params.mjs'
+import { cacheRoot, persistParams } from './plugin-params.mjs'
 import { loadArsManifest, mergeArsSkills } from './ars.mjs'
 import { componentViews, SERVER_NAMES, wantOf } from './mcp.mjs'
 import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mjs'
@@ -96,7 +96,7 @@ function groupStats(catalog, selection, desired, gates, blocked) {
   }))
 }
 
-export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
+export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshParams) {
   /** 设置页展示 MCP 组件状态用；headless/sdk 没有 mcpManager 时给不可用。 */
   const mcpStatusOf = () => (mcpController === undefined ? { available: false, servers: [] } : mcpController.status())
   const webServer = scope.webServer ?? scope.get?.('webServer')
@@ -325,6 +325,7 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
       try {
         if (action === 'apply') await applyMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
         else if (action === 'create-from') await cloneMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
+        else if (action === 'save') await saveMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name, body.newName)
         else if (action === 'rename') await renameMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name, body.newName)
         else if (action === 'delete') await deleteMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
         else throw new Error(`未知的选择态操作：${action}`)
@@ -383,7 +384,7 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
       const catalog = await loadCatalog()
       if (body.action === 'open-dir') {
         const target = typeof body.target === 'string' ? body.target : undefined
-        const result = openConfigTarget(configDirOfParams(currentParams(pluginConfig)), target)
+        const result = openConfigTarget(cacheRoot(), target)
         await appendEvent('open-config-dir', { target: result.path })
         return { ok: true, ...result }
       }
@@ -398,11 +399,24 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
         await appendEvent('settings-check', { action: body.action, ok: check.ok })
         return { ok: true, check, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
       }
-      const backups = await saveSettingsCard(catalog, pluginConfig, body)
+      const { params: savedParams, backups } = await saveSettingsCard(catalog, pluginConfig, body)
+      // 非密钥字段写 profile 补丁、密钥写 DSH 凭据库；随后按新值重新注入环境变量。
+      const persisted = await persistParams(ctx, savedParams)
+      if (typeof refreshParams === 'function') await refreshParams()
       applySkillEnv(currentParams(pluginConfig))
       settingsCache = undefined
-      await appendEvent('settings-saved', { cardId: body.cardId })
-      return { ok: true, backups, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
+      await appendEvent('settings-saved', {
+        cardId: body.cardId,
+        saved: persisted.saved,
+        configUpdated: persisted.configUpdated,
+        credentialsAvailable: persisted.credentialsAvailable,
+        secretsUpdated: persisted.secretsUpdated,
+        secretErrors: persisted.secretErrors,
+        error: persisted.error,
+      })
+      if (persisted.saved === false && persisted.error !== undefined) throw new Error(persisted.error)
+      // 保存会触发插件重启，这里用刚存下的参数回填响应，避免返回重启前的旧值。
+      return { ok: true, backups, settings: await settingsCards(catalog, savedParams, mcpStatusOf()) }
     },
     'POST /mcp': async body => {
       const action = typeof body.action === 'string' ? body.action : ''
@@ -435,7 +449,7 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController) {
         version: VERSION,
         packageDir: join(SKILLS_DIR, '..'),
         stateDir: STATE_DIR,
-        configDir: configDirOfParams(currentParams(pluginConfig)),
+        configDir: cacheRoot(),
         catalog: { total: catalog.stats.total, defaults: catalog.stats.defaults, generatedAt: catalog.generatedAt },
         arsCommands: arsCommandCount(),
         mcp: mcpController === undefined ? { available: false, servers: [] } : mcpController.status(),

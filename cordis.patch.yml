@@ -1,8 +1,11 @@
 # dsh-zrwang-plugin 组合包补丁层。
 #
 # 只挂载本插件的一行宿主条目；MATLAB MCP 与 Simulink 工具随包放在
-# mathworks/ 下，由插件的 MathWorks组件动态注册。插件设置写在
-# DSH 家目录的 zrwang-plugin-config/settings.json。
+# mathworks/ 下，由插件的 MathWorks组件动态注册。
+#
+# 插件参数不在这里写死：非密钥设置由设置页通过 configEditor 写进当前 profile
+# 补丁的同一行程（`- id: dsh-zrwang-plugin` 的 `config:`），密钥存 DSH 凭据库
+# `$DSH_HOME/.credentials.yaml`；这里保持空 config。
 # 技能实体只在本包 skills/ 里，勾选后才以目录联接挂到 <项目根>/.agents/skills/。
 
 - insert:

@@ -1,73 +1,22 @@
 /**
  * 目录树读取与查询。
  *
- * 运行时真正读的是 <configDir>/catalog.json 与 <configDir>/defaults.json（文件类内容）；
- * 本包 catalog/ 下的同名文件只是种子。种子比运行时文件新（generatedAt 更大）时自动刷新运行时副本，
- * 刷新前把旧文件备份到 state/backups/，避免插件升级后仍显示旧技能集。
+ * 直接读本包 catalog/catalog.json 与 catalog/defaults.json——不再往 DSH 家目录复制运行副本，
+ * 少了两个文件也就少一处过期源。插件升级后包内容即最新。
  */
-import { copyFile, mkdir, readFile, stat } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { readFile, stat } from 'node:fs/promises'
+import { join, resolve } from 'node:path'
 import { CATALOG_FILE } from './config.mjs'
-import { configDirOfParams, readParams } from './plugin-params.mjs'
-import { backupFile } from './state.mjs'
 
 let cache
 let cacheMtime = 0
-let runtimeFiles
 
-function generatedAtOf(text) {
-  try {
-    const value = JSON.parse(text).generatedAt
-    return typeof value === 'string' ? value : ''
-  } catch {
-    return ''
-  }
-}
-
-/** 种子比运行时副本新时刷新运行时文件（旧文件先备份）。 */
-async function syncRuntimeFile(seedFile, runtimeFile, label) {
-  if (!existsSync(runtimeFile)) {
-    await copyFile(seedFile, runtimeFile)
-    return 'seeded'
-  }
-  let seedText
-  try {
-    seedText = await readFile(seedFile, 'utf8')
-  } catch {
-    return 'seed-missing'
-  }
-  let runtimeText = ''
-  try {
-    runtimeText = await readFile(runtimeFile, 'utf8')
-  } catch {
-    runtimeText = ''
-  }
-  const seedStamp = generatedAtOf(seedText)
-  const runtimeStamp = generatedAtOf(runtimeText)
-  if (seedStamp.length === 0) return 'seed-no-stamp'
-  if (runtimeStamp.length > 0 && runtimeStamp >= seedStamp) return 'up-to-date'
-  await backupFile(runtimeFile, label)
-  await copyFile(seedFile, runtimeFile)
-  return 'refreshed'
-}
-
-async function runtimeCatalogFiles() {
-  if (runtimeFiles !== undefined) return runtimeFiles
-  const params = readParams({})
-  const configDir = configDirOfParams(params)
-  await mkdir(configDir, { recursive: true })
-  const catalogFile = join(configDir, 'catalog.json')
-  const defaultsFile = join(configDir, 'defaults.json')
-  const seedDefaults = join(CATALOG_FILE, '..', 'defaults.json')
-  await syncRuntimeFile(CATALOG_FILE, catalogFile, 'catalog')
-  if (existsSync(seedDefaults)) await syncRuntimeFile(seedDefaults, defaultsFile, 'defaults')
-  runtimeFiles = { configDir, catalogFile, defaultsFile }
-  return runtimeFiles
+async function catalogFiles() {
+  return { catalogFile: CATALOG_FILE, defaultsFile: join(resolve(CATALOG_FILE, '..'), 'defaults.json') }
 }
 
 export async function loadCatalog() {
-  const files = await runtimeCatalogFiles()
+  const files = await catalogFiles()
   const info = await stat(files.catalogFile)
   if (cache !== undefined && info.mtimeMs === cacheMtime) return cache
   const catalog = JSON.parse(await readFile(files.catalogFile, 'utf8'))
@@ -81,7 +30,6 @@ export async function loadCatalog() {
   cacheMtime = info.mtimeMs
   return cache
 }
-
 /** 上游仓库 → GitHub 页面；local 与非法值不生成链接。 */
 function repoUrl(repo) {
   if (typeof repo !== 'string' || repo === 'local') return undefined

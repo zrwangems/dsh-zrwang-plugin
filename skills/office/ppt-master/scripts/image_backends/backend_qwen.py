@@ -92,12 +92,14 @@ ASPECT_RATIO_SIZE_MAP = {
 
 
 def _validate_model(model: str) -> str:
-    """Limit the backend to the model contract implemented below."""
+    """Accept whatever model the caller configured.
+
+    阿里云多模态生图接口对 qwen-image 系列一视同仁，具体型号由服务端决定，
+    这里不做白名单限制：用户填什么就传什么。
+    """
     resolved = model.strip()
-    if resolved not in SUPPORTED_MODELS:
-        raise ValueError(
-            f"Unsupported Qwen model '{model}'. Supported: {sorted(SUPPORTED_MODELS)}"
-        )
+    if not resolved:
+        raise ValueError("Qwen image model is empty; set QWEN_MODEL or --model.")
     return resolved
 
 

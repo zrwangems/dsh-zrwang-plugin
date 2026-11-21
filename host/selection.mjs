@@ -79,10 +79,13 @@ export function findTreeNode(catalog, nodeId) {
 }
 
 /**
- * “全选 / 全关”只作用直接子节点（只往下一层）：
- * 子技能 → 勾选变更；子目录 → 该目录的门禁；不会递归到孙节点。
- * 一级目录行同时切换本组门禁，避免“子项都勾上了但注入数为 0”。
- * options.only 给出可见子节点（搜索过滤后用），只处理这些子节点。
+ * “全选 / 全关”递归作用于这一棵技能树（含下下层）：
+ * - 子树里每个技能叶子 → 勾选变更；
+ * - 子树里每个目录 → 该目录的门禁；被点到的节点自己也一起切，避免它之前被显式关掉后
+ *   「全选」却不生效；
+ * - 一级目录行同时切换本组门禁，避免“子项都勾上了但注入数为 0”。
+ * options.only 给出可见节点（搜索过滤后用）：只处理这些技能名，目录只有在子树里确实
+ * 有被处理到的技能时才跟着切，不波及被过滤掉的分支。
  */
 export function childBatch(catalog, nodeId, value, options = {}) {
   const node = findTreeNode(catalog, nodeId)
@@ -91,13 +94,27 @@ export function childBatch(catalog, nodeId, value, options = {}) {
   const only = Array.isArray(options.only) ? new Set(options.only) : undefined
   const skillChanges = {}
   const gates = {}
-  for (const child of node.children ?? []) {
-    const key = child.kind === 'skill' ? child.name : child.id
-    if (only !== undefined && !only.has(key)) continue
-    if (child.kind === 'skill') skillChanges[child.name] = value === true
-    else gates[child.id] = value === true
+  /** 返回这棵子树里有没有被处理到的技能。 */
+  const walk = child => {
+    if (child.kind === 'skill') {
+      if (only !== undefined && !only.has(child.name)) return false
+      skillChanges[child.name] = value === true
+      return true
+    }
+    let touched = false
+    for (const grand of child.children ?? []) {
+      if (walk(grand)) touched = true
+    }
+    if (only !== undefined && !touched) return false
+    gates[child.id] = value === true
+    return true
   }
-  if (node.kind === 'group') gates[node.id] = value === true
+  let touched = false
+  for (const child of node.children ?? []) {
+    if (walk(child)) touched = true
+  }
+  // 点到的节点自身：过滤时只有真的处理到东西才切；一级分组永远切（它是注入总闸）。
+  if (node.kind === 'group' || only === undefined || touched) gates[node.id] = value === true
   return { skillChanges, gates }
 }
 

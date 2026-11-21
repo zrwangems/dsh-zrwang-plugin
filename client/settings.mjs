@@ -2,7 +2,7 @@
  * My DSH 设置：模型服务 / 科研服务 / 运行环境。
  *
  * 数据来自宿主 GET /settings；保存 POST /settings。
- * 所有字段改动都自动保存（文本框失焦、下拉选择即存），页面不再有“保存”按钮；
+ * 每个配置块自己有「保存」按钮：输入/选择只改本地值，点保存才写配置；
  * 检查类按钮只做检测/校验，不写配置。
  */
 function zrOpenExternal(url) {
@@ -18,7 +18,7 @@ function ZrConfigField(props) {
   var field = props.field
   var value = props.value === undefined ? '' : props.value
   var onChange = props.onChange
-  var onCommit = props.onCommit === undefined ? function () {} : props.onCommit
+
   var head = [
     h('span', { className: 'zr-field-label' }, zrT(field.label || field.id)),
     field.required ? h('span', { className: 'zr-required' }, ' *') : null,
@@ -35,7 +35,7 @@ function ZrConfigField(props) {
         className: 'zr-input zr-inline-select',
         value: value,
         title: value,
-        onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
+        onChange: function (event) { onChange(event.target.value) },
       }, (field.options || []).map(function (option) {
         return h('option', { key: option.value, value: option.value }, zrT(option.label))
       })),
@@ -53,7 +53,7 @@ function ZrConfigField(props) {
     control = h('select', {
       className: 'zr-input',
       value: value,
-      onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
+      onChange: function (event) { onChange(event.target.value) },
     }, (field.options || []).map(function (option) {
       return h('option', { key: option.value, value: option.value }, zrT(option.label))
     }))
@@ -63,8 +63,7 @@ function ZrConfigField(props) {
       rows: field.rows || 3,
       placeholder: zrT(field.placeholder || ''),
       value: value,
-      onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
-      onBlur: function (event) { onCommit(event.target.value) },
+      onChange: function (event) { onChange(event.target.value) },
     })
   } else {
     control = h('input', {
@@ -73,8 +72,8 @@ function ZrConfigField(props) {
       autoComplete: 'off',
       placeholder: zrT(field.placeholder || ''),
       value: value,
-      onChange: function (event) { onChange(event.target.value); onCommit(event.target.value) },
-      onBlur: function (event) { onCommit(event.target.value) },
+      onChange: function (event) { onChange(event.target.value) },
+      onChange: function (event) { onChange(event.target.value) },
     })
   }
   return h('div', { className: 'zr-field', key: field.id },
@@ -94,9 +93,11 @@ function ZrConfigCard(props) {
   var card = props.card
   var values = props.values || {}
   var onField = props.onField
-  var onCommitField = props.onCommitField === undefined ? function () {} : props.onCommitField
+  var onSave = props.onSave === undefined ? function () {} : props.onSave
+  var dirty = props.dirty === true
   var onAction = props.onAction
   var saved = props.saved
+  var busy = props.busy === true
   var busyAction = props.busyAction
   var check = props.check
   var fields = (card.fields || []).slice()
@@ -179,7 +180,6 @@ function ZrConfigCard(props) {
               field: field,
               value: values[field.id],
               onChange: function (next) { onField(card.id, field.id, next) },
-              onCommit: function (next) { onCommitField(card.id, field.id, next) },
             })
           }
           return h('div', { className: 'zr-field-row', key: 'row-' + rowIndex }, pair.map(function (field) {
@@ -188,16 +188,23 @@ function ZrConfigCard(props) {
               field: field,
               value: values[field.id],
               onChange: function (next) { onField(card.id, field.id, next) },
-              onCommit: function (next) { onCommitField(card.id, field.id, next) },
             })
           }))
         })
       })())
       : null,
     zrCheckLine(check),
-    card.kind === 'info' || actionsTop
+    card.kind === 'info'
       ? null
-      : h('div', { className: 'zr-actions' },
+      : h('div', { className: 'zr-actions zr-save-row' },
+        h('button', {
+          className: 'zr-btn zr-btn-primary' + (busy ? ' zr-btn-busy' : ''),
+          key: 'save',
+          type: 'button',
+          disabled: busy || !dirty,
+          title: dirty ? zrT('保存这一块的配置') : zrT('没有改动'),
+          onClick: function () { if (!busy && dirty) onSave(card.id) },
+        }, busy ? zrT('保存中…') : zrT('保存')),
         actions.map(function (action) {
           var isBusy = busyAction === action.id
           return h('button', {
@@ -208,7 +215,8 @@ function ZrConfigCard(props) {
             onClick: function () { if (!isBusy) onAction(card.id, action.id) },
           }, isBusy ? zrT('检查中…') : zrT(action.label))
         }),
-        saved === card.id ? h('span', { className: 'zr-saved' }, zrT('已自动保存')) : null
+        saved === card.id && !dirty ? h('span', { className: 'zr-saved' }, zrT('已保存')) : null,
+        dirty ? h('span', { className: 'zr-dirty' }, zrT('有未保存的修改')) : null
       )
   )
 }
@@ -258,7 +266,6 @@ function ZrSettingsView(props) {
   var pagePair = React.useState('models')
   var activePage = pagePair[0]
   var setActivePage = pagePair[1]
-  var timersRef = React.useRef({})
 
   /**
    * 保存/检查成功后刷新服务端数据，但保留用户已输入但尚未提交的内容：
@@ -305,6 +312,8 @@ function ZrSettingsView(props) {
     setBusy(function (count) { return count + 1 })
     zrRequest('/settings', body, ZR_TIMEOUT_SETTINGS).then(function (payload) {
       refreshPayload(payload.settings)
+      // 保存会触发插件重启：稍后再拉一次，拿到重启后的真实配置
+      setTimeout(function () { reload() }, 900)
       setSaved(cardId)
       setChecks(function (previous) {
         var copy = {}
@@ -335,17 +344,16 @@ function ZrSettingsView(props) {
     setValueLocal(cardId, fieldId, next)
   }
 
-  // 失焦/选择后自动保存：只有值真的变了才保存；同一卡片防抖，避免连写
-  var commitField = function (cardId, fieldId, next) {
-    setValueLocal(cardId, fieldId, next)
-    var before = baselineRef.current[cardId] === undefined ? undefined : baselineRef.current[cardId][fieldId]
-    var normalized = next === undefined || next === null ? '' : String(next)
-    if (before !== undefined && String(before) === normalized) return
-    if (timersRef.current[cardId] !== undefined) clearTimeout(timersRef.current[cardId])
-    timersRef.current[cardId] = setTimeout(function () {
-      timersRef.current[cardId] = undefined
-      saveCard(cardId)
-    }, 500)
+  /** 这一块的输入和已保存的值不一样就算有改动，用来决定「保存」能不能点。 */
+  var isDirty = function (cardId) {
+    var current = valuesRef.current[cardId] || {}
+    var base = baselineRef.current[cardId] || {}
+    for (var id in current) {
+      var normalized = current[id] === undefined || current[id] === null ? '' : String(current[id])
+      var before = base[id] === undefined || base[id] === null ? '' : String(base[id])
+      if (normalized !== before) return true
+    }
+    return false
   }
 
   var runAction = function (cardId, actionId) {
@@ -400,7 +408,9 @@ function ZrSettingsView(props) {
           busyAction: actionBusy,
           check: checks[card.id],
           onField: setField,
-          onCommitField: commitField,
+          onSave: saveCard,
+          dirty: isDirty(card.id),
+          busy: busy,
           onAction: runAction,
         })
       }),

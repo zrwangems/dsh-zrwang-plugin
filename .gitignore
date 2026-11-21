@@ -29,9 +29,13 @@ AgentsDo/upstream-adaptation-record/.tmp/
 # 插件运行期在“被当作项目根”时生成：<项目根>/.agents/skills 目录联接与 ppt 项目目录
 .agents/
 
-# 由设置生成、可能含用户参数的技能运行时文件
+# 由设置生成、可能含用户参数的技能运行时文件（都在技能目录里，不落 DSH 家目录）
 skills/research/nature-skills/nature-academic-search/mcp-server/config.toml
 skills/research/nature-skills/nature-image2ppt/config.yaml
+skills/research/nature-skills/nature-figure/config/nature-figure.json
 # 学校配置随 nature-downloader 技能目录分发；凭据类运行时文件不入库
 skills/research/nature-skills/nature-downloader/config/credentials.json
 skills/research/nature-skills/nature-downloader/config/settings.json
+
+# 运行期生成（含机器相关路径，由插件启动时重建），不入库
+ars/skills/*/_shared/dsh-runtime.md

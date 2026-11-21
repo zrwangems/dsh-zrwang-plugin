@@ -18,7 +18,11 @@ from pathlib import Path
 DEFAULT_CONFIG_HOME = "~/.image2ppt"
 DEFAULT_CODEX_AUTH_FILE = "~/.codex/auth.json"
 DEFAULT_IMAGE_MODEL = "gpt-image-2"
-DEFAULT_IMAGE_BACKEND = "auto"
+# 本插件统一走 OpenAI 兼容的图片接口；没有配置文件时也用这个后端，不依赖生成的 config.yaml。
+DEFAULT_IMAGE_BACKEND = "openai-compatible-api"
+BUILTIN_CONFIG = {
+    "IMAGE2PPT_IMAGE_BACKEND": DEFAULT_IMAGE_BACKEND,
+}
 ALLOWED_IMAGE_BACKENDS = {"auto", "codex-oauth", "openai-compatible-api"}
 ENV_FIELDS = (
     "OPENAI_API_KEY",
@@ -78,8 +82,9 @@ def config_scope(path: Path | None = None) -> str:
 
 def read_config_file(path: Path) -> dict:
     path = Path(path).expanduser()
+    # 没有配置文件时用内置默认值（后端等），插件不再生成 config.yaml。
     if not path.exists():
-        return {}
+        return dict(BUILTIN_CONFIG)
     try:
         import yaml
     except ImportError as exc:

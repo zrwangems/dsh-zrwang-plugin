@@ -76,6 +76,16 @@ function ZrCheckbox(props) {
   })
 }
 
+function zrCollectSkillNames(node, out) {
+  var list = out || []
+  if (node.kind === 'skill') {
+    list.push(node.name)
+    return list
+  }
+  for (var i = 0; i < (node.children || []).length; i += 1) zrCollectSkillNames(node.children[i], list)
+  return list
+}
+
 function ZrNodeRow(props) {
   var node = props.node
   var depth = props.depth
@@ -148,20 +158,19 @@ function ZrNodeRow(props) {
         }, '↗'),
       hasChildren && node.kind !== 'skill'
         ? (function () {
-          // 搜索过滤时只对“看得见的直接子节点”生效，避免全选波及被过滤掉的项。
+          // 搜索过滤时只对“这一棵子树里还能看见的技能”生效，避免全选波及被过滤掉的项；
+          // 没过滤时 only 留空，后端递归处理整棵子树。
           var only
-          if (searching) {
-            only = (node.children || []).map(function (child) { return child.kind === 'skill' ? child.name : child.id })
-          }
+          if (searching) only = zrCollectSkillNames(node)
           return h(React.Fragment, null,
             h('button', {
               className: 'zr-bulkbtn',
-              title: zrT('选中/打开这一层下面的所有技能与分组（只下一层）'),
+              title: zrT('选中这棵技能树下的全部技能与分组（含更深层）'),
               onClick: function (event) { event.stopPropagation(); if (props.onBulk !== undefined) props.onBulk(node.id, true, only) },
             }, zrT('全选')),
             h('button', {
               className: 'zr-bulkbtn',
-              title: zrT('取消/关闭这一层下面的所有技能与分组（只下一层）'),
+              title: zrT('取消这棵技能树下的全部技能与分组（含更深层）'),
               onClick: function (event) { event.stopPropagation(); if (props.onBulk !== undefined) props.onBulk(node.id, false, only) },
             }, zrT('全关')))
         })()
@@ -238,13 +247,17 @@ function ZrPresetsBar(props) {
   var setDialog = dialogPair[1]
 
   var closeDialog = function () { setDialog(null) }
-  var submitDialog = function () {
+  var submitDialog = function (savedName) {
     if (dialog === null) return
     if (dialog.kind === 'rename') {
       var trimmed = String(dialog.value || '').trim()
       if (trimmed.length > 0 && trimmed !== dialog.name) props.onRename(dialog.name, trimmed)
     } else if (dialog.kind === 'delete') {
       props.onDelete(dialog.name)
+    } else if (dialog.kind === 'save') {
+      // savedName 省略 = 跳过命名，让宿主按原模式名保存。
+      var value = savedName === undefined ? String(dialog.value || '').trim() : String(savedName)
+      props.onSave(dialog.name, value)
     }
     setDialog(null)
   }
@@ -265,6 +278,10 @@ function ZrPresetsBar(props) {
   var menuEntries = []
   if (menu !== null) {
     menuEntries.push({ label: zrT('基于此新建'), action: function () { props.onClone(menu.name) } })
+    menuEntries.push({
+      label: zrT('保存'),
+      action: function () { setDialog({ kind: 'save', name: menu.name, value: menu.name === '默认' ? '' : menu.name }) },
+    })
     if (menu.builtin !== true) {
       menuEntries.push({
         label: zrT('重命名'),
@@ -334,9 +351,9 @@ function ZrPresetsBar(props) {
     h('div', { className: 'zr-presets-list' },
       items.map(function (mode) {
         var active = presets.active === mode.name
-        var tip = zrT('项目基础态（注入 0）；右键：基于此新建；勾选或打开门禁会自动建立当前工作区的模式')
-        if (mode.workspace === true) tip = zrT('当前工作区的模式，改动自动保存；右键：基于此新建 / 重命名 / 删除')
-        else if (mode.builtin !== true) tip = zrT('项目级模式，所有工作区共享；右键：基于此新建 / 重命名 / 删除')
+        var tip = zrT('项目基础态（注入 0）；右键：基于此新建 / 保存；勾选或打开门禁会自动建立当前工作区的模式')
+        if (mode.workspace === true) tip = zrT('当前工作区的模式，改动自动保存；右键：基于此新建 / 保存 / 重命名 / 删除')
+        else if (mode.builtin !== true) tip = zrT('项目级共享组，所有工作区可用；右键：基于此新建 / 保存 / 重命名 / 删除')
         return h('button', {
           key: mode.name,
           className: 'zr-preset' + (active ? ' zr-active' : '') + (mode.workspace === true ? ' zr-wsmode' : ''),
@@ -361,7 +378,8 @@ function ZrPresetsBar(props) {
     })),
     dialog === null ? null : h('div', { className: 'zr-modal-mask', onClick: closeDialog },
       h('div', { className: 'zr-modal', onClick: function (event) { event.stopPropagation() } },
-        h('div', { className: 'zr-modal-title' }, dialog.kind === 'rename' ? zrT('重命名模式') : zrT('删除模式')),
+        h('div', { className: 'zr-modal-title' },
+          dialog.kind === 'rename' ? zrT('重命名模式') : (dialog.kind === 'save' ? zrT('保存为共享组') : zrT('删除模式'))),
         dialog.kind === 'rename'
           ? h('input', {
             className: 'zr-input',
@@ -370,14 +388,32 @@ function ZrPresetsBar(props) {
             onChange: dialogInput,
             onKeyDown: dialogKeyDown,
           })
-          : h('div', { className: 'zr-desc' }, zrT('确定删除模式「{name}」？', { name: dialog.name })),
+          : (dialog.kind === 'save'
+            ? h(React.Fragment, null,
+              h('div', { className: 'zr-desc' }, zrT('把「{name}」的内容存成项目级共享组，同项目其他工作区都能基于它新建。可以留空或点「用原名」按原名保存。', { name: dialog.name })),
+              h('input', {
+                className: 'zr-input',
+                autoFocus: true,
+                placeholder: dialog.name === '默认' ? zrT('输入组名（「默认」不能重名，留空会自动取名）') : dialog.name,
+                value: dialog.value,
+                onChange: dialogInput,
+                onKeyDown: dialogKeyDown,
+              }))
+            : h('div', { className: 'zr-desc' }, zrT('确定删除模式「{name}」？', { name: dialog.name }))),
         h('div', { className: 'zr-modal-actions' },
           h('button', { className: 'zr-btn', type: 'button', onClick: closeDialog }, zrT('取消')),
+          dialog.kind === 'save'
+            ? h('button', {
+              className: 'zr-btn',
+              type: 'button',
+              onClick: function () { submitDialog('') },
+            }, zrT('用原名'))
+            : null,
           h('button', {
             className: 'zr-btn' + (dialog.kind === 'delete' ? ' zr-btn-danger' : ''),
             type: 'button',
-            onClick: submitDialog,
-          }, dialog.kind === 'rename' ? zrT('确定') : zrT('删除'))
+            onClick: function () { submitDialog() },
+          }, dialog.kind === 'rename' ? zrT('确定') : (dialog.kind === 'save' ? zrT('保存') : zrT('删除')))
         )
       )
     )
