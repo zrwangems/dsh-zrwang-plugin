@@ -49,7 +49,7 @@ MCP 组件**不提供设置项**，注册参数全部固定，保证开箱即用
 
 | 组件 | 固定参数 |
 | --- | --- |
-| `matlab-mcp` | 命令 = 包内 `mathworks/matlab-mcp-server-windows-x64.exe`；参数 `--matlab-session-mode=existing`、`--extension-file=<包内>/simulink-agentic-toolkit/tools/tools.json`、`--disable-telemetry=true`；env `WINDIR=C:\Windows`；工具调用超时 120000ms、启动超时 30000ms |
+| `matlab-mcp` | 命令 = 包内 `mathworks/matlab-mcp-server-windows-x64.exe`；参数 `--matlab-session-mode=existing`、`--extension-file=<包内>/simulink-agentic-toolkit/tools/tools.json`、`--disable-telemetry=true`；env `WINDIR=%SystemRoot%`（代码里取 `SystemRoot`，缺省才用 `C:\Windows`）；工具调用超时 120000ms、启动超时 30000ms |
 | `windows-mcp` | 命令 = 系统 PATH 里的 `windows-mcp`；参数 `serve`；env `ANONYMIZED_TELEMETRY=false`、`WINDOWS_MCP_SCREENSHOT_SCALE=0.5`；工具调用超时 120000ms、启动超时 30000ms |
 
 设置页的「运行环境 → 组件状态 → 重新检查」会校验两个组件的文件（包内 exe、SATK 扩展文件、Windows MCP 运行时）并显示当前连接状态；MCP 本身不再有配置卡片或「MCP配置」页签。

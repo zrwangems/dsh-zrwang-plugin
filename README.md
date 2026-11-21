@@ -90,7 +90,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 - **非密钥配置**只写进当前 profile 的 `cordis.patch.yml`，即 `- id: dsh-zrwang-plugin` 这一项的 `config`。没有 `settings.json`，也没有插件自己的配置目录。
 - **密钥**只写进 DSH 凭据库（`api-key` 凭据），不写 YAML、不写日志、不回显；设置页只显示「已设置 / 未设置」。因此插件包、profile 补丁和 `cache/` 里都不会出现明文密钥。
-- **运行期产物**（选择态、门禁、模式、Python 启动钩子、MCP 暂存、备份）全部在插件安装目录下的 `cache/`，卸载插件时一起删除；插件不会在 `~/.dsh` 里另建目录。
+- **运行期产物**（选择态、门禁、模式、Python 启动钩子、备份）全部在插件安装目录下的 `cache/`，卸载插件时一起删除；插件不会在 `~/.dsh` 里另建目录。
 - DSH 的 shell 会清掉名字里带 `KEY` / `TOKEN` / `SECRET` / `PASSWORD` 的环境变量，所以密钥以 `ZRWANG_*_CRED` 注入，再由插件生成的 Python 启动钩子映射回上游脚本认识的标准变量名。
 - 上游技能自己的配置文件、向导和读写代码已删除：技能只从插件注入的环境变量取参数。需要改默认值时改插件设置，不要去改技能目录。
 

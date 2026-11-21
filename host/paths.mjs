@@ -9,7 +9,7 @@
  * 布局：
  *   <插件目录>/cache/
  *     state/       选择态、门禁、模式、界面展开、事件、链接台账
- *     artifacts/   MCP 暂存、Python 启动钩子、shim
+ *     artifacts/   Python 启动钩子、shim
  *     backups/     覆盖写之前的备份
  */
 import { existsSync, mkdirSync } from 'node:fs'
@@ -39,14 +39,11 @@ export function stateRoot() {
   return join(cacheRoot(), 'state')
 }
 
-/** 运行期产物目录（MCP 暂存、Python 钩子、shim）。 */
+/** 运行期产物目录（Python 钩子、shim）。 */
 export function artifactRoot() {
   return join(cacheRoot(), 'artifacts')
 }
 
-export function mcpRoot() {
-  return join(artifactRoot(), 'mcp')
-}
 
 export function pythonRoot() {
   return join(artifactRoot(), 'python')
@@ -78,7 +75,7 @@ export function ensureDirSync(dir, mode = 0o700) {
 
 /** 装配早期需要的目录（写状态、生成 shim 之前）。 */
 export function ensureCacheSync() {
-  for (const dir of [cacheRoot(), stateRoot(), artifactRoot(), mcpRoot(), pythonRoot(), shimRoot(), backupRoot()]) {
+  for (const dir of [cacheRoot(), stateRoot(), artifactRoot(), pythonRoot(), shimRoot(), backupRoot()]) {
     ensureDirSync(dir)
   }
   return cacheRoot()
