@@ -8,7 +8,6 @@ import { ROUTE_PREFIX, SKILLS_DIR, VERSION } from './config.mjs'
 import { cacheRoot, stateRoot } from './paths.mjs'
 import { openPath } from './platform.mjs'
 import { catalogView, loadCatalog } from './catalog.mjs'
-import { reconcile, readLinks } from './farm.mjs'
 import { resolveProjectRoot } from './project.mjs'
 import { ancestorDirIdsOfSkill, buildEffectiveGates, childBatch, desiredSkills, groupCounts, loadSelection, resetGroup, setSelection } from './selection.mjs'
 import { presetsPayload, loadPresets, applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, renameMode, saveActiveMode, saveMode, activeModeContent } from './presets.mjs'
@@ -17,6 +16,7 @@ import { blockedSkills, openConfigTarget, presenceOf, runSettingCheck, saveSetti
 import { checkArsDeps, loadArsManifest, mergeArsSkills } from './ars.mjs'
 import { componentViews, SERVER_NAMES, wantOf } from './mcp.mjs'
 import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mjs'
+import { invalidateSkillProvider } from './skill-provider.mjs'
 import { appendEvent, readEvents } from './state.mjs'
 import { loadUi, saveExpanded } from './ui-state.mjs'
 import { skillDoc } from './skill-doc.mjs'
@@ -147,37 +147,22 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
     const ars = loadArsManifest()
     const arsEnabled = gates.ars === true
     mergeArsSkills(desired, arsEnabled)
-    const linkState = await reconcile({ projectRoot, desired })
-    if (linkState.added > 0 || linkState.removed > 0 || linkState.retargeted > 0) {
-      try {
-        ctx.emit('plugin-manager/changed', { reason: 'plugin' })
-      } catch {
-        // 没有远程事件通道时忽略
-      }
-    }
+    invalidateSkillProvider()
     const payload = {
       ok: true,
       version: VERSION,
       selection: selection.skills,
       blocked,
       session: { sessionId, projectRoot, gates: buildEffectiveGates(catalog, gates, selection), workspace: workspaceView(workspace) },
-      project: { root: projectRoot, skillsRoot: linkState.skillsDir },
-      links: {
-        count: linkState.linked.length,
-        names: linkState.linked,
-        added: linkState.added,
-        removed: linkState.removed,
-        retargeted: linkState.retargeted,
-        kept: linkState.kept,
-        conflicts: linkState.conflicts,
-      },
+      project: { root: projectRoot, skillsRoot: '' },
+      links: { count: 0, names: [], added: 0, removed: 0, retargeted: 0, kept: 0, conflicts: [] },
       ars: ars === undefined ? undefined : {
         label: ars.label,
         license: ars.license,
         enabled: arsEnabled,
         skillCount: (ars.skills ?? []).length,
         commandCount: (ars.commands ?? []).length,
-        injected: (ars.skills ?? []).filter(skill => linkState.linked.includes(skill.name)).length,
+        injected: arsEnabled ? (ars.skills ?? []).length : 0,
         repo: ars.upstream,
       },
       groups: groupStats(catalog, selection, desired, gates, blocked),
@@ -365,7 +350,6 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
     },
     'GET /health': async () => {
       const catalog = await loadCatalog()
-      const links = await readLinks()
       return {
         ok: true,
         version: VERSION,
@@ -375,7 +359,7 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
         catalog: { total: catalog.stats.total, defaults: catalog.stats.defaults, generatedAt: catalog.generatedAt },
         arsCommands: arsCommandCount(),
         mcp: mcpStatusOf(),
-        projects: Object.keys(links.projects ?? {}).length,
+        projects: 0,
         warnings: runtime.warnings(),
         events: await readEvents(10),
       }

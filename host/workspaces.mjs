@@ -85,7 +85,7 @@ function fromProject(projectRoot) {
  * @param {string|undefined} cwd 已解析出的会话工作目录
  * @param {string} projectRoot 项目根
  */
-export async function resolveWorkspace(ctx, sessionId, cwd, projectRoot) {
+export async function resolveWorkspaceByPath(ctx, cwd, projectRoot) {
   const registry = (() => {
     try {
       return ctx?.get?.('workspaceRegistry')
@@ -95,12 +95,6 @@ export async function resolveWorkspace(ctx, sessionId, cwd, projectRoot) {
   })()
   if (registry === undefined) return fromProject(projectRoot)
   try {
-    if (typeof registry.list === 'function') {
-      for (const entity of registry.list()) {
-        const ids = Array.isArray(entity?.sessionIds) ? entity.sessionIds : []
-        if (ids.includes(sessionId)) return fromEntity(entity)
-      }
-    }
     if (typeof registry.resolveByPath === 'function' && typeof cwd === 'string' && cwd.length > 0) {
       const entity = await registry.resolveByPath(cwd)
       if (entity !== undefined && entity !== null) return fromEntity(entity)
@@ -109,6 +103,28 @@ export async function resolveWorkspace(ctx, sessionId, cwd, projectRoot) {
     // 工作区服务不可用时按项目根回退，选择态仍然能用
   }
   return fromProject(projectRoot)
+}
+
+/** 解析会话所属工作区；永不抛错（工作区服务异常时回退到项目根）。 */
+export async function resolveWorkspace(ctx, sessionId, cwd, projectRoot) {
+  const registry = (() => {
+    try {
+      return ctx?.get?.('workspaceRegistry')
+    } catch {
+      return undefined
+    }
+  })()
+  if (registry !== undefined && typeof registry.list === 'function') {
+    try {
+      for (const entity of registry.list()) {
+        const ids = Array.isArray(entity?.sessionIds) ? entity.sessionIds : []
+        if (ids.includes(sessionId)) return fromEntity(entity)
+      }
+    } catch {
+      // 继续按路径/项目根回退
+    }
+  }
+  return resolveWorkspaceByPath(ctx, cwd, projectRoot)
 }
 
 /** 给客户端展示用的工作区摘要。 */

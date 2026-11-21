@@ -8,7 +8,7 @@ import path from "node:path";
 export const DEFAULT_DISCOVERY_URL = "https://www.webofscience.com/wos/woscc/basic-search";
 
 export function configPathFromEnv(env = process.env) {
-  if (env.LIT_DL_SCHOOL_FILE) return env.LIT_DL_SCHOOL_FILE;
+  if (env.DSH_ZRWANG_LIT_DL_SCHOOL_FILE) return env.DSH_ZRWANG_LIT_DL_SCHOOL_FILE;
   return path.join(path.dirname(new URL(import.meta.url).pathname), "..", "..", "config", "school.json");
 }
 

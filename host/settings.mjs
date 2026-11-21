@@ -12,7 +12,7 @@ import { SKILLS_DIR } from './config.mjs'
 import { cacheRoot } from './paths.mjs'
 import { isMac, isWindows, openPath, processIds, listeningPid, which, registryDisplayIcon } from './platform.mjs'
 import { getPath, setPath, text } from './object.mjs'
-import { applySkillEnv } from './env.mjs'
+import { applySkillEnv, shellEnvValues } from './env.mjs'
 import { SECRET_REFS } from './params.mjs'
 import { DEPENDENCIES, detectPythons, probePython, readPythonCandidates, resolvePython } from './python.mjs'
 import { checkMcp, MATLAB_MCP_EXE, SIMULINK_TOOLKIT_DIR, SIMULINK_TOOLS_FILE } from './mcp.mjs'
@@ -430,8 +430,7 @@ export function presenceOf(present = {}) {
 
 function childEnv(params) {
   applySkillEnv(params)
-  const env = { ...process.env }
-  return env
+  return { ...process.env, ...shellEnvValues(params) }
 }
 
 async function runPython(params, args, cwd, timeout = 60_000) {

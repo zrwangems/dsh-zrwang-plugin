@@ -56,7 +56,7 @@ check('MathWorks 组件随包', (pkg.files ?? []).includes('mathworks')
   && existsSync(join(ROOT, 'mathworks', 'matlab-mcp-server-windows-x64.exe'))
   && existsSync(join(ROOT, 'mathworks', 'simulink-agentic-toolkit', 'tools', 'tools.json')))
 check('插件不提供 Python 安装功能', !existsSync(join(ROOT, 'scripts', 'install-python-runtime.mjs')) && !existsSync(join(ROOT, 'runtime')))
-check('旧宿主模块已删除', ['skill-settings.mjs', 'plugin-params.mjs', 'python-detect.mjs'].every(name => !existsSync(join(ROOT, 'host', name))))
+check('旧宿主模块已删除', ['skill-settings.mjs', 'plugin-params.mjs', 'python-detect.mjs', 'farm.mjs'].every(name => !existsSync(join(ROOT, 'host', name))))
 
 // 可分发性：运行期源码里不能出现作者本机路径
 const sourceFiles = [
@@ -158,7 +158,7 @@ check('ARS 许可是 CC-BY-NC', existsSync(join(ROOT, 'vendor', 'licenses', 'ars
 const requiredHost = [
   'index.mjs', 'routes.mjs', 'runtime.mjs', 'config.mjs', 'paths.mjs', 'platform.mjs',
   'params.mjs', 'object.mjs', 'state.mjs', 'python.mjs', 'env.mjs', 'settings.mjs',
-  'mcp.mjs', 'ars.mjs', 'farm.mjs', 'migrate.mjs', 'skill-guard.mjs', 'catalog.mjs', 'presets.mjs',
+  'mcp.mjs', 'ars.mjs', 'skill-provider.mjs', 'legacy-links.mjs', 'migrate.mjs', 'skill-guard.mjs', 'catalog.mjs', 'presets.mjs',
 ]
 const missingHost = requiredHost.filter(name => !existsSync(join(ROOT, 'host', name)))
 check('宿主模块齐全', missingHost.length === 0, missingHost.join(', '))
@@ -176,6 +176,9 @@ check('宿主/脚本语法', syntaxErrors.length === 0, syntaxErrors.join('；')
 const allHost = sourceFiles.filter(file => file.includes(`${join(ROOT, 'host')}`)).map(file => readFileSync(file, 'utf8')).join('\n')
 check('宿主不再引用旧状态目录', !allHost.includes('ZRWANG_PLUGIN_STATE_DIR'))
 check('运行时目录只在插件缓存', allHost.includes('dsh-zrwang-plugin') && allHost.includes('cache'))
+check('不再生成 artifacts/backups', !allHost.includes("'artifacts'") && !allHost.includes("'backups'"))
+check('静态 shim 与 Python 钩子随包', ['host/shim/python/python', 'host/shim/python/python.cmd', 'host/shim/bash/bash', 'host/pysite/sitecustomize.py'].every(name => existsSync(join(ROOT, name))))
+check('不再用项目联接注入技能', !allHost.includes('reconcile({') && !allHost.includes('symlink('))
 check('不写 credentials.json/settings.json', !/writeFileSync\([^)]*credentials\.json/.test(allHost) && !/writeFileSync\([^)]*settings\.json/.test(allHost))
 const hostIndexSource = readFileSync(join(ROOT, 'host', 'index.mjs'), 'utf8')
 check('凭据走 DSH 凭据库 + configEditor', readFileSync(join(ROOT, 'host', 'runtime.mjs'), 'utf8').includes('persistParams') && readFileSync(join(ROOT, 'host', 'params.mjs'), 'utf8').includes('credentials'))

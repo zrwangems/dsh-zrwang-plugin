@@ -8,18 +8,18 @@ const PROVIDERS = new Set(PUBLISHER_PROVIDERS);
  */
 const ENV = {
   elsevier: {
-    api_key: "ZRWANG_ELSEVIER_CRED",
-    insttoken: "ZRWANG_ELSEVIER_INST_CRED",
-    authtoken: "ZRWANG_ELSEVIER_AUTH_CRED",
+    api_key: "DSH_ZRWANG_ELSEVIER_CRED",
+    insttoken: "DSH_ZRWANG_ELSEVIER_INST_CRED",
+    authtoken: "DSH_ZRWANG_ELSEVIER_AUTH_CRED",
   },
   springer_nature: {
-    fulltext_api_key: "ZRWANG_SPRINGER_FULLTEXT_CRED",
-    openaccess_api_key: "ZRWANG_SPRINGER_OA_CRED",
-    metadata_api_key: "ZRWANG_SPRINGER_METADATA_CRED",
+    fulltext_api_key: "DSH_ZRWANG_SPRINGER_FULLTEXT_CRED",
+    openaccess_api_key: "DSH_ZRWANG_SPRINGER_OA_CRED",
+    metadata_api_key: "DSH_ZRWANG_SPRINGER_METADATA_CRED",
   },
   ieee: {
-    api_key: "ZRWANG_IEEE_CRED",
-    fulltext_endpoint: "ZRWANG_IEEE_FULLTEXT_ENDPOINT",
+    api_key: "DSH_ZRWANG_IEEE_CRED",
+    fulltext_endpoint: "DSH_ZRWANG_IEEE_FULLTEXT_ENDPOINT",
   },
 };
 

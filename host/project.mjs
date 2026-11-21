@@ -4,8 +4,7 @@
  * 项目根判定与 DSH 的 skill-filesystem 保持一致：最近的含 .git 的祖先；没有就用 cwd。
  */
 import { existsSync } from 'node:fs'
-import { dirname, isAbsolute, join, parse, relative, resolve } from 'node:path'
-import { SKILLS_REL } from './config.mjs'
+import { dirname, isAbsolute, join, parse, resolve } from 'node:path'
 
 /** 拒绝盘符根、Windows 目录等明显不该写的位置。 */
 export function validateCwd(cwd) {
@@ -29,20 +28,4 @@ export function resolveProjectRoot(cwd) {
     if (parent === dir) return start
     dir = parent
   }
-}
-
-export function skillsRootOf(projectRoot) {
-  return join(projectRoot, ...SKILLS_REL)
-}
-
-
-/** child 是否在 parent 之内（Windows 大小写不敏感）。 */
-export function isInside(parent, child) {
-  const rel = relative(resolve(parent), resolve(child))
-  return rel.length > 0 && !rel.startsWith('..') && !isAbsolute(rel)
-}
-
-/** 两个绝对路径是否同一个位置。 */
-export function samePath(a, b) {
-  return relative(resolve(a), resolve(b)) === ''
 }

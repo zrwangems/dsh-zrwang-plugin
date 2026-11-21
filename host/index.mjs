@@ -7,18 +7,20 @@
  *   3. MCP 组件、技能文件护栏、ARS 命令；
  *   4. 卸载时恢复进程环境、注销 MCP 与命令。
  *
- * 技能只在侧栏勾选后，才由 farm 以目录联接挂到 `<项目根>/.agents/skills/`；
+ * 技能只在侧栏勾选后，才由 DSH 官方的 ctx.skills 提供方按工作区列出；
  * 运行期文件全部在 `<插件目录>/cache/`。
  */
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { SKILLS_DIR, VERSION } from './config.mjs'
 import { cacheRoot } from './paths.mjs'
+import { shellEnvValues, shellEnvVariables } from './env.mjs'
 import { createRuntime } from './runtime.mjs'
 import { registerRoutes } from './routes.mjs'
 import { appendEvent, ensureStateDirSync } from './state.mjs'
 import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-commands.mjs'
 import { createSkillGuard } from './skill-guard.mjs'
+import { registerSkillProvider } from './skill-provider.mjs'
 import { loadGates } from './gates.mjs'
 import { createMcpController } from './mcp.mjs'
 
@@ -54,6 +56,22 @@ export function apply(ctx, config) {
 
   const mcpController = createMcpController(ctx)
   effect(ctx, () => () => mcpController.disposeAll(), 'dsh-zrwang-plugin: mcp registrations')
+
+  // 官方扩展点：把本插件的配置作为每次 shell 调用的 DSH_* 事实注入。
+  ctx.inject?.(['shellEnv'], scope => {
+    const dispose = scope.shellEnv.register({
+      name: 'zrwang-plugin-config',
+      variables: shellEnvVariables(),
+      resolve: () => shellEnvValues(runtime.effective()),
+    })
+    effect(scope, () => dispose, 'dsh-zrwang-plugin: shell env')
+  })
+
+  // 原生技能注入：按工作区把选中的技能注册进 ctx.skills，不写项目目录。
+  ctx.inject?.(['skills'], scope => {
+    const dispose = registerSkillProvider(scope, runtime)
+    effect(scope, () => dispose, 'dsh-zrwang-plugin: skill provider')
+  })
 
   // 技能文件护栏：禁止模型用 write/edit 改插件里的 skills/ 与 ars/。
   ctx.inject?.(['tools'], scope => {

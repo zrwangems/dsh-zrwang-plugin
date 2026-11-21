@@ -16,7 +16,7 @@ import { normalizeConfig, persistParams, SECRET_REFS, configOfParams } from './p
 import { setPath } from './object.mjs'
 import { appendEvent } from './state.mjs'
 
-const STATE_FILES = ['selection.json', 'gates.json', 'presets.json', 'ui.json', 'links.json']
+const STATE_FILES = ['selection.json', 'gates.json', 'presets.json', 'ui.json']
 
 function mergeDeep(base, extra) {
   if (extra === null || typeof extra !== 'object' || Array.isArray(extra)) return extra

@@ -7,10 +7,8 @@
  *   - 插件包里的技能、ARS、学校配置运行期只读，不在 `cache/` 之外写任何文件。
  *
  * 布局：
- *   <插件目录>/cache/
- *     state/       选择态、门禁、模式、界面展开、事件、链接台账
- *     artifacts/   Python 启动钩子、shim
- *     backups/     覆盖写之前的备份
+ *   <插件目录>/cache/state/   选择态、门禁、模式、界面展开、事件、链接台账
+ *   <插件目录>/cache/patent/  专利技能的向量库与工作数据（由技能写入）
  */
 import { existsSync, mkdirSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
@@ -39,24 +37,6 @@ export function stateRoot() {
   return join(cacheRoot(), 'state')
 }
 
-/** 运行期产物目录（Python 钩子、shim）。 */
-export function artifactRoot() {
-  return join(cacheRoot(), 'artifacts')
-}
-
-
-export function pythonRoot() {
-  return join(artifactRoot(), 'python')
-}
-
-export function shimRoot() {
-  return join(artifactRoot(), 'bin')
-}
-
-export function backupRoot() {
-  return join(cacheRoot(), 'backups')
-}
-
 /** 旧版本目录：只在启动时迁移一次并删除，运行期不再读写。 */
 export function legacyConfigRoot() {
   const home = process.env.DSH_HOME
@@ -73,9 +53,9 @@ export function ensureDirSync(dir, mode = 0o700) {
   return dir
 }
 
-/** 装配早期需要的目录（写状态、生成 shim 之前）。 */
+/** 装配早期需要的目录。 */
 export function ensureCacheSync() {
-  for (const dir of [cacheRoot(), stateRoot(), artifactRoot(), pythonRoot(), shimRoot(), backupRoot()]) {
+  for (const dir of [cacheRoot(), stateRoot()]) {
     ensureDirSync(dir)
   }
   return cacheRoot()

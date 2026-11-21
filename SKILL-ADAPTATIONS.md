@@ -4,7 +4,7 @@
 
 ## 适配原则
 
-1. 技能内容以「单独注入到 `<项目根>/.agents/skills/<技能>` 后仍能正常工作」为准，不能依赖上游仓库的整仓结构。
+1. 技能内容以「由 DSH 的 `ctx.skills` 提供方单独加载后仍能正常工作」为准，不能依赖上游仓库的整仓结构，也不依赖项目里的 `.agents/skills`。
 2. 需要配置的东西（API Key、模型、账号、学校信息等）优先走插件设置页或随包固定配置，不让用户手改技能里的 `.env`、`config.*`。
 3. 上游用 Claude Code / Codex 的工具名、命令名、多角色方式，要换成 DSH 的对应能力（`ask_user_question`、`web_search`、`web_fetch`、`skill`、`subagent` / Agent Team 等）。
 4. 所有改写必须通过 vendor 机制重放：
@@ -18,7 +18,7 @@
 
 | 技能 / 仓库 | 上游形态 | 适配内容 |
 | --- | --- | --- |
-| `ppt-master`（hugohe3/ppt-master） | 用 `.env` 配置生图模型与 Key；项目目录按仓库根/`cwd` 算 | 设置页「模型服务 → 生图模型」只保留 URL / 模型 / API Key（OpenAI Images 兼容协议，不分厂商）；`applySkillEnv` 注入 `ZRWANG_IMAGE_*` 与 `ZRWANG_IMAGE_CRED`，`image_gen.py` 顶部 `_apply_plugin_image_env` 映射成 `OPENAI_*`/`QWEN_*`；DSH 的 shell 子进程会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，所以密钥用 `_CRED` 注入，再由 `sitecustomize.py` 在 Python 启动时映射回上游标准名；`config.py` 删除了 `.env` 查找与 `ENV_PATH`，`image_gen.py`/`image_search.py`/`notes_to_audio.py` 删除全部 `.env` 加载代码，**不写 `~/.ppt-master/.env`**；`PROJECTS_DIR` 改为 `ZRWANG_PPT_PROJECTS` 或 `<cwd>/.agents/ppt-master/projects`；删除 `.env.example` 与 `update_repo.py`；SKILL.md 与配置文档顶部加说明 |
+| `ppt-master`（hugohe3/ppt-master） | 用 `.env` 配置生图模型与 Key；项目目录按仓库根/`cwd` 算 | 设置页「模型服务 → 生图模型」只保留 URL / 模型 / API Key（OpenAI Images 兼容协议，不分厂商）；插件通过 `ctx.shellEnv` 注入 `DSH_ZRWANG_IMAGE_*` 与 `DSH_ZRWANG_IMAGE_CRED`；DSH 的 shell 子进程会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，所以密钥用 `_CRED`，再由 `host/pysite/sitecustomize.py` 映射回 `OPENAI_*`/`QWEN_*`；`config.py` 删除了 `.env` 查找与 `ENV_PATH`，`image_gen.py`/`image_search.py`/`notes_to_audio.py` 删除全部 `.env` 加载代码，**不写 `~/.ppt-master/.env`**；`PROJECTS_DIR` 改为 `ZRWANG_PPT_PROJECTS` 或 `<cwd>/.agents/ppt-master/projects`；删除 `.env.example` 与 `update_repo.py`；SKILL.md 与配置文档顶部加说明 |
 | `nature-image2ppt` | 读 `config.yaml` 的 OCR/生图配置；用 `shutil.which("convert")` 判断 ImageMagick | 删除 `runtime_env.py` 的配置路径/读写与 `config` 子命令、`image_gen.py` 的运行时 env 加载、`config.example.yaml`；OCR/生图参数只从插件注入的环境变量读（`PADDLE_OCR_TOKEN`、`IMAGE2PPT_IMAGE_*`）；`doctor` 纳入设置页检查；补丁排除 `C:\Windows\System32\convert.exe` 的假 ImageMagick |
 | `nature-academic-search` | 主路径依赖 academic-search / paper-search / pubmed MCP | 本 DSH 未注册这些 MCP：`static/core/tools.md` 与 SKILL.md 顶部写明降级为 `web_search`/`web_fetch` + OpenAlex CLI + preflight；`mcp-server/utils/config.py` 只读 `NCBI_EMAIL`/`PUBMED_EMAIL`/`NCBI_API_KEY`/`CROSSREF_MAILTO`，删除 `config/` 目录与 `install.sh`，不再有 `config.toml` |
 | `nature-figure` | 绘图后端偏好写 `~/.config/nature-skills` | `scripts/nature_figure_backend.py` 只打印 `NATURE_FIGURE_BACKEND`（`get` 不再 `set/clear`）；后端偏好只由设置页「科研服务 → Nature 绘图」决定，删除 `~/.config/nature-skills` 持久化与相关文档表述 |
@@ -57,9 +57,10 @@
 以下不是对某个上游技能的改写，而是让所有技能在 DSH（Web / Desktop）下可运行的环境适配：
 
 - **配置只有一个来源**：非密钥写进当前 profile 的 `cordis.patch.yml`（`- id: dsh-zrwang-plugin` 的 `config`），密钥写进 DSH 凭据库；没有 `settings.json`、没有插件配置目录、没有上游 `.env`/`config.*`。设置页的所有字段保存后立即重新注入环境变量。
-- **密钥注入**：DSH shell 会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，所以密钥统一以 `ZRWANG_*_CRED` 注入；`cache/artifacts/python/sitecustomize.py` 在 Python 启动时把它们映射回 `OPENAI_API_KEY`、`QWEN_API_KEY`、`NCBI_API_KEY`、`ELSEVIER_API_KEY`、`ZHIPUAI_API_KEY` 等上游标准名。生图配置另注入 `ZRWANG_IMAGE_*`、`IMAGE2PPT_IMAGE_*`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`；Nature 生图复用模型服务的生图 URL/模型/Key，不再单独设置，不设全局 `OPENAI_API_KEY`。
-- **系统 Python（不自带、不安装）**：插件不再自带 `runtime/python`，也不提供任何安装功能；`host/python.mjs` 检测本机 Python（PATH、`py` 启动器、Conda、常见目录），设置 → 运行环境 → Python 解释器 里下拉选择并只读校验依赖（缺包只提示）。所有技能的 `python`/`python3` 由 `cache/artifacts/bin` 的 shim 指向所选解释器，`bash` 指向 Git Bash（Windows）或系统 bash；不在 `skills/`/`ars/` 下建 venv。
-- **运行期文件只在插件缓存**：`<插件目录>/cache/{state,artifacts,backups}`，卸载插件时一起删除；`~/.dsh` 里不再出现 `zrwang-plugin-config/` 之类的旁目录。
+- **技能注入**：不再使用 `<项目根>/.agents/skills` 目录联接；插件通过 `ctx.skills.registerProvider` 按当前工作目录列出选中技能，`get()` 按需读取插件包内 `SKILL.md`。旧版本留下的、指回插件 `skills/`/`ars/` 的联接会在首次按项目列出时自动摘掉。DSH 的官方查找参数只有 `cwd`，所以隔离粒度是工作区（同一工作区所有对话共享），不能按单个对话区分。
+- **配置注入**：不再手工改宿主进程环境；插件通过 DSH 官方 `ctx.shellEnv.register` 注册 `DSH_ZRWANG_*`，每次 shell 调用由 DSH 注入。DSH shell 会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，所以密钥用 `_CRED` 结尾的名字；`host/pysite/sitecustomize.py` 在 Python 启动时把它们映射回 `OPENAI_API_KEY`、`QWEN_API_KEY`、`NCBI_API_KEY`、`ELSEVIER_API_KEY`、`ZHIPUAI_API_KEY` 等上游标准名，非密钥的 `DSH_ZRWANG_*` 则去掉前缀还原成上游变量名。Nature 生图复用模型服务的生图 URL/模型/Key，不再单独设置，不设全局 `OPENAI_API_KEY`。
+- **系统 Python（不自带、不安装）**：插件不再自带 `runtime/python`，也不提供任何安装功能；`host/python.mjs` 检测本机 Python（PATH、`py` 启动器、Conda、常见目录），设置 → 运行环境 → Python 解释器 里下拉选择并只读校验依赖（缺包只提示）。所有技能的 `python`/`python3` 由静态的 `host/shim/python` 指向所选解释器，`bash`/`sh` 由 `host/shim/bash` 指向 Git Bash（Windows）或系统 bash；不在 `skills/`/`ars/` 下建 venv。
+- **运行期文件只在插件缓存**：`<插件目录>/cache/state/`（选择态、门禁、模式、事件）与 `cache/patent/`（专利工作数据）；shim 与 Python 钩子是随包静态文件，不再生成 `artifacts/` 或 `backups/`。卸载插件时缓存一起删除，`~/.dsh` 里不再出现 `zrwang-plugin-config/` 之类的旁目录。
 - **MATLAB MCP**：profile 使用 existing 模式；MATLAB/Simulink/playground 技能顶部注明需先启动 MATLAB 并 `shareMATLABSession()`；`matlab-mcp` 与 `windows-mcp` 只在 Windows 上可用，其他平台组件显示不可用。
 - **专利工作目录**：项目内 `.agents/patent/` 优先；无项目时用 `PATENT_OA_HOME`/`PATENT_MAP_HOME`（插件缓存）。
 - **组件置灰**：本机未安装 draw.io、Polyspace 时，对应技能在侧栏置灰并给出原因，不静默失败。

@@ -680,7 +680,7 @@ async function main() {
   const schoolConfig = loadSchoolConfig();
   const discoveryUrl = discoveryUrlFromConfig(schoolConfig);
   const cnkiUrl = cnkiUrlFromConfig(schoolConfig, args.cnkiUrl);
-  const contactEmail = args.unpaywallEmail || process.env.UNPAYWALL_EMAIL || "";
+  const contactEmail = args.unpaywallEmail || process.env.DSH_ZRWANG_UNPAYWALL_EMAIL || "";
   if (args.openAccess && !args.route) args.route = "open_access";
   process.stderr.write(`[config] ${schoolSummary(schoolConfig)}; discovery=${discoveryUrl}; cnki=${cnkiUrl}\n`);
   const results = [];

@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 /**
- * 宿主半侧冒烟：不装 DSH，用桩上下文验证目录树、勾选门禁、联接增删、
+ * 宿主半侧冒烟：不装 DSH，用桩上下文验证目录树、勾选门禁、原生技能提供方、
  * 技能护栏、缓存路径、参数读写与设置卡片。
  *
  * 全程在系统临时目录里跑，不写仓库、不碰真实 ~/.dsh。
  */
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, sep } from 'node:path'
+import { delimiter, join, resolve } from 'node:path'
 
 const WORK = mkdtempSync(join(tmpdir(), 'dsh-zrwang-smoke-'))
 process.env.DSH_HOME = join(WORK, 'home')
 process.env.ZRWANG_BASH = ''
 const CACHE = join(WORK, 'cache')
 
-const { setCacheRootForTests, cacheRoot, stateRoot, artifactRoot, legacyConfigRoot } = await import('../host/paths.mjs')
+const { setCacheRootForTests, cacheRoot, stateRoot, legacyConfigRoot } = await import('../host/paths.mjs')
 setCacheRootForTests(CACHE)
 mkdirSync(CACHE, { recursive: true })
 
@@ -22,13 +22,16 @@ const { loadCatalog, skillsInGroup } = await import('../host/catalog.mjs')
 const { loadSelection, desiredSkills, setSelection, childBatch } = await import('../host/selection.mjs')
 const { buildEffectiveGates } = await import('../host/selection.mjs')
 const { resolveProjectRoot } = await import('../host/project.mjs')
-const { reconcile } = await import('../host/farm.mjs')
 const { SKILLS_DIR } = await import('../host/config.mjs')
 const { guardReason } = await import('../host/skill-guard.mjs')
-const { symlinkType, shimContent } = await import('../host/platform.mjs')
 const { defaultParams, normalizeConfig, configOfParams, withSecrets, persistParams } = await import('../host/params.mjs')
 const { settingsCards, saveSettingsCard } = await import('../host/settings.mjs')
 const { stateFile, writeJson } = await import('../host/state.mjs')
+const { applySkillEnv, restoreSkillEnv } = await import('../host/env.mjs')
+const { registerSkillProvider } = await import('../host/skill-provider.mjs')
+const { loadPresets, ensureEditableMode } = await import('../host/presets.mjs')
+const { resolveWorkspaceByPath } = await import('../host/workspaces.mjs')
+const { loadGates, setGates, clearGates } = await import('../host/gates.mjs')
 
 let failures = 0
 let total = 0
@@ -42,17 +45,10 @@ function check(name, ok, detail) {
   process.stderr.write(`FAIL ${name}${detail === undefined ? '' : `：${detail}`}\n`)
 }
 
-function isInside(parent, child) {
-  const a = realpathSync.native(parent).toLowerCase()
-  const b = realpathSync.native(child).toLowerCase()
-  const prefix = a.endsWith(sep) ? a : a + sep
-  return b === a || b.startsWith(prefix)
-}
-
 // ---- 缓存路径 ----
 check('缓存根指向测试目录', cacheRoot() === CACHE)
 check('状态目录在缓存下', stateRoot() === join(CACHE, 'state'))
-check('运行时产物在缓存下', artifactRoot() === join(CACHE, 'artifacts'))
+check('缓存里不再有 artifacts/backups', !existsSync(join(CACHE, 'artifacts')) && !existsSync(join(CACHE, 'backups')))
 check('旧配置目录只用于迁移', legacyConfigRoot() === join(process.env.DSH_HOME, 'zrwang-plugin-config'))
 
 // ---- 目录树 ----
@@ -61,6 +57,7 @@ const seed = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'catalog', 
 check('目录树直接读包内文件', catalog.stats.total === seed.stats.total && catalog.generatedAt === seed.generatedAt)
 check('目录树每个 dir 都是 posix 路径', Object.values(catalog.skills).every(info => !String(info.dir).includes('\\')))
 const engineering = skillsInGroup(catalog, 'engineering')
+const sampleSkill = engineering.find(node => node.name === 'matlab-create-live-script') ?? engineering[0]
 check('工程组非空', engineering.length > 10, String(engineering.length))
 
 const selection = await loadSelection(catalog)
@@ -98,24 +95,6 @@ const collect = node => node.kind === 'skill' ? engSkills.add(node.name) : (node
 catalog.groups.find(group => group.id === 'engineering').children.forEach(collect)
 check('全选一组覆盖整棵子树', Object.keys(engBatch.skillChanges).length === engSkills.size && engBatch.gates.engineering === true)
 
-// ---- 联接增删 ----
-const skillsDir = join(proj, '.agents', 'skills')
-const pick = engineering.find(node => node.name === 'matlab-create-live-script') ?? engineering[0]
-const r1 = await reconcile({ projectRoot: proj, desired: new Map([[pick.name, pick]]) })
-const link = join(skillsDir, pick.name)
-check('建立联接', r1.added === 1 && existsSync(link), JSON.stringify(r1))
-check('联接指向插件技能目录', realpathSync(link) === realpathSync(join(SKILLS_DIR, ...String(pick.dir).split('/'))))
-const r2 = await reconcile({ projectRoot: proj, desired: new Map() })
-check('取消后摘除联接且实体仍在', r2.removed === 1 && !existsSync(link) && existsSync(join(SKILLS_DIR, ...pick.dir.split('/'))))
-const second = engineering.find(node => node.name !== pick.name)
-const realDir = join(skillsDir, second.name)
-mkdirSync(realDir, { recursive: true })
-const r3 = await reconcile({ projectRoot: proj, desired: new Map([[second.name, second]]) })
-check('同名真实目录报冲突且不覆盖', r3.conflicts.some(item => item.name === second.name) && existsSync(realDir))
-const r4 = await reconcile({ projectRoot: proj, desired: new Map() })
-check('冲突目录不被删除', existsSync(realDir))
-rmSync(realDir, { recursive: true, force: true })
-
 // ---- 技能护栏 ----
 const guardCases = [
   ['拦技能写入', join(SKILLS_DIR, 'engineering', 'matlab', 'matlab-core', 'SKILL.md'), true],
@@ -128,11 +107,9 @@ for (const [label, target, expectDenied] of guardCases) {
 }
 
 // ---- 平台分支 ----
-check('Windows 目录链接用 junction', symlinkType('win32') === 'junction' && symlinkType('linux') === 'dir')
-const winShim = shimContent('python', 'C:\\Python311\\python.exe', 'win32')
-check('Windows shim 是 .cmd 内容', winShim.startsWith('@echo off') && winShim.includes('C:\\Python311\\python.exe') && winShim.includes('%*'))
-const posixShim = shimContent('python', '/usr/bin/python3', 'linux')
-check('POSIX shim 是 sh 脚本', posixShim.startsWith('#!/bin/sh') && posixShim.includes('exec "/usr/bin/python3"'))
+check('静态 shim 与启动钩子随包', [
+  'python/python', 'python/python.cmd', 'bash/bash', 'bash/bash.cmd', 'firecrawl/firecrawl',
+].every(name => existsSync(join(SKILLS_DIR, '..', 'host', 'shim', name))) && existsSync(join(SKILLS_DIR, '..', 'host', 'pysite', 'sitecustomize.py')))
 
 // ---- 参数：只进配置与凭据库 ----
 const normalized = normalizeConfig({
@@ -181,12 +158,53 @@ check('保存生图卡片', savedImage.image.apiKey === 'new-secret' && savedIma
 const savedPatent = saveSettingsCard(normalized.params, { cardId: 'patent', values: { provider: 'dashscope', vault: '/tmp/vault', apiKey: 'x' } })
 check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope' && savedPatent.patent.vault === '/tmp/vault' && savedPatent.patent.embedding.apiKey === 'x')
 
+// ---- 环境注入：静态 shim，不生成 artifacts ----
+{
+  const beforePath = process.env.PATH
+  const params = { ...defaultParams(), python: { path: process.execPath } }
+  const applied = applySkillEnv(params)
+  check('环境注入使用所选解释器', applied.python.path === process.execPath && process.env.ZRWANG_SKILL_PYTHON === process.execPath)
+  check('PATH 指向静态 shim 目录', process.env.PATH.split(delimiter).includes(resolve(SKILLS_DIR, '..', 'host', 'shim', 'python')), JSON.stringify(process.env.PATH.split(delimiter).slice(0, 4)))
+  check('PYTHONPATH 指向静态启动钩子', process.env.PYTHONPATH.split(delimiter).includes(resolve(SKILLS_DIR, '..', 'host', 'pysite')), process.env.PYTHONPATH)
+  check('环境注入不生成 artifacts/backups', !existsSync(join(CACHE, 'artifacts')) && !existsSync(join(CACHE, 'backups')))
+  restoreSkillEnv()
+  check('卸载后恢复 PATH 并清掉注入变量', process.env.PATH === beforePath && process.env.ZRWANG_SKILL_PYTHON === undefined)
+}
+
+// ---- 原生技能提供方 ----
+{
+  await setSelection({ [sampleSkill.name]: true })
+  await setGates({ engineering: true })
+  const liveSelection = await loadSelection(catalog)
+  const liveGates = await loadGates()
+  await loadPresets(catalog, liveSelection, liveGates, proj)
+  const liveWorkspace = await resolveWorkspaceByPath({ get: () => undefined }, proj, proj)
+  await ensureEditableMode(catalog, liveSelection, liveGates, proj, liveWorkspace)
+  let provider
+  const fakeSkills = {
+    registerProvider(factory) {
+      provider = factory({ invalidate() {} })
+      return () => {}
+    },
+  }
+  const dispose = registerSkillProvider({ get: name => (name === 'skills' ? fakeSkills : undefined) }, { effective: () => ({}) })
+  const listed = await provider.list({ cwd: proj })
+  const candidate = listed.find(item => item.name === sampleSkill.name)
+  check('原生提供方按选择列出技能', candidate !== undefined && candidate.provider === 'zrwang-plugin', JSON.stringify({ count: listed.length, names: listed.slice(0, 3).map(item => item.name), want: sampleSkill.name }))
+  const loaded = candidate === undefined ? undefined : await provider.get(candidate, { cwd: proj })
+  check('原生提供方按需读取 SKILL.md', typeof loaded?.content === 'string' && loaded.content.startsWith('---') && loaded.resourceBase?.kind === 'directory')
+  check('原生提供方不写项目目录', !existsSync(join(proj, '.agents', 'skills')))
+  dispose()
+  await setSelection({ [sampleSkill.name]: false })
+  await clearGates(['engineering'])
+}
+
 // ---- 状态文件 ----
 const concurrentFile = stateFile('concurrent-writes.json')
 const results = await Promise.allSettled(Array.from({ length: 20 }, (_, index) => writeJson(concurrentFile, { index })))
 check('并发原子写不互相踩', results.every(result => result.status === 'fulfilled'))
 check('并发写后 JSON 完整', JSON.parse(readFileSync(concurrentFile, 'utf8')).index === 19)
-check('状态文件在缓存目录', isInside(stateRoot(), concurrentFile))
+check('状态文件在缓存目录', concurrentFile.startsWith(stateRoot()))
 
 // ---- 卸载清理 ----
 rmSync(WORK, { recursive: true, force: true })

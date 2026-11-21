@@ -6,8 +6,7 @@
  * 会在下次 vendor 时被覆盖，或者把规则改坏而没人发现。所以统一在这层硬拦。
  *
  * 覆盖范围：
- *   - skills/ 与 ars/ 两个目录（含通过项目 .agents/skills/ 联接进来的路径，
- *     联接会 realpath 回插件目录，同样命中）；
+ *   - skills/ 与 ars/ 两个目录（含通过符号链接/realpath 指回插件目录的路径）；
  *   - 只拦 DSH 的 write / edit 工具；read/glob/grep 等只读工具不受影响；
  *   - 不改轮询 shell（bash/pwsh）——命令串无法在每次执行前可靠判断读写，
  *     误拦只读命令的代价更大，这一点写进文档说明。
@@ -22,7 +21,7 @@ import { ARS_DIR, PKG_DIR, SKILLS_DIR } from './config.mjs'
 /** 受保护的根目录：插件内的所有技能实体。 */
 export const PROTECTED_ROOTS = [SKILLS_DIR, ARS_DIR]
 
-/** 尽量取真实路径；目标不存在时沿父目录回溯，避免联接绕过。 */
+/** 尽量取真实路径；目标不存在时沿父目录回溯，避免符号链接绕过。 */
 function canonical(target) {
   let current = resolve(target)
   const tail = []

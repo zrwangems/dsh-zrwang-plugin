@@ -4,11 +4,11 @@
  * 全部落在插件的 `<插件目录>/cache/` 下，卸载插件时一起删除；
  * 不写 DSH profile，也不写用户主目录的其它位置。
  */
-import { appendFile, copyFile, mkdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { randomUUID } from 'node:crypto'
-import { backupRoot, ensureCacheSync, stateRoot } from './paths.mjs'
+import { ensureCacheSync, stateRoot } from './paths.mjs'
 
 /** 事件日志路径随缓存根变化，不能在建模块时固定。 */
 function eventsFile() {
@@ -60,21 +60,6 @@ export function writeJson(file, value) {
     if (writeQueues.get(file) === next) writeQueues.delete(file)
   })
   return next
-}
-
-/** 覆盖写之前的备份；返回备份路径，文件不存在时返回 undefined。 */
-export async function backupFile(file, label) {
-  try {
-    await stat(file)
-  } catch {
-    return undefined
-  }
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
-  const dir = join(backupRoot(), stamp)
-  await mkdir(dir, { recursive: true })
-  const target = join(dir, `${label}-${file.split(/[\\/]/).pop()}`)
-  await copyFile(file, target)
-  return target
 }
 
 /** 追加事件日志；超过上限时截断为最后 200 行，避免无限增长。 */

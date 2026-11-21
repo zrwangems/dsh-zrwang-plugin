@@ -26,7 +26,7 @@
  *   }
  * }
  */
-import { backupFile, readJson, stateFile, writeJson } from './state.mjs'
+import { readJson, stateFile, writeJson } from './state.mjs'
 import { replaceGates } from './gates.mjs'
 import { effectiveGateOpen, setSelection } from './selection.mjs'
 import { presetNameFromTitle, projectKeyOf, uniquePresetName } from './workspaces.mjs'
@@ -301,7 +301,6 @@ export async function loadPresets(catalog, selection, gates, projectRoot) {
       cache = { version: 3, projects: normalizeProjectKeys(raw.projects), updatedAt: raw.updatedAt }
     } else if (raw !== null && raw.version === 2 && raw.projects !== null && typeof raw.projects === 'object') {
       // 迁移前备份，迁移失败也不丢旧文件。
-      await backupFile(FILE, 'presets-v2')
       cache = { version: 3, projects: migrateV2(raw.projects), updatedAt: now() }
       migrated = true
     } else {

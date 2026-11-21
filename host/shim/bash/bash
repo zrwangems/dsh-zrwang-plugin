@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "${ZRWANG_SKILL_BASH:?bash is not configured}" "$@"

@@ -10,9 +10,10 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
 import { isMac, isWindows, which } from './platform.mjs'
-import { stateRoot } from './paths.mjs'
+import { PKG_DIR, stateRoot } from './paths.mjs'
 
 const STATE_DIR = stateRoot()
+const SHIM_ROOT = join(PKG_DIR, 'host', 'shim')
 
 /** ARS / 技能脚本需要的第三方模块（找不到只提示，不安装）。 */
 export const DEPENDENCIES = [
@@ -225,6 +226,7 @@ export function detectPythons(options = {}) {
   }
   const candidates = []
   for (const item of collectCandidates().slice(0, MAX_PROBES)) {
+    if (isPluginShim(item.path)) continue
     const probe = probePython(item.path)
     candidates.push({ ...item, ...probe })
   }
@@ -250,22 +252,29 @@ export function detectPythons(options = {}) {
 export function readPythonCandidates() {
   try {
     const parsed = JSON.parse(readFileSync(CACHE_FILE, 'utf8'))
-    if (Array.isArray(parsed.candidates)) return parsed
+    if (Array.isArray(parsed.candidates)) {
+      parsed.candidates = parsed.candidates.filter(item => !isPluginShim(item.path))
+      return parsed
+    }
   } catch {
     // 未检测或缓存损坏
   }
   return undefined
 }
 
+function isPluginShim(path) {
+  return typeof path === 'string' && (path === SHIM_ROOT || path.startsWith(`${SHIM_ROOT}${process.platform === 'win32' ? '\\' : '/'}`))
+}
+
 function autoCandidate() {
   const cached = readPythonCandidates()
   if (cached !== undefined) {
-    const usable = cached.candidates.filter(item => item.ok === true)
+    const usable = cached.candidates.filter(item => item.ok === true && !isPluginShim(item.path))
     const ready = usable.find(item => item.missing.length === 0)
     const chosen = ready ?? usable[0]
     if (chosen !== undefined) return { ...chosen, source: `自动（${chosen.source}）` }
   }
-  const probe = findCommands(['python', 'python3'])[0]
+  const probe = findCommands(['python', 'python3']).find(item => !isPluginShim(item.path))
   if (probe !== undefined) return { path: probe.path, ok: false, version: '', missing: [], source: `自动（${probe.source}，尚未校验）` }
   return undefined
 }
@@ -277,6 +286,7 @@ function autoCandidate() {
 export function selectPython(params) {
   const explicit = typeof params?.python?.path === 'string' ? params.python.path.trim() : ''
   if (explicit.length > 0) {
+    if (isPluginShim(explicit)) return { path: '', version: '', missing: [], ok: false, source: '不能选择插件自己的转发脚本' }
     if (!existsSync(explicit)) return { path: '', version: '', missing: [], ok: false, source: `设置指定的 Python 不存在：${explicit}` }
     const cached = readPythonCandidates()?.candidates?.find(item => item.path.toLowerCase() === explicit.toLowerCase())
     return cached === undefined

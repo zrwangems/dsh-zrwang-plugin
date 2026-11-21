@@ -5,9 +5,9 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { PKG_DIR } from './paths.mjs'
 
-export { PKG_DIR, cacheRoot, stateRoot, artifactRoot } from './paths.mjs'
+export { PKG_DIR, cacheRoot, stateRoot } from './paths.mjs'
 
-/** 技能实体根。DSH 不扫描这里，只有建立联接后才可见。 */
+/** 技能实体根：由插件自己的 ctx.skills 提供方按需读取。 */
 export const SKILLS_DIR = join(PKG_DIR, 'skills')
 
 /** ARS 功能区块根（不在 skills/ 里）。 */
@@ -24,9 +24,6 @@ export const ROUTE_PREFIX = '/dsh-zrwang-plugin'
 
 /** 会话里三类的固定顺序。 */
 export const GROUP_IDS = ['engineering', 'research', 'office']
-
-/** 技能链接所在的相对位置。 */
-export const SKILLS_REL = ['.agents', 'skills']
 
 const pkg = JSON.parse(readFileSync(join(PKG_DIR, 'package.json'), 'utf8'))
 

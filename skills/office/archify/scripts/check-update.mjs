@@ -52,7 +52,7 @@ function silent(reason) {
 }
 
 function updatesDisabled() {
-  return process.env.ARCHIFY_UPDATE_CHECK_DISABLED === '1';
+  return process.env.DSH_ZRWANG_ARCHIFY_UPDATE_CHECK_DISABLED === '1';
 }
 
 function isPlainObject(value) {

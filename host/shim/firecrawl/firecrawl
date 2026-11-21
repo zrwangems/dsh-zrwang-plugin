@@ -1,0 +1,3 @@
+#!/bin/sh
+export ELECTRON_RUN_AS_NODE=1
+exec "${ZRWANG_NODE:?node is not configured}" "${ZRWANG_FIRECRAWL_SCRIPT}" "${ZRWANG_FIRECRAWL_LAUNCHER}" "$@"

@@ -88,19 +88,6 @@ export function listeningPid(port) {
   return Number.isSafeInteger(pid) && pid > 0 ? pid : undefined
 }
 
-/**
- * 目录联接/符号链接的类型：Windows 用 junction（不需要管理员权限），其它平台用 dir。
- * @param {string} [platform] - 便于测试注入。
- */
-export function symlinkType(platform = process.platform) {
-  return platform === 'win32' ? 'junction' : 'dir'
-}
-
-/** 生成 python/bash 之类的转发 shim 内容。 */
-export function shimContent(kind, target, platform = process.platform) {
-  if (platform === 'win32') return `@echo off\r\n"${target}" %*\r\n`
-  return `#!/bin/sh\nexec "${String(target).replace(/\\/g, '/')}" "$@"\n`
-}
 
 /** 读 Windows 卸载注册表里某个程序的名字；非 Windows 返回 undefined。 */
 export function registryDisplayIcon(match, platform = process.platform) {

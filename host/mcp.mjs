@@ -11,7 +11,7 @@
  * closeTimeoutMs。参数固定，设置页不暴露 MCP 配置。
  */
 import { join } from 'node:path'
-import { MATHWORKS_DIR, PKG_DIR } from './config.mjs'
+import { MATHWORKS_DIR } from './config.mjs'
 import { isWindows } from './platform.mjs'
 
 export { MATHWORKS_DIR }

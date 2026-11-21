@@ -1,13 +1,13 @@
 # dsh-zrwang-plugin（My DSH）
 
-王湛然专属DSH插件：按项目、按 DSH 工作区控制「注入哪些技能」和「启用哪些组件」，把 21 个上游 GitHub 仓库的技能收进一个统一入口。
+王湛然专属DSH插件：按 DSH 工作区控制「注入哪些技能」和「启用哪些组件」，把 22 个上游 GitHub 仓库的技能收进一个统一入口。
 
 
 ## 它解决什么
 
-技能从 `<项目根>/.agents/skills/` 发现，一个项目装几十上百个技能会互相干扰、难以挑选。本插件把技能按「工程 / 科研 / 办公」三组组织成目录树，按项目与 DSH 工作区保存注入状态：
+DSH 默认从 `<项目根>/.agents/skills/` 发现技能，一个项目装几十上百个技能会互相干扰、难以挑选。本插件把技能按「工程 / 科研 / 办公」三组组织成目录树，并按 DSH 工作区保存注入状态。它不再往项目里建目录联接，而是通过 DSH 官方的 `ctx.skills` 提供方按工作区直接提供选中的技能：
 
-- 勾选即注入，取消即摘除；技能实体只存在插件包里，不在每个项目重复复制。
+- 勾选即注入，取消即摘除；技能实体只存在插件包里，项目目录里不出现 `.agents/skills`，也不留链接。
 - 按项目保存「默认」注入态，按 DSH 工作区自动建立以工作区命名的模式，同工作区所有对话共享、改动自动保存；右键可基于此新建、重命名、删除。
 - 329 个技能全部可用，默认不注入任何技能（门禁全关），用哪组开哪组；默认勾选集合为工程 64 个 + 飞书 4 个基础技能。
 - 每个技能都能一键打开上游 GitHub 项目；中文短说明与详情在侧栏直接看。
@@ -24,7 +24,7 @@
 - **逐层与批量**：目录行的「全选 / 全关」只作用于**直接下一层**（子技能勾选、子目录门禁），不会递归下钻；**一级目录（工程/科研/办公）的「全选」会同时打开本组门禁**，点一次就能真正开始注入。搜索过滤时「全选 / 全关」只处理当前看得见的直接子节点。目录复选框按“子树里有没有勾选技能”自下而上推导：空子树显示未勾选并置灰；最上层四个（工程/科研/办公/ARS）仍是注入开关，默认都不勾。
 - **技能详情**：中文短说明一行、详情按 Markdown 渲染，含表格、列表、代码与链接；详情读不出来时提示打开 SKILL.md。
 - **上游链接**：每个「项目根」（如 MATLAB、中国专利技能、ARS）右侧有 **↗**，在浏览器打开对应 GitHub 仓库；项目内部的子目录/技能不重复显示。
-- **写操作护栏**：模型用 write/edit 改插件内 `skills/`、`ars/` 一律拒绝（含经项目目录联接写入），避免跑任务时改坏技能。
+- **写操作护栏**：模型用 write/edit 改插件内 `skills/`、`ars/` 一律拒绝，避免跑任务时改坏技能。
 - **ARS 学术研究（独立功能区块）**：目录 `ars/`，不进 `skills/`、不计入 329 个技能；默认关闭，勾选后注入 5 个流水线技能并提供 16 个 `/ars-*` 命令；多角色流程会在执行前自动打开 DSH 的「智能体团队协作」。
 - **MCP 组件（与 ARS 并列的两行）**：
   - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；工程组关掉即注销。
@@ -90,8 +90,9 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 - **非密钥配置**只写进当前 profile 的 `cordis.patch.yml`，即 `- id: dsh-zrwang-plugin` 这一项的 `config`。没有 `settings.json`，也没有插件自己的配置目录。
 - **密钥**只写进 DSH 凭据库（`api-key` 凭据），不写 YAML、不写日志、不回显；设置页只显示「已设置 / 未设置」。因此插件包、profile 补丁和 `cache/` 里都不会出现明文密钥。
-- **运行期产物**（选择态、门禁、模式、Python 启动钩子、备份）全部在插件安装目录下的 `cache/`，卸载插件时一起删除；插件不会在 `~/.dsh` 里另建目录。
-- DSH 的 shell 会清掉名字里带 `KEY` / `TOKEN` / `SECRET` / `PASSWORD` 的环境变量，所以密钥以 `ZRWANG_*_CRED` 注入，再由插件生成的 Python 启动钩子映射回上游脚本认识的标准变量名。
+- **运行期产物**只有选择态、门禁、模式、事件和专利工作数据，放在插件安装目录下的 `cache/`（`cache/state/`、`cache/patent/`），卸载插件时一起删除；插件不会在 `~/.dsh` 里另建目录。
+- Python 启动钩子和 `python`/`python3`/`bash`/`firecrawl` 转发脚本是随包分发的静态文件（`host/pysite/`、`host/shim/`），运行期不生成、不复制。
+- 配置通过 DSH 官方 `ctx.shellEnv` 注册成每次 shell 调用的 `DSH_ZRWANG_*` 事实，不再手工改宿主进程环境。DSH 的 shell 会清掉名字里带 `KEY` / `TOKEN` / `SECRET` / `PASSWORD` 的普通环境变量，所以密钥用 `_CRED` 结尾的 `DSH_ZRWANG_*` 变量；`host/pysite/sitecustomize.py` 在 Python 启动时把它们映射回上游脚本认识的标准名字。
 - 上游技能自己的配置文件、向导和读写代码已删除：技能只从插件注入的环境变量取参数。需要改默认值时改插件设置，不要去改技能目录。
 
 ## 系统 Python
@@ -101,7 +102,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 - **检测来源**：PATH 上的 `python` / `python3`、Windows `py` 启动器、Conda 环境（`conda env list`）、常见安装目录（Python 官方安装、Anaconda/Miniconda）；打开设置页时自动检测（结果缓存在插件 `cache/state/python-candidates.json`，5 分钟内复用），点「检查运行环境」会强制重扫。
 - **选择**：设置 → 运行环境 → Python 解释器，下拉选一个（或「自动选择」用第一个可用解释器）；选完立即自动保存，没有自定义路径输入框。
 - **校验**：会读版本并逐个 import 技能需要的模块（PyYAML、jsonschema、ruamel.yaml、pypdf、defusedxml、openpyxl、requests、Pillow、python-pptx、python-docx、PyMuPDF、openai、playwright）。**缺什么只列出，不安装**，请在你选择的环境里自行补齐。
-- **生效方式**：插件把 `python` / `python3` 指向所选解释器（插件 `cache/artifacts/bin` 下的 shim + `BASH_ENV`），`bash` 指向 Git Bash；没有可用解释器时不动系统 PATH，技能会提示未选择。
+- **生效方式**：插件把静态的 `host/shim/python` 目录挂到 PATH 前面，`python` / `python3` 转给所选解释器；`host/shim/bash` 里的 `bash` / `sh` 转给 Git Bash 或系统 bash。没有可用解释器时不挂这个目录，技能会提示未选择。
 - 插件不再随包分发 `runtime/`，也不再维护依赖清单；从本仓库安装时同样走系统 Python。
 
 ## 技能来源
@@ -162,12 +163,8 @@ npm run build && npm run verify && npm run smoke   # 对应快捷脚本
 dsh plugin --profile <你的profile> remove dsh-zrwang-plugin
 ```
 
-卸载只会移除 profile 里的依赖与 bundle，不会自动摘掉项目里已经建立的技能联接。想删干净按这个顺序：
+卸载只会移除 profile 里的依赖与 bundle。技能是 DSH 运行时提供的，不在项目目录留文件，所以不需要先摘链接；配置随 profile 补丁删除，密钥随 DSH 凭据库删除，运行期状态在插件目录的 `cache/` 下，卸载插件时一起消失。
 
-1. 先在侧栏里把已勾选的技能/分组关掉，让插件把 `<项目根>/.agents/skills/` 下的联接摘掉；
-2. 再执行上面的 remove；
-3. 配置随 profile 补丁删除；密钥随 DSH 凭据库删除；运行期状态在插件目录的 `cache/` 下，卸载插件时一起消失。
-
-插件包本身（仓库目录）不会被卸载命令删除；项目里 `.agents/skills/` 这些目录如果空了，可以手动删掉。
+插件包本身（仓库目录）不会被卸载命令删除。
 
 [![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
