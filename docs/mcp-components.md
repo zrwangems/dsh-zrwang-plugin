@@ -35,24 +35,37 @@ DSH 的 Agent 每走一步都会重新解析工具表（	ools.resolve），并�
 - 注意时序：勾选后到连接完成前发出的那一轮请求，工具表在该步已经固定，看不到新工具；等状态变成「已启动」再发下一条消息即可。
 - 若「已启动」之后仍看不到工具，那才是问题（会话仍在用旧请求/工具被限制），把会话 id 和 /health 的 mcp 输出给我排查。
 
-## 稳定性：启动标识、重启、探测、重连
+## 稳定性：重连、自动恢复、状态面
 
-- **启动标识**：组件行勾选后先显示「启动中…」，连上后变成绿色的「已启动（N 个工具）」，失败则显示红色的「启动失败」；面板顶部还会有一条同样的状态条。界面会自己轮询到结果（约每 1.2 秒，最多 20 次），不需要手动刷新。
-  - 首次启动失败时 mcp-client 会按 `reconnect` 策略自动重试；插件把两个组件都设成 30 次、最长间隔 10s（默认是 10 次、30s），MATLAB 重启期间不容易一下把预算耗光。重试期间显示「启动中（第 N 次尝试）」或「重连中」，预算耗尽才变成「启动失败」，鼠标悬停可看 `lastError`。
-- **重启**：组件行右侧的「重启」会重建该服务器实例并重置重连预算——MATLAB 重开会话、或后台崩溃后重连预算耗尽（`failed: gave-up`）时用它。
-- **自动重连**：崩溃/断线由 mcp-client 按 `reconnect` 策略自动退避重连，期间状态是「重连中」；两个组件固定 30 次、500ms 起步、10s 封顶。MATLAB 的 `existing` 会话断开后，重连要等 MATLAB 和共享会话恢复；恢复不了就用「重启」重置预算。
-- 完整状态面还包括 `attempt/maxAttempts/toolCount/lastError`，`GET /dsh-zrwang-plugin/health` 的 `mcp` 字段可直接查；组件注册/注销遵守插件生命周期，卸载插件会先撤掉工具再退出。
+稳定性分两层，都用 DSH 官方面，没有插件自己维护的重连循环：
 
-## 固定参数（无设置项）
+1. **mcp-client 自己重连**。断线或首次启动失败后按注册条目的 `reconnect` 预算退避重连。插件把两个组件固定成 **30 次、500ms 起步、10s 封顶**（官方默认是 10 次、30s 封顶），一轮预算约 4.4 分钟，够 MATLAB 完整重启一次。
+2. **插件的自愈守护**。控制器订阅官方 `mcp-manager/status` 事件；当某个组件变成 `failed: gave-up`（或 `reconnect-disabled`）且当前还有会话在用它时，按 **15s → 30s → 1m → 2m → 5m** 的间隔调用 `ctx.mcpManager.restart()` 重建实例。重建成功、状态回到 `connected` 就清空退避；MATLAB 重开并重新 `shareMATLABSession()` 后会自动接上，不需要守着屏幕点「重启」。
 
-MCP 组件**不提供设置项**，注册参数全部固定，保证开箱即用：
+界面上能看到整个过程：
+
+- 「启动中…」→「已启动（N 个工具）」；重连期间显示「重连中（第 N/30 次，约 X 秒后重试）」。
+- 预算用完时显示「连接失败，约 X 秒后自动恢复（第 K 次）」，连上后回到绿字。
+- 只有以下情况不自动重建，组件行会直接说明原因：
+  - `failed: cleanup`：上一次连接没有确认关闭，DSH 要求重启 Host 才能换实例；
+  - `failed: load`：组件加载本身出错（例如包内 exe 缺失），重建也不会好；
+  - 组件已被所有会话关掉，或手动点了「重启」（手动重启会重置预算和自愈计数）。
+- 面板轮询会一直跟到有明确结论（重连/自愈期间约 4 秒一次），不再 20 次后停掉。
+
+**开关**：设置 → 运行环境 → MCP 组件稳定性 → 「断线自动恢复」，默认开启。关掉后只保留 mcp-client 自己的重连，预算用完需要手动点「重启」。
+
+**手动重启 / 探测**：组件行右侧「重启」重建实例并重置预算；`POST /dsh-zrwang-plugin/mcp` 的 `probe` 会单独连一次、列工具再关闭，不扰动正在运行的实例。完整状态面（`state/attempt/maxAttempts/toolCount/lastError/nextRetryAtMs/recover`）可从 `GET /dsh-zrwang-plugin/health` 的 `mcp` 字段查；自愈的每次排队、重建也会写进运行事件日志。
+
+## 固定参数
+
+MCP 的连接参数全部固定，保证开箱即用；设置页只有一个「断线自动恢复」开关：
 
 | 组件 | 固定参数 |
 | --- | --- |
-| `matlab-mcp` | 命令 = 包内 `mathworks/matlab-mcp-server-windows-x64.exe`；参数 `--matlab-session-mode=existing`、`--extension-file=<包内>/simulink-agentic-toolkit/tools/tools.json`、`--disable-telemetry=true`；env `WINDIR=%SystemRoot%`（代码里取 `SystemRoot`，缺省才用 `C:\Windows`）；工具调用超时 120000ms、启动超时 30000ms |
-| `windows-mcp` | 命令 = 系统 PATH 里的 `windows-mcp`；参数 `serve`；env `ANONYMIZED_TELEMETRY=false`、`WINDOWS_MCP_SCREENSHOT_SCALE=0.5`；工具调用超时 120000ms、启动超时 30000ms |
+| `matlab-mcp` | 命令 = 包内 `mathworks/matlab-mcp-server-windows-x64.exe`；参数 `--matlab-session-mode=existing`、`--extension-file=<包内>/simulink-agentic-toolkit/tools/tools.json`、`--disable-telemetry=true`；env `WINDIR=%SystemRoot%`（代码里取 `SystemRoot`，缺省才用 `C:\Windows`）；工具调用超时 120000ms、启动超时 30000ms、重连 30 次/10s 封顶、`failOnStartupError=false` |
+| `windows-mcp` | 命令 = 系统 PATH 里的 `windows-mcp`；参数 `serve`；env `ANONYMIZED_TELEMETRY=false`、`WINDOWS_MCP_SCREENSHOT_SCALE=0.5`；工具调用超时 120000ms、启动超时 30000ms、重连 30 次/10s 封顶、`failOnStartupError=false` |
 
-设置页的「运行环境 → 组件状态 → 重新检查」会校验两个组件的文件（包内 exe、SATK 扩展文件、Windows MCP 运行时）并显示当前连接状态；MCP 本身不再有配置卡片或「MCP配置」页签。
+设置页的「运行环境 → 组件状态 → 重新检查」会校验两个组件的文件（包内 exe、SATK 扩展文件、Windows MCP 运行时）并显示当前连接状态和自动恢复开关；MCP 没有连接参数配置卡片，也没有「MCP配置」页签。
 
 ## 边界
 
@@ -61,4 +74,5 @@ MCP 组件**不提供设置项**，注册参数全部固定，保证开箱即用
 - `serverName` 固定为 `matlab-mcp` / `windows-mcp`。如果 profile 的 `cordis.patch.yml` 里还留着同名的静态 MCP 行（例如旧的 `mcp-matlab` / `mcp-windows`），注册会报冲突，组件行会显示原因；装到该 profile 前先删掉静态行。
 - 服务器名与工具前缀变化会影响按名字引用工具的说明文字：旧文档里的 `mcp__matlab__*` 现在应写作 `mcp__matlab-mcp__*`。
 - MATLAB 本体（R2023a 及以上）仍需用户自己安装；这是 MathWorks 服务器本身的运行前提，不是插件的本机依赖。
+- 自动重建有一个短暂的「工具暂时消失」窗口：`restart()` 会先卸旧实例再挂新实例，期间该组件的工具不在工具表里，连上后会以 `tool-addition` 开发消息重新出现。这是 mcp-manager 的重建语义，不是插件额外造成的。
 

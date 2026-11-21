@@ -79,6 +79,7 @@ export function defaultParams() {
     },
     optional: {},
     python: { path: '' },
+    mcp: { autoRecover: 'on' },
   }
 }
 
@@ -99,6 +100,7 @@ const TABLE = {
   'patent.embedding.dimensions': 'string',
   'patent.embedding.apiKey': 'secret',
   'python.path': 'string',
+  'mcp.autoRecover': 'string',
   'natureAcademic.pubmed.apiKey': 'secret',
   'image.apiKey': 'secret',
   'natureImage2ppt.paddleOcrToken': 'secret',
@@ -169,6 +171,10 @@ export function normalizeConfig(raw) {
   if (params.python.path.length > 0 && !isAbsoluteLike(params.python.path)) {
     warnings.push('python.path 必须是绝对路径，已忽略')
     params.python.path = ''
+  }
+  if (!['on', 'off'].includes(params.mcp.autoRecover)) {
+    warnings.push('mcp.autoRecover 只能是 on 或 off，已回退为 on')
+    params.mcp.autoRecover = 'on'
   }
   return { params, legacySecrets, warnings }
 }

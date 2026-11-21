@@ -337,6 +337,8 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
       const next = saveSettingsCard(runtime.effective(), body)
       const saved = await runtime.save(next)
       if (!saved.result.saved && saved.result.error !== undefined) throw new Error(saved.result.error)
+      // 关掉「断线自动恢复」时撤掉已排队的重建。
+      mcpController?.refreshPolicy()
       return { ok: true, warnings: saved.result.warnings, settings: await settingsPayload() }
     },
     'POST /mcp': async body => {

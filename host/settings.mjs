@@ -330,6 +330,21 @@ export function settingsCards(params, present = {}, mcpStatus = { available: fal
         ],
       },
       {
+        id: 'mcp-stability',
+        title: 'MCP 组件稳定性',
+        page: 'runtime',
+        kind: 'fields',
+        autoSave: true,
+        fields: [{
+          id: 'autoRecover',
+          label: '断线自动恢复',
+          control: 'select',
+          options: [{ value: 'on', label: '开启（默认）' }, { value: 'off', label: '关闭' }],
+          value: params.mcp?.autoRecover === 'off' ? 'off' : 'on',
+          help: '重连次数用完（例如 MATLAB 会话断了很久）后，插件按 15s/30s/1m/2m/5m 退避自动重建该 MCP，连上即停；关闭后只能手动点「重启」。',
+        }],
+      },
+      {
         id: 'runtime',
         title: '',
         page: 'runtime',
@@ -368,6 +383,12 @@ export function saveSettingsCard(params, body) {
       if (typeof values[key] === 'string') next.patent.embedding[key] = values[key].trim()
     }
     if (secret(values.apiKey)) next.patent.embedding.apiKey = values.apiKey.trim()
+    return next
+  }
+  if (body?.cardId === 'mcp-stability') {
+    const choice = text(values.autoRecover)
+    if (!['on', 'off'].includes(choice)) throw new Error('断线自动恢复只能是 on 或 off')
+    next.mcp = { autoRecover: choice }
     return next
   }
   if (body?.cardId === 'runtime') {

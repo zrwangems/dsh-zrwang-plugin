@@ -34,6 +34,7 @@ const { resolveWorkspaceByPath } = await import('../host/workspaces.mjs')
 const { saveSessionSelection } = await import('../host/session-selection.mjs')
 const { installComponentGuard } = await import('../host/session-components.mjs')
 const { createToolRestrictions } = await import('../host/tool-restrictions.mjs')
+const { createMcpController, RECOVER_DELAYS_MS, RECONNECT_POLICY, componentViews, resolveMatlabEntry } = await import('../host/mcp.mjs')
 const { loadGates, setGates, clearGates } = await import('../host/gates.mjs')
 
 let failures = 0
@@ -123,6 +124,10 @@ const normalized = normalizeConfig({
 })
 check('参数归一化只保留白名单字段', normalized.params.image.model === 'gpt-image-1' && normalized.warnings.some(item => item.includes('imageApiKey')))
 check('非法 URL 被忽略', normalizeConfig({ image: { baseUrl: 'not a url' } }).params.image.baseUrl === '')
+check('MCP 自动恢复默认开启且只认 on/off',
+  normalizeConfig({}).params.mcp.autoRecover === 'on'
+  && normalizeConfig({ mcp: { autoRecover: 'off' } }).params.mcp.autoRecover === 'off'
+  && normalizeConfig({ mcp: { autoRecover: 'yes' } }).params.mcp.autoRecover === 'on')
 const config = configOfParams(withSecrets(normalized.params, { 'image.apiKey': 'secret-value' }))
 check('配置里没有密钥字段', JSON.stringify(config).includes('secret-value') === false && JSON.stringify(config).includes('apiKey') === false)
 check('非密钥写进配置', config.image.model === 'gpt-image-1')
@@ -154,12 +159,15 @@ check('空密钥会从凭据库删除', cleared.saved && !credentialStore.has('Z
 // ---- 设置卡片 ----
 const cards = settingsCards(normalized.params, { 'image.apiKey': true }).cards
 const byId = Object.fromEntries(cards.map(card => [card.id, card]))
-check('设置卡片齐全', ['image', 'nature-image2ppt', 'optional-search', 'nature-figure', 'nature-academic-search', 'nature-downloader', 'patent', 'runtime'].every(id => byId[id] !== undefined), Object.keys(byId).join(','))
+check('设置卡片齐全', ['image', 'nature-image2ppt', 'optional-search', 'nature-figure', 'nature-academic-search', 'nature-downloader', 'patent', 'mcp-stability', 'runtime'].every(id => byId[id] !== undefined), Object.keys(byId).join(','))
+check('MCP 稳定性卡片是开关', byId['mcp-stability'].fields.some(field => field.id === 'autoRecover' && field.control === 'select' && field.value === 'on'))
 check('密钥只回显是否已设置', JSON.stringify(cards).includes('secret-value') === false && byId.image.fields.some(field => field.secret === true && field.hasValue === true))
 const savedImage = saveSettingsCard(normalized.params, { cardId: 'image', values: { baseUrl: 'https://api.example.com/v1', model: 'gpt-image-1', apiKey: 'new-secret' } })
 check('保存生图卡片', savedImage.image.apiKey === 'new-secret' && savedImage.image.model === 'gpt-image-1')
 const savedPatent = saveSettingsCard(normalized.params, { cardId: 'patent', values: { provider: 'dashscope', vault: '/tmp/vault', apiKey: 'x' } })
 check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope' && savedPatent.patent.vault === '/tmp/vault' && savedPatent.patent.embedding.apiKey === 'x')
+const savedMcp = saveSettingsCard(normalized.params, { cardId: 'mcp-stability', values: { autoRecover: 'off' } })
+check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
 
 // ---- 环境注入：静态 shim，不生成 artifacts ----
 {
@@ -245,6 +253,89 @@ check('保存专利卡片', savedPatent.patent.embedding.provider === 'dashscope
     && calls[0]?.deny?.includes('read_file') !== true,
     JSON.stringify(calls[0]))
   restrictions.disposeAll()
+}
+
+// ---- MCP 稳定性：重连预算与自动恢复 ----
+{
+  const matlab = resolveMatlabEntry()
+  check('MATLAB MCP 使用加长的重连预算', JSON.stringify(matlab.reconnect) === JSON.stringify(RECONNECT_POLICY), JSON.stringify(matlab.reconnect))
+  check('MCP 启动失败不拖垮插件装配', matlab.failOnStartupError === false)
+
+  const scheduled = []
+  const timers = {
+    setTimeout(fn, ms) {
+      const id = { fn, ms, unref() {} }
+      scheduled.push(id)
+      return id
+    },
+    clearTimeout(id) {
+      const index = scheduled.indexOf(id)
+      if (index >= 0) scheduled.splice(index, 1)
+    },
+  }
+  let statusHandler
+  const registered = []
+  const restarted = []
+  const events = []
+  const manager = {
+    register(name) { registered.push(name); return () => {} },
+    async restart(name) { restarted.push(name) },
+    list() { return [] },
+  }
+  let enabled = true
+  const controller = createMcpController({
+    get: name => (name === 'mcpManager' ? manager : undefined),
+    on: (event, handler) => { if (event === 'mcp-manager/status') statusHandler = handler; return () => {} },
+  }, {
+    autoRecover: () => enabled,
+    timers,
+    onEvent: (kind, detail) => events.push({ kind, detail }),
+  })
+
+  await controller.reconcile({ mathworks: true }, { sessionId: 'mcp-a' })
+  check('勾选后注册 MATLAB MCP', registered.includes('matlab-mcp'), JSON.stringify(registered))
+
+  statusHandler('matlab-mcp', { state: 'failed', reason: 'gave-up', attempt: 30, lastError: 'matlab gone' })
+  check('预算耗尽后排队自动恢复', scheduled.length === 1 && scheduled[0].ms === RECOVER_DELAYS_MS[0], JSON.stringify(scheduled.map(item => item.ms)))
+  check('自动恢复期间状态里带倒计时', controller.status().servers[0].recover.pendingAt !== undefined, JSON.stringify(controller.status().servers[0].recover))
+
+  scheduled.shift().fn()
+  await new Promise(resolve => setTimeout(resolve, 20))
+  check('到点后重建 MCP 实例', restarted.includes('matlab-mcp'), JSON.stringify(restarted))
+  check('自动恢复次数进状态面', controller.status().servers[0].recover.count === 1, JSON.stringify(controller.status().servers[0].recover))
+
+  statusHandler('matlab-mcp', { state: 'connected', toolCount: 14 })
+  check('连上后重置退避', controller.status().servers[0].recover.attempts === 0)
+
+  statusHandler('matlab-mcp', { state: 'failed', reason: 'cleanup', result: { closeConfirmed: false } })
+  check('未确认关闭不自动重建', scheduled.length === 0)
+
+  statusHandler('matlab-mcp', { state: 'failed', reason: 'gave-up', attempt: 30 })
+  enabled = false
+  controller.refreshPolicy()
+  check('关掉自动恢复后撤掉排队', scheduled.length === 0)
+  enabled = true
+  controller.refreshPolicy()
+  check('重新打开自动恢复会立刻排队', scheduled.length === 1, JSON.stringify(scheduled.map(item => item.ms)))
+  controller.disposeAll()
+  check('卸载时清掉自愈计时器', scheduled.length === 0)
+
+  const view = componentViews({
+    engineeringInjected: 3,
+    gates: { engineering: true },
+    status: {
+      available: true,
+      servers: [{
+        name: 'matlab-mcp',
+        state: 'failed',
+        reason: 'gave-up',
+        attempt: 30,
+        maxAttempts: 30,
+        recover: { enabled: true, count: 2, attempts: 2, pendingAt: Date.now() + 15000, retryInMs: 15000 },
+      }],
+    },
+  }).components[0]
+  check('失败但自愈中的组件行显示自动恢复', view.recovering === true && view.statusLabel.includes('自动恢复'), view.statusLabel)
 }
 
 // ---- 状态文件 ----

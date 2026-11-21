@@ -182,6 +182,8 @@ check('不再用项目联接注入技能', !allHost.includes('reconcile({') && !
 check('不写 credentials.json/settings.json', !/writeFileSync\([^)]*credentials\.json/.test(allHost) && !/writeFileSync\([^)]*settings\.json/.test(allHost))
 const hostIndexSource = readFileSync(join(ROOT, 'host', 'index.mjs'), 'utf8')
 check('凭据走 DSH 凭据库 + configEditor', readFileSync(join(ROOT, 'host', 'runtime.mjs'), 'utf8').includes('persistParams') && readFileSync(join(ROOT, 'host', 'params.mjs'), 'utf8').includes('credentials'))
+check('MCP 自愈走官方状态事件与重启', allHost.includes('mcp-manager/status') && allHost.includes('mcp.restart') && allHost.includes('RECOVER_DELAYS_MS'))
+check('MCP 自动恢复开关在配置白名单里', readFileSync(join(ROOT, 'host', 'params.mjs'), 'utf8').includes("'mcp.autoRecover'"))
 
 // ---- 7.1 适配覆盖与仓库一致 ----
 const overridesRoot = join(ROOT, 'vendor', 'overrides')
@@ -223,6 +225,7 @@ if (check('lib/client.js 存在', existsSync(clientFile))) {
   check('client 包 id', client.includes("id: 'dsh-zrwang-plugin'"))
   check('client 含 registerTab', client.includes('registerTab'))
   check('client 含 ZrPanel', client.includes('function ZrPanel'))
+  check('client 显示重连与自动恢复', client.includes('重连中') && client.includes('自动恢复'))
   check('client 无 import/export', !/^\s*(import|export)\s/m.test(client))
   let clientSyntax = ''
   try {
@@ -255,6 +258,9 @@ check('SKILL-ADAPTATIONS.md 存在', existsSync(join(ROOT, 'SKILL-ADAPTATIONS.md
 const readme = existsSync(join(ROOT, 'README.md')) ? readFileSync(join(ROOT, 'README.md'), 'utf8') : ''
 check('README 不再提旧状态目录', !readme.includes('zrwang-plugin-config') && !readme.includes('ZRWANG_PLUGIN_STATE_DIR'))
 check('README 说明设置写在 profile 补丁与凭据库', readme.includes('cordis.patch.yml') && readme.includes('凭据'))
+check('README 说明 MCP 断线自动恢复', readme.includes('断线自动恢复'))
+const mcpDoc = existsSync(join(ROOT, 'docs', 'mcp-components.md')) ? readFileSync(join(ROOT, 'docs', 'mcp-components.md'), 'utf8') : ''
+check('MCP 文档说明自动恢复与官方状态事件', mcpDoc.includes('自动恢复') && mcpDoc.includes('mcp-manager/status'))
 
 // ---- 12 技能配置审计（只读）----
 if (existsSync(join(ROOT, 'scripts', 'audit-skill-config.mjs'))) {

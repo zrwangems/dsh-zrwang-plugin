@@ -86,7 +86,8 @@ function ZrPanel(props) {
     }).then(function () { setBusy(false); refreshUntilMcpSettled() })
   }
 
-  // MCP 组件是异步启动的：勾选/切换后轮询到“已启动 / 启动失败”，让界面给出明确结果。
+  // MCP 组件是异步启动的：勾选/切换后轮询到“已启动 / 启动失败”。
+  // 重连和自动恢复可能持续几分钟，所以不在 20 次后放弃；有明确结论才停。
   var pollRef = React.useRef(null)
   var refreshUntilMcpSettled = function () {
     if (pollRef.current !== null) return
@@ -98,13 +99,16 @@ function ZrPanel(props) {
         mergePayload(payload)
         var components = payload.components || []
         var pending = false
+        var slow = false
         for (var i = 0; i < components.length; i += 1) {
           var item = components[i]
-          if (item.enabled === true && (item.phase === 'starting' || item.phase === 'idle')) pending = true
+          if (item.enabled !== true) continue
+          if (item.phase === 'starting' || item.phase === 'idle') pending = true
+          else if (item.phase === 'failed' && item.recovering === true) { pending = true; slow = true }
         }
-        if (pending && attempts < 20) pollRef.current = setTimeout(tick, 1200)
+        if (pending && attempts < 360) pollRef.current = setTimeout(tick, slow ? 4000 : 1500)
       }, function () {
-        if (attempts < 20) pollRef.current = setTimeout(tick, 1500)
+        if (attempts < 360) pollRef.current = setTimeout(tick, 3000)
       })
     }
     pollRef.current = setTimeout(tick, 600)
@@ -122,7 +126,8 @@ function ZrPanel(props) {
     var components = state.value.components || []
     for (var i = 0; i < components.length; i += 1) {
       var item = components[i]
-      if (item.enabled === true && (item.phase === 'starting' || item.phase === 'idle')) {
+      if (item.enabled === true && (item.phase === 'starting' || item.phase === 'idle'
+        || (item.phase === 'failed' && item.recovering === true))) {
         refreshUntilMcpSettled()
         return
       }

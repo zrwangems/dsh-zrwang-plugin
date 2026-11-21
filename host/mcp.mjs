@@ -8,8 +8,15 @@
  *
  * 注册条目字段按 DSH 官方 @deepseek-ai/dsh-mcp-manager 的条目 schema：
  * transport / command / args / env / cwd / toolCallTimeoutMs / startupTimeoutMs /
- * closeTimeoutMs。参数固定，设置页不暴露 MCP 配置。
+ * closeTimeoutMs / reconnect / failOnStartupError。连接参数固定，设置页只暴露一个
+ * 「断线自动恢复」开关。
+ *
+ * 稳定性分两层，都用 DSH 官方面：
+ *   - mcp-client 自己的重连退避（注册条目的 reconnect 预算）；
+ *   - 本控制器的自愈守护：订阅 `mcp-manager/status`，预算耗尽（failed: gave-up）
+ *     且仍有用组件时，按退避序列调用 `mcpManager.restart()` 重建实例，连上即停。
  */
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { MATHWORKS_DIR } from './config.mjs'
 import { isWindows } from './platform.mjs'
@@ -27,6 +34,15 @@ export const SERVER_NAMES = { mathworks: 'matlab-mcp', windows: 'windows-mcp' }
 /** mcp-client 的关闭预算；官方默认 5000。 */
 const CLOSE_TIMEOUT_MS = 5000
 
+/** 自愈守护的退避序列（毫秒）：重连预算用完后按这个节奏重建实例，连上即停。 */
+export const RECOVER_DELAYS_MS = [15_000, 30_000, 60_000, 120_000, 300_000]
+
+/** 只有这两种终止原因能靠重建实例恢复；cleanup/load 重建也没用。 */
+const RECOVERABLE_REASONS = new Set(['gave-up', 'reconnect-disabled'])
+
+/** mcp-client 的重连预算；30 次 × 最长 10s ≈ 4.4 分钟，够 MATLAB 重启一轮。 */
+export const RECONNECT_POLICY = { enabled: true, initialDelayMs: 500, maxDelayMs: 10_000, maxAttempts: 30 }
+
 /**
  * 组装 MATLAB MCP 的注册条目（stdio）。参数固定：existing 会话 + 插件自带扩展文件。
  */
@@ -42,7 +58,9 @@ export function resolveMatlabEntry() {
     closeTimeoutMs: CLOSE_TIMEOUT_MS,
     // MATLAB 关掉/共享会话失效时 mcp-client 会按这个预算自动重连；30 次比默认
     // 的 10 次更耐抖，最长间隔 10s，避免 30s 一次等太久。
-    reconnect: { enabled: true, initialDelayMs: 500, maxDelayMs: 10000, maxAttempts: 30 },
+    reconnect: { ...RECONNECT_POLICY },
+    // MATLAB 没开时启动失败只是状态，不让它把插件装配一起拖垮。
+    failOnStartupError: false,
   }
 }
 
@@ -59,7 +77,8 @@ export function resolveWindowsEntry() {
     toolCallTimeoutMs: 120000,
     startupTimeoutMs: 30000,
     closeTimeoutMs: CLOSE_TIMEOUT_MS,
-    reconnect: { enabled: true, initialDelayMs: 500, maxDelayMs: 10000, maxAttempts: 30 },
+    reconnect: { ...RECONNECT_POLICY },
+    failOnStartupError: false,
   }
 }
 
@@ -71,14 +90,31 @@ export function entryOf(want) {
 }
 
 /**
- * 单例控制器：维护本插件注册的服务器集合，串行执行对账。
+ * 单例控制器：维护本插件注册的服务器集合，串行执行对账，并负责断线自愈。
+ *
+ * `mcp-client` 自己会在断线后按 `reconnect` 预算重连；预算用完时
+ * （状态 `failed: gave-up`）由这里的守护按 `RECOVER_DELAYS_MS` 调
+ * `mcpManager.restart()` 重建实例，MATLAB 重开、共享会话恢复后自动接上，
+ * 不需要用户点「重启」。状态变化来自官方 `mcp-manager/status` 事件。
+ *
  * @param {object} ctx - 插件上下文（用于 ctx.get('mcpManager') 与卸载清理）
+ * @param {object} [options]
+ * @param {() => boolean} [options.autoRecover] - 设置页开关：false 时只保留手动重启
+ * @param {(kind: string, detail: object) => void} [options.onEvent] - 诊断事件出口
+ * @param {{setTimeout: Function, clearTimeout: Function}} [options.timers] - 测试注入
  */
-export function createMcpController(ctx) {
+export function createMcpController(ctx, options = {}) {
   /** @type {Map<string, () => void>} 已注册服务器 → 释放函数 */
   const disposers = new Map()
   /** @type {Map<string, string>} 注册失败原因 */
   const failures = new Map()
+  /** @type {Map<string, object>} 最近一次 mcp-manager/status 状态 */
+  const statuses = new Map()
+  /**
+   * 自愈记录：重建次数、退避位置、下一次尝试时间。
+   * @type {Map<string, {attempts: number, count: number, timer?: object, pendingAt?: number, error?: string}>}
+   */
+  const recovery = new Map()
   /**
    * 每个会话各自想要的组件状态。组件注册是宿主全局的，取并集：
    * 只要还有一个会话（工作区模式）需要，就保持注册，避免切会话把别人的工具注销。
@@ -87,6 +123,26 @@ export function createMcpController(ctx) {
   const wants = new Map()
   const WANT_LIMIT = 50
   let queue = Promise.resolve()
+  const timers = options.timers ?? {
+    setTimeout: (fn, ms) => setTimeout(fn, ms),
+    clearTimeout: id => clearTimeout(id),
+  }
+
+  const autoRecover = () => {
+    try {
+      return typeof options.autoRecover === 'function' ? options.autoRecover() !== false : true
+    } catch {
+      return true
+    }
+  }
+
+  const emit = (kind, detail) => {
+    try {
+      options.onEvent?.(kind, detail)
+    } catch {
+      // 诊断事件失败不影响连接。
+    }
+  }
 
   const unionWant = () => {
     const merged = { mathworks: false, windows: false }
@@ -111,7 +167,95 @@ export function createMcpController(ctx) {
     }
   }
 
+  /** 服务器名 → 组件键（mathworks / windows）。 */
+  const componentKeyOf = name => Object.keys(SERVER_NAMES).find(key => SERVER_NAMES[key] === name)
+  const isWanted = name => {
+    const key = componentKeyOf(name)
+    return key !== undefined && unionWant()[key] === true
+  }
+
+  const clearRecoverTimer = name => {
+    const record = recovery.get(name)
+    if (record === undefined) return
+    if (record.timer !== undefined) timers.clearTimeout(record.timer)
+    record.timer = undefined
+    record.pendingAt = undefined
+  }
+
+  const resetRecover = name => {
+    const record = recovery.get(name)
+    if (record === undefined) return
+    clearRecoverTimer(name)
+    record.attempts = 0
+  }
+
+  const forgetRecover = name => {
+    clearRecoverTimer(name)
+    recovery.delete(name)
+  }
+
+  function scheduleRecover(name) {
+    if (!autoRecover() || !disposers.has(name) || !isWanted(name)) return
+    const record = recovery.get(name) ?? { attempts: 0, count: 0 }
+    if (record.timer !== undefined) return
+    const delay = RECOVER_DELAYS_MS[Math.min(record.attempts, RECOVER_DELAYS_MS.length - 1)]
+    record.pendingAt = Date.now() + delay
+    record.timer = timers.setTimeout(() => {
+      record.timer = undefined
+      record.pendingAt = undefined
+      void attemptRecover(name)
+    }, delay)
+    record.timer?.unref?.()
+    recovery.set(name, record)
+    emit('mcp-recover-scheduled', { server: name, delayMs: delay, nextAttempt: record.count + 1 })
+  }
+
+  async function attemptRecover(name) {
+    if (!autoRecover() || !disposers.has(name) || !isWanted(name)) return
+    const mcp = manager()
+    if (mcp === undefined || mcp === null || typeof mcp.restart !== 'function') return
+    const record = recovery.get(name) ?? { attempts: 0, count: 0 }
+    record.attempts += 1
+    record.count += 1
+    record.error = undefined
+    recovery.set(name, record)
+    try {
+      await mcp.restart(name)
+      emit('mcp-auto-recover', { server: name, attempt: record.count, ok: true })
+    } catch (error) {
+      const message = String(error?.message ?? error)
+      record.error = message
+      emit('mcp-auto-recover', { server: name, attempt: record.count, ok: false, error: message })
+      // 未确认关闭/清理失败会挡住重建，继续重试也没用。
+      if (/cleanup|unconfirmed|restart the Host/i.test(message)) return
+      scheduleRecover(name)
+    }
+  }
+
+  const onStatus = (name, status) => {
+    if (componentKeyOf(name) === undefined) return
+    statuses.set(name, status)
+    if (status?.state === 'connected') {
+      resetRecover(name)
+      return
+    }
+    if (status?.state === 'failed') {
+      if (RECOVERABLE_REASONS.has(status.reason) && disposers.has(name)) scheduleRecover(name)
+      else clearRecoverTimer(name)
+    }
+  }
+
+  // 官方事件：每次状态变化都会推一条；插件卸载时 ctx.on 的返回值负责解绑。
+  let offStatus
+  try {
+    offStatus = ctx.on?.('mcp-manager/status', (name, status) => { onStatus(name, status) })
+  } catch {
+    offStatus = undefined
+  }
+
   const release = name => {
+    forgetRecover(name)
+    statuses.delete(name)
     const dispose = disposers.get(name)
     if (dispose === undefined) return
     disposers.delete(name)
@@ -141,7 +285,7 @@ export function createMcpController(ctx) {
       return
     }
     const targets = [
-      { key: 'mathworks', name: SERVER_NAMES.mathworks, entry: () => resolveMatlabEntry() },
+      { key: 'mathworks', name: SERVER_NAMES.mathworks, entry: () => resolveMatlabEntry(), requires: MATLAB_MCP_EXE },
       { key: 'windows', name: SERVER_NAMES.windows, entry: () => resolveWindowsEntry() },
     ]
     const wanted = unionWant()
@@ -152,7 +296,41 @@ export function createMcpController(ctx) {
         continue
       }
       if (disposers.has(target.name)) continue
+      // 文件都不在时反复启动只会刷重连预算，直接给明确原因。
+      if (target.requires !== undefined && !existsSync(target.requires)) {
+        failures.set(target.name, `缺少可执行文件：${target.requires}`)
+        continue
+      }
       register(target.name, target.entry())
+    }
+  }
+
+  /** 自愈状态（给状态面和界面用）。 */
+  const recoverViewOf = name => {
+    const record = recovery.get(name)
+    const view = { enabled: autoRecover(), count: record?.count ?? 0, attempts: record?.attempts ?? 0 }
+    if (record?.pendingAt !== undefined) {
+      view.pendingAt = record.pendingAt
+      view.retryInMs = Math.max(0, record.pendingAt - Date.now())
+    }
+    if (record?.error !== undefined) view.error = record.error
+    return view
+  }
+
+  const statusViewOf = (name, status) => {
+    const failure = failures.get(name)
+    return {
+      name,
+      state: status.state ?? 'unknown',
+      attempt: status.attempt ?? 0,
+      ...(status.maxAttempts === undefined ? {} : { maxAttempts: status.maxAttempts }),
+      ...(status.toolCount === undefined ? {} : { toolCount: status.toolCount }),
+      ...(status.lastError === undefined ? {} : { lastError: status.lastError }),
+      ...(status.reason === undefined ? {} : { reason: status.reason }),
+      ...(status.nextRetryAtMs === undefined ? {} : { nextRetryAtMs: status.nextRetryAtMs }),
+      ...(status.connectedAt === undefined ? {} : { connectedAt: status.connectedAt }),
+      ...(failure === undefined ? {} : { error: failure }),
+      recover: recoverViewOf(name),
     }
   }
 
@@ -177,17 +355,14 @@ export function createMcpController(ctx) {
       queue = queue.then(run, run)
       return queue
     },
-    /** 当前受管服务器的状态（来自 mcpManager.list()）。 */
+    /** 当前受管服务器的状态（来自 mcpManager.list()，并合并自愈进度）。 */
     status() {
       const mcp = manager()
       const available = mcp !== undefined && mcp !== null
       if (!available) {
         return {
           available: false,
-          servers: [
-            { name: SERVER_NAMES.mathworks, state: 'unavailable', attempt: 0, error: failures.get(SERVER_NAMES.mathworks) },
-            { name: SERVER_NAMES.windows, state: 'unavailable', attempt: 0, error: failures.get(SERVER_NAMES.windows) },
-          ].map(server => (server.error === undefined ? { name: server.name, state: server.state, attempt: server.attempt } : server)),
+          servers: [SERVER_NAMES.mathworks, SERVER_NAMES.windows].map(name => statusViewOf(name, { state: 'unavailable', attempt: 0 })),
         }
       }
       let views = []
@@ -197,31 +372,21 @@ export function createMcpController(ctx) {
         return { available: true, servers: [], error: String(error?.message ?? error) }
       }
       const servers = views
-        .filter(view => view.name === SERVER_NAMES.mathworks || view.name === SERVER_NAMES.windows)
-        .map(view => {
-          const status = view.status ?? {}
-          const failure = failures.get(view.name)
-          return {
-            name: view.name,
-            state: status.state ?? 'unknown',
-            attempt: status.attempt ?? 0,
-            ...(status.maxAttempts === undefined ? {} : { maxAttempts: status.maxAttempts }),
-            ...(status.toolCount === undefined ? {} : { toolCount: status.toolCount }),
-            ...(status.lastError === undefined ? {} : { lastError: status.lastError }),
-            ...(status.reason === undefined ? {} : { reason: status.reason }),
-            ...(failure === undefined ? {} : { error: failure }),
-          }
-        })
+        .filter(view => componentKeyOf(view.name) !== undefined)
+        .map(view => statusViewOf(view.name, view.status ?? {}))
       for (const name of [...disposers.keys()]) {
-        if (!servers.some(server => server.name === name)) servers.push({ name, state: 'unknown', attempt: 0 })
+        if (!servers.some(server => server.name === name)) {
+          servers.push(statusViewOf(name, statuses.get(name) ?? { state: 'unknown', attempt: 0 }))
+        }
       }
       return { available: true, servers }
     },
-    /** 重启一个已注册的服务器（重置重连预算，MATLAB 重开会话后也用它）。 */
+    /** 重启一个已注册的服务器（手动重启重置重连预算和自愈计数）。 */
     async restart(serverName) {
       const mcp = manager()
       if (mcp === undefined || mcp === null) return { ok: false, detail: '当前 profile 没有 MCP 管理器（仅 Web/桌面端支持）' }
       if (!disposers.has(serverName)) return { ok: false, detail: '该组件未开启，先勾选开启后再重启' }
+      forgetRecover(serverName)
       try {
         await mcp.restart(serverName)
         return { ok: true, detail: `已重启 ${serverName}` }
@@ -249,9 +414,28 @@ export function createMcpController(ctx) {
         return { ok: false, detail: `探测失败：${String(error?.message ?? error)}` }
       }
     },
-    /** 插件卸载时注销全部服务器。 */
+    /** 设置页切换「断线自动恢复」后调用：关掉时撤掉已排队的重建。 */
+    refreshPolicy() {
+      if (autoRecover()) {
+        // 打开时如果已经有服务器卡在 gave-up，立刻排一次恢复，不用等下一次状态变化。
+        for (const [name, status] of statuses) {
+          if (status?.state === 'failed' && RECOVERABLE_REASONS.has(status.reason)) scheduleRecover(name)
+        }
+        return
+      }
+      // 关掉时连退避一起清空；再打开时从 15s 重新开始。
+      for (const name of [...recovery.keys()]) resetRecover(name)
+    },
+    /** 插件卸载时注销全部服务器并停掉自愈计时器。 */
     disposeAll() {
+      for (const name of [...recovery.keys()]) forgetRecover(name)
       for (const name of [...disposers.keys()]) release(name)
+      try {
+        offStatus?.()
+      } catch {
+        // ctx 已经拆掉时解绑会失败，忽略。
+      }
+      statuses.clear()
       failures.clear()
     },
   }
@@ -274,6 +458,7 @@ const STATE_LABELS = {
   connecting: '连接中',
   reconnecting: '重连中',
   disconnected: '已断开',
+  closed: '已关闭',
   disabled: '未运行',
   failed: '连接失败',
   error: '连接失败',
@@ -291,12 +476,35 @@ function phaseOf(state) {
   return 'idle'
 }
 
-/** 组件行显示的启动结果文案（成功时带工具数）。 */
+/** 距离下一次自动重连/自动恢复还有几秒。 */
+function retrySecondsOf(server) {
+  const at = server?.recover?.pendingAt ?? server?.nextRetryAtMs
+  if (at === undefined) return undefined
+  return Math.max(1, Math.ceil((at - Date.now()) / 1000))
+}
+
+/** 组件行显示的启动结果文案（成功时带工具数，重连/自愈时带剩余秒数）。 */
 function statusLabelOf(server) {
   const phase = phaseOf(server.state)
+  const seconds = retrySecondsOf(server)
+  const wait = seconds === undefined ? '' : `，约 ${seconds} 秒后重试`
   if (phase === 'running') return server.toolCount === undefined ? '已启动' : `已启动（${server.toolCount} 个工具）`
-  if (phase === 'starting') return server.attempt > 0 ? `启动中（第 ${server.attempt + 1} 次尝试）` : '启动中…'
-  if (phase === 'failed') return '启动失败'
+  if (phase === 'starting') {
+    if (server.state === 'reconnecting') {
+      const budget = server.maxAttempts === undefined ? '' : `/${server.maxAttempts}`
+      return `重连中（第 ${server.attempt + 1}${budget} 次${wait}）`
+    }
+    return server.attempt > 0 ? `启动中（第 ${server.attempt + 1} 次尝试）` : '启动中…'
+  }
+  if (phase === 'failed') {
+    if (server.recover?.pendingAt !== undefined) {
+      const attempt = server.recover.count + 1
+      return `连接失败，${seconds === undefined ? '稍后' : `约 ${seconds} 秒后`}自动恢复（第 ${attempt} 次）`
+    }
+    if (server.reason === 'cleanup') return '上次连接未确认关闭，需要重启 DSH'
+    if (server.reason === 'load') return '启动失败（组件加载出错）'
+    return '启动失败'
+  }
   if (phase === 'unavailable') return '当前 profile 不支持'
   return '未启动'
 }
@@ -319,11 +527,17 @@ export function componentViews({ engineeringInjected, gates, status }) {
       ...(server?.maxAttempts === undefined ? {} : { maxAttempts: server.maxAttempts }),
       ...(server?.error === undefined ? {} : { error: server.error }),
       ...(server?.lastError === undefined ? {} : { lastError: server.lastError }),
+      ...(server?.reason === undefined ? {} : { reason: server.reason }),
+      ...(server?.nextRetryAtMs === undefined ? {} : { nextRetryAtMs: server.nextRetryAtMs }),
+      ...(server?.connectedAt === undefined ? {} : { connectedAt: server.connectedAt }),
+      ...(server?.recover === undefined ? {} : { recover: server.recover }),
     }
   }
   const componentOf = (id, label, kind, enabled, desc, hint, serverName) => {
     const server = viewOf(serverName, enabled)
     const phase = phaseOf(server.state)
+    // 只在真的排了自动恢复时算“自愈中”；cleanup/关闭开关时不能一直挂着轮询。
+    const recovering = phase === 'failed' && server.recover?.pendingAt !== undefined
     return {
       id,
       label,
@@ -332,6 +546,8 @@ export function componentViews({ engineeringInjected, gates, status }) {
       desc,
       hint,
       phase,
+      recovering,
+      ...(server.recover?.retryInMs === undefined ? {} : { retryInMs: server.recover.retryInMs }),
       // 本会话没开、但别的会话还在用：界面上要能看出来，别让人以为工具没了。
       globallyActive: enabled !== true && (server.state === 'connected' || server.state === 'connecting' || server.state === 'reconnecting'),
       statusLabel: statusLabelOf(server),
@@ -414,9 +630,11 @@ export function checkMcp(controller) {
     parts.push('服务器未开启（勾选对应组件后才会注册）')
   } else {
     for (const server of status.servers) {
-      const error = server.error === undefined ? '' : `，${server.error}`
-      parts.push(`${server.name}：${server.state}（第 ${server.attempt} 次尝试${error}）`)
+      const error = server.error ?? server.lastError
+      parts.push(`${server.name}：${statusLabelOf(server)}${error === undefined ? '' : `（${error}）`}`)
     }
+    const autoRecover = status.servers.some(server => server.recover?.enabled === true)
+    parts.push(autoRecover ? '断线自动恢复：开启' : '断线自动恢复：关闭')
   }
   return {
     ok: problems.length === 0,

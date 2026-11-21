@@ -502,16 +502,42 @@ function ZrArsRow(props) {
 
 var ZR_PHASE_CLASS = { running: ' zr-ok', starting: ' zr-warn', failed: ' zr-bad', unavailable: ' zr-blocked' }
 
+/** 下一次重连/自愈还剩几秒；宿主算过一次，这里按本地时间再算，轮询间隙也能显示。 */
+function zrRetryText(component) {
+  var server = component.server || {}
+  var at = component.recover !== undefined && component.recover.pendingAt !== undefined
+    ? component.recover.pendingAt
+    : server.nextRetryAtMs
+  if (at === undefined || at === null) return ''
+  var seconds = Math.max(1, Math.ceil((at - Date.now()) / 1000))
+  return zrT('约 {s} 秒后', { s: seconds })
+}
+
 /** 组件行状态文案：用本地模板拼，避免宿主返回的中文状态串在英文界面里露出来。 */
 function zrComponentStatus(component) {
   var phase = component.phase === undefined ? 'idle' : component.phase
+  var server = component.server || {}
   if (phase === 'running') {
     return component.toolCount === undefined ? zrT('已启动') : zrT('已启动（{count} 个工具）', { count: component.toolCount })
   }
   if (phase === 'starting') {
+    if (server.state === 'reconnecting') {
+      var budget = server.maxAttempts === undefined ? '' : '/' + server.maxAttempts
+      var wait = zrRetryText(component)
+      return wait === ''
+        ? zrT('重连中（第 {n}{budget} 次）', { n: (server.attempt || 0) + 1, budget: budget })
+        : zrT('重连中（第 {n}{budget} 次，{wait}重试）', { n: (server.attempt || 0) + 1, budget: budget, wait: wait })
+    }
     return component.attempt > 0 ? zrT('启动中（第 {n} 次尝试）', { n: component.attempt + 1 }) : zrT('启动中…')
   }
-  if (phase === 'failed') return zrT('启动失败')
+  if (phase === 'failed') {
+    if (component.recovering === true && component.recover !== undefined && component.recover.pendingAt !== undefined) {
+      return zrT('连接失败，{wait}自动恢复（第 {n} 次）', { wait: zrRetryText(component), n: (component.recover.count || 0) + 1 })
+    }
+    if (server.reason === 'cleanup') return zrT('上次连接未确认关闭，需要重启 DSH')
+    if (server.reason === 'load') return zrT('启动失败（组件加载出错）')
+    return zrT('启动失败')
+  }
   if (phase === 'unavailable') return zrT('当前 profile 不支持')
   return zrT('未启动')
 }
@@ -528,6 +554,7 @@ function ZrComponentRow(props) {
   var phase = component.phase || 'idle'
   var tagTitle = ''
   if (component.server && component.server.lastError) tagTitle = component.server.lastError
+  else if (component.recover && component.recover.error) tagTitle = component.recover.error
   else if (phase === 'running') tagTitle = zrT('已注册到当前 DSH：MCP 工具会在当前对话的下一条消息起出现在工具表，不需要新开会话')
   else if (phase === 'starting') tagTitle = zrT('启动完成后，MCP 工具从当前对话的下一条消息起生效，不需要新开会话')
   var tag = component.enabled === true

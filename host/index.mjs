@@ -59,7 +59,12 @@ export function apply(ctx, config) {
       await appendEvent('host-apply-failed', { error: String(error?.message ?? error) })
     })
 
-  const mcpController = createMcpController(ctx)
+  // 自愈守护：订阅 mcp-manager/status，重连预算用完后自动重建实例；
+  // 开关来自设置页（profile 补丁里的 config.mcp.autoRecover）。
+  const mcpController = createMcpController(ctx, {
+    autoRecover: () => runtime.effective()?.mcp?.autoRecover !== 'off',
+    onEvent: (kind, detail) => { void appendEvent(kind, detail) },
+  })
   effect(ctx, () => () => mcpController.disposeAll(), 'dsh-zrwang-plugin: mcp registrations')
   const toolRestrictions = createToolRestrictions(ctx)
   effect(ctx, () => () => toolRestrictions.disposeAll(), 'dsh-zrwang-plugin: mcp tool restrictions')
