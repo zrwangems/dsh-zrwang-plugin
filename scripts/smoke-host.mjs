@@ -134,7 +134,7 @@ const normalized = normalizeConfig({
 })
 check('参数归一化只保留白名单字段', normalized.params.image.model === 'gpt-image-1' && normalized.warnings.some(item => item.includes('imageApiKey')))
 check('非法 URL 被忽略', normalizeConfig({ image: { baseUrl: 'not a url' } }).params.image.baseUrl === '')
-check('专利数据目录默认在 storages 下', defaultParams().patent.root === join(STORAGE, 'patent'))
+check('专利数据目录没有默认值', defaultParams().patent.root === '' && patentPathsOf(defaultParams()) === undefined)
 check('相对专利目录被拒绝', normalizeConfig({ patent: { root: 'relative/patent' } }).params.patent.root === '')
 check('插件安装目录不能当专利目录', normalizeConfig({ patent: { root: join(SKILLS_DIR, '..') } }).params.patent.root === '')
 check('绝对专利目录被保留', normalizeConfig({ patent: { root: samplePatentRoot } }).params.patent.root === samplePatentRoot)
@@ -175,9 +175,10 @@ const cards = settingsCards(normalized.params, { 'image.apiKey': true }).cards
 const byId = Object.fromEntries(cards.map(card => [card.id, card]))
 check('设置卡片齐全', ['image', 'nature-image2ppt', 'optional-search', 'nature-figure', 'nature-academic-search', 'nature-downloader', 'patent', 'mcp-stability', 'runtime'].every(id => byId[id] !== undefined), Object.keys(byId).join(','))
 check('MCP 稳定性卡片是开关', byId['mcp-stability'].fields.some(field => field.id === 'autoRecover' && field.control === 'select' && field.value === 'on'))
-check('专利卡片含数据目录与实际路径',
-  byId.patent.fields.some(field => field.id === 'root' && field.value.length > 0)
-  && byId.patent.fields.some(field => field.id === 'patent-resolved' && field.control === 'status'))
+check('专利卡片初始为空并提示未设置',
+  byId.patent.fields.some(field => field.id === 'root' && field.value === '')
+  && byId.patent.fields.some(field => field.id === 'patent-resolved' && String(field.value).includes('未设置')))
+check('清空专利目录会写进配置', configOfParams(defaultParams()).patent.root === '')
 check('密钥只回显是否已设置', JSON.stringify(cards).includes('secret-value') === false && byId.image.fields.some(field => field.secret === true && field.hasValue === true))
 const savedImage = saveSettingsCard(normalized.params, { cardId: 'image', values: { baseUrl: 'https://api.example.com/v1', model: 'gpt-image-1', apiKey: 'new-secret' } })
 check('保存生图卡片', savedImage.image.apiKey === 'new-secret' && savedImage.image.model === 'gpt-image-1')
@@ -189,8 +190,8 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
 // ---- 专利目录：默认路径、置灰与注入 ----
 {
   const patentSkill = Object.values(catalog.skills ?? {}).find(node => String(node.dir ?? '').startsWith('research/patent/'))
-  const withoutRoot = await blockedSkills({ ...defaultParams(), patent: { ...defaultParams().patent, root: '' } }, catalog)
-  check('没设置专利目录时专利技能置灰', patentSkill !== undefined && withoutRoot[patentSkill.name]?.includes('专利数据目录'), withoutRoot[patentSkill?.name])
+  const withoutRoot = await blockedSkills(defaultParams(), catalog)
+  check('默认没设置专利目录时专利技能置灰', patentSkill !== undefined && withoutRoot[patentSkill.name]?.includes('专利数据目录'), withoutRoot[patentSkill?.name])
   const withRoot = await blockedSkills({ ...defaultParams(), patent: { ...defaultParams().patent, root: samplePatentRoot } }, catalog)
   check('设置好专利目录后不再因路径置灰', patentSkill !== undefined && withRoot[patentSkill.name] === undefined, withRoot[patentSkill?.name])
   check('专利目录指向文件时置灰', patentRootProblem({ patent: { root: process.execPath } }) !== undefined)

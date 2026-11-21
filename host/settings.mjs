@@ -329,7 +329,10 @@ export function settingsCards(params, present = {}, mcpStatus = { available: fal
         kind: 'fields',
         autoSave: true,
         fields: [
-          maskField({ id: 'root', label: '专利数据目录', help: `必填绝对路径。Obsidian 库建在它下面的 vault/（用 Obsidian 打开这个子目录）；向量索引与模型在 patent-map/，审查答复在 oa/，产物在 outputs/。默认建议 ${defaultPatentRoot()}；清空或填错时专利类技能会置灰、不注入。` }, params.patent?.root),
+          {
+            ...maskField({ id: 'root', label: '专利数据目录', help: `必填绝对路径，不填则 9 个专利技能全部停用。Obsidian 库建在它下面的 vault/（用 Obsidian 打开这个子目录）；向量索引与模型在 patent-map/，审查答复在 oa/，产物在 outputs/。建议填 ${defaultPatentRoot()}，也可以换成你自己的数据盘；填相对路径、文件或插件安装目录内的路径同样视为无效。` }, params.patent?.root),
+            placeholder: defaultPatentRoot(),
+          },
           {
             id: 'patent-resolved',
             control: 'status',

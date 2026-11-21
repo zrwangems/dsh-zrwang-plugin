@@ -549,7 +549,7 @@
 
     <div class="grid g4" style="margin-bottom:16px">
       <article class="card reveal"><div class="ico">✦</div><h3>模型服务</h3><p>生图模型（URL / 模型 / API Key），OCR 模型 Token。</p></article>
-      <article class="card reveal"><div class="ico">⌕</div><h3>科研服务</h3><p>Pexels / Pixabay / OpenAlex / Firecrawl、PubMed / Crossref、Elsevier / Springer / IEEE、绘图后端、专利向量模型。</p></article>
+      <article class="card reveal"><div class="ico">⌕</div><h3>科研服务</h3><p>Pexels / Pixabay / OpenAlex / Firecrawl、PubMed / Crossref、Elsevier / Springer / IEEE、绘图后端、专利数据目录与向量模型。</p></article>
       <article class="card reveal"><div class="ico">⚙</div><h3>运行环境</h3><p>Python 解释器下拉选择，officecli / zotero-cli / lark-cli / draw.io / Polyspace / MATLAB 的可用性检查。</p></article>
       <article class="card reveal"><div class="ico">↻</div><h3>MCP 组件稳定性</h3><p>「断线自动恢复」开关，默认开启；关掉后只保留 mcp-client 自己的重连。</p></article>
     </div>
@@ -600,7 +600,7 @@
 ├── <span class="d">storages/</span>
 │   └── <span class="d">dsh-zrwang-plugin/</span>       <span class="c"># 运行期，插件升级保留</span>
 │       ├── <span class="d">state/</span>              <span class="c"># 选择态/门禁/模式/事件</span>
-│       └── <span class="d">patent/</span>             <span class="c"># 专利数据目录：vault/ patent-map/ oa/ outputs/</span>
+│       └── <span class="d">patent/</span>             <span class="c"># 设置页指定；建议放这里：vault/ patent-map/ oa/ outputs/</span>
 └── <span class="c">（没有 zrwang-plugin-config/）</span></pre>
       <div class="panel reveal">
         <h3>写入时机</h3>
@@ -650,7 +650,7 @@
           </tr>
           <tr>
             <td><code>$DSH_HOME/storages/dsh-zrwang-plugin/patent/</code>（设置页可改）</td>
-            <td>专利技能的向量索引与工作数据；只有用到专利技能时才创建。</td>
+            <td>专利技能的向量索引与工作数据；设置页填了「专利数据目录」才会用，不填则专利技能置灰。</td>
             <td>专利技能（vault/、patent-map/、oa/、outputs/）</td>
             <td><span class="tag amber">升级保留，卸载后手动删</span></td>
           </tr>

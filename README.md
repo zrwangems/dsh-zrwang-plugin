@@ -85,7 +85,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 | 栏目 | 内容 |
 | --- | --- |
 | 模型服务 | 生图模型（URL / 模型 / API Key，按 OpenAI Images 兼容协议）、OCR 模型（百度 PaddleOCR-VL Token，可选） |
-| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE）、Nature 绘图后端（Python / R）、专利检索向量模型（智谱 / 通义 / OpenAI / 本地，可选）与专利数据目录（Obsidian 库是它下面的 `vault/`，向量索引在同目录 `patent-map/`；清空或填错时专利技能置灰） |
+| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE）、Nature 绘图后端（Python / R）、专利检索向量模型（智谱 / 通义 / OpenAI / 本地，可选）与专利数据目录（必填；Obsidian 库是它下面的 `vault/`，向量索引在同目录 `patent-map/`；不填或填错时专利技能置灰） |
 | 运行环境 | Python 解释器下拉选择，以及 officecli、zotero-cli、lark-cli、draw.io、Polyspace、MATLAB、MathWorks MCP、Windows MCP 的可用性 |
 
 改动即生效：每张卡片下方有「保存」按钮；Nature 绘图、专利向量服务这类下拉选择选中即自动保存。保存后插件立即用新值重算环境变量，不需要重启 DSH。
@@ -94,7 +94,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 - **非密钥配置**只写进当前 profile 的 `cordis.patch.yml`，即 `- id: dsh-zrwang-plugin` 这一项的 `config`。没有 `settings.json`，也没有插件自己的配置目录。
 - **密钥**只写进 DSH 凭据库（`api-key` 凭据），不写 YAML、不写日志、不回显；设置页只显示「已设置 / 未设置」。因此插件包、profile 补丁和持久化目录里都不会出现明文密钥。
-- **运行期产物**只有选择态、门禁、模式、事件和专利数据，全部放在 DSH 的持久化根 `$DSH_HOME/storages/dsh-zrwang-plugin/` 下：`state/` 存选择与状态，`patent/` 是默认的专利数据目录（Obsidian 库 `vault/`、索引 `patent-map/`、审查答复 `oa/`、产物 `outputs/` 都在里面）。插件升级不会删掉这里；插件安装目录里不再产生 `cache/`。
+- **运行期产物**只有选择态、门禁、模式、事件和专利数据，全部放在 DSH 的持久化根 `$DSH_HOME/storages/dsh-zrwang-plugin/` 下：`state/` 存选择与状态；`patent/` 是建议的专利数据位置（Obsidian 库 `vault/`、索引 `patent-map/`、审查答复 `oa/`、产物 `outputs/` 都在里面），但要在设置页填了目录才会用，不填时 9 个专利技能全部置灰。插件升级不会删掉这里；插件安装目录里不再产生 `cache/`。
 - Python 启动钩子和 `python`/`python3`/`bash`/`firecrawl` 转发脚本是随包分发的静态文件（`host/pysite/`、`host/shim/`），运行期不生成、不复制。
 - 配置通过 DSH 官方 `ctx.shellEnv` 注册成每次 shell 调用的 `DSH_ZRWANG_*` 事实，不再手工改宿主进程环境。DSH 的 shell 会清掉名字里带 `KEY` / `TOKEN` / `SECRET` / `PASSWORD` 的普通环境变量，所以密钥用 `_CRED` 结尾的 `DSH_ZRWANG_*` 变量；`host/pysite/sitecustomize.py` 在 Python 启动时把它们映射回上游脚本认识的标准名字。
 - 上游技能自己的配置文件、向导和读写代码已删除：技能只从插件注入的环境变量取参数。需要改默认值时改插件设置，不要去改技能目录。

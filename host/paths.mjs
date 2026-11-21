@@ -5,7 +5,7 @@
  *
  *   <DSH_HOME>/storages/dsh-zrwang-plugin/
  *   ├── state/    选择态、会话快照、门禁、模式、界面、事件
- *   └── patent/   默认专利数据根（可在设置页改成别的绝对路径）
+ *   └── patent/   建议的专利数据位置（设置页填了才算数，不填不用专利技能）
  *       ├── vault/        Obsidian 库（打开这个目录作为 vault）
  *       ├── patent-map/   专利地图的索引 SQLite 与向量模型
  *       ├── oa/           审查答复向量库与工作数据
@@ -52,7 +52,7 @@ export function stateRoot() {
   return join(storageRoot(), 'state')
 }
 
-/** 专利数据默认根：设置页没填时的位置。 */
+/** 建议的专利数据目录：只用于设置页提示，不会被自动采用。 */
 export function defaultPatentRoot() {
   return join(storageRoot(), 'patent')
 }

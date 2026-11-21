@@ -11,7 +11,7 @@
 import { existsSync, statSync } from 'node:fs'
 import { resolve, sep } from 'node:path'
 import { getPath, setPath } from './object.mjs'
-import { PKG_DIR, defaultPatentRoot } from './paths.mjs'
+import { PKG_DIR } from './paths.mjs'
 
 /**
  * 密钥字段 → DSH 凭据引用名。
@@ -77,7 +77,8 @@ export function defaultParams() {
     natureImage2ppt: {},
     natureFigure: { backend: 'python' },
     patent: {
-      root: defaultPatentRoot(),
+      // 专利数据目录必须由用户在设置页指定；留空表示专利类技能不启用。
+      root: '',
       embedding: { provider: 'zhipu', model: '', baseUrl: '', dimensions: '' },
     },
     optional: {},
