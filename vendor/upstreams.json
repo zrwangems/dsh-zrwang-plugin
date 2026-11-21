@@ -391,7 +391,8 @@
             "to": "skill 工具"
           }
         ]
-      }
+      },
+      "lineEndings": "lf"
     },
     {
       "id": "academic-humanizer",

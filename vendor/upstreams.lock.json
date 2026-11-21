@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-16T06:21:24.135Z",
+  "generatedAt": "2026-11-21T12:34:06.108Z",
   "repos": [
     {
       "id": "matlab-agentic",
@@ -1999,7 +1999,7 @@
       "id": "ars",
       "repo": "Imbad0202/academic-research-skills",
       "ref": "main",
-      "sha": "c67a7be53f23d9dbba4030bbcd6f5ccfeda3afa9",
+      "sha": "00315dfea67cba974583debae32b77bdce659301",
       "label": "Academic Research Skills (ARS)",
       "target": "ars/skills",
       "count": 5,

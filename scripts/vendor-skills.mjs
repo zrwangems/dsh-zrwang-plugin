@@ -18,7 +18,7 @@ import {
   cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync, copyFileSync,
 } from 'node:fs'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
-import { arsParams, writeArsRuntimeNotes } from '../host/ars.mjs'
+import { writeArsRuntimeNotes } from '../host/ars.mjs'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const WORK = resolve(ROOT, '..', 'AgentsDo', 'skill-management-20261027')
@@ -110,6 +110,15 @@ function collectPreserved() {
   return preserved
 }
 
+function patchesTargetAny(cfgs) {
+  const file = join(ROOT, 'vendor', 'skill-patches.json')
+  if (!existsSync(file)) return false
+  const document = JSON.parse(readFileSync(file, 'utf8'))
+  const targets = cfgs.flatMap(cfg => [cfg.target, ...(cfg.aliases === undefined ? [] : [cfg.aliases.target])])
+  return (document.patches ?? []).some(patch => (patch.files ?? []).some(entry =>
+    targets.some(target => entry.path === target || entry.path.startsWith(`${target}/`))))
+}
+
 function applySkillPatches(root) {
   const file = join(ROOT, 'vendor', 'skill-patches.json')
   if (!existsSync(file)) return
@@ -141,10 +150,10 @@ function applySkillPatches(root) {
  * 插件对上游技能的实际适配版本：vendor 最后一步覆盖到仓库，再按 removals 删除
  * 上游多余文件。放在版本库里，重跑 vendor 不会丢改动。
  */
-function applyOverrides(root = ROOT) {
+function applyOverrides(root = ROOT, parts = ['skills', 'ars']) {
   const base = join(ROOT, 'vendor', 'overrides')
   if (!existsSync(base)) return
-  for (const part of ['skills', 'ars']) {
+  for (const part of parts) {
     const src = join(base, part)
     if (!existsSync(src)) continue
     const dest = join(root, part)
@@ -153,7 +162,8 @@ function applyOverrides(root = ROOT) {
   }
   const removalsFile = join(ROOT, 'vendor', 'removals.json')
   if (!existsSync(removalsFile)) return
-  const removals = JSON.parse(readFileSync(removalsFile, 'utf8')).remove ?? []
+  const removals = (JSON.parse(readFileSync(removalsFile, 'utf8')).remove ?? [])
+    .filter(rel => parts.includes(String(rel).split('/')[0]))
   for (const rel of removals) {
     const target = join(root, ...String(rel).split('/'))
     rmSync(target, { force: true })
@@ -265,6 +275,20 @@ function extractTarball(file, name) {
   return join(root, tops[0])
 }
 
+/** 上游发行版本号（ARS 放在 .claude-plugin/plugin.json，读不到就留空）。 */
+function upstreamVersion(repoRoot) {
+  try {
+    return JSON.parse(readFileSync(join(repoRoot, '.claude-plugin', 'plugin.json'), 'utf8')).version ?? ''
+  } catch {
+    return ''
+  }
+}
+
+/** 上游源码是否按 CRLF 落盘。默认沿用历史行为；纯 LF 仓库（如 ARS）显式设 lineEndings: 'lf'。 */
+function crlfFor(cfg) {
+  return cfg.lineEndings !== 'lf'
+}
+
 /** 克隆一个仓库（codeload 卡住时的兜底）。 */
 function cloneRepo(cfg) {
   const cloneDir = join(EXTRACT, cfg.id, 'clone')
@@ -275,7 +299,7 @@ function cloneRepo(cfg) {
   rmSync(cloneDir, { recursive: true, force: true })
   mkdirSync(join(EXTRACT, cfg.id), { recursive: true })
   log(`  git clone --depth 1 ${cfg.repo}`)
-  run('git', ['-c', 'core.autocrlf=true', '-c', 'core.eol=crlf', 'clone', '--depth', '1', '--single-branch', '--branch', cfg.ref ?? 'main', `https://github.com/${cfg.repo}.git`, cloneDir])
+  run('git', ['-c', `core.autocrlf=${crlfFor(cfg) ? 'true' : 'false'}`, '-c', `core.eol=${crlfFor(cfg) ? 'crlf' : 'lf'}`, 'clone', '--depth', '1', '--single-branch', '--branch', cfg.ref ?? 'main', `https://github.com/${cfg.repo}.git`, cloneDir])
   return cloneDir
 }
 
@@ -290,10 +314,10 @@ function cloneRepoAt(cfg, sha) {
   mkdirSync(cloneDir, { recursive: true })
   log(`  git fetch --depth 1 ${cfg.repo}@${sha.slice(0, 12)}`)
   run('git', ['init'], { cwd: cloneDir })
-  // 仓库工作树约定是 CRLF（core.autocrlf=true），锁定检出也按 CRLF 落盘；
-  // 字面补丁在 applySkillPatches 里会先归一化成 LF 再匹配，写回时恢复 CRLF。
-  run('git', ['config', 'core.autocrlf', 'true'], { cwd: cloneDir })
-  run('git', ['config', 'core.eol', 'crlf'], { cwd: cloneDir })
+  // 检出的换行跟随上游约定：默认 CRLF（历史行为），lineEndings: 'lf' 的仓库按 LF。
+  // 字面补丁在 applySkillPatches 里会先归一化成 LF 再匹配，写回时恢复原换行。
+  run('git', ['config', 'core.autocrlf', crlfFor(cfg) ? 'true' : 'false'], { cwd: cloneDir })
+  run('git', ['config', 'core.eol', crlfFor(cfg) ? 'crlf' : 'lf'], { cwd: cloneDir })
   run('git', ['remote', 'add', 'origin', `https://github.com/${cfg.repo}.git`], { cwd: cloneDir })
   run('git', ['fetch', '--depth', '1', 'origin', sha], { cwd: cloneDir })
   run('git', ['checkout', '--detach', 'FETCH_HEAD'], { cwd: cloneDir })
@@ -548,9 +572,16 @@ function copySharedFiles(cfg, repoRoot, skillDir) {
 function collectScriptRefs(skillDir) {
   const refs = new Set()
   for (const file of walkFiles(skillDir)) {
-    if (!/\.(md|markdown)$/i.test(file)) continue
+    // JSON 合同/降级登记表里也会点名脚本（例如 stage_capability_matrix.json），
+    // 模型按登记表去跑时不能扑空，所以一并纳入闭包。
+    if (!/\.(md|markdown|json)$/i.test(file)) continue
     const text = readFileSync(file, 'utf8')
-    for (const match of text.matchAll(/scripts\/([A-Za-z0-9_./-]+\.py)/g)) refs.add(match[1])
+    for (const match of text.matchAll(/scripts\/([A-Za-z0-9_./-]+\.py)/g)) {
+      const rel = match[1]
+      // 合同/降级表会点名测试与 fixture 脚本；它们不是运行时依赖，也不随包分发。
+      if (/(^|\/)(tests?|fixtures)\//.test(rel) || /(^|\/)test_[^/]*\.py$/.test(rel)) continue
+      refs.add(rel)
+    }
   }
   return refs
 }
@@ -575,7 +606,9 @@ function copyScriptClosure(cfg, repoRoot, skillDir) {
       if (!/\.md$/i.test(entry)) continue
       const text = readFileSync(join(commandDir, entry), 'utf8')
       for (const match of text.matchAll(/scripts\/([A-Za-z0-9_./-]+\.py)/g)) {
-        queue.push(match[1].split('/').join(sep))
+        const rel = match[1]
+        if (/(^|\/)(tests?|fixtures)\//.test(rel) || /(^|\/)test_[^/]*\.py$/.test(rel)) continue
+        queue.push(rel.split('/').join(sep))
       }
     }
   }
@@ -673,13 +706,29 @@ function generateAliasSkills(cfg, repoRoot, stageRoot) {
     const description = descLine === null ? `ARS 命令 ${name}` : descLine[1].trim().replace(/^['"]|['"]$/g, '')
     let body = match[2].trim()
     for (const change of spec.rewrite ?? []) body = body.split(change.find).join(change.to)
-    // 保留上游命令正文（含具体脚本与步骤），只把 Claude 插件根路径改写成 DSH 里说得通的写法。
+    // 保留上游命令正文（含具体脚本与步骤），把 Claude Code 的 Skill 工具调用和
+    // `${CLAUDE_PLUGIN_ROOT}` 占位路径换成 DSH 里说得通的说法。注意反引号要连
+    // 原来包住占位符的那一对一起吃掉，否则会生成 ``a `b` c`` 这种坏行内代码。
     body = body
-      .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/MODE_REGISTRY\.md/g, '对应技能目录下的 `_shared/MODE_REGISTRY.md`')
-      .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/([a-z0-9-]+)\/SKILL\.md/g, '`$1` 技能')
-      .replace(/\$\{CLAUDE_PLUGIN_ROOT\}\/?/g, '')
-      .replace(/python3\s+scripts\/([A-Za-z0-9_./-]+)/g, 'python `scripts/$1`（用技能目录里的副本，解释器由设置里选择的系统 Python 提供）')
-      .replace(/\$ARGUMENTS/g, '用户本次输入')
+      .replace(/^First invoke the (?:Skill tool|skill 工具).*$/m, line => {
+        const found = /skill:\s*"([^"]+)"/.exec(line)
+        const skill = found === null ? '所调用技能' : found[1]
+        return `先加载并遵循 \`${skill}\` 技能（SKILL.md 及其引用文件），把下面的模式说明与用户输入当作该技能参数；不要用命令摘要代替技能正文。`
+      })
+      .replace(/`?\$\{CLAUDE_PLUGIN_ROOT\}\/MODE_REGISTRY\.md`?/g, '`_shared/MODE_REGISTRY.md`（技能目录下）')
+      .replace(/`?\$\{CLAUDE_PLUGIN_ROOT\}\/([a-z0-9-]+)\/SKILL\.md`?/g, '`$1` 技能的 `SKILL.md`')
+      // 其余 `${CLAUDE_PLUGIN_ROOT}/academic-paper/references/x.md` 这种：去掉插件根，
+      // 保留技能根相对路径（前面技能加载说明已经说清从哪个技能目录解析）。
+      .replace(/`?\$\{CLAUDE_PLUGIN_ROOT\}\/([^`\s]+)`?/g, '`$1`')
+      .replace(/`?\$\{CLAUDE_PLUGIN_ROOT\}`?/g, '技能资源目录')
+      .replace(/python3\s+scripts\//g, 'python scripts/')
+      .replace(/\$ARGUMENTS/g, '<用户输入>')
+    const runtimeNote = [
+      '',
+      '',
+      '> DSH 运行说明：正文里的 `scripts/...` 指所调用技能目录下的脚本副本；`python` 由设置页选择的系统解释器提供，`bash` 由插件注入，不要改成 Claude Code 的插件根路径。',
+    ].join('\n')
+    const commandBody = `${body}${runtimeNote}`
     const head = [
       '---',
       `name: ${name}`,
@@ -690,7 +739,7 @@ function generateAliasSkills(cfg, repoRoot, stageRoot) {
     ]
     const dir = join(target, name)
     mkdirSync(dir, { recursive: true })
-    writeFileSync(join(dir, 'SKILL.md'), `${head.join('\n')}${body}\n`, 'utf8')
+    writeFileSync(join(dir, 'SKILL.md'), `${head.join('\n')}${commandBody}\n`, 'utf8')
     count += 1
   }
   return count
@@ -701,7 +750,7 @@ function generateAliasSkills(cfg, repoRoot, stageRoot) {
  * 技能目录与命令文本都由这里描述，宿主半侧只读它。
  * 实体放在包根 ars/ 下（root: 'package'），不混进 skills/。
  */
-function writeArsManifest(cfg, records, aliasCount, stageRoot) {
+function writeArsManifest(cfg, records, aliasCount, stageRoot, upstream) {
   const descriptions = cfg.descriptions === undefined
     ? {}
     : JSON.parse(readFileSync(join(ROOT, ...String(cfg.descriptions).split('/')), 'utf8'))
@@ -732,6 +781,9 @@ function writeArsManifest(cfg, records, aliasCount, stageRoot) {
     version: 1,
     label: '学术研究（ARS）',
     upstream: cfg.repo,
+    upstreamVersion: upstream?.version ?? '',
+    upstreamSha: upstream?.sha ?? '',
+    syncedAt: new Date().toISOString(),
     license: 'CC-BY-NC-4.0',
     root: 'ars',
     doc: 'docs/ars-usage.md',
@@ -868,7 +920,7 @@ async function main() {
     if (cfg.runtimeRoot !== undefined) {
       const written = writeArsRuntimeNotes(join(STAGE, ...cfg.runtimeRoot.split('/')))
       log(`  运行时说明写入 ${written} 个技能`)
-      writeArsManifest(cfg, records, aliasCount, STAGE)
+      writeArsManifest(cfg, records, aliasCount, STAGE, { sha, version: upstreamVersion(repoRoot) })
     }
     lock.repos.push({ id: cfg.id, repo: cfg.repo, ref: cfg.ref ?? 'main', sha, label: cfg.label, target: cfg.target, count: records.length, aliases: aliasCount, outsideCatalog: cfg.outsideCatalog === true, skills: records })
     log(`  收录 ${records.length} 个技能`)
@@ -904,7 +956,9 @@ async function main() {
     }
     const restored = restorePreserved(SKILLS, preserved)
     if (restored > 0) log(`回填用户配置 ${restored} 个文件`)
-    applySkillPatches(SKILLS)
+    // 局部更新只该重放目标仓库的补丁；否则会把其它上游的补丁打到已经适配过的树上。
+    if (patchesTargetAny(repos)) applySkillPatches(SKILLS)
+    else log('  跳过错位补丁：本次更新的上游没有 skill-patches')
     applyOverrides(ROOT)
     const existing = existsSync(LOCK)
       ? JSON.parse(readFileSync(LOCK, 'utf8'))

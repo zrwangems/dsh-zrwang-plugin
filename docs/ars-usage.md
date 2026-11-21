@@ -52,3 +52,15 @@
 **关于 Agent Team**：评审团、完整流水线这类多角色流程会用 DSH 的 Agent Team 并行跑；没开 Agent Team 时对应命令会提示先开启。`/ars-plan` 这种单角色对话不受影响。
 
 **关于 Python**：引用核验、PRISMA 计数这类校验脚本需要 Python。插件**不自带也不安装** Python，只检测本机解释器；到「设置 → 运行环境 → Python 解释器」点「重新检测系统 Python」并选一个（缺的包会列出，需自行补齐）。选定后所有技能的 `python`/`python3` 自动指向它；「运行环境 → 组件状态」可检查解释器与依赖。
+
+## 上游版本与改动范围
+
+这部分内容来自 [Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) **v3.24.4**（提交 `00315df`），五个技能的正文、角色提示、参考文件、模板和命令步骤都是复制过来的，不是重写。插件只做这些适配：
+
+- 把上游根目录的 `shared/` 和用到的 `scripts/` 放进每个技能，路径从 `shared/...` 改为 `_shared/...`；
+- 跨技能引用改成 `../<技能名>/...`，五个技能一起勾选即可互相读取；
+- 顶部注明输出简体中文、多角色流程用 DSH Agent Team；
+- `/ars-*` 命令保留上游的模式说明和脚本步骤，去掉 Claude Code 的 Skill 工具写法与插件根占位符；
+- `WebSearch`/`WebFetch`/`AskUserQuestion` 换成 DSH 的 `web_search`/`web_fetch`/`ask_user_question`。
+
+逐文件对照结果、每个命令对应的技能/模式，以及没有搬过来的 Claude Code hooks，写在 [ars-alignment.md](ars-alignment.md)。同步与核对：`node scripts/vendor-skills.mjs --only=ars`、`npm run verify:ars`。

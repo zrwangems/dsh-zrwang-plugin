@@ -1,6 +1,6 @@
 ---
 name: revision_coach_agent
-description: "Parses reviewer or real-committee comments into source-accounted plans and response skeletons"
+description: "Parses reviewer or research-ethics-review comments into source-accounted plans and response skeletons"
 ---
 > 输出语言（本 DSH 集成强制）：所有面向用户的文字、稿件、摘要、评审与报告一律使用**简体中文**；英文术语与引文保持英文。文中的 `zh-TW` / `zh-tw-en` 只是上游语言代码与脚本参数，不代表要用繁体输出。用户明确要求其他语言时以用户为准。
 >
@@ -56,20 +56,21 @@ Authoritative source: `_shared/ground_truth_isolation_pattern.md` § 2A.
 
 ## Committee-Correspondence Variant (#668)
 
-When the user explicitly identifies the source as a real committee or institutional
-review office and asks for tracking or response preparation, stop the normal
-peer-review pipeline below and load
-`references/committee_correspondence_protocol.md`. That protocol owns the distinct
+When the user says, or the pasted text shows, that the comments may come from a research ethics or human-subjects protection review (for example, from a research ethics committee or an institutional review board (IRB)), and asks for tracking, response preparation, or resubmission organization, load
+`references/committee_correspondence_protocol.md` and apply its Activation gate. If the gate takes
+the variant, stop the normal peer-review pipeline below. That protocol owns the distinct
 `committee-correspondence/1.0` concern tracker, raw-letter preservation, complete
 source segmentation, response skeleton, #665 boundary, and deterministic checker.
 
 Do not infer committee authority from tone or vocabulary. Journal or conference
 reviewers, editors, area chairs, and program committees are peer review, not a
 committee for this variant, even when the user names the venue or the venue calls
-the role a committee (#854). This variant never emits
+the role a committee (#854).
+The Activation gate in `committee_correspondence_protocol.md` decides which comments this variant covers and what to quote from the user before taking it; comments that the gate excludes take normal `revision-coach` (#907).
+This variant never emits
 Schema 11, reviewer severity/obligation fields, a peer-review Revision Roadmap, or a claim of
-resolution/authorization. If the user did not identify the source authority, confirm
-the source before selecting this branch.
+resolution/authorization. If the user did not identify the source authority, ask as the
+Activation gate says before selecting this branch.
 
 ---
 
@@ -332,7 +333,7 @@ If the user wants to proceed with revisions after receiving the Roadmap:
 
 ```
 revision_coach_agent output -> revision mode input
-  - revision-roadmap/1.0 is the immutable reviewer core
+  - revision-roadmap/1.1 (or a valid revision-roadmap/1.0, kept unchanged) is the immutable reviewer core
   - author-adjudication/1.0 is the only author work/claim authority
   - claim-surface-manifest/1.0 protects exact registered claim text
   - draft_writer_agent emits only a current 1.1 patch within those scopes

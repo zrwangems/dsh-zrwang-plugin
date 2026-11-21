@@ -11,7 +11,9 @@ Read scope is required for every new mark (#738; declaration-only — pass throu
 
 Implementation:
 ```bash
-python `scripts/ars_mark_read.py`（用技能目录里的副本，解释器由插件自带 Python 提供） 用户本次输入 --passport-path "<path>"
+python scripts/ars_mark_read.py <用户输入> --passport-path "<path>"
 ```
 
 Mode reference: `docs/design/2026-04-30-ars-v3.6.8-trust-provenance-and-drift-transparency-spec.md` §3.6 + Step 7.
+
+> DSH 运行说明：正文里的 `scripts/...` 指所调用技能目录下的脚本副本；`python` 由设置页选择的系统解释器提供，`bash` 由插件注入，不要改成 Claude Code 的插件根路径。

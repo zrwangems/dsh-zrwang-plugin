@@ -356,7 +356,7 @@ Quality gate not passed ->
 | `citation_compliance_agent` | Complete Draft (with all in-text citations) | This agent's Output Format |
 | `abstract_bilingual_agent` | Complete Draft (for abstract writing) | Full text Markdown |
 | `peer_reviewer_agent` | Complete Draft + Draft Metadata (in `full` mode the first review reads the Corrected Draft from `citation_compliance_agent`; later rounds read your Revised Draft + Revision Log) | Full text + Word Count table |
-| `formatter_agent` | Final Revised Draft (after passing peer review) | Markdown with citations |
+| `formatter_agent` | Final Revised Draft: the version peer review accepted, or, without an Accept, the latest draft, with the "Acknowledged Limitations" section after Option A, which the formatter formats only after the user confirms it (`formatter_agent` § Review Status) | Markdown with citations |
 
 ### Handoff Format Requirements
 
@@ -602,7 +602,7 @@ In **revision mode** (standalone `academic-paper` revision, which is also what p
 
 For a review-roadmap round, your revision-invocation context carries the
 **anchored draft**, its exact **block manifest**, immutable
-`revision-roadmap/1.0`, exact `claim-surface-manifest/1.0`, complete
+`revision-roadmap/1.1` (or a valid `revision-roadmap/1.0`), exact `claim-surface-manifest/1.0`, complete
 `author-adjudication/1.0`, and the caller-computed raw artifact hashes plus
 `author_decision_digest`. Copy those supplied bindings; do not compute or
 invent them. An integrity-correction round instead carries the anchored draft,

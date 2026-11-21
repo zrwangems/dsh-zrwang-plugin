@@ -13,7 +13,9 @@ To invalidate the **entire** cache at once (e.g. after a systemic resolver bug c
 
 Implementation:
 ```bash
-python `scripts/ars_cache_invalidate.py`（用技能目录里的副本，解释器由插件自带 Python 提供） 用户本次输入
+python scripts/ars_cache_invalidate.py <用户输入>
 ```
 
 Mode reference: `docs/design/2026-05-21-v3.10-182-promote-citation-gate-spec.md` §2 Delta 2.
+
+> DSH 运行说明：正文里的 `scripts/...` 指所调用技能目录下的脚本副本；`python` 由设置页选择的系统解释器提供，`bash` 由插件注入，不要改成 Claude Code 的插件根路径。

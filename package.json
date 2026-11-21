@@ -34,7 +34,8 @@
     "notes": "node scripts/gen-ars-notes.mjs",
     "build": "node scripts/gen-ars-notes.mjs && node scripts/build-client.mjs",
     "verify": "node scripts/verify.mjs",
-    "smoke": "node scripts/smoke-host.mjs"
+    "smoke": "node scripts/smoke-host.mjs",
+    "verify:ars": "node scripts/audit-ars-alignment.mjs"
   },
   "keywords": [
     "dsh",
