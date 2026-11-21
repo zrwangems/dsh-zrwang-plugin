@@ -117,6 +117,8 @@ function main() {
   }
   for (const group of groups) walk(group, undefined)
 
+  const posix = value => String(value ?? '').split(/[\\/]+/).filter(Boolean).join('/')
+
   const attachSkill = (parentNode, name, dirName) => {
     if (used.has(name)) fail(`技能重复挂载：${name}`)
     used.add(name)
@@ -127,11 +129,11 @@ function main() {
     const info = origin.get(name) ?? { repo: 'local', sha: 'local', path: dirName }
     skills[name] = {
       name,
-      dir: dirName,
+      dir: posix(dirName),
       zh,
       en: en.slice(0, 400),
       group: ancestors(parentNode).map(n => n.id).join('/'),
-      path: dirName.split('\\').join('/'),
+      path: posix(dirName),
       repo: info.repo,
       sha: info.sha,
     }
@@ -141,7 +143,7 @@ function main() {
       title: name,
       zh,
       name,
-      dir: dirName.split('\\').join('/'),
+      dir: posix(dirName),
     }
     parentNode.children ??= []
     parentNode.children.push(node)

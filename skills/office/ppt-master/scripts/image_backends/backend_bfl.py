@@ -189,7 +189,7 @@ def generate(prompt: str,
     _resolve_request_options(aspect_ratio, image_size, resolved_model)
     api_key = require_api_key(
         "BFL_API_KEY",
-        message="No API key found. Set BFL_API_KEY in the current environment or a .env file.",
+        message="No API key found. Set BFL_API_KEY in the current environment (set through the DSH plugin settings).",
     )
     base_url = os.environ.get("BFL_BASE_URL") or DEFAULT_BASE_URL
 

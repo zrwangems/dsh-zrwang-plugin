@@ -195,7 +195,7 @@ function main() {
   }
 
   mkdirSync(RECORD_DIR, { recursive: true })
-  writeFileSync(join(RECORD_DIR, 'skill-config-matrix.json'), `${JSON.stringify(json, null, 2)}${NL}`, 'utf8')
+  if (!CHECK) writeFileSync(join(RECORD_DIR, 'skill-config-matrix.json'), `${JSON.stringify(json, null, 2)}${NL}`, 'utf8')
 
   const md = []
   md.push('# 技能与组件配置覆盖矩阵')
@@ -231,7 +231,7 @@ function main() {
     md.push(`| ${row.name} | \`${row.dir}\` | ${row.modules.join('、') || '-'} | ${STATUS_LABELS[row.status] ?? row.status} | ${hitText} | ${note.replaceAll('|', '/')} | ${row.check.replaceAll('|', '/')} |`)
   }
   md.push('')
-  writeFileSync(join(RECORD_DIR, 'skill-config-matrix.md'), `${md.join(NL)}${NL}`, 'utf8')
+  if (!CHECK) writeFileSync(join(RECORD_DIR, 'skill-config-matrix.md'), `${md.join(NL)}${NL}`, 'utf8')
 
   console.log(`技能 ${rows.length} 个，组件 ${components.length} 个`)
   console.log(Object.entries(summary).map(([status, count]) => `${STATUS_LABELS[status] ?? status}=${count}`).join('  '))
@@ -243,7 +243,7 @@ function main() {
       console.log(`  - ${name} [${row.profile}] ${keys}`)
     }
   }
-  console.log(`\n已写入 ${relative(ROOT, join(RECORD_DIR, 'skill-config-matrix.md'))}`)
+  if (!CHECK) console.log(`\n已写入 ${relative(ROOT, join(RECORD_DIR, 'skill-config-matrix.md'))}`)
   if (CHECK && unresolved.length > 0) process.exit(1)
 }
 

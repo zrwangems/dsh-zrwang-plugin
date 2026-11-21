@@ -48,11 +48,8 @@ def main(argv: list[str] | None = None) -> int:
             vault_s = resolved["vault"]
         else:
             print(
-                "错误：未配置 Obsidian 库。可先运行：\n"
-                "  python skills/patent-reader/tools/vault/check_obsidian_env.py\n"
-                "然后：\n"
-                '  python skills/patent-reader/tools/vault/check_obsidian_env.py --set "你的库路径"\n'
-                "或不入库，仅用 write 写入 outputs/patent_reader/。",
+                "错误：未配置 Obsidian 库。请在 DSH 插件设置 → 科研服务 → 专利检索向量模型 "
+                "里填写 Obsidian 专利库路径；或不入库，仅用 write 写入 outputs/patent_reader/。",
                 file=sys.stderr,
             )
             return 1

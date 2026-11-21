@@ -29,9 +29,10 @@
     "SKILL-ADAPTATIONS.md"
   ],
   "scripts": {
-    "vendor": "node scripts/vendor-skills.mjs",
+    "vendor": "node scripts/vendor-skills.mjs && node scripts/gen-ars-notes.mjs",
     "catalog": "node scripts/gen-catalog.mjs",
-    "build": "node scripts/build-client.mjs",
+    "notes": "node scripts/gen-ars-notes.mjs",
+    "build": "node scripts/gen-ars-notes.mjs && node scripts/build-client.mjs",
     "verify": "node scripts/verify.mjs",
     "smoke": "node scripts/smoke-host.mjs"
   },

@@ -3,7 +3,7 @@ name: patent-reader
 description: "专利通俗解读：中国或海外（美欧日韩等）公开号 / PDF 成通俗笔记、图谱与 Obsidian 入库。"
 user-invocable: false
 ---
-> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的对应子目录（oa / patent-map / obsidian_vault.txt），不要写 `~/Documents/patent-disclosure-skill`；Obsidian 库路径可用 `PATENT_READER_OBSIDIAN_VAULT` 覆盖。
+> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的 oa / patent-map；不要写 `~/Documents/patent-disclosure-skill` 或 `~/.patent-disclosure-skill`。Obsidian 库路径由 DSH 插件设置（科研服务 → 专利检索向量模型）注入 `PATENT_READER_OBSIDIAN_VAULT`，本技能不读写 `obsidian_vault.txt`。
 # 专利通俗解读
 
 ## 用途

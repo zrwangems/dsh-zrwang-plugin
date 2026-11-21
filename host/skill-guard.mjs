@@ -17,44 +17,43 @@
  */
 import { existsSync, realpathSync } from 'node:fs'
 import { dirname, isAbsolute, join, resolve } from 'node:path'
-import { PKG_DIR, SKILLS_DIR } from './config.mjs'
-import { ARS_DIR } from './ars.mjs'
+import { ARS_DIR, PKG_DIR, SKILLS_DIR } from './config.mjs'
 
 /** 受保护的根目录：插件内的所有技能实体。 */
 export const PROTECTED_ROOTS = [SKILLS_DIR, ARS_DIR]
 
-/** Windows 下路径大小写不敏感。 */
-function normalize(path) {
-  const text = String(path).replace(/\//g, '\\').replace(/\\+$/, '')
-  return process.platform === 'win32' ? text.toLowerCase() : text
-}
-
-/** 把路径解析成真实路径；文件还不存在时，向上找到最近的已存在祖先再拼回去。 */
-function canonical(path) {
-  let current = path
+/** 尽量取真实路径；目标不存在时沿父目录回溯，避免联接绕过。 */
+function canonical(target) {
+  let current = resolve(target)
   const tail = []
-  for (let depth = 0; depth < 40; depth += 1) {
-    if (existsSync(current)) {
-      let real
-      try {
-        real = realpathSync.native(current)
-      } catch {
-        real = current
+  for (;;) {
+    try {
+      if (existsSync(current)) {
+        return join(realpathSync.native(current), ...tail.reverse())
       }
-      return tail.length === 0 ? real : join(real, ...tail.reverse())
+    } catch {
+      // 权限不足等情况下按原路径判断
+      return resolve(target)
     }
     const parent = dirname(current)
-    if (parent === current) return path
-    tail.push(current.slice(parent.length).replace(/^[\\/]+/, ''))
+    if (parent === current) return resolve(target)
+    tail.push(current.slice(parent.length).replace(/^[\\/]/, ''))
     current = parent
   }
-  return path
+}
+
+/** Windows 下路径大小写不敏感；两种分隔符都接受。 */
+function normalize(path) {
+  const text = String(path).replace(/[\\/]+$/, '')
+  return process.platform === 'win32' ? text.toLowerCase() : text
 }
 
 function isInside(parent, child) {
   const a = normalize(parent)
   const b = normalize(child)
-  return b === a || b.startsWith(`${a}\\`)
+  if (b === a) return true
+  const sep = process.platform === 'win32' ? /[\\/]/ : /\//
+  return b.startsWith(a) && sep.test(b.charAt(a.length))
 }
 
 /**

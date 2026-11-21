@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Load patent-search pagination defaults from config.yaml (dialog / CLI may override)."""
+"""Patent-search pagination defaults (in code; dialog / CLI may override)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -22,50 +22,16 @@ GOOGLE_PATENTS_DEFAULTS: dict[str, Any] = {
 }
 
 
-def config_path() -> Path:
-    return Path(__file__).resolve().parents[1] / "config.yaml"
-
-
-def _load_yaml(path: Path | None) -> dict[str, Any]:
-    target = path or config_path()
-    if not target.is_file():
-        return {}
-    try:
-        import yaml
-    except ImportError:
-        return {}
-    data = yaml.safe_load(target.read_text(encoding="utf-8")) or {}
-    return data if isinstance(data, dict) else {}
-
-
 def load_google_patents_config(path: Path | None = None) -> dict[str, Any]:
-    cfg = dict(GOOGLE_PATENTS_DEFAULTS)
-    section = _load_yaml(path).get("google_patents")
-    if not isinstance(section, dict):
-        return cfg
-    for key in GOOGLE_PATENTS_DEFAULTS:
-        if key not in section:
-            continue
-        try:
-            cfg[key] = int(section[key])
-        except (TypeError, ValueError):
-            continue
-    return cfg
+    """Defaults are in code; the old config.yaml is gone."""
+    del path
+    return dict(GOOGLE_PATENTS_DEFAULTS)
 
 
 def load_search_config(path: Path | None = None) -> dict[str, Any]:
-    cfg = dict(DEFAULTS)
-    data = _load_yaml(path)
-    if not data:
-        return cfg
-    for key in _INT_KEYS:
-        if key not in data:
-            continue
-        try:
-            cfg[key] = int(data[key])
-        except (TypeError, ValueError):
-            continue
-    return cfg
+    """Defaults are in code; the old config.yaml is gone."""
+    del path
+    return dict(DEFAULTS)
 
 
 def resolve_max_pages(

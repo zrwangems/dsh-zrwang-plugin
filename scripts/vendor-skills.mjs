@@ -137,6 +137,40 @@ function applySkillPatches(root) {
   log(`已应用技能补丁 ${document.patches?.length ?? 0} 组`)
 }
 
+/**
+ * 插件对上游技能的实际适配版本：vendor 最后一步覆盖到仓库，再按 removals 删除
+ * 上游多余文件。放在版本库里，重跑 vendor 不会丢改动。
+ */
+function applyOverrides(root = ROOT) {
+  const base = join(ROOT, 'vendor', 'overrides')
+  if (!existsSync(base)) return
+  for (const part of ['skills', 'ars']) {
+    const src = join(base, part)
+    if (!existsSync(src)) continue
+    const dest = join(root, part)
+    mkdirSync(dest, { recursive: true })
+    cpSync(src, dest, { recursive: true, force: true })
+  }
+  const removalsFile = join(ROOT, 'vendor', 'removals.json')
+  if (!existsSync(removalsFile)) return
+  const removals = JSON.parse(readFileSync(removalsFile, 'utf8')).remove ?? []
+  for (const rel of removals) {
+    const target = join(root, ...String(rel).split('/'))
+    rmSync(target, { force: true })
+    let parent = dirname(target)
+    while (parent.startsWith(root) && parent !== root && existsSync(parent)) {
+      try {
+        if (readdirSync(parent).length > 0) break
+        rmdirSync(parent)
+        parent = dirname(parent)
+      } catch {
+        break
+      }
+    }
+  }
+  log(`已应用插件适配覆盖 ${removals.length} 项删除`)
+}
+
 function restorePreserved(stage, preserved) {
   let restored = 0
   for (const [rel, bytes] of preserved) {
@@ -832,8 +866,8 @@ async function main() {
     const aliasCount = generateAliasSkills(cfg, repoRoot, STAGE)
     if (aliasCount > 0) log(`  命令别名 ${aliasCount} 个`)
     if (cfg.runtimeRoot !== undefined) {
-      const written = await writeArsRuntimeNotes(arsParams(), join(STAGE, ...cfg.runtimeRoot.split('/')))
-      log(`  运行时说明写入 ${written.written} 个技能（Python：${written.python.path || '未找到'}）`)
+      const written = writeArsRuntimeNotes(join(STAGE, ...cfg.runtimeRoot.split('/')))
+      log(`  运行时说明写入 ${written} 个技能`)
       writeArsManifest(cfg, records, aliasCount, STAGE)
     }
     lock.repos.push({ id: cfg.id, repo: cfg.repo, ref: cfg.ref ?? 'main', sha, label: cfg.label, target: cfg.target, count: records.length, aliases: aliasCount, outsideCatalog: cfg.outsideCatalog === true, skills: records })
@@ -871,6 +905,7 @@ async function main() {
     const restored = restorePreserved(SKILLS, preserved)
     if (restored > 0) log(`回填用户配置 ${restored} 个文件`)
     applySkillPatches(SKILLS)
+    applyOverrides(ROOT)
     const existing = existsSync(LOCK)
       ? JSON.parse(readFileSync(LOCK, 'utf8'))
       : { version: 1, repos: [], totals: { skills: 0 } }
@@ -910,6 +945,7 @@ async function main() {
       log(`  ${cfg.id}: 技能树外内容已写入包根 ${cfg.target}`)
     }
     renameSync(STAGE, SKILLS)
+    applyOverrides(ROOT)
     lock.totals.skills = seen.size
     writeFileSync(LOCK, `${JSON.stringify(lock, null, 2)}\n`, 'utf8')
     log(`\n完成：${lock.totals.skills} 个技能，lock 写入 ${relative(ROOT, LOCK)}`)

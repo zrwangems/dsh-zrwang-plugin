@@ -1,66 +1,49 @@
-"""Configuration management for academic search server.
+"""Configuration for the academic search server.
 
-默认值直接写在这里（随技能分发），不再生成 config.toml。
-需要改参数时改这份代码或在环境变量里给值（PUBMED_EMAIL / NCBI_API_KEY / CROSSREF_MAILTO）。
+All user-facing values come from the DSH plugin settings, injected as
+environment variables. The skill has no config file and never writes one.
+
+Environment:
+    NCBI_EMAIL / PUBMED_EMAIL  contact email for PubMed
+    NCBI_API_KEY               optional PubMed API key
+    CROSSREF_MAILTO            optional Crossref polite-pool email
 """
 
 import os
-from pathlib import Path
-
-try:
-    import toml
-except ImportError:  # toml 只用于读取可选的用户配置文件
-    toml = None
-
-
-DEFAULTS = {
-    "pubmed": {"email": "", "api_key": "", "cache_dir": "~/.cache/academic-search", "cache_ttl": 86400},
-    "crossref": {"mailto": "", "timeout": 15},
-    "arxiv": {"timeout": 30},
-    "general": {"default_rows": 5, "max_rows": 50},
-}
 
 
 class Config:
-    def __init__(self, config_path: str | Path | None = None):
-        self._config = DEFAULTS
-        if config_path is None:
-            env_path = os.environ.get("ZRWANG_NATURE_ACADEMIC_CONFIG", "").strip()
-            config_path = Path(env_path) if env_path else Path(__file__).parent.parent / "config.toml"
-        # 没有配置文件就用上面的默认值；设置页只在用户真的填了参数时才写这个文件。
-        if toml is not None and Path(config_path).is_file():
-            self._config = toml.load(config_path)
+    """Read-only view over the plugin-injected environment."""
 
     @property
     def pubmed_email(self) -> str:
-        return os.environ.get("PUBMED_EMAIL") or self._config.get("pubmed", {}).get("email", "")
+        return (os.environ.get("NCBI_EMAIL") or os.environ.get("PUBMED_EMAIL") or "").strip()
 
     @property
     def pubmed_api_key(self) -> str:
-        return os.environ.get("NCBI_API_KEY") or self._config.get("pubmed", {}).get("api_key", "")
+        return (os.environ.get("NCBI_API_KEY") or "").strip()
 
     @property
     def crossref_mailto(self) -> str:
-        return os.environ.get("CROSSREF_MAILTO") or self._config.get("crossref", {}).get("mailto", "")
+        return (os.environ.get("CROSSREF_MAILTO") or "").strip()
 
     @property
     def crossref_timeout(self) -> int:
-        return self._config.get("crossref", {}).get("timeout", 15)
+        return 15
 
     @property
     def arxiv_timeout(self) -> int:
-        return self._config.get("arxiv", {}).get("timeout", 30)
+        return 30
 
     @property
     def default_rows(self) -> int:
-        return self._config.get("general", {}).get("default_rows", 5)
+        return 5
 
     @property
     def max_rows(self) -> int:
-        return self._config.get("general", {}).get("max_rows", 50)
+        return 50
 
 
-# Global config instance
 _config: Config | None = None
 
 

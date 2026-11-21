@@ -5,7 +5,7 @@
  */
 import { existsSync } from 'node:fs'
 import { dirname, isAbsolute, join, parse, relative, resolve } from 'node:path'
-import { PPT_PROJECTS_REL, SKILLS_REL } from './config.mjs'
+import { SKILLS_REL } from './config.mjs'
 
 /** 拒绝盘符根、Windows 目录等明显不该写的位置。 */
 export function validateCwd(cwd) {
@@ -35,9 +35,6 @@ export function skillsRootOf(projectRoot) {
   return join(projectRoot, ...SKILLS_REL)
 }
 
-export function pptProjectsRootOf(projectRoot) {
-  return join(projectRoot, ...PPT_PROJECTS_REL)
-}
 
 /** child 是否在 parent 之内（Windows 大小写不敏感）。 */
 export function isInside(parent, child) {

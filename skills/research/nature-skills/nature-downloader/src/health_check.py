@@ -7,20 +7,22 @@
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any, Optional
 
-from config import CONFIG_DIR, load_config
+from config import load_config
 from validators import validate_carsi_entry, validate_sso_domain
 
-# 缓存文件
-CACHE_FILE = CONFIG_DIR / "health_cache.json"
+# 缓存只写插件运行期目录（ZRWANG_PLUGIN_CACHE）；没有该变量就不落盘。
+_CACHE_DIR = os.environ.get("ZRWANG_PLUGIN_CACHE", "").strip()
+CACHE_FILE = Path(_CACHE_DIR) / "nature-downloader-health.json" if _CACHE_DIR else None
 CACHE_TTL = 600  # 10 分钟
 
 
 def _load_cache() -> Optional[dict[str, Any]]:
-    if not CACHE_FILE.exists():
+    if CACHE_FILE is None or not CACHE_FILE.exists():
         return None
     try:
         with open(CACHE_FILE, "r", encoding="utf-8") as f:
@@ -30,13 +32,15 @@ def _load_cache() -> Optional[dict[str, Any]]:
 
 
 def _save_cache(data: dict[str, Any]) -> None:
-    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    if CACHE_FILE is None:
+        return
+    CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def _clear_cache() -> None:
-    if CACHE_FILE.exists():
+    if CACHE_FILE is not None and CACHE_FILE.exists():
         CACHE_FILE.unlink()
 
 

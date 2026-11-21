@@ -187,7 +187,7 @@ class PubMedSource:
         if not cfg.pubmed_email:
             raise DataSourceError(
                 SOURCE_NAME,
-                "PubMed email not configured. Set PUBMED_EMAIL env var or [pubmed].email in config.toml",
+                "PubMed email not configured. 在 DSH 插件设置里填 PubMed 联系邮箱",
             )
 
         rows = min(rows, cfg.max_rows)
@@ -259,7 +259,7 @@ class PubMedSource:
         if not cfg.pubmed_email:
             raise DataSourceError(
                 SOURCE_NAME,
-                "PubMed email not configured. Set PUBMED_EMAIL env var or [pubmed].email in config.toml",
+                "PubMed email not configured. 在 DSH 插件设置里填 PubMed 联系邮箱",
             )
 
         fetch_params: dict[str, Any] = {
@@ -296,7 +296,7 @@ class PubMedSource:
         if not cfg.pubmed_email:
             raise DataSourceError(
                 SOURCE_NAME,
-                "PubMed email not configured. Set PUBMED_EMAIL env var or [pubmed].email in config.toml",
+                "PubMed email not configured. 在 DSH 插件设置里填 PubMed 联系邮箱",
             )
 
         # Use esearch on MeSH database

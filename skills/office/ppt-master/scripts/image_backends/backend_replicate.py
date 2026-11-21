@@ -178,7 +178,7 @@ def generate(prompt: str,
     api_key = require_api_key(
         "REPLICATE_API_KEY",
         "REPLICATE_API_TOKEN",
-        message="No API key found. Set REPLICATE_API_KEY or REPLICATE_API_TOKEN in the current environment or a .env file.",
+        message="No API key found. Set REPLICATE_API_KEY or REPLICATE_API_TOKEN in the current environment (set through the DSH plugin settings).",
     )
     base_url = os.environ.get("REPLICATE_BASE_URL") or DEFAULT_BASE_URL
 

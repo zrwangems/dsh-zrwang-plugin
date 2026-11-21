@@ -7,32 +7,20 @@ import sys
 from pathlib import Path
 
 
-def persisted_vault_config_path() -> Path:
-    """用户级持久化：Obsidian 库路径（项目内优先，其次用户主目录）。"""
-    cwd = Path.cwd().resolve()
-    for parent in [cwd, *cwd.parents]:
-        if (parent / ".git").exists():
-            return parent / ".agents" / "patent" / "obsidian_vault.txt"
-    home = Path.home()
-    return home / ".patent-disclosure-skill" / "obsidian_vault.txt"
+def persisted_vault_config_path() -> Path | None:
+    """库路径只来自插件设置，不再有持久化文件。"""
+    return None
 
 
 def read_persisted_vault() -> str:
-    path = persisted_vault_config_path()
-    if not path.is_file():
-        return ""
-    try:
-        return path.read_text(encoding="utf-8").strip().strip('"').strip("'")
-    except OSError:
-        return ""
+    return ""
 
 
 def write_persisted_vault(vault: str | Path) -> Path:
-    path = persisted_vault_config_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    resolved = str(Path(vault).expanduser().resolve())
-    path.write_text(resolved + "\n", encoding="utf-8")
-    return path
+    raise SystemExit(
+        "Obsidian 库路径请在 DSH 插件设置 → 科研服务 → 专利检索向量模型 → Obsidian 专利库路径 里填写；"
+        f"本技能不写持久化文件（收到：{vault}）。"
+    )
 
 
 def _looks_like_vault(path: Path) -> bool:
@@ -312,15 +300,9 @@ def probe_obsidian_environment() -> dict:
         "vaults": vaults,
         "resolved": resolved,
         "env_var": "PATENT_READER_OBSIDIAN_VAULT",
-        "persisted_config": str(persisted_vault_config_path()),
-        "hint_powershell": (
-            '$env:PATENT_READER_OBSIDIAN_VAULT = "你的库路径"\n'
-            "python skills/patent-reader/tools/vault/check_obsidian_env.py --set \"你的库路径\""
-        ),
-        "hint_bash": (
-            'export PATENT_READER_OBSIDIAN_VAULT="你的库路径"\n'
-            'python skills/patent-reader/tools/vault/check_obsidian_env.py --set "你的库路径"'
-        ),
+        "persisted_config": "",
+        "hint_powershell": '在 DSH 插件设置 → 科研服务 → 专利检索向量模型 里填写 Obsidian 专利库路径',
+        "hint_bash": '在 DSH 插件设置 → 科研服务 → 专利检索向量模型 里填写 Obsidian 专利库路径',
     }
 
 

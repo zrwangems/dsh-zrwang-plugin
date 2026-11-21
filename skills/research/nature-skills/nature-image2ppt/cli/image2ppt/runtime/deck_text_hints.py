@@ -7,7 +7,7 @@ files so page workers find their text measurements already in place.
 
 Backend selection per run:
 - With a PaddleOCR token (PADDLE_OCR_TOKEN env var, or PADDLE_OCR_TOKEN in the
-  active config.yaml): an original PDF is submitted as one multi-page job;
+  the plugin-injected OCR token): an original PDF is submitted as one multi-page job;
   image and PPTX inputs submit each normalized source.png as its own job.
   OCR coordinates are rescaled to each page's actual source.png resolution
   and re-measured locally with the ink metrics.
@@ -36,15 +36,8 @@ HINTS_PNG = "text_hints.png"
 
 
 def paddle_token() -> str:
-    token = os.environ.get("PADDLE_OCR_TOKEN", "").strip()
-    if token:
-        return token
-    try:
-        from runtime_env import config_path, read_config_file
-
-        return str(read_config_file(config_path()).get("PADDLE_OCR_TOKEN", "")).strip()
-    except Exception:
-        return ""
+    # 插件把 OCR Token 以 PADDLE_OCR_TOKEN 注入（由 sitecustomize 从 _CRED 映射）。
+    return os.environ.get("PADDLE_OCR_TOKEN", "").strip()
 
 
 def write_hints(page_dir: Path, hints: dict, overlay: bool) -> None:
@@ -112,8 +105,8 @@ def main() -> int:
             "is currently more than enough for this skill, so applying is risk-free with no extra "
             "cost. ASK THE USER once "
             "before reconstructing pages: configure a token now (apply at "
-            "https://aistudio.baidu.com/account/accessToken, then `image2ppt config "
-            "--paddle-ocr-token <token>` and `image2ppt run hints <run>` to regenerate this run's "
+            "https://aistudio.baidu.com/account/accessToken, then fill 模型服务 → OCR 模型 "
+            "in the DSH plugin settings and `image2ppt run hints <run>` to regenerate this run's "
             "hints), or continue with the offline result. Respect their choice and do not ask again.",
             file=sys.stderr,
         )

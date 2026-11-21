@@ -15,11 +15,29 @@ async function catalogFiles() {
   return { catalogFile: CATALOG_FILE, defaultsFile: join(resolve(CATALOG_FILE, '..'), 'defaults.json') }
 }
 
+function posix(path) {
+  return String(path ?? '').split(/[\\/]+/).filter(Boolean).join('/')
+}
+
+/** 目录树里的路径统一成 posix；catalog 历史版本在 Windows 上生成过反斜杠。 */
+export function normalizeCatalogPaths(catalog) {
+  const walk = node => {
+    if (typeof node.dir === 'string') node.dir = posix(node.dir)
+    for (const child of node.children ?? []) walk(child)
+  }
+  for (const skill of Object.values(catalog.skills ?? {})) {
+    if (typeof skill.dir === 'string') skill.dir = posix(skill.dir)
+    if (typeof skill.path === 'string') skill.path = posix(skill.path)
+  }
+  for (const group of catalog.groups ?? []) walk(group)
+  return catalog
+}
+
 export async function loadCatalog() {
   const files = await catalogFiles()
   const info = await stat(files.catalogFile)
   if (cache !== undefined && info.mtimeMs === cacheMtime) return cache
-  const catalog = JSON.parse(await readFile(files.catalogFile, 'utf8'))
+  const catalog = normalizeCatalogPaths(JSON.parse(await readFile(files.catalogFile, 'utf8')))
   try {
     const defaults = JSON.parse(await readFile(files.defaultsFile, 'utf8'))
     if (Array.isArray(defaults.skills)) catalog.defaults = defaults.skills

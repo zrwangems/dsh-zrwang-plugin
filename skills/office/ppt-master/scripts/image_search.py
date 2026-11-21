@@ -62,7 +62,6 @@ if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from console_encoding import configure_utf8_stdio  # noqa: E402
-from config import load_prefixed_env_file  # noqa: E402
 from image_backends.backend_common import download_image, save_image_bytes  # noqa: E402
 from image_sources.provider_common import (  # noqa: E402
     AssetCandidate,
@@ -256,21 +255,6 @@ def _warn_weak_required_terms(required_terms: tuple[str, ...]) -> None:
             "Needs-Manual or --from-url over loosening identity gates.",
             file=sys.stderr,
         )
-
-
-# ---------------------------------------------------------------------------
-# .env loading
-# ---------------------------------------------------------------------------
-
-
-def _load_search_env_file() -> None:
-    """Load image-search keys from the shared PPT Master .env locations."""
-    load_prefixed_env_file(("PEXELS_", "PIXABAY_"))
-
-
-# ---------------------------------------------------------------------------
-# Provider dispatch
-# ---------------------------------------------------------------------------
 
 
 def _load_provider(name: str):
@@ -2615,7 +2599,6 @@ def _default_provider_chain() -> list[str]:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    _load_search_env_file()
 
     parser = build_parser()
     args = parser.parse_args(argv)

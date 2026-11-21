@@ -42,7 +42,6 @@ from pathlib import Path
 
 import authoring_roundtrip
 from console_encoding import configure_utf8_stdio
-from config import load_prefixed_env_file
 from pptx_workspace import (
     AUTHORING_SVG_FLAT_DIR,
     ROUNDTRIP_MANIFEST_PATH,
@@ -85,20 +84,6 @@ class AudioJob:
     output_path: Path
 
 
-def _load_tts_env_file() -> None:
-    """Load TTS-related keys from the first .env file, without overriding shell env."""
-    load_prefixed_env_file((
-        "ELEVENLABS_",
-        "MINIMAX_",
-        "QWEN_",
-        "DASHSCOPE_",
-        "COSYVOICE_",
-        "OPENAI_",
-    ))
-
-
-# A Markdown heading needs a space after the hashes; "#1 revenue grew" is speech.
-_ATX_HEADING_RE = re.compile(r" {0,3}#{1,6}(?:[ \t]|$)")
 
 
 def spoken_text(markdown: str) -> str:
@@ -446,7 +431,6 @@ def _normalize_voice_option_args(argv: list[str]) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _load_tts_env_file()
 
     parser = argparse.ArgumentParser(
         description=__doc__,

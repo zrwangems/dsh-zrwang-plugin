@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-21T07:30:22.225Z",
+  "generatedAt": "2026-11-21T08:38:30.762Z",
   "totalSkills": 329,
   "totalComponents": 16,
   "summary": {
@@ -41,15 +41,20 @@
         "archify"
       ],
       "hits": {
+        "home": 3,
+        "hostTool": 1,
+        "bash": 6,
         "configFile": 6,
         "env": 6,
-        "home": 3,
         "cli": 5,
-        "bash": 6,
-        "apiKey": 1,
-        "hostTool": 1
+        "apiKey": 1
       },
       "unexpected": {
+        "home": [
+          "SKILL.md",
+          "bin/visual-check.mjs",
+          "scripts/check-update.mjs"
+        ],
         "configFile": [
           "bin/archify.mjs",
           "bin/delivery-update.mjs",
@@ -65,11 +70,6 @@
           "bin/open-artifact.mjs",
           "bin/preview.mjs",
           "bin/visual-check.mjs"
-        ],
-        "home": [
-          "bin/visual-check.mjs",
-          "scripts/check-update.mjs",
-          "SKILL.md"
         ],
         "apiKey": [
           "scripts/check-render-output.mjs"
@@ -239,19 +239,19 @@
         "drawio"
       ],
       "hits": {
-        "cli": 6,
         "home": 4,
         "env": 3,
+        "cli": 6,
         "bash": 3,
-        "python3": 5,
-        "hostTool": 1
+        "hostTool": 1,
+        "python3": 5
       },
       "unexpected": {
         "home": [
           "README.md",
           "README.zh-CN.md",
-          "scripts/export_drawio.py",
-          "SKILL.md"
+          "SKILL.md",
+          "scripts/export_drawio.py"
         ],
         "env": [
           "README.md",
@@ -336,11 +336,11 @@
       "status": "no-config",
       "modules": [],
       "hits": {
-        "cli": 6,
-        "bash": 6,
-        "python3": 2,
         "home": 1,
-        "hostTool": 1
+        "cli": 4,
+        "hostTool": 1,
+        "bash": 4,
+        "python3": 1
       },
       "unexpected": {
         "home": [
@@ -349,7 +349,7 @@
       },
       "note": "README 里的 ~/.claude 只是上游安装示例，无外部配置。",
       "check": "-",
-      "files": 23
+      "files": 12
     },
     {
       "name": "generate-polyspace-test-xunit-tests",
@@ -394,8 +394,8 @@
       "status": "no-config",
       "modules": [],
       "hits": {
-        "cli": 6,
         "home": 2,
+        "cli": 6,
         "hostTool": 5,
         "bash": 6
       },
@@ -504,11 +504,11 @@
         "lark-cli"
       ],
       "hits": {
-        "hostTool": 2,
+        "configFile": 6,
         "bash": 6,
         "repoPath": 6,
-        "cli": 6,
-        "configFile": 6
+        "hostTool": 2,
+        "cli": 6
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -543,11 +543,11 @@
         "lark-cli"
       ],
       "hits": {
+        "cli": 2,
+        "python3": 1,
         "bash": 6,
         "repoPath": 6,
-        "cli": 2,
-        "apiKey": 1,
-        "python3": 1
+        "apiKey": 1
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -583,8 +583,8 @@
       ],
       "hits": {
         "bash": 4,
-        "cli": 2,
-        "repoPath": 1
+        "repoPath": 1,
+        "cli": 2
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -602,9 +602,9 @@
       ],
       "hits": {
         "bash": 6,
+        "repoPath": 6,
         "home": 1,
         "winPath": 1,
-        "repoPath": 6,
         "cli": 1,
         "apiKey": 2
       },
@@ -623,11 +623,11 @@
         "lark-cli"
       ],
       "hits": {
-        "apiKey": 6,
+        "hostTool": 1,
         "bash": 6,
         "repoPath": 6,
-        "cli": 3,
-        "hostTool": 1
+        "apiKey": 6,
+        "cli": 3
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -663,8 +663,8 @@
         "lark-cli"
       ],
       "hits": {
-        "bash": 6,
         "cli": 5,
+        "bash": 6,
         "repoPath": 6,
         "apiKey": 4
       },
@@ -684,8 +684,8 @@
       ],
       "hits": {
         "bash": 6,
-        "cli": 6,
-        "repoPath": 6
+        "repoPath": 6,
+        "cli": 6
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -827,11 +827,11 @@
         "lark-cli"
       ],
       "hits": {
-        "bash": 6,
-        "python3": 6,
-        "apiKey": 2,
         "hostTool": 1,
-        "repoPath": 1
+        "bash": 6,
+        "repoPath": 1,
+        "python3": 6,
+        "apiKey": 2
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -866,12 +866,12 @@
         "lark-cli"
       ],
       "hits": {
-        "bash": 6,
-        "cli": 5,
-        "python3": 6,
         "apiKey": 3,
         "hostTool": 1,
-        "repoPath": 1
+        "bash": 6,
+        "repoPath": 1,
+        "cli": 5,
+        "python3": 6
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -940,8 +940,8 @@
         "lark-cli"
       ],
       "hits": {
-        "bash": 6,
         "cli": 6,
+        "bash": 6,
         "repoPath": 3
       },
       "unexpected": {},
@@ -959,10 +959,10 @@
         "lark-cli"
       ],
       "hits": {
+        "hostTool": 1,
         "bash": 6,
         "repoPath": 5,
-        "apiKey": 5,
-        "hostTool": 1
+        "apiKey": 5
       },
       "unexpected": {},
       "note": "依赖本机 lark-cli（npm 全局安装 @larksuite/cli）并已登录；正文里的 lark-cli 命令、token/权限说明属正常内容。跨技能引用（../lark-shared 等）要求相关技能一起注入。",
@@ -1640,8 +1640,8 @@
         "matlab-mcp"
       ],
       "hits": {
-        "cli": 2,
-        "env": 1
+        "env": 1,
+        "cli": 2
       },
       "unexpected": {},
       "note": "技能正文里的 matlab 命令与 $env: 示例属正常内容；MATLAB MCP 由插件 MathWorks组件在工程技能组开启时动态注册（existing 模式：需先启动 MATLAB 并 shareMATLABSession()）。",
@@ -1747,8 +1747,8 @@
       ],
       "hits": {
         "cli": 6,
-        "bash": 3,
         "repoPath": 3,
+        "bash": 3,
         "python3": 1
       },
       "unexpected": {},
@@ -2020,8 +2020,8 @@
       "status": "no-config",
       "modules": [],
       "hits": {
-        "cli": 5,
-        "home": 1
+        "home": 1,
+        "cli": 5
       },
       "unexpected": {
         "home": [
@@ -2437,8 +2437,8 @@
         "matlab-mcp"
       ],
       "hits": {
-        "cli": 6,
         "env": 2,
+        "cli": 6,
         "bash": 2
       },
       "unexpected": {},
@@ -2471,9 +2471,9 @@
       "status": "no-config",
       "modules": [],
       "hits": {
-        "cli": 2,
         "home": 1,
         "env": 1,
+        "cli": 2,
         "bash": 1
       },
       "unexpected": {
@@ -2615,8 +2615,8 @@
       ],
       "hits": {
         "cli": 6,
-        "bash": 1,
-        "hostTool": 1
+        "hostTool": 1,
+        "bash": 1
       },
       "unexpected": {},
       "note": "技能正文里的 matlab 命令与 $env: 示例属正常内容；MATLAB MCP 由插件 MathWorks组件在工程技能组开启时动态注册（existing 模式：需先启动 MATLAB 并 shareMATLABSession()）。",
@@ -3112,10 +3112,10 @@
       "status": "no-config",
       "modules": [],
       "hits": {
-        "cli": 2,
         "configFile": 1,
         "env": 1,
-        "apiKey": 1
+        "apiKey": 1,
+        "cli": 2
       },
       "unexpected": {
         "configFile": [
@@ -3503,19 +3503,19 @@
         "third-party-token"
       ],
       "hits": {
+        "home": 1,
+        "apiKey": 2,
         "cli": 3,
         "env": 1,
-        "apiKey": 2,
-        "bash": 1,
-        "home": 1
+        "bash": 1
       },
       "unexpected": {
-        "apiKey": [
-          "references/api-and-gotchas.md",
-          "SKILL.md"
-        ],
         "home": [
           "SKILL.md"
+        ],
+        "apiKey": [
+          "SKILL.md",
+          "references/api-and-gotchas.md"
         ]
       },
       "note": "只有私有 MATLAB Package Repository 才需要 ARTIFACTORY_TOKEN；属第三方服务，可选。",
@@ -3604,8 +3604,8 @@
       ],
       "hits": {
         "cli": 6,
-        "bash": 1,
-        "repoPath": 1
+        "repoPath": 1,
+        "bash": 1
       },
       "unexpected": {},
       "note": "技能正文里的 matlab 命令与 $env: 示例属正常内容；MATLAB MCP 由插件 MathWorks组件在工程技能组开启时动态注册（existing 模式：需先启动 MATLAB 并 shareMATLABSession()）。",
@@ -3780,38 +3780,34 @@
         "mcp-degraded"
       ],
       "hits": {
-        "configFile": 6,
+        "home": 4,
+        "configFile": 4,
         "apiKey": 6,
-        "hostTool": 1,
-        "python3": 2,
-        "bash": 4,
-        "home": 5,
+        "bash": 3,
         "env": 2,
+        "python3": 1,
         "cli": 1
       },
       "unexpected": {
-        "configFile": [
-          "install.sh",
-          "mcp-server/README.md",
-          "mcp-server/sources/pubmed.py",
-          "mcp-server/utils/config.py",
+        "home": [
           "README.md",
-          "README_EN.md"
+          "README_EN.md",
+          "mcp-server/README.md",
+          "static/core/routing-and-ops.md"
+        ],
+        "configFile": [
+          "README.md",
+          "README_EN.md",
+          "mcp-server/README.md",
+          "static/core/routing-and-ops.md"
         ],
         "apiKey": [
-          "install.sh",
-          "mcp-server/README.md",
-          "mcp-server/utils/config.py",
           "README.md",
           "README_EN.md",
+          "SKILL.md",
+          "mcp-server/README.md",
+          "mcp-server/utils/config.py",
           "scripts/academic_search.py"
-        ],
-        "home": [
-          "mcp-server/README.md",
-          "mcp-server/utils/config.py",
-          "README.md",
-          "README_EN.md",
-          "static/core/routing-and-ops.md"
         ],
         "env": [
           "mcp-server/utils/config.py",
@@ -3820,7 +3816,7 @@
       },
       "note": "MCP 未注册，降级为 OpenAlex + web_search/web_fetch；config.toml 由插件写入。",
       "check": "python <skill>/scripts/preflight.py",
-      "files": 40
+      "files": 36
     },
     {
       "name": "nature-citation",
@@ -3830,22 +3826,22 @@
       "status": "no-config",
       "modules": [],
       "hits": {
+        "apiKey": 2,
         "bash": 2,
         "home": 1,
         "env": 1,
-        "python3": 1,
-        "apiKey": 2
+        "python3": 1
       },
       "unexpected": {
+        "apiKey": [
+          "SKILL.md",
+          "static/core/principles.md"
+        ],
         "home": [
           "scripts/nature_citation.py"
         ],
         "env": [
           "scripts/nature_citation.py"
-        ],
-        "apiKey": [
-          "SKILL.md",
-          "static/core/principles.md"
         ]
       },
       "note": "expanduser 只处理调用参数；FIRECRAWL_API_KEY 属可选第三方抓取服务。",
@@ -3878,47 +3874,36 @@
         "python"
       ],
       "hits": {
-        "home": 6,
-        "python3": 6,
-        "configFile": 6,
-        "cli": 1,
-        "bash": 5,
+        "home": 3,
         "env": 6,
-        "apiKey": 1,
-        "hostTool": 2
+        "hostTool": 2,
+        "python3": 2,
+        "bash": 1,
+        "configFile": 3
       },
       "unexpected": {
         "home": [
-          "data/school.schema.json",
-          "docs/nature-downloader-reference-research-2026-07-15.md",
-          "docs/superpowers/plans/2026-06-21-nature-downloader-merge.md",
-          "README.md",
-          "README_EN.md",
-          "references/delivery-verification-and-failures.md"
-        ],
-        "configFile": [
-          "docs/nature-downloader-reference-research-2026-07-15.md",
-          "README.md",
-          "README_EN.md",
-          "scripts/batch_download.mjs",
-          "scripts/configure_credentials.py",
-          "scripts/lib/credentials.mjs"
+          "SKILL.md",
+          "references/delivery-verification-and-failures.md",
+          "references/institutional-browser-workflow.md"
         ],
         "env": [
+          "SKILL.md",
           "references/delivery-verification-and-failures.md",
           "references/institutional-browser-workflow.md",
           "scripts/batch_download.mjs",
-          "scripts/configure_credentials.py",
           "scripts/lib/credentials.mjs",
           "scripts/lib/school-config.mjs"
         ],
-        "apiKey": [
-          "scripts/configure_credentials.py"
+        "configFile": [
+          "scripts/batch_download.mjs",
+          "scripts/lib/credentials.mjs",
+          "scripts/lib/school-config.mjs"
         ]
       },
       "note": "生图/OCR/学术检索/学校配置由插件设置或随包文件提供；Codex 只作为上游可选后端名保留。",
       "check": "LIT_DL_CONFIG_DIR 指向包内 config",
-      "files": 44
+      "files": 33
     },
     {
       "name": "nature-experiment-log",
@@ -3945,27 +3930,21 @@
         "optional-image"
       ],
       "hits": {
-        "home": 3,
         "bash": 6,
-        "env": 3,
         "apiKey": 3,
+        "env": 3,
         "python3": 6
       },
       "unexpected": {
-        "home": [
-          "manifest.yaml",
-          "scripts/nature_figure_backend.py",
-          "SKILL.md"
+        "apiKey": [
+          "SKILL.md",
+          "references/openrouter-image-generation.md",
+          "scripts/generate_openrouter_schematic.py"
         ],
         "env": [
           "references/openrouter-image-generation.md",
           "scripts/generate_openrouter_schematic.py",
           "scripts/nature_figure_backend.py"
-        ],
-        "apiKey": [
-          "references/openrouter-image-generation.md",
-          "scripts/generate_openrouter_schematic.py",
-          "SKILL.md"
         ]
       },
       "note": "绘图后端偏好；OpenRouter 生图可选，不配也能用。",
@@ -3984,16 +3963,39 @@
         "python"
       ],
       "hits": {
-        "env": 6,
+        "apiKey": 6,
         "home": 6,
+        "configFile": 5,
+        "bash": 6,
+        "env": 6,
         "cli": 5,
         "python3": 6,
-        "configFile": 6,
-        "apiKey": 6,
-        "hostTool": 3,
-        "bash": 6
+        "hostTool": 3
       },
       "unexpected": {
+        "apiKey": [
+          "README.md",
+          "README_EN.md",
+          "SKILL.md",
+          "cli/image2ppt/runtime/deck_text_hints.py",
+          "cli/image2ppt/runtime/image_gen.py",
+          "cli/image2ppt/runtime/main.py"
+        ],
+        "home": [
+          "SKILL.md",
+          "cli/image2ppt/runtime/_page_artifacts.py",
+          "cli/image2ppt/runtime/build_pptx_from_manifest.py",
+          "cli/image2ppt/runtime/deck_run_state.py",
+          "cli/image2ppt/runtime/formula_renderer.py",
+          "cli/image2ppt/runtime/image_gen.py"
+        ],
+        "configFile": [
+          "SKILL.md",
+          "cli/image2ppt/runtime/image_gen.py",
+          "cli/image2ppt/runtime/main.py",
+          "cli/image2ppt/runtime/runtime_env.py",
+          "manifest.yaml"
+        ],
         "env": [
           "cli/image2ppt/cli.py",
           "cli/image2ppt/runtime/configure_image_backend.py",
@@ -4001,35 +4003,11 @@
           "cli/image2ppt/runtime/image_gen.py",
           "cli/image2ppt/runtime/main.py",
           "cli/image2ppt/runtime/paddle_text_hints.py"
-        ],
-        "home": [
-          "cli/image2ppt/runtime/build_pptx_from_manifest.py",
-          "cli/image2ppt/runtime/deck_run_state.py",
-          "cli/image2ppt/runtime/formula_renderer.py",
-          "cli/image2ppt/runtime/image_gen.py",
-          "cli/image2ppt/runtime/main.py",
-          "cli/image2ppt/runtime/paddle_text_hints.py"
-        ],
-        "configFile": [
-          "cli/image2ppt/runtime/deck_text_hints.py",
-          "cli/image2ppt/runtime/image_gen.py",
-          "cli/image2ppt/runtime/main.py",
-          "cli/image2ppt/runtime/runtime_env.py",
-          "config.example.yaml",
-          "manifest.yaml"
-        ],
-        "apiKey": [
-          "cli/image2ppt/runtime/deck_text_hints.py",
-          "cli/image2ppt/runtime/image_gen.py",
-          "cli/image2ppt/runtime/main.py",
-          "cli/image2ppt/runtime/paddle_text_hints.py",
-          "cli/image2ppt/runtime/runtime_env.py",
-          "config.example.yaml"
         ]
       },
       "note": "生图/OCR/学术检索/学校配置由插件设置或随包文件提供；Codex 只作为上游可选后端名保留。",
       "check": "python <image2ppt-root>/cli/image2ppt/cli.py doctor",
-      "files": 58
+      "files": 57
     },
     {
       "name": "nature-literature-pipeline",
@@ -4074,10 +4052,10 @@
         "patent"
       ],
       "hits": {
+        "bash": 4,
         "python3": 6,
         "hostTool": 5,
         "cli": 6,
-        "bash": 4,
         "home": 3,
         "env": 2
       },
@@ -4104,9 +4082,9 @@
       "status": "no-config",
       "modules": [],
       "hits": {
+        "bash": 1,
         "home": 1,
-        "python3": 1,
-        "bash": 1
+        "python3": 1
       },
       "unexpected": {
         "home": [
@@ -4262,8 +4240,8 @@
         "nature-runtime"
       ],
       "hits": {
-        "bash": 1,
         "cli": 1,
+        "bash": 1,
         "python3": 1
       },
       "unexpected": {},
@@ -4343,8 +4321,8 @@
       "status": "no-config",
       "modules": [],
       "hits": {
-        "python3": 2,
-        "bash": 1
+        "bash": 1,
+        "python3": 2
       },
       "unexpected": {},
       "note": "文档/写作流程类，无外部配置。",
@@ -4577,8 +4555,8 @@
         "patent-home"
       ],
       "hits": {
-        "bash": 6,
         "home": 6,
+        "bash": 6,
         "cli": 2,
         "env": 1
       },
@@ -4609,8 +4587,8 @@
         "patent-home"
       ],
       "hits": {
-        "bash": 2,
-        "home": 1
+        "home": 1,
+        "bash": 2
       },
       "unexpected": {
         "home": [
@@ -4632,10 +4610,10 @@
         "browser"
       ],
       "hits": {
+        "home": 6,
         "bash": 6,
         "cli": 6,
         "hostTool": 5,
-        "home": 6,
         "env": 6,
         "python3": 1
       },
@@ -4671,20 +4649,19 @@
         "patent-home"
       ],
       "hits": {
-        "bash": 3,
-        "configFile": 4,
         "home": 1,
+        "bash": 3,
+        "configFile": 3,
         "env": 2
       },
       "unexpected": {
+        "home": [
+          "SKILL.md"
+        ],
         "configFile": [
           "prompts/guardrails.md",
           "references/max_rounds.md",
-          "SKILL.md",
           "tools/docket_config.py"
-        ],
-        "home": [
-          "SKILL.md"
         ],
         "env": [
           "tools/docket_paths.py",
@@ -4693,7 +4670,7 @@
       },
       "note": "工作目录改到 <项目根>/.agents/patent；不写 ~/Documents；embedding 密钥按需配置。",
       "check": "各工具 --help",
-      "files": 28
+      "files": 27
     },
     {
       "name": "patent-exam-policy",
@@ -4730,8 +4707,8 @@
       },
       "unexpected": {
         "home": [
-          "prompts/guardrails.md",
           "SKILL.md",
+          "prompts/guardrails.md",
           "tools/map_cache.py",
           "tools/model_store.py",
           "tools/vault_index.py"
@@ -4758,13 +4735,20 @@
         "optional-embedding"
       ],
       "hits": {
+        "home": 5,
         "apiKey": 4,
         "configFile": 6,
         "bash": 5,
-        "home": 5,
         "env": 2
       },
       "unexpected": {
+        "home": [
+          "SKILL.md",
+          "tools/config.py",
+          "tools/ingest_case.py",
+          "tools/pdf_text.py",
+          "tools/vault_layout.py"
+        ],
         "apiKey": [
           "docs/embedding.config.yaml",
           "tools/config.py",
@@ -4775,16 +4759,9 @@
           "docs/vault.md",
           "prompts/configure_embedding.md",
           "prompts/guardrails.md",
+          "tools/README.md",
           "tools/config.py",
-          "tools/embed.py",
-          "tools/README.md"
-        ],
-        "home": [
-          "SKILL.md",
-          "tools/config.py",
-          "tools/ingest_case.py",
-          "tools/pdf_text.py",
-          "tools/vault_layout.py"
+          "tools/embed.py"
         ],
         "env": [
           "tools/config.py",
@@ -4806,15 +4783,22 @@
         "obsidian"
       ],
       "hits": {
-        "env": 6,
         "home": 6,
+        "env": 6,
         "bash": 3,
         "cli": 6,
         "repoPath": 2,
-        "hostTool": 2,
-        "winPath": 1
+        "hostTool": 2
       },
       "unexpected": {
+        "home": [
+          "SKILL.md",
+          "prompts/patent_plain_reader.md",
+          "tools/README.md",
+          "tools/crawl/cnipa_epub_crawler.py",
+          "tools/crawl/cnipa_epub_parse.py",
+          "tools/shared/obsidian_env.py"
+        ],
         "env": [
           "docs/obsidian-setup-guide.md",
           "prompts/patent_plain_reader.md",
@@ -4822,17 +4806,6 @@
           "tools/crawl/cnipa_epub_crawler.py",
           "tools/shared/obsidian_env.py",
           "tools/stdio_utf8.py"
-        ],
-        "home": [
-          "prompts/patent_plain_reader.md",
-          "SKILL.md",
-          "tools/crawl/cnipa_epub_crawler.py",
-          "tools/crawl/cnipa_epub_parse.py",
-          "tools/README.md",
-          "tools/shared/obsidian_env.py"
-        ],
-        "winPath": [
-          "tools/vault/check_obsidian_env.py"
         ]
       },
       "note": "工作目录改到 <项目根>/.agents/patent；不写 ~/Documents；embedding 密钥按需配置。",
@@ -4850,21 +4823,14 @@
         "browser"
       ],
       "hits": {
-        "bash": 6,
-        "configFile": 5,
         "home": 2,
+        "bash": 6,
         "env": 4,
         "cli": 4,
-        "hostTool": 1
+        "hostTool": 1,
+        "configFile": 1
       },
       "unexpected": {
-        "configFile": [
-          "prompts/global_search.md",
-          "prompts/patent_search.md",
-          "tools/cnipa_search.py",
-          "tools/gp_search.py",
-          "tools/search_config.py"
-        ],
         "home": [
           "SKILL.md",
           "tools/cnipa_parse.py"
@@ -4874,11 +4840,14 @@
           "tools/cnipa_crawler.py",
           "tools/emit_search_report.py",
           "tools/stdio_utf8.py"
+        ],
+        "configFile": [
+          "tools/search_config.py"
         ]
       },
       "note": "工作目录改到 <项目根>/.agents/patent；不写 ~/Documents；embedding 密钥按需配置。",
       "check": "各工具 --help",
-      "files": 28
+      "files": 27
     },
     {
       "name": "polyspace-agentic-toolkit-setup",
@@ -4890,12 +4859,12 @@
         "polyspace-mcp"
       ],
       "hits": {
-        "cli": 6,
         "home": 6,
-        "configFile": 5,
+        "env": 1,
+        "cli": 6,
         "hostTool": 3,
         "bash": 3,
-        "env": 1
+        "configFile": 5
       },
       "unexpected": {},
       "note": "本机未安装 Polyspace，profile 未注册 Polyspace MCP；侧栏置灰。",
@@ -5085,33 +5054,58 @@
         "bash"
       ],
       "hits": {
-        "repoPath": 6,
+        "home": 6,
+        "configFile": 5,
+        "winPath": 1,
         "python3": 6,
-        "bash": 6,
-        "configFile": 6,
+        "repoPath": 6,
         "hostTool": 5,
+        "bash": 6,
         "apiKey": 6,
         "cli": 6,
-        "home": 6,
-        "env": 6,
-        "winPath": 1
+        "env": 6
       },
       "unexpected": {
-        "repoPath": [
-          "references/ai-image-comparison/palette/_manifest.json",
-          "references/ai-image-comparison/palette/_manifest.md",
-          "references/ai-image-comparison/README.md",
-          "references/ai-image-comparison/rendering/_manifest.json",
-          "references/ai-image-comparison/rendering/_manifest.md",
-          "references/ai-image-comparison/type/_manifest.json"
+        "home": [
+          "SKILL.md",
+          "scripts/apply_template.py",
+          "scripts/docs/image.md",
+          "scripts/docs/narration.md",
+          "scripts/image_treat.py",
+          "scripts/native_payloads.py"
+        ],
+        "configFile": [
+          "SKILL.md",
+          "references/image-generator.md",
+          "scripts/docs/image.md",
+          "scripts/docs/narration.md",
+          "scripts/image_gen.py"
+        ],
+        "winPath": [
+          "SKILL.md"
         ],
         "python3": [
+          "SKILL.md",
           "references/ai-image-comparison/README.md",
           "references/animations.md",
           "references/artifact-ownership.md",
           "references/executor-base.md",
-          "references/executor-visualization.md",
-          "references/image-generator.md"
+          "references/executor-visualization.md"
+        ],
+        "repoPath": [
+          "SKILL.md",
+          "references/ai-image-comparison/README.md",
+          "references/ai-image-comparison/palette/_manifest.json",
+          "references/ai-image-comparison/palette/_manifest.md",
+          "references/ai-image-comparison/rendering/_manifest.json",
+          "references/ai-image-comparison/rendering/_manifest.md"
+        ],
+        "hostTool": [
+          "SPONSORS.md",
+          "SPONSORS_CN.md",
+          "references/image-generator.md",
+          "scripts/confirm_ui/static/catalogs.json",
+          "scripts/image_gen.py"
         ],
         "bash": [
           "references/ai-image-comparison/README.md",
@@ -5120,21 +5114,6 @@
           "references/image-generator.md",
           "references/image-searcher.md",
           "references/native-data-interface.md"
-        ],
-        "configFile": [
-          "references/image-generator.md",
-          "scripts/config.py",
-          "scripts/docs/image.md",
-          "scripts/docs/narration.md",
-          "scripts/image_backends/backend_bfl.py",
-          "scripts/image_backends/backend_fal.py"
-        ],
-        "hostTool": [
-          "references/image-generator.md",
-          "scripts/confirm_ui/static/catalogs.json",
-          "scripts/image_gen.py",
-          "SPONSORS.md",
-          "SPONSORS_CN.md"
         ],
         "apiKey": [
           "references/image-searcher.md",
@@ -5152,14 +5131,6 @@
           "scripts/project_management/cli.py",
           "scripts/visual_review.py"
         ],
-        "home": [
-          "scripts/apply_template.py",
-          "scripts/config.py",
-          "scripts/docs/image.md",
-          "scripts/docs/narration.md",
-          "scripts/image_gen.py",
-          "scripts/image_treat.py"
-        ],
         "env": [
           "scripts/config.py",
           "scripts/docs/image.md",
@@ -5167,14 +5138,11 @@
           "scripts/image_backends/backend_common.py",
           "scripts/image_backends/backend_fal.py",
           "scripts/image_backends/backend_gemini.py"
-        ],
-        "winPath": [
-          "SKILL.md"
         ]
       },
       "note": "生图配置走插件设置注入进程环境；Python 走插件 shim；项目目录在 <项目根>/.agents/ppt-master/projects。",
       "check": "python <skill>/scripts/image_gen.py --list-backends",
-      "files": 438
+      "files": 437
     },
     {
       "name": "pre-submission-reviewer",
@@ -5247,8 +5215,8 @@
         "polyspace-mcp"
       ],
       "hits": {
-        "cli": 2,
-        "home": 1
+        "home": 1,
+        "cli": 2
       },
       "unexpected": {},
       "note": "本机未安装 Polyspace，profile 未注册 Polyspace MCP；侧栏置灰。",
@@ -5419,8 +5387,8 @@
         "polyspace-mcp"
       ],
       "hits": {
-        "cli": 3,
-        "configFile": 1
+        "configFile": 1,
+        "cli": 3
       },
       "unexpected": {},
       "note": "本机未安装 Polyspace，profile 未注册 Polyspace MCP；侧栏置灰。",
@@ -5674,8 +5642,8 @@
       "status": "no-config",
       "modules": [],
       "hits": {
-        "cli": 3,
-        "home": 1
+        "home": 1,
+        "cli": 3
       },
       "unexpected": {
         "home": [
@@ -5711,20 +5679,20 @@
       "status": "no-config",
       "modules": [],
       "hits": {
+        "configFile": 4,
         "cli": 6,
-        "home": 2,
-        "configFile": 4
+        "home": 2
       },
       "unexpected": {
+        "configFile": [
+          "SKILL.md",
+          "references/network-setup.md",
+          "references/persistent-side-effects.md",
+          "references/target-settings-schema.md"
+        ],
         "home": [
           "references/network-setup.md",
           "references/persistent-side-effects.md"
-        ],
-        "configFile": [
-          "references/network-setup.md",
-          "references/persistent-side-effects.md",
-          "references/target-settings-schema.md",
-          "SKILL.md"
         ]
       },
       "note": "home/config 命中是 Simulink Real-Time 目标机配置文档。",
@@ -6196,7 +6164,7 @@
       "unexpected": {},
       "note": "HTML/排版类，无外部配置。",
       "check": "-",
-      "files": 8
+      "files": 7
     },
     {
       "name": "zotero-cli",
@@ -6208,8 +6176,8 @@
         "zotero"
       ],
       "hits": {
-        "cli": 2,
         "apiKey": 1,
+        "cli": 2,
         "bash": 1
       },
       "unexpected": {

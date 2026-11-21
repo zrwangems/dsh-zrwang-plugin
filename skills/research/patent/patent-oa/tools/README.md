@@ -9,7 +9,6 @@ Agent 按 `../patent-oa/prompts/configure_embedding.md` 问答；写文件命令
 ```bash
 python ../patent-oa/tools/config.py recommend
 python ../patent-oa/tools/config.py skip-vector
-# 或：预设 + Key（Key → 文档目录 embedding.secrets.yaml）
 python ../patent-oa/tools/config.py set --preset zhipu --api-key "sk-..."
 # 或：自定义
 python ../patent-oa/tools/config.py set --provider openai_compatible \
@@ -22,8 +21,7 @@ python ../patent-oa/tools/config.py status
 python ../patent-oa/tools/rebuild_vectors.py --confirm
 ```
 
-- 配置：`{Documents}/patent-disclosure-skill/oa/embedding.config.yaml`  
-- 密钥：同目录 `embedding.secrets.yaml`（勿提交）  
+- 配置与密钥：DSH 插件设置「科研服务 → 专利检索向量模型」（不写任何文件）  
 - 自检失败仍可用标签检索。
 
 ## Provider

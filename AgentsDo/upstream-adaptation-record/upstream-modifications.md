@@ -25,9 +25,9 @@
 | VEN-15 | `matlab-agentic` / `simulink` / `playground` | 全部 `SKILL.md` | headerNotes | MATLAB MCP 是 existing 模式，需先启动 MATLAB 并 `shareMATLABSession()` | 当前 MATLAB 未运行时 MCP 报 failed to attach | 会话中调用 MCP 工具时可见 |
 | VEN-16 | `nature-downloader` | `src/config.py` 等 5 文件 | patch | 配置目录从 `~/.config/lit-dl` 改到 DSH 家目录（旧规则保留） | 避免 C 盘用户目录 | `LIT_DL_CONFIG_DIR` |
 | VEN-17 | `matlab-agentic` / `simulink` | `matlab-call-python`、`matlab-import-external-ai-model`、`simulink-integrate-python-code` 的 `SKILL.md` | headerNotes | 说明 Python 统一用插件运行时，MATLAB `pyenv` 用 `ZRWANG_SKILL_PYTHON` | 用户要求所有技能 Python 由插件提供 | 抽查正文 |
-| VEN-18 | `nature` | `nature-downloader`、`nature-figure`、`nature-academic-search`、`nature-citation` 的 `SKILL.md` | headerNotes | 说明配置在插件配置目录；下载器凭据、学术邮箱/Firecrawl 由设置注入；学校固定北航；Nature 生图复用模型服务 | 配置集中和不兼容旧 `.env` 的要求 | 顶部说明 + `verify-skill-config` |
+| VEN-18 | `nature` | `nature-downloader`、`nature-figure`、`nature-academic-search`、`nature-citation` 的 `SKILL.md` | headerNotes | 说明配置在插件配置目录；下载器凭据、学术邮箱/Firecrawl 由设置注入；学校固定北航；Nature 生图复用模型服务 | 配置集中和不兼容旧 `.env` 的要求 | 顶部说明 + `npm run verify` |
 | VEN-19 | `lark`（28 技能） | 每个 `SKILL.md` | headerNotes | 说明用 DSH `read`/`write`/`edit` 与 `pwsh`/`bash` 执行 `lark-cli`、需先 `lark-cli auth login`、Claude/Codex harness 对照表仅参考、`../lark-shared` 等跨技能引用需一起勾选 | lark-cli 官方 skills 面向多 harness；DSH 无法解析其他 harness 的工具与配置 | `vendor --only=lark` + `verify` |
-| PAT-13 | `nature-citation` | `scripts/nature_citation.py` | patch | `--mailto` / `--ncbi-email` 默认读 `CROSSREF_MAILTO` / `NCBI_EMAIL`；补 `import os` | 设置里的邮箱不用每次手动传参 | `--help` 显示默认；`verify-skill-config` |
+| PAT-13 | `nature-citation` | `scripts/nature_citation.py` | patch | `--mailto` / `--ncbi-email` 默认读 `CROSSREF_MAILTO` / `NCBI_EMAIL`；补 `import os` | 设置里的邮箱不用每次手动传参 | `--help` 显示默认；`npm run verify` |
 
 ## 二、文件补丁（`vendor/skill-patches.json`）
 
@@ -75,6 +75,6 @@
 | NEW-05 | ppt-master / nature / patent / polyspace / MATLAB | `vendor/upstreams.json` | headerNotes | 见 VEN-11~VEN-15 | 避免模型检查 C 盘配置或调用不存在的 MCP | 抽查 SKILL.md |
 | NEW-06 | ppt-master / nature-image2ppt / patent | `vendor/skill-patches.json` | patch | 见 PAT-03~PAT-10 | 生图注入、项目目录、ImageMagick、MCP 降级、专利目录 | 见各行验证 |
 | NEW-07 | 全技能 | `scripts/audit-skill-config.mjs`、`vendor/skill-config-rules.json` | runtime-config | 301 技能 + 14 组件逐项审计，生成矩阵 | “一个都不能漏”的可复核机制 | `audit-skill-config --check` |
-| NEW-08 | 运行时 | `runtime/python/`、`scripts/install-python-runtime.mjs`、`vendor/python-requirements.txt` | runtime-config | 插件自带 standalone CPython 3.11 + venv + 集中依赖；所有技能 Python 由它提供 | 用户要求插件独立 Python，不向系统开放，不在 skill 目录放 py 包 | `node scripts/verify-skill-config.mjs`；`runtime\python\venv\Scripts\python.exe --version` |
+| NEW-08 | 运行时 | `runtime/python/`、`scripts/install-python-runtime.mjs`、`vendor/python-requirements.txt` | runtime-config | 插件自带 standalone CPython 3.11 + venv + 集中依赖；所有技能 Python 由它提供 | 用户要求插件独立 Python，不向系统开放，不在 skill 目录放 py 包 | `npm run verify` + `npm run smoke`；`runtime\python\venv\Scripts\python.exe --version` |
 | NEW-09 | 设置页 | `host/skill-settings.mjs`、`client/settings.mjs`、`host/plugin-params.mjs`、`host/routes.mjs` | runtime-config | 分栏改为模型服务/科研服务/运行环境；科研服务自动保存且无检查/保存按钮；删除 Python 与依赖卡 | 用户要求 | 正常 dsh web 打开设置页目视检查 |
 | NEW-10 | 配置集中 | `host/skill-settings.mjs`、`vendor/skill-patches.json` | runtime-config | nature 配置、北航学校配置、image2ppt 配置全部写 `~/.dsh/zrwang-plugin-config/`；ppt-master 禁用 `.env`；生图复用模型服务 | 用户要求不兼容上游旧配置、保证独立性 | `image2ppt doctor`；`image_gen --list-backends`；配置文件列表 |

@@ -163,7 +163,7 @@ def generate(prompt: str,
     _resolve_size(aspect_ratio, normalized_size)
     api_key = require_api_key(
         "MODELSCOPE_API_KEY",
-        message="No API key found. Set MODELSCOPE_API_KEY in the current environment or the project-root .env.",
+        message="No API key found. Set MODELSCOPE_API_KEY in the current environment (set through the DSH plugin settings).",
     )
     base_url = os.environ.get("MODELSCOPE_BASE_URL") or DEFAULT_ENDPOINT
 

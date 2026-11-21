@@ -17,7 +17,7 @@
 
 ## 默认少翻页
 
-阈值写在 `../patent-search/config.yaml`：
+阈值是代码里的默认值，可用参数覆盖：
 
 - `max_pages`：默认 **3** 页（含当前结果页）；
 - `max_pages_hard`：探测不到「共 N 页」时，`--complete` 才用的回退硬上限（默认 20）；

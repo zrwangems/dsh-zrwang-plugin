@@ -60,33 +60,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return run_script("runtime_env.py", argv)
 
 
-def cmd_config(args: argparse.Namespace) -> int:
-    argv = ["config"]
-    if args.api_key:
-        argv.extend(["--api-key", args.api_key])
-    if args.base_url:
-        argv.extend(["--base-url", args.base_url])
-    if args.clear_base_url:
-        argv.append("--clear-base-url")
-    if args.model:
-        argv.extend(["--model", args.model])
-    if getattr(args, "image_backend", None):
-        argv.extend(["--image-backend", args.image_backend])
-    if getattr(args, "image_user_agent", None):
-        argv.extend(["--image-user-agent", args.image_user_agent])
-    if getattr(args, "clear_image_user_agent", False):
-        argv.append("--clear-image-user-agent")
-    if getattr(args, "paddle_ocr_token", None):
-        argv.extend(["--paddle-ocr-token", args.paddle_ocr_token])
-    return run_script("runtime_env.py", argv)
-
-
 def cmd_setup(args: argparse.Namespace) -> int:
-    config = subprocess.run(
-        [sys.executable, str(RUNTIME_DIR / "runtime_env.py"), "config"],
-        text=True,
-        capture_output=True,
-    )
     doctor_args = ["doctor", "--json"]
     if args.check_api:
         doctor_args.append("--check-api")
@@ -104,12 +78,7 @@ def cmd_setup(args: argparse.Namespace) -> int:
             "stderr": doctor.stderr,
         }
     payload = {
-        "setup": "ok" if config.returncode == 0 and doctor.returncode == 0 else "needs_attention",
-        "config": {
-            "ok": config.returncode == 0,
-            "stdout": config.stdout,
-            "stderr": config.stderr,
-        },
+        "setup": "ok" if doctor.returncode == 0 else "needs_attention",
         "doctor": doctor_payload,
     }
     return print_json(payload)
@@ -155,7 +124,6 @@ def cmd_prepare(args: argparse.Namespace) -> int:
             tool_call=None,
             model=None,
             fallback_command=None,
-            runtime_home=None,
             input_context_policy=None,
         )
     )
@@ -173,8 +141,6 @@ def cmd_backend(args: argparse.Namespace) -> int:
         argv.extend(["--model", args.model])
     if args.fallback_command:
         argv.extend(["--fallback-command", args.fallback_command])
-    if args.runtime_home:
-        argv.extend(["--runtime-home", args.runtime_home])
     if args.input_context_policy:
         argv.extend(["--input-context-policy", args.input_context_policy])
     return run_script("configure_image_backend.py", argv)
@@ -420,7 +386,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="CLI for preparing, rebuilding, validating, and finalizing editable PPTX runs.",
         formatter_class=HELP_FORMATTER,
         epilog="""Command groups:
-  - setup/doctor/config manage the local image2ppt environment and API fallback config.
+  - setup/doctor check the local image2ppt environment; configuration comes from DSH plugin settings.
   - prepare creates a run directory and writes the selected image backend contract.
   - run manages deterministic workflow state, dispatch records, result records, and finalization.
   - page measures text geometry: hints reports text line boxes and font sizes from source ink.
@@ -445,12 +411,11 @@ Use '<command> --help' for exact arguments:
 
     setup = sub.add_parser(
         "setup",
-        help="Initialize local config and run doctor.",
-        description="""Initialize the local image2ppt environment without installing the Skill.
+        help="Check the local environment and run doctor.",
+        description="""Check the local image2ppt environment without installing the Skill.
 
-Use this after installing the CLI, or when checking whether the local runtime can run.
-It creates/checks the active project/override/user config.yaml, preserves existing values,
-and runs doctor.
+Configuration (image model, OCR token) comes from the DSH plugin settings and is
+injected as environment variables; this skill does not read or write config files.
 It does not call npx, does not install the Skill, and does not require API credentials
 unless --check-api is passed.
 """,
@@ -468,8 +433,8 @@ unless --check-api is passed.
         help="Check CLI dependencies and config status.",
         description="""Check the local image2ppt environment.
 
-Doctor reports the CLI Python path, importable dependencies, config home/file,
-and CLI fallback readiness when --check-api is passed. It cannot detect the
+Doctor reports the CLI Python path, importable dependencies, and CLI fallback
+readiness when --check-api is passed. It cannot detect the
 Agent-only image_gen.imagegen tool and does not perform a network API probe.
 """,
         formatter_class=HELP_FORMATTER,
@@ -484,40 +449,6 @@ Agent-only image_gen.imagegen tool and does not perform a network API probe.
     doctor.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
     doctor.add_argument("--timeout", type=int, help="Reserved timeout value for future network probes.")
     doctor.set_defaults(func=cmd_doctor)
-
-    config = sub.add_parser(
-        "config",
-        help="Write or update the active project/user config.yaml.",
-        description="""Configure API fallback values used by image2ppt image commands.
-
-Values are written to the active config file. A project-level config.yaml beside
-config.example.yaml takes precedence over the legacy user-level file. Environment
-variables still win at runtime. API keys are masked in command output.
-""",
-        formatter_class=HELP_FORMATTER,
-        epilog="""Examples:
-  image2ppt config --api-key "your-api-key" --model gpt-image-2
-  image2ppt config --api-key "your-api-key" --image-backend openai-compatible-api --base-url https://example.test/v1 --model provider-image-model
-  image2ppt config --clear-base-url
-""",
-    )
-    config.add_argument("--api-key", help="OpenAI or OpenAI-compatible API key to store.")
-    config.add_argument("--base-url", help="OpenAI-compatible base URL, for example https://api.openai.com/v1.")
-    config.add_argument("--clear-base-url", action="store_true", help="Remove OPENAI_BASE_URL from the config file.")
-    config.add_argument("--model", help="Default provider image model id.")
-    config.add_argument(
-        "--image-backend",
-        choices=["auto", "codex-oauth", "openai-compatible-api"],
-        help="Default transport backend for image generate/edit calls.",
-    )
-    config.add_argument("--image-user-agent", help="Optional User-Agent for the OpenAI-compatible API only.")
-    config.add_argument(
-        "--clear-image-user-agent",
-        action="store_true",
-        help="Remove IMAGE2PPT_IMAGE_USER_AGENT from the config file.",
-    )
-    config.add_argument("--paddle-ocr-token", metavar="TOKEN", help="PaddleOCR-VL token for content-aware text hints. Apply at https://aistudio.baidu.com/account/accessToken.")
-    config.set_defaults(func=cmd_config)
 
     prepare = sub.add_parser(
         "prepare",
@@ -611,7 +542,6 @@ Use this when a parent Agent selects image_gen.imagegen or when forcing other ba
     backend.add_argument("--tool-call", metavar="CALL", help="Override the tool call for non-builtin contracts.")
     backend.add_argument("--model", metavar="MODEL", help="Image model label for API/CLI fallback.")
     backend.add_argument("--fallback-command", metavar="CMD", help="Override the fallback command for non-builtin contracts.")
-    backend.add_argument("--runtime-home", metavar="DIR", help="Shared config home. Defaults to ~/.image2ppt.")
     backend.add_argument("--input-context-policy", metavar="TEXT", help="Override the input policy for non-builtin contracts.")
     backend.set_defaults(func=cmd_backend)
 
@@ -798,13 +728,12 @@ sheet splitting inside page directories.
         epilog="""Backend selection:
   auto uses Codex OAuth only for GPT Image model ids with compatible auth.
   codex-oauth explicitly uses ~/.codex/auth.json or CODEX_AUTH_FILE.
-  openai-compatible-api explicitly uses the active config.yaml or OPENAI_API_KEY,
-  OPENAI_BASE_URL, and IMAGE2PPT_IMAGE_MODEL. Third-party endpoints never receive
-  Codex OAuth credentials.
+  openai-compatible-api uses OPENAI_API_KEY, OPENAI_BASE_URL, and
+  IMAGE2PPT_IMAGE_MODEL from the DSH plugin settings. Third-party endpoints never
+  receive Codex OAuth credentials.
 
 Setup:
-  codex login
-  image2ppt config --api-key "your-api-key" --image-backend openai-compatible-api --base-url https://example.test/v1 --model provider-image-model
+  Configure the image model in DSH plugin settings (模型服务 → 生图模型).
 
 Parameter surface:
   generate/edit backend requests always pass model and prompt. Explicit non-auto

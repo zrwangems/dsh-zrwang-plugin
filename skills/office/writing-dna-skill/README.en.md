@@ -160,7 +160,7 @@ Topic: ...
 
 However accurate the distillation, model output often still reads as machine-written. These are two separate problems. Distillation addresses *does this sound like the author*, while AI tone is *does this sound like a machine*. The style can be right while "it's not A, but B" keeps recurring, every subheading is numbered "one, two, three", and paragraphs open with a bare comment like "Sounds like...".
 
-`skills/lieflat-less-ai-tone/` is the final step in the workflow, clearing those tells against an explicit rule list. It installs together with this repository; no extra step is needed.
+`../lieflat-less-ai-tone/` is the final step in the workflow, clearing those tells against an explicit rule list. It installs together with this repository; no extra step is needed.
 
 Then:
 

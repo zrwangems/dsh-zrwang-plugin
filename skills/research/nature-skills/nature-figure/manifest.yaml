@@ -44,13 +44,12 @@ routes:
 
 preference:
   backend_script: scripts/nature_figure_backend.py
-  config_env: NATURE_FIGURE_CONFIG
-  default_config: ~/.config/nature-skills/nature-figure.json
+  config_env: NATURE_FIGURE_BACKEND
   behavior: |
     For plotting tasks, first honor an explicit Python/R choice, then a clearly
     language-specific input workflow, then a choice established in this task,
-    then the saved preference returned by the backend script. If none exists,
-    ask the user once and save the answer. Pause only dependent plotting work.
+    then the plugin setting returned by the backend script. The skill has no
+    config file and never persists a choice.
 
 axes:
   backend:
@@ -58,11 +57,9 @@ axes:
       BLOCKING GATE WITH PERSISTED PREFERENCE. Determine the plotting backend
       from an explicit user choice, a clearly language-specific input
       file/workflow, a choice established in this task, or the saved preference
-      returned by scripts/nature_figure_backend.py get. If none resolves it, ask
-      exactly one concise question — "Python or R? I will remember this as your
-      default." — and pause dependent plotting steps while continuing independent
-      inspection. Read-only review does not require a backend choice.
-      Save the answer with the backend preference script
+      returned by scripts/nature_figure_backend.py get (the DSH plugin setting).
+      Read-only review does not require a backend choice. A per-task explicit
+      choice only applies to that task; do not claim to remember it.
       before proceeding. Only recommend a backend when the user explicitly asks
       you to choose; in that case use references/backend-selection.md, state the
       reason, save the selected backend, then proceed. Once selected, the

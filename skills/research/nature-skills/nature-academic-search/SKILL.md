@@ -2,7 +2,7 @@
 name: nature-academic-search
 description: "Search literature across sources, verify or manage citations, and build MeSH strategies or citation-impact audits. Use for 文献检索、引文核对、参考文献管理、严格他引 and evidence-backed citer profiles; not for translating a paper or drafting manuscript prose."
 ---
-> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search MCP 服务器：不要调用 `search_papers` 等 MCP 工具；可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`，并明确告诉用户检索已降级。PubMed/Crossref 等参数在插件设置「科研服务」里，配置在插件配置目录（`ZRWANG_NATURE_ACADEMIC_CONFIG`）。
+> [dsh-zrwang-plugin] 本 DSH 没有注册 academic-search / paper-search MCP 服务器：不要调用 `search_papers` 等 MCP 工具；可用 `web_search`、`web_fetch`、`scripts/academic_search.py`（OpenAlex）、`scripts/preflight.py`、`scripts/format-converter.py`，并明确告诉用户检索已降级。PubMed/Crossref 等参数在插件设置「科研服务」里，通过环境变量（`NCBI_EMAIL`、`NCBI_API_KEY`、`CROSSREF_MAILTO`）注入；本技能不读写配置文件。
 # Academic Search — Router
 
 ## Routing protocol

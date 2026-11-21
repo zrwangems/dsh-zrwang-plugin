@@ -92,7 +92,7 @@ python ../patent-reader/tools/extract/fetch_design_views.py \
 
 | 变量 | 说明 |
 |------|------|
-| `PATENT_READER_OBSIDIAN_VAULT` | Obsidian 库根（兼容 `PATENT_DISCLOSURE_OBSIDIAN_VAULT`）；也可用 `check_obsidian_env.py --set` 持久化到 `~/.patent-disclosure-skill/obsidian_vault.txt` |
+| `PATENT_READER_OBSIDIAN_VAULT` | Obsidian 库根（插件设置「Obsidian 专利库路径」注入）；没有持久化文件 |
 | `PATENT_READER_PAPERS_DIR` | 库内目录，默认 `Research/Patents` |
 | `PATENT_READER_OUTPUT_DIR` | 解读 RUN 目录（默认 `outputs/patent_reader`）；无库时笔记也写这里 |
 | `PATENT_READER_GLOSSARY_DIR` | 术语目录，默认 `Research/术语` |

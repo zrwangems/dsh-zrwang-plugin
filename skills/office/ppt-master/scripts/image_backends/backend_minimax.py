@@ -233,7 +233,7 @@ def generate(prompt: str,
     _resolve_dimensions(aspect_ratio, normalized_size)
     api_key = require_api_key(
         "MINIMAX_API_KEY",
-        message="No API key found. Set MINIMAX_API_KEY in the current environment or a .env file.",
+        message="No API key found. Set MINIMAX_API_KEY in the current environment (set through the DSH plugin settings).",
     )
     base_url = os.environ.get("MINIMAX_BASE_URL") or DEFAULT_ENDPOINT
 

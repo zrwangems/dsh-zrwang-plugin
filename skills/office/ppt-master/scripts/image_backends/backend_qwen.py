@@ -208,7 +208,7 @@ def generate(prompt: str,
     api_key = require_api_key(
         "QWEN_API_KEY",
         "DASHSCOPE_API_KEY",
-        message="No API key found. Set QWEN_API_KEY or DASHSCOPE_API_KEY in the current environment or a .env file.",
+        message="No API key found. Set QWEN_API_KEY or DASHSCOPE_API_KEY in the current environment (set through the DSH plugin settings).",
     )
     base_url = os.environ.get("QWEN_BASE_URL") or DEFAULT_ENDPOINT
 

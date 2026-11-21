@@ -15,14 +15,10 @@ import tempfile
 from pathlib import Path
 
 
-DEFAULT_CONFIG_HOME = "~/.image2ppt"
 DEFAULT_CODEX_AUTH_FILE = "~/.codex/auth.json"
 DEFAULT_IMAGE_MODEL = "gpt-image-2"
-# 本插件统一走 OpenAI 兼容的图片接口；没有配置文件时也用这个后端，不依赖生成的 config.yaml。
+# 本插件统一走 OpenAI 兼容的图片接口；配置由 DSH 插件设置注入环境变量。
 DEFAULT_IMAGE_BACKEND = "openai-compatible-api"
-BUILTIN_CONFIG = {
-    "IMAGE2PPT_IMAGE_BACKEND": DEFAULT_IMAGE_BACKEND,
-}
 ALLOWED_IMAGE_BACKENDS = {"auto", "codex-oauth", "openai-compatible-api"}
 ENV_FIELDS = (
     "OPENAI_API_KEY",
@@ -43,83 +39,9 @@ def cli_reinstall_hint() -> str:
     return "`python -m pip install -r <image2ppt-root>/requirements.txt`"
 
 
-def project_config_path() -> Path:
-    return SKILL_ROOT / "config.yaml"
-
-
-def user_config_path() -> Path:
-    return Path(DEFAULT_CONFIG_HOME).expanduser() / "config.yaml"
-
-
-def config_path(home: Path | None = None) -> Path:
-    if home is not None:
-        return Path(home).expanduser() / "config.yaml"
-    explicit_home = os.getenv("IMAGE2PPT_CONFIG_HOME", "").strip()
-    if explicit_home:
-        return Path(explicit_home).expanduser() / "config.yaml"
-    project = project_config_path()
-    if project.is_file():
-        return project
-    user = user_config_path()
-    if user.is_file():
-        return user
-    # A fresh project-local Skill creates config.yaml beside config.example.yaml.
-    return project
-
-
-def runtime_home() -> Path:
-    return config_path().parent
-
-
-def config_scope(path: Path | None = None) -> str:
-    resolved = (path or config_path()).resolve()
-    if resolved == project_config_path().resolve():
-        return "project"
-    if resolved == user_config_path().resolve():
-        return "user"
-    return "override"
-
-
-def read_config_file(path: Path) -> dict:
-    path = Path(path).expanduser()
-    # 没有配置文件时用内置默认值（后端等），插件不再生成 config.yaml。
-    if not path.exists():
-        return dict(BUILTIN_CONFIG)
-    try:
-        import yaml
-    except ImportError as exc:
-        raise SystemExit(f"PyYAML is required to read Image2PPT config. Install with {cli_reinstall_hint()}.") from exc
-    with path.open("r", encoding="utf-8") as handle:
-        data = yaml.safe_load(handle) or {}
-    if not isinstance(data, dict):
-        raise SystemExit(f"Invalid config file: {path}")
-    return data
-
-
-def write_config_file(path: Path, values: dict) -> None:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        import yaml
-    except ImportError as exc:
-        raise SystemExit(f"PyYAML is required to write Image2PPT config. Install with {cli_reinstall_hint()}.") from exc
-    data = {key: values[key] for key in ENV_FIELDS if values.get(key)}
-    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
-    try:
-        os.chmod(temp_name, 0o600)
-        handle = os.fdopen(fd, "w", encoding="utf-8")
-        fd = -1
-        with handle:
-            yaml.safe_dump(data, handle, allow_unicode=True, sort_keys=True)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temp_name, path)
-        os.chmod(path, 0o600)
-    finally:
-        if fd >= 0:
-            os.close(fd)
-        if os.path.exists(temp_name):
-            os.unlink(temp_name)
+def env_values() -> dict:
+    """Read only the process environment; the DSH plugin owns all configuration."""
+    return {key: os.environ.get(key, "") for key in ENV_FIELDS}
 
 
 def mask_secret(value: str) -> str:
@@ -162,47 +84,6 @@ def select_image_backend(values: dict, codex_ready: bool, api_ready: bool) -> tu
     if codex_ready and codex_model_compatible(model):
         return "codex-oauth", True
     return "openai-compatible-api", api_ready
-
-
-def config(args: argparse.Namespace) -> int:
-    home = runtime_home()
-    values = read_config_file(config_path(home))
-    before = dict(values)
-    if args.api_key:
-        values["OPENAI_API_KEY"] = args.api_key
-    if args.base_url is not None:
-        values["OPENAI_BASE_URL"] = args.base_url.strip()
-    if args.clear_base_url:
-        values.pop("OPENAI_BASE_URL", None)
-    if args.model is not None:
-        values["IMAGE2PPT_IMAGE_MODEL"] = args.model.strip()
-    if args.image_backend is not None:
-        backend = args.image_backend.strip().lower()
-        if backend not in ALLOWED_IMAGE_BACKENDS:
-            raise SystemExit(
-                "--image-backend must be auto, codex-oauth, or openai-compatible-api"
-            )
-        values["IMAGE2PPT_IMAGE_BACKEND"] = backend
-    if args.image_user_agent is not None:
-        values["IMAGE2PPT_IMAGE_USER_AGENT"] = args.image_user_agent.strip()
-    if args.clear_image_user_agent:
-        values.pop("IMAGE2PPT_IMAGE_USER_AGENT", None)
-    if args.paddle_ocr_token:
-        values["PADDLE_OCR_TOKEN"] = args.paddle_ocr_token.strip()
-    changed = sorted(key for key in ENV_FIELDS if before.get(key) != values.get(key))
-    if changed or not config_path(home).exists():
-        write_config_file(config_path(home), values)
-        state = "updated" if before else "created"
-    else:
-        state = "unchanged"
-    print(f"config={state} path={config_path(home)}")
-    print(f"changed={', '.join(changed) if changed else '<none>'}")
-    for key in ENV_FIELDS:
-        value = str(values.get(key, ""))
-        if key in ("OPENAI_API_KEY", "PADDLE_OCR_TOKEN"):
-            value = mask_secret(value)
-        print(f"{key}={value or '<unset>'}")
-    return 0
 
 
 def module_status() -> dict[str, dict]:
@@ -312,13 +193,7 @@ def internal_resource_status() -> dict:
 
 
 def collect_status(check_api: bool = False, check_ocr: bool = False) -> dict:
-    home = runtime_home()
-    active_config = config_path(home)
-    config_values = read_config_file(active_config)
-    values = dict(config_values)
-    for key in ENV_FIELDS:
-        if os.getenv(key):
-            values[key] = os.environ[key]
+    values = env_values()
 
     modules = module_status()
     renderer = renderer_status()
@@ -347,10 +222,6 @@ def collect_status(check_api: bool = False, check_ocr: bool = False) -> dict:
         "ok": ok,
         "skill_root": str(SKILL_ROOT),
         "local_cli": {"path": str(CLI_ENTRY), "ready": CLI_ENTRY.is_file(), "python": sys.executable},
-        "config_home": str(home),
-        "config_file": str(active_config),
-        "config_scope": config_scope(active_config),
-        "config_exists": active_config.exists(),
         "dependencies": modules,
         "internal_resources": resources,
         "rendering": renderer,
@@ -359,14 +230,14 @@ def collect_status(check_api: bool = False, check_ocr: bool = False) -> dict:
         "ocr": {
             "selection": "paddleocr-vl" if token else "builtin-ink",
             "token": "set" if token else "unset",
-            "token_source": token_source,
+            "token_source": "environment",
             "endpoint": PADDLE_ENDPOINT,
             "model": PADDLE_MODEL,
             "network_client_ready": modules["requests"]["available"],
             "network_probe_performed": False,
             "fallback": {"backend": "builtin-ink", "ready": offline_ready, "priority": "network-first-then-local"},
             "apply_url": PADDLE_TOKEN_APPLY_URL,
-            "configure_command": "image2ppt config --paddle-ocr-token <token>",
+            "configure_command": "DSH 插件设置 → 模型服务 → OCR 模型（百度 OCR Token）",
         },
         "image_backend": {
             "agent_builtin": {"checked": False, "ready": None, "tool_name": "image_gen.imagegen"},
@@ -395,7 +266,7 @@ def doctor(args: argparse.Namespace) -> int:
 
     print(f"skill root: {status['skill_root']}")
     print(f"local CLI: {'ready' if status['local_cli']['ready'] else 'missing'} ({status['local_cli']['path']})")
-    print(f"config: {status['config_file']} ({'exists' if status['config_exists'] else 'missing'})")
+    print("config: DSH 插件设置（本技能不读写配置文件）")
     for module, item in status["dependencies"].items():
         print(f"python import {module}: {'ok' if item['available'] else 'missing'}")
     render = status["rendering"]
@@ -426,24 +297,6 @@ def main() -> None:
     doc.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
     doc.add_argument("--timeout", type=int, default=30, help="Reserved for opt-in network probes.")
     doc.set_defaults(func=doctor)
-    cfg = sub.add_parser("config", help="Write or update the active project/user config.yaml")
-    cfg.add_argument("--api-key", help="OpenAI or OpenAI-compatible image API key to store.")
-    cfg.add_argument("--base-url", help="OpenAI-compatible base URL.")
-    cfg.add_argument("--clear-base-url", action="store_true", help="Remove OPENAI_BASE_URL from the config file.")
-    cfg.add_argument("--model", help="Default provider image model id.")
-    cfg.add_argument(
-        "--image-backend",
-        choices=sorted(ALLOWED_IMAGE_BACKENDS),
-        help="Default transport backend for image generate/edit calls.",
-    )
-    cfg.add_argument("--image-user-agent", help="Optional User-Agent for the OpenAI-compatible API only.")
-    cfg.add_argument(
-        "--clear-image-user-agent",
-        action="store_true",
-        help="Remove IMAGE2PPT_IMAGE_USER_AGENT from the config file.",
-    )
-    cfg.add_argument("--paddle-ocr-token", help=f"Baidu AI Studio PaddleOCR token. Apply at {PADDLE_TOKEN_APPLY_URL}.")
-    cfg.set_defaults(func=config)
     args = parser.parse_args()
     raise SystemExit(args.func(args))
 

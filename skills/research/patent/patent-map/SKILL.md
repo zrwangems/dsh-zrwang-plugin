@@ -3,7 +3,7 @@ name: patent-map
 description: "专利地图：基于通俗解读已入库的 Obsidian 案例，点名后打开五种图。地形按 bge-small-zh 向量摊开。"
 user-invocable: false
 ---
-> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的对应子目录（oa / patent-map / obsidian_vault.txt），不要写 `~/Documents/patent-disclosure-skill`；Obsidian 库路径可用 `PATENT_READER_OBSIDIAN_VAULT` 覆盖。
+> [dsh-zrwang-plugin] 工作目录优先使用 `<当前项目根>/.agents/patent/` 下的 oa / patent-map；不要写 `~/Documents/patent-disclosure-skill` 或 `~/.patent-disclosure-skill`。Obsidian 库路径由 DSH 插件设置（科研服务 → 专利检索向量模型）注入 `PATENT_READER_OBSIDIAN_VAULT`，本技能不读写 `obsidian_vault.txt`。
 # 专利地图
 
 ## 用途
@@ -16,7 +16,7 @@ user-invocable: false
 
 ## 输入
 
-已有解读入库的 vault（与解读同一份：`PATENT_READER_OBSIDIAN_VAULT` 或 `~/.patent-disclosure-skill/obsidian_vault.txt`）。取数优先扫 `Research/Patents/**/*_解读_*.md`。若本机 `obsidian` CLI 可用且库已打开，用 `obsidian vaults` / `base:query` 核对，不替代磁盘扫描。
+已有解读入库的 vault（与解读同一份：`PATENT_READER_OBSIDIAN_VAULT`，由插件设置指定）。取数优先扫 `Research/Patents/**/*_解读_*.md`。若本机 `obsidian` CLI 可用且库已打开，用 `obsidian vaults` / `base:query` 核对，不替代磁盘扫描。
 
 ## 步骤
 

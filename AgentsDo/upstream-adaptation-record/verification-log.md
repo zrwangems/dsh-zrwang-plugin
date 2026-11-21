@@ -194,7 +194,7 @@ nature-figure.json
 `nature-downloader/config/school.json` 已移到 `backup-20261113/skill-config-moved/`。
 
 ```text
-node scripts/verify-skill-config.mjs  -> 14 项通过
+npm run verify -> 63 项通过（旧脚本已删除）
 node scripts/verify.mjs               -> 通过 92 项
 node scripts/smoke-host.mjs           -> 全部通过
 node scripts/smoke-routes.mjs         -> 全部通过
@@ -256,7 +256,7 @@ GET /dsh-zrwang-plugin/settings cards：
 验证：
 
 ```text
-node scripts/verify-skill-config.mjs -> 18 项通过
+npm run verify -> 63 项通过（配置单一来源改造后）
 configure_credentials.py show -> 掩码显示 elsevier/springer/ieee
 configure_school.py show/validate -> ok（学校 schema 通过）
 nature_citation.py --help -> --mailto/--ncbi-email 默认读环境变量
@@ -306,7 +306,7 @@ node scripts/audit-skill-config.mjs --check -> 无待处置
 
 ```text
 node scripts/verify.mjs -> 87 项通过，未配置 settings.json 时跳过相关检查
-node scripts/verify-skill-config.mjs -> 19 项通过
+npm run verify -> 63 项通过（旧脚本已删除）
 node scripts/smoke-host.mjs / smoke-routes.mjs -> 全部通过
 node scripts/audit-skill-config.mjs --check -> 无待处置
 ```
@@ -328,3 +328,16 @@ node scripts/audit-upstreams.mjs --only=ppt-master,nature,patent --proxy=...
 ```
 
 另外 `matlab-agentic` 158/158、`simulink` 49/49、`polyspace` 19/19、`playground` 4/4 也通过（同一轮 `--only=matlab-agentic,simulink,polyspace,playground`）。
+
+## 2026-11-21 配置单一来源改造（web/desktop 优先）
+
+```text
+node scripts/build-client.mjs          -> built lib/client.js
+node scripts/verify.mjs                -> 通过 65 项
+node scripts/smoke-host.mjs            -> 通过 43 项，失败 0 项
+node scripts/smoke-routes.mjs          -> 全部通过
+node scripts/audit-skill-config.mjs --check -> 0（329 技能，需修复 0）
+node scripts/audit-upstreams.mjs       -> 上游完整性：全部通过（已登记 removals）
+```
+
+本次改造把设置统一到 profile `cordis.patch.yml` 的 `config` + DSH 凭据库，运行期文件只放插件 `cache/`；上游技能自己的 `.env`、`config.yaml`、`credentials.json`、`settings.json`、向导与读写代码已删除，技能改由插件注入的环境变量取参数。技能适配文件放在 `vendor/overrides/`，删除项登记在 `vendor/removals.json`。

@@ -11,37 +11,9 @@ from pathlib import Path
 SCHEMA_VERSION = 2
 
 
-def documents_dir() -> Path:
-    """操作系统「文档」目录，与 oa 包同一套解析。"""
-    if sys.platform == "win32":
-        try:
-            import ctypes
-            from ctypes import wintypes
-
-            CSIDL_PERSONAL = 5
-            SHGFP_TYPE_CURRENT = 0
-            buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
-            hr = ctypes.windll.shell32.SHGetFolderPathW(
-                None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf
-            )
-            if hr == 0 and buf.value:
-                p = Path(buf.value)
-                if p.is_dir() or p.parent.is_dir():
-                    return p
-        except Exception:
-            pass
-        known = os.environ.get("USERPROFILE") or os.environ.get("HOME")
-        if known:
-            return Path(known) / "Documents"
-    xdg = (os.environ.get("XDG_DOCUMENTS_DIR") or "").strip()
-    if xdg:
-        return Path(xdg).expanduser()
-    return Path.home() / "Documents"
-
-
-def skill_data_root() -> Path:
-    """与 oa 同级：{Documents}/patent-disclosure-skill/"""
-    return (documents_dir() / "patent-disclosure-skill").resolve()
+def plugin_cache() -> Path | None:
+    raw = (os.environ.get("ZRWANG_PLUGIN_CACHE") or "").strip()
+    return Path(raw).expanduser().resolve() if raw else None
 
 
 def map_home() -> Path:
@@ -52,11 +24,14 @@ def map_home() -> Path:
     env = (os.environ.get("PATENT_MAP_HOME") or "").strip()
     if env:
         return Path(env).expanduser().resolve()
-    return (skill_data_root() / "patent-map").resolve()
+    cache = plugin_cache()
+    if cache is None:
+        raise SystemExit("PATENT_MAP_HOME 未设置：请在 DSH 插件里运行本技能，或设置 PATENT_MAP_HOME。")
+    return (cache / "patent" / "patent-map").resolve()
 
 
 def cache_dir_for_vault(vault: Path | None = None) -> Path:
-    """数据根：{Documents}/patent-disclosure-skill/patent-map/ ，与 oa 同级。"""
+    """数据根：PATENT_MAP_HOME（插件缓存目录），与 oa 同级。"""
     return map_home()
 
 
@@ -74,10 +49,8 @@ def _connect(db: Path) -> sqlite3.Connection:
     if not readme.is_file():
         readme.write_text(
             "专利地图加速副本（可删，下次打开会重建）。\n"
-            "与审查答复 oa 同级，在操作系统文档目录：\n"
-            "  {Documents}/patent-disclosure-skill/patent-map/\n"
-            "不要放进 Obsidian 库文件夹内。PATENT_MAP_HOME 可覆盖本目录。\n"
-            "向量模型默认也在本夹 models/ ；若曾装在 ~/.patent-disclosure-skill/patent-map/models/ 仍可读。\n",
+            "目录由 DSH 插件设置决定（PATENT_MAP_HOME），不要放进 Obsidian 库文件夹内。\n"
+            "向量模型也装在本夹 models/。\n",
             encoding="utf-8",
         )
     conn = sqlite3.connect(str(db), timeout=8)

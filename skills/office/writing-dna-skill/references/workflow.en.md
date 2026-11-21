@@ -218,6 +218,6 @@ Specific claims and facts from the source articles **must not be carried into th
 
 ### After Drafting
 
-Clean AI writing tells from the finished draft using the rules in `skills/lieflat-less-ai-tone/`. It rewrites against an explicit whitelist, leaves unmatched text untouched, and does not restructure the piece.
+Clean AI writing tells from the finished draft using the rules in `../lieflat-less-ai-tone/`. It rewrites against an explicit whitelist, leaves unmatched text untouched, and does not restructure the piece.
 
 **When the distilled artifacts conflict with the AI-tell rules, the artifacts win** — that is how the target author actually writes, not an AI tell.

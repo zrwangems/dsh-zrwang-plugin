@@ -55,7 +55,7 @@ def _require_api_key() -> str:
     key = (os.environ.get("PIXABAY_API_KEY") or "").strip()
     if not key:
         raise RuntimeError(
-            "PIXABAY_API_KEY is not set. Add it to your environment or .env file. "
+            "PIXABAY_API_KEY is not set. Set it in the DSH plugin settings (模型服务 → 可选检索服务). "
             "Get one at https://pixabay.com/api/docs/"
         )
     return key

@@ -9,7 +9,8 @@ import { existsSync } from 'node:fs'
 import { lstat, mkdir, readdir, realpath, rmdir, symlink, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import { PKG_DIR, SKILLS_DIR } from './config.mjs'
-import { isInside, pptProjectsRootOf, samePath, skillsRootOf } from './project.mjs'
+import { isInside, samePath, skillsRootOf } from './project.mjs'
+import { symlinkType } from './platform.mjs'
 import { readJson, stateFile, writeJson } from './state.mjs'
 
 const LINKS_FILE = stateFile('links.json')
@@ -54,7 +55,7 @@ async function createLink(target, link) {
     if (!st.isSymbolicLink()) throw new Error(`同名真实目录已存在：${link}`)
     await removeLink(link)
   }
-  await symlink(target, link, 'junction')
+  await symlink(target, link, symlinkType())
 }
 
 /** 并发上限的 map，避免 100+ 目录联接串行等待。 */
@@ -125,7 +126,7 @@ export async function scanLinks(projectRoot) {
  * 把项目目录同步成目标集合。
  * @param {{projectRoot: string, desired: Map<string, {name: string, dir: string}>}} input
  */
-export async function reconcile({ projectRoot, desired, pptTarget }) {
+export async function reconcile({ projectRoot, desired }) {
   return withFarmLock(async () => {
     const skillsDir = skillsRootOf(projectRoot)
     await mkdir(skillsDir, { recursive: true })
@@ -180,42 +181,7 @@ export async function reconcile({ projectRoot, desired, pptTarget }) {
     for (const name of Object.keys(managed)) {
       if (!desired.has(name)) delete managed[name]
     }
-
-    // ppt-master 的项目目录：只有该技能被注入时才把 projects 指向当前项目。
-    const pptLink = join(SKILLS_DIR, 'office', 'ppt-master', 'projects')
-    const pptTargetPath = pptTarget ?? pptProjectsRootOf(projectRoot)
-    let ppt = db.projects[key]?.ppt
-    if (desired.has('ppt-master')) {
-      await mkdir(pptTargetPath, { recursive: true })
-      const st = await pathInfo(pptLink)
-      if (st === undefined) {
-        await createLink(pptTargetPath, pptLink)
-      } else if (st.isSymbolicLink()) {
-        let current
-        try {
-          current = await realpath(pptLink)
-        } catch {
-          current = undefined
-        }
-        if (current === undefined || !samePath(current, pptTargetPath)) await createLink(pptTargetPath, pptLink)
-      } else {
-        conflicts.push({ name: 'ppt-master/projects', reason: '插件目录里已存在真实 projects' })
-      }
-      ppt = { link: pptLink, target: pptTargetPath }
-    } else if (ppt !== undefined) {
-      // projects 是技能包里的共享链接，可能已被另一个项目重新指向。关闭旧项目时
-      // 只有链接仍指向旧项目自己的输出目录才摘，不能顺手摘掉别人正在用的链接。
-      let current
-      try {
-        current = await realpath(pptLink)
-      } catch {
-        current = undefined
-      }
-      if (current !== undefined && samePath(current, ppt.target)) await removeLink(pptLink)
-      ppt = undefined
-    }
-
-    db.projects[key] = { projectRoot, skills: managed, ppt }
+    db.projects[key] = { projectRoot, skills: managed }
     // 清掉已经不存在的项目记录
     for (const [entryKey, entry] of Object.entries(db.projects)) {
       if (!existsSync(entry.projectRoot)) delete db.projects[entryKey]
@@ -224,7 +190,6 @@ export async function reconcile({ projectRoot, desired, pptTarget }) {
     return {
       projectRoot,
       skillsDir,
-      pptProjects: desired.has('ppt-master') ? pptTargetPath : undefined,
       added,
       removed,
       retargeted,
@@ -239,4 +204,29 @@ export async function reconcile({ projectRoot, desired, pptTarget }) {
 export async function linkSummary(projectRoot) {
   const scan = await scanLinks(projectRoot)
   return { skillsDir: scan.dir, linked: [...scan.links.keys()], conflicts: scan.conflicts }
+}
+
+
+/** 卸载时摘掉某个项目里由本插件建立的链接（不碰真实目录/外部链接）。 */
+export async function removeManagedLinks(projectRoot) {
+  return withFarmLock(async () => {
+    const db = await loadLinks()
+    const key = projectKey(projectRoot)
+    const managed = db.projects[key]?.skills ?? {}
+    const scan = await scanLinks(projectRoot)
+    let removed = 0
+    for (const name of Object.keys(managed)) {
+      if (!scan.links.has(name)) continue
+      if (await removeLink(join(skillsRootOf(projectRoot), name))) removed += 1
+    }
+    delete db.projects[key]
+    await writeJson(LINKS_FILE, db)
+    return { removed }
+  })
+}
+
+/** 台账里记录的所有项目根（清理脚本用）。 */
+export async function managedProjects() {
+  const db = await loadLinks()
+  return Object.values(db.projects ?? {}).map(entry => entry.projectRoot).filter(Boolean)
 }

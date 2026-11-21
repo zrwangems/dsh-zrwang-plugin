@@ -4,15 +4,9 @@
 
 The cloud backend requires one Baidu AI Studio Access Token named
 `PADDLE_OCR_TOKEN`. It is not the traditional Baidu `API Key + Secret Key` pair.
-Apply at <https://aistudio.baidu.com/account/accessToken> and configure it with:
-
-```bash
-python <image2ppt-root>/cli/image2ppt/cli.py config \
-  --paddle-ocr-token "<BAIDU_AI_STUDIO_ACCESS_TOKEN>"
-```
-
-The process environment has priority over the active `config.yaml`, resolved as
-override directory, project-level Skill root, then legacy user-level location.
+Apply at <https://aistudio.baidu.com/account/accessToken> and fill it in DSH plugin
+settings (模型服务 → OCR 模型). The plugin injects `PADDLE_OCR_TOKEN` into the
+process environment; the skill reads no config file and has no config command.
 Never print, commit, or copy the token into a run.
 
 ## Fixed network client behavior

@@ -1,20 +1,20 @@
 /**
- * 宿主 HTTP 接口，全部挂在 /dsh-zrwang-plugin 前缀下。
+ * 宿主 HTTP 接口，全部挂在 /dsh-zrwang-plugin 前缀下（仅 Web/Desktop）。
  *
  * 每个请求先过同源栅栏；返回统一 JSON：成功 {ok:true,...}，失败 {ok:false,error}。
  */
-import { spawn } from 'node:child_process'
 import { join } from 'node:path'
-import { ROUTE_PREFIX, SKILLS_DIR, STATE_DIR, VERSION } from './config.mjs'
+import { ROUTE_PREFIX, SKILLS_DIR, VERSION } from './config.mjs'
+import { cacheRoot, stateRoot } from './paths.mjs'
+import { openPath } from './platform.mjs'
 import { catalogView, loadCatalog } from './catalog.mjs'
 import { reconcile, readLinks } from './farm.mjs'
 import { resolveProjectRoot } from './project.mjs'
 import { ancestorDirIdsOfSkill, buildEffectiveGates, childBatch, desiredSkills, groupCounts, loadSelection, resetGroup, setSelection } from './selection.mjs'
 import { presetsPayload, loadPresets, applyMode, applyModeContent, cloneMode, deleteMode, ensureEditableMode, renameMode, saveActiveMode, saveMode, activeModeContent } from './presets.mjs'
 import { clearGates, loadGates, normalizeGates, setGates } from './gates.mjs'
-import { blockedSkills, applySkillEnv, checkArsDependencies, currentParams, openConfigTarget, runSettingCheck, saveSettingsCard, settingsCards } from './skill-settings.mjs'
-import { cacheRoot, persistParams } from './plugin-params.mjs'
-import { loadArsManifest, mergeArsSkills } from './ars.mjs'
+import { blockedSkills, openConfigTarget, presenceOf, runSettingCheck, saveSettingsCard, settingsCards } from './settings.mjs'
+import { checkArsDeps, loadArsManifest, mergeArsSkills } from './ars.mjs'
 import { componentViews, SERVER_NAMES, wantOf } from './mcp.mjs'
 import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mjs'
 import { appendEvent, readEvents } from './state.mjs'
@@ -42,9 +42,8 @@ function refusalOf(ctx, req) {
 }
 
 function sendJson(res, status, value) {
-  const body = JSON.stringify(value)
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
-  res.end(body)
+  res.end(JSON.stringify(value))
 }
 
 async function readBody(req) {
@@ -80,10 +79,7 @@ function resolveCwd(ctx, sessionId, provided) {
 function groupHasSkill(catalog, groupId, name) {
   const group = catalog.groups.find(item => item.id === groupId)
   if (group === undefined) return false
-  const walk = node => {
-    if (node.kind === 'skill') return node.name === name
-    return (node.children ?? []).some(walk)
-  }
+  const walk = node => (node.kind === 'skill' ? node.name === name : (node.children ?? []).some(walk))
   return walk(group)
 }
 
@@ -96,23 +92,10 @@ function groupStats(catalog, selection, desired, gates, blocked) {
   }))
 }
 
-export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshParams) {
-  /** 设置页展示 MCP 组件状态用；headless/sdk 没有 mcpManager 时给不可用。 */
+export function registerRoutes(scope, ctx, runtime, mcpController) {
   const mcpStatusOf = () => (mcpController === undefined ? { available: false, servers: [] } : mcpController.status())
   const webServer = scope.webServer ?? scope.get?.('webServer')
-  /**
-   * 设置页冷启动要做组件检测（Python、officecli、zotero-cli、draw.io、MATLAB 等），
-   * 首次可能超过十秒。这里按参数快照缓存一小段时间，避免同一次打开重复付这份成本。
-   */
-  let settingsCache
-  const SETTINGS_CACHE_MS = 10_000
 
-  /**
-   * 读取当前工作区的活跃模式。
-   * persist=true 时把模式内容写回全局 selection / gates（用户改动前的对齐）；
-   * persist=false（/catalog、/resync 等只读请求）时只在内存里算出同样的视图，
-   * 不覆盖全局状态，避免后台轮询把刚落下的勾选写回旧值。
-   */
   async function modeState(catalog, projectRoot, workspace, persist) {
     const selection = await loadSelection(catalog)
     const gates = await loadGates()
@@ -124,9 +107,7 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
       return { selection: await loadSelection(catalog), gates: await loadGates(), active }
     }
     const skills = {}
-    for (const name of Object.keys(catalog.skills)) {
-      skills[name] = active.content.selection?.[name] === true
-    }
+    for (const name of Object.keys(catalog.skills)) skills[name] = active.content.selection?.[name] === true
     return { selection: { ...selection, skills }, gates: normalizeGates(active.content.gates), active }
   }
 
@@ -134,7 +115,6 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
     return modeState(catalog, projectRoot, workspace, true)
   }
 
-  /** 会话 → 项目根 → DSH 工作区，统一入口。 */
   async function contextOf(sessionId, cwd) {
     if (typeof sessionId !== 'string' || sessionId.length === 0) throw new Error('缺少 sessionId')
     const resolved = resolveCwd(ctx, sessionId, cwd)
@@ -144,43 +124,35 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
     return { sessionId, cwd: resolved, projectRoot, workspace: { ...workspace, sessionId } }
   }
 
-  /** 勾选变化后，把受影响的目录显式门禁清掉，让它们回到“按勾选推导”。 */
   async function resetDerivedGatesForSkills(catalog, names) {
     if (names.length === 0) return
     const ids = new Set()
-    for (const name of names) {
-      for (const id of ancestorDirIdsOfSkill(catalog, name)) ids.add(id)
-    }
+    for (const name of names) for (const id of ancestorDirIdsOfSkill(catalog, name)) ids.add(id)
     if (ids.size > 0) await clearGates([...ids])
   }
 
   async function syncState(sessionId, cwd, includeCatalog = true, persist = true) {
     const catalog = await loadCatalog()
-    const scope = await contextOf(sessionId, cwd)
-    const { projectRoot, workspace } = scope
+    const scopeInfo = await contextOf(sessionId, cwd)
+    const { projectRoot, workspace } = scopeInfo
     const { selection, gates } = await modeState(catalog, projectRoot, workspace, persist)
-    // ARS 是固定功能区块：作为技能树里的第四行，由模式里的 gates.ars 控制
     syncArsCommands(gates.ars === true)
-    const params = currentParams(pluginConfig)
-    const blocked = await blockedSkills(catalog, params)
+    const params = runtime.effective()
+    const blocked = await blockedSkills(params, catalog)
     const desired = desiredSkills(catalog, selection, gates, blocked)
-    // MCP 组件：MathWorks 随「工程技能组开启 + 确有工程技能注入」自动开关；Windows MCP 手动。
     const engineeringInjected = [...desired.keys()].filter(name => groupHasSkill(catalog, 'engineering', name)).length
     if (mcpController !== undefined) await mcpController.reconcile(wantOf({ engineeringInjected, gates }), { sessionId })
-    const mcpStatus = mcpController === undefined ? { available: false, servers: [] } : mcpController.status()
+    const mcpStatus = mcpStatusOf()
     const components = componentViews({ engineeringInjected, gates, status: mcpStatus })
-    // ARS 是固定功能区块：作为技能树里的第四行，由会话/目录门禁 gates.ars 控制，默认开。
     const ars = loadArsManifest()
     const arsEnabled = gates.ars === true
     mergeArsSkills(desired, arsEnabled)
-    const status = await reconcile({ projectRoot, desired })
-    // 注入集合变化后通知客户端：DSH 的技能目录（`/` 菜单）按会话缓存，
-    // 只在这类变更事件后才会重新拉取，否则新勾选的技能不会出现在斜杠菜单里。
-    if (status.added > 0 || status.removed > 0 || status.retargeted > 0) {
+    const linkState = await reconcile({ projectRoot, desired })
+    if (linkState.added > 0 || linkState.removed > 0 || linkState.retargeted > 0) {
       try {
         ctx.emit('plugin-manager/changed', { reason: 'plugin' })
       } catch {
-        // 没有远程事件通道时忽略，客户端下次刷新页面仍会更新
+        // 没有远程事件通道时忽略
       }
     }
     const payload = {
@@ -189,19 +161,15 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
       selection: selection.skills,
       blocked,
       session: { sessionId, projectRoot, gates: buildEffectiveGates(catalog, gates, selection), workspace: workspaceView(workspace) },
-      project: {
-        root: projectRoot,
-        skillsRoot: status.skillsDir,
-        pptProjects: status.pptProjects,
-      },
+      project: { root: projectRoot, skillsRoot: linkState.skillsDir },
       links: {
-        count: status.linked.length,
-        names: status.linked,
-        added: status.added,
-        removed: status.removed,
-        retargeted: status.retargeted,
-        kept: status.kept,
-        conflicts: status.conflicts,
+        count: linkState.linked.length,
+        names: linkState.linked,
+        added: linkState.added,
+        removed: linkState.removed,
+        retargeted: linkState.retargeted,
+        kept: linkState.kept,
+        conflicts: linkState.conflicts,
       },
       ars: ars === undefined ? undefined : {
         label: ars.label,
@@ -209,7 +177,7 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
         enabled: arsEnabled,
         skillCount: (ars.skills ?? []).length,
         commandCount: (ars.commands ?? []).length,
-        injected: (ars.skills ?? []).filter(skill => status.linked.includes(skill.name)).length,
+        injected: (ars.skills ?? []).filter(skill => linkState.linked.includes(skill.name)).length,
         repo: ars.upstream,
       },
       groups: groupStats(catalog, selection, desired, gates, blocked),
@@ -222,6 +190,12 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
     return payload
   }
 
+  async function settingsPayload() {
+    const params = runtime.effective()
+    const payload = settingsCards(params, presenceOf(runtime.presence()), mcpStatusOf())
+    return { ok: true, ...payload }
+  }
+
   const handlers = {
     'GET /catalog': async query => {
       const sessionId = query.get('sessionId')
@@ -230,22 +204,19 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
     },
     'POST /session': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
-      const scope = await contextOf(body.sessionId, body.cwd)
+      const scopeInfo = await contextOf(body.sessionId, body.cwd)
       const catalog = await loadCatalog()
       const selection = await loadSelection(catalog)
-      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
-      // 在「默认」上改任何门禁 → 先为当前工作区建立（或复用）以工作区命名的模式
-      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
       const patch = body.gates ?? Object.fromEntries(Object.entries(body.categories ?? {}))
       const nextGates = await setGates(patch)
-      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, scope.projectRoot, scope.workspace)
-      // ARS 开/关同时决定 16 个 /ars-* 命令是否出现在斜杠菜单里。
+      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, scopeInfo.projectRoot, scopeInfo.workspace)
       syncArsCommands(nextGates.ars === true)
-      return syncState(scope.sessionId, body.cwd, false)
+      return syncState(scopeInfo.sessionId, body.cwd, false)
     },
     'POST /ui': async body => {
-      const expanded = body.expanded ?? {}
-      const ui = await saveExpanded(expanded)
+      const ui = await saveExpanded(body.expanded ?? {})
       return { ok: true, ui }
     },
     'GET /doc': async query => {
@@ -270,13 +241,13 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
         if (names.has(name) && typeof value === 'boolean') changes[name] = value
       }
       if (Object.keys(changes).length === 0) throw new Error('没有可应用的选择变更')
-      const scope = await contextOf(body.sessionId, body.cwd)
-      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
-      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
+      const scopeInfo = await contextOf(body.sessionId, body.cwd)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
       await setSelection(changes)
       await resetDerivedGatesForSkills(catalog, Object.keys(changes))
-      await saveActiveMode(catalog, await loadSelection(catalog), await loadGates(), scope.projectRoot, scope.workspace)
-      return syncState(scope.sessionId, body.cwd, false)
+      await saveActiveMode(catalog, await loadSelection(catalog), await loadGates(), scopeInfo.projectRoot, scopeInfo.workspace)
+      return syncState(scopeInfo.sessionId, body.cwd, false)
     },
     'POST /children': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
@@ -284,139 +255,90 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
       const selection = await loadSelection(catalog)
       const nodeId = typeof body.nodeId === 'string' ? body.nodeId : ''
       const value = body.value === true
-      // 搜索过滤时客户端只传可见子节点，避免“全选”把没显示出来的子项也改掉。
       const only = Array.isArray(body.only) ? body.only.filter(item => typeof item === 'string') : undefined
       const { skillChanges, gates } = childBatch(catalog, nodeId, value, { only })
-      const scope = await contextOf(body.sessionId, body.cwd)
-      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
-      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
-      const params = currentParams(pluginConfig)
-      const blocked = await blockedSkills(catalog, params)
+      const scopeInfo = await contextOf(body.sessionId, body.cwd)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
+      const blocked = await blockedSkills(runtime.effective(), catalog)
       const changes = Object.fromEntries(Object.entries(skillChanges).filter(([name]) => blocked[name] === undefined))
       if (Object.keys(changes).length > 0) await setSelection(changes)
       await resetDerivedGatesForSkills(catalog, Object.keys(changes))
       const nextGates = Object.keys(gates).length > 0 ? await setGates(gates) : await loadGates()
-      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, scope.projectRoot, scope.workspace)
+      await saveActiveMode(catalog, await loadSelection(catalog), nextGates, scopeInfo.projectRoot, scopeInfo.workspace)
       syncArsCommands(nextGates.ars === true)
-      return syncState(scope.sessionId, body.cwd, false)
+      return syncState(scopeInfo.sessionId, body.cwd, false)
     },
     'POST /reset': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
       const catalog = await loadCatalog()
-      const selection = await loadSelection(catalog)
       const group = catalog.groups.find(item => item.id === body.group)
       if (group === undefined) throw new Error(`未知一级目录：${body.group}`)
-      const scope = await contextOf(body.sessionId, body.cwd)
-      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
-      await ensureEditableMode(catalog, live.selection, live.gates, scope.projectRoot, scope.workspace)
+      const scopeInfo = await contextOf(body.sessionId, body.cwd)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
+      await ensureEditableMode(catalog, live.selection, live.gates, scopeInfo.projectRoot, scopeInfo.workspace)
       const changedNames = await resetGroup(catalog, group.id)
       await resetDerivedGatesForSkills(catalog, changedNames)
-      await saveActiveMode(catalog, await loadSelection(catalog), await loadGates(), scope.projectRoot, scope.workspace)
-      return syncState(scope.sessionId, body.cwd, false)
+      await saveActiveMode(catalog, await loadSelection(catalog), await loadGates(), scopeInfo.projectRoot, scopeInfo.workspace)
+      return syncState(scopeInfo.sessionId, body.cwd, false)
     },
     'POST /presets': async body => {
-      const scope = await contextOf(body.sessionId, body.cwd)
+      const scopeInfo = await contextOf(body.sessionId, body.cwd)
       const catalog = await loadCatalog()
       const selection = await loadSelection(catalog)
-      const live = await activateMode(catalog, scope.projectRoot, scope.workspace)
+      const live = await activateMode(catalog, scopeInfo.projectRoot, scopeInfo.workspace)
       const gates = live.gates
       const action = typeof body.action === 'string' ? body.action : ''
       const name = typeof body.name === 'string' ? body.name.trim() : ''
       try {
-        if (action === 'apply') await applyMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
-        else if (action === 'create-from') await cloneMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
-        else if (action === 'save') await saveMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name, body.newName)
-        else if (action === 'rename') await renameMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name, body.newName)
-        else if (action === 'delete') await deleteMode(catalog, selection, gates, scope.projectRoot, scope.workspace, name)
+        if (action === 'apply') await applyMode(catalog, selection, gates, scopeInfo.projectRoot, scopeInfo.workspace, name)
+        else if (action === 'create-from') await cloneMode(catalog, selection, gates, scopeInfo.projectRoot, scopeInfo.workspace, name)
+        else if (action === 'save') await saveMode(catalog, selection, gates, scopeInfo.projectRoot, scopeInfo.workspace, name, body.newName)
+        else if (action === 'rename') await renameMode(catalog, selection, gates, scopeInfo.projectRoot, scopeInfo.workspace, name, body.newName)
+        else if (action === 'delete') await deleteMode(catalog, selection, gates, scopeInfo.projectRoot, scopeInfo.workspace, name)
         else throw new Error(`未知的选择态操作：${action}`)
       } catch (error) {
-        await appendEvent('presets-action', {
-          action,
-          name,
-          newName: body.newName ?? null,
-          workspace: scope.workspace.key,
-          title: scope.workspace.title,
-          ok: false,
-          error: String(error?.message ?? error),
-        })
+        await appendEvent('presets-action', { action, name, newName: body.newName ?? null, workspace: scopeInfo.workspace.key, title: scopeInfo.workspace.title, ok: false, error: String(error?.message ?? error) })
         throw error
       }
-      await appendEvent('presets-action', {
-        action,
-        name,
-        newName: body.newName ?? null,
-        workspace: scope.workspace.key,
-        title: scope.workspace.title,
-        ok: true,
-      })
-      const gatesAfter = await loadGates()
-      syncArsCommands(gatesAfter.ars === true)
-      return syncState(scope.sessionId, body.cwd, false)
+      await appendEvent('presets-action', { action, name, newName: body.newName ?? null, workspace: scopeInfo.workspace.key, title: scopeInfo.workspace.title, ok: true })
+      syncArsCommands((await loadGates()).ars === true)
+      return syncState(scopeInfo.sessionId, body.cwd, false)
     },
     'POST /open-url': async body => {
       const url = typeof body.url === 'string' ? body.url.trim() : ''
       if (!/^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?$/.test(url)) throw new Error('只允许打开 GitHub 仓库页面')
-      const child = process.platform === 'win32'
-        ? spawn('cmd.exe', ['/c', 'start', '', url], { detached: true, stdio: 'ignore' })
-        : spawn('xdg-open', [url], { detached: true, stdio: 'ignore' })
-      child.unref()
+      if (!openPath(url)) throw new Error('无法调用系统浏览器')
       await appendEvent('open-repo', { url })
       return { ok: true, url }
     },
     'POST /resync': async body => {
       if (typeof body.sessionId !== 'string' || body.sessionId.length === 0) throw new Error('缺少 sessionId')
-      // 只读刷新：只重算视图与注入联接，不改写选择态文件（避免与用户的写操作抢状态）。
       return syncState(body.sessionId, body.cwd, false, false)
     },
-    'GET /settings': async () => {
-      const catalog = await loadCatalog()
-      const params = currentParams(pluginConfig)
-      const signature = JSON.stringify(params)
-      if (settingsCache !== undefined && settingsCache.signature === signature
-        && Date.now() - settingsCache.at < SETTINGS_CACHE_MS) {
-        return { ok: true, ...settingsCache.value }
-      }
-      const payload = await settingsCards(catalog, params, mcpStatusOf())
-      settingsCache = { signature, at: Date.now(), value: payload }
-      return { ok: true, ...payload }
-    },
+    'GET /settings': async () => settingsPayload(),
     'POST /settings': async body => {
-      const catalog = await loadCatalog()
       if (body.action === 'open-dir') {
         const target = typeof body.target === 'string' ? body.target : undefined
-        const result = openConfigTarget(cacheRoot(), target)
+        const result = openConfigTarget(target)
         await appendEvent('open-config-dir', { target: result.path })
         return { ok: true, ...result }
       }
       const checkActions = new Set(['ars-check-deps', 'image-check', 'image2ppt-check', 'runtime-check'])
       if (typeof body.action === 'string' && checkActions.has(body.action)) {
         if (body.action === 'ars-check-deps') {
-          const result = await checkArsDependencies(pluginConfig)
+          const result = checkArsDeps(runtime.effective())
           await appendEvent('ars-check-deps', { ok: result.ok, missing: result.missing })
-          return { ok: true, check: result, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
+          return { ok: true, check: result, settings: await settingsPayload() }
         }
-        const check = await runSettingCheck(catalog, pluginConfig, body.action, mcpController)
+        const check = await runSettingCheck(body.action, runtime.effective(), mcpController)
         await appendEvent('settings-check', { action: body.action, ok: check.ok })
-        return { ok: true, check, settings: await settingsCards(catalog, currentParams(pluginConfig), mcpStatusOf()) }
+        return { ok: true, check, settings: await settingsPayload() }
       }
-      const { params: savedParams, backups } = await saveSettingsCard(catalog, pluginConfig, body)
-      // 非密钥字段写 profile 补丁、密钥写 DSH 凭据库；随后按新值重新注入环境变量。
-      const persisted = await persistParams(ctx, savedParams)
-      if (typeof refreshParams === 'function') await refreshParams()
-      applySkillEnv(currentParams(pluginConfig))
-      settingsCache = undefined
-      await appendEvent('settings-saved', {
-        cardId: body.cardId,
-        saved: persisted.saved,
-        configUpdated: persisted.configUpdated,
-        credentialsAvailable: persisted.credentialsAvailable,
-        secretsUpdated: persisted.secretsUpdated,
-        secretErrors: persisted.secretErrors,
-        error: persisted.error,
-      })
-      if (persisted.saved === false && persisted.error !== undefined) throw new Error(persisted.error)
-      // 保存会触发插件重启，这里用刚存下的参数回填响应，避免返回重启前的旧值。
-      return { ok: true, backups, settings: await settingsCards(catalog, savedParams, mcpStatusOf()) }
+      const next = saveSettingsCard(runtime.effective(), body)
+      const saved = await runtime.save(next)
+      if (!saved.result.saved && saved.result.error !== undefined) throw new Error(saved.result.error)
+      return { ok: true, warnings: saved.result.warnings, settings: await settingsPayload() }
     },
     'POST /mcp': async body => {
       const action = typeof body.action === 'string' ? body.action : ''
@@ -448,18 +370,20 @@ export function registerRoutes(scope, ctx, pluginConfig, mcpController, refreshP
         ok: true,
         version: VERSION,
         packageDir: join(SKILLS_DIR, '..'),
-        stateDir: STATE_DIR,
-        configDir: cacheRoot(),
+        cacheDir: cacheRoot(),
+        stateDir: stateRoot(),
         catalog: { total: catalog.stats.total, defaults: catalog.stats.defaults, generatedAt: catalog.generatedAt },
         arsCommands: arsCommandCount(),
-        mcp: mcpController === undefined ? { available: false, servers: [] } : mcpController.status(),
+        mcp: mcpStatusOf(),
         projects: Object.keys(links.projects ?? {}).length,
+        warnings: runtime.warnings(),
         events: await readEvents(10),
       }
     },
   }
 
-  const disposer = webServer.register({
+  const webServerRef = webServer
+  const disposer = webServerRef.register({
     kind: 'prefix',
     path: ROUTE_PREFIX,
     handler: (req, res) => {

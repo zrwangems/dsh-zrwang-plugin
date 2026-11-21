@@ -4,7 +4,7 @@ Unified Image Generation Tool
 
 Dispatches to the appropriate backend based on explicit provider configuration.
 
-Backend selection (`IMAGE_BACKEND` in `.env` or the current process environment):
+Backend selection (`IMAGE_BACKEND` injected by the DSH plugin, or set in the current process environment):
   IMAGE_BACKEND=gemini      -> Gemini backend (google-genai SDK)
   IMAGE_BACKEND=openai      -> OpenAI-compatible backend (raw HTTP via requests)
   IMAGE_BACKEND=minimax     -> MiniMax image backend
@@ -21,13 +21,8 @@ Backend selection (`IMAGE_BACKEND` in `.env` or the current process environment)
   IMAGE_BACKEND=replicate   -> Replicate backend
   IMAGE_BACKEND=openrouter  -> OpenRouter backend
 
-Configuration source (process env wins, `.env` is the fallback layer):
-  1. Current process environment variables
-  2. The first `.env` found among:
-     - Current working directory
-     - Skill directory (e.g. `~/.agents/skills/ppt-master/.env`)
-     - Repo root (when running from a clone)
-     - `~/.ppt-master/.env` (user-level config)
+Configuration source: the DSH plugin injects these variables from its settings
+(设置 → 模型服务 → 生图模型). There is no `.env` file and no fallback layer.
 
 Supported keys:
   IMAGE_BACKEND    (required) backend name
@@ -58,43 +53,33 @@ import time
 from pathlib import Path
 
 from console_encoding import configure_utf8_stdio
-from config import load_prefixed_env_file, resolve_env_path
 
 configure_utf8_stdio()
 
 # >>> dsh-zrwang-plugin image bridge
-def _plugin_image_values():
-    # DSH 的 shell 子进程会按变量名清洗 *KEY*/*TOKEN*/*SECRET*/*PASSWORD*，
-    # 密钥不能只靠环境变量传给技能进程；这里从插件 settings.json 兜底读取。
-    root = os.environ.get("ZRWANG_PLUGIN_CONFIG_DIR", "").strip()
-    if not root:
-        return {}
-    try:
-        with open(os.path.join(root, "settings.json"), "r", encoding="utf-8") as handle:
-            image = (json.load(handle) or {}).get("image") or {}
-        return image if isinstance(image, dict) else {}
-    except Exception:
-        return {}
-
-
+# 插件把生图配置注入为 ZRWANG_IMAGE_*；密钥用不带 KEY/TOKEN 的 ZRWANG_IMAGE_CRED
+# （DSH 的 shell 会清掉名字里带 KEY 的变量）。这里映射成 image_gen 认的后端变量。
 def _apply_plugin_image_env():
-    image = _plugin_image_values()
-    pairs = (
-        ("ZRWANG_IMAGE_BASE_URL", "OPENAI_BASE_URL", "baseUrl"),
-        ("ZRWANG_IMAGE_MODEL", "OPENAI_MODEL", "model"),
-        ("ZRWANG_IMAGE_API_KEY", "OPENAI_API_KEY", "apiKey"),
-    )
-    for source, target_env, key in pairs:
-        value = os.environ.get(source, "").strip() or str(image.get(key) or "").strip()
-        if value:
-            os.environ[target_env] = value
-            os.environ.setdefault(source, value)
-    if (
-        os.environ.get("ZRWANG_IMAGE_API_KEY")
-        or os.environ.get("ZRWANG_IMAGE_BASE_URL")
-        or image.get("apiKey")
-        or image.get("baseUrl")
-    ):
+    backend = os.environ.get("ZRWANG_IMAGE_BACKEND", "").strip().lower()
+    base_url = os.environ.get("ZRWANG_IMAGE_BASE_URL", "").strip()
+    model = os.environ.get("ZRWANG_IMAGE_MODEL", "").strip()
+    cred = os.environ.get("ZRWANG_IMAGE_CRED", "").strip()
+    if backend == "qwen":
+        if cred:
+            os.environ.setdefault("QWEN_API_KEY", cred)
+        if model:
+            os.environ.setdefault("QWEN_MODEL", model)
+        if base_url:
+            os.environ.setdefault("QWEN_BASE_URL", base_url.replace("/compatible-mode/v1", "").rstrip("/") or "https://dashscope.aliyuncs.com")
+        os.environ["IMAGE_BACKEND"] = "qwen"
+        return
+    if base_url:
+        os.environ.setdefault("OPENAI_BASE_URL", base_url)
+    if model:
+        os.environ.setdefault("OPENAI_MODEL", model)
+    if cred:
+        os.environ.setdefault("OPENAI_API_KEY", cred)
+    if cred or base_url:
         os.environ["IMAGE_BACKEND"] = "openai"
         os.environ.setdefault("OPENAI_QUALITY", "omit")
 
@@ -102,7 +87,6 @@ def _apply_plugin_image_env():
 _apply_plugin_image_env()
 # <<< dsh-zrwang-plugin image bridge
 
-ENV_PATH = resolve_env_path()
 IMAGE_ENV_PREFIXES = (
     "IMAGE_",
     "GEMINI_",
@@ -274,30 +258,6 @@ TIER_ORDER = {"core": 0, "extended": 1, "experimental": 2}
 SUPPORTED_BACKENDS = tuple(sorted(BACKEND_REGISTRY))
 
 
-def _load_image_env_file() -> Path | None:
-    """
-    Load image generation config from the resolved `.env` as a fallback layer.
-
-    Existing process environment variables win over `.env`.
-    """
-    replacements = {
-        "IMAGE_API_KEY": "GEMINI_API_KEY / OPENAI_API_KEY / QWEN_API_KEY / ZHIPU_API_KEY / ...",
-        "IMAGE_MODEL": "GEMINI_MODEL / OPENAI_MODEL / QWEN_MODEL / ZHIPU_MODEL / ...",
-        "IMAGE_BASE_URL": "GEMINI_BASE_URL / OPENAI_BASE_URL / QWEN_BASE_URL / ZHIPU_BASE_URL / ...",
-    }
-    deprecated_messages = {
-        key: (
-            "Global image config keys have been removed.\n"
-            f"Use IMAGE_BACKEND plus provider-specific keys instead, such as {replacement}."
-        )
-        for key, replacement in replacements.items()
-    }
-    return load_prefixed_env_file(
-        IMAGE_ENV_PREFIXES,
-        deprecated_keys=deprecated_messages,
-    )
-
-
 def _validate_runtime_config() -> None:
     """Reject deprecated global image variables from any configuration source."""
     for key in DEPRECATED_IMAGE_KEYS:
@@ -353,15 +313,6 @@ def _load_backend(canonical_name: str) -> tuple[object, str]:
 
 def _print_backend_resolution() -> None:
     """Print the effective Path A backend without exposing credentials."""
-    backend_from_process = "IMAGE_BACKEND" in os.environ
-    try:
-        env_path = _load_image_env_file()
-    except ValueError as exc:
-        print("Resolved backend: invalid configuration")
-        print(f"Configuration source: {ENV_PATH}")
-        print(f"Configuration error: {exc}")
-        return
-
     try:
         _validate_runtime_config()
     except ValueError as exc:
@@ -372,21 +323,14 @@ def _print_backend_resolution() -> None:
 
     backend_name = os.environ.get("IMAGE_BACKEND", "").strip().lower()
     if not backend_name:
-        if backend_from_process:
-            source = "process environment (empty)"
-        elif env_path is not None:
-            source = f"none (checked {env_path})"
-        else:
-            source = "none (no .env found)"
         print("Resolved backend: not configured (Path A unavailable)")
-        print(f"Configuration source: {source}")
+        print("Configuration source: none (plugin settings did not set a backend)")
         return
 
     canonical = BACKEND_ALIASES.get(backend_name)
     resolved = canonical or f"invalid ({backend_name})"
-    source = "process environment" if backend_from_process else str(env_path or ENV_PATH)
     print(f"Resolved backend: {resolved}")
-    print(f"Configuration source: {source}")
+    print("Configuration source: plugin settings (process environment)")
 
 
 def _print_backend_list() -> None:
@@ -462,9 +406,8 @@ def _resolve_backend() -> tuple[object, str]:
         "image tool directly with the prompts from images/image_prompts.json and save\n"
         "the outputs to images/<filename>. See references/image-generator.md §7 Path B.\n"
         "\n"
-        "To use Path A instead, set IMAGE_BACKEND in one of these places:\n"
-        f"  1. Current process environment\n"
-        f"  2. {ENV_PATH}\n"
+        "To use Path A instead, configure the image model in the DSH plugin settings\n"
+        "（设置 → 插件 → My DSH → 模型服务 → 生图模型）。\n"
         "\n"
         f"Supported backends: {supported}\n"
         "\n"
@@ -1490,13 +1433,12 @@ def main() -> None:
             sys.exit(1)
 
     try:
-        _load_image_env_file()
         _validate_runtime_config()
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit(1)
 
-    # CLI --backend overrides the value loaded from .env
+    # CLI --backend overrides the value from the environment
     if args.backend:
         os.environ["IMAGE_BACKEND"] = args.backend
 

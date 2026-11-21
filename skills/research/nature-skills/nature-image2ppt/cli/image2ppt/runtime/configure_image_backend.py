@@ -4,13 +4,12 @@ import json
 import os
 
 from deck_run_state import load_deck, load_jobs, read_json, run_dir_from_target, save_deck, write_json
-from runtime_env import DEFAULT_IMAGE_MODEL, config_path, read_config_file
+from runtime_env import DEFAULT_IMAGE_MODEL
 
 
 def configured_model() -> str:
-    """Resolve the provider model without assuming any vendor-specific id."""
-    values = read_config_file(config_path())
-    return str(os.getenv("IMAGE2PPT_IMAGE_MODEL") or values.get("IMAGE2PPT_IMAGE_MODEL") or DEFAULT_IMAGE_MODEL).strip()
+    """Resolve the provider model from the plugin-injected environment."""
+    return str(os.getenv("IMAGE2PPT_IMAGE_MODEL") or DEFAULT_IMAGE_MODEL).strip()
 
 
 def backend_contract(args):
@@ -91,7 +90,7 @@ def main():
     if not args.model:
         parser.error("--model or IMAGE2PPT_IMAGE_MODEL must be a non-empty provider model id")
     if args.runtime_home is None:
-        args.runtime_home = str(config_path().parent)
+        args.runtime_home = ""
 
     if args.backend_id == "builtin-imagegen":
         fixed_field_overrides = [

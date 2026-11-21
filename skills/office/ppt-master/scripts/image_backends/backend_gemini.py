@@ -272,7 +272,7 @@ def generate(prompt: str,
     """
     Gemini image generation or image-to-image editing with automatic retry.
 
-    Reads credentials from the current process environment or a `.env` file:
+    Reads credentials from the current process environment (injected by the DSH plugin):
       GEMINI_API_KEY
       GEMINI_BASE_URL
       GEMINI_MODEL (optional override)
@@ -296,7 +296,7 @@ def generate(prompt: str,
 
     if not api_key:
         raise ValueError(
-            "No API key found. Set GEMINI_API_KEY in the current environment or a .env file."
+            "No API key found. Set GEMINI_API_KEY in the current environment (set through the DSH plugin settings)."
         )
 
     if model is None:

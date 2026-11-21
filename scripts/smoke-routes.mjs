@@ -5,17 +5,16 @@
  *   GET /catalog → POST /session → 同工作区共享 → 跨工作区隔离
  *   POST /presets create-from（命名模式/默认拒绝）→ rename 升级项目级 → delete。
  *
- * 运行时会临时改 STATE_DIR / DSH_HOME 到 AgentsDo 下的测试目录，不污染真实配置。
+ * 全程在系统临时目录里跑，不写仓库、不碰真实 ~/.dsh。
  */
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
-const WORK = resolve(import.meta.dirname, '..', '..', 'AgentsDo', 'skill-management-20261027', 'tmp', 'routes')
-rmSync(WORK, { recursive: true, force: true })
-mkdirSync(WORK, { recursive: true })
-process.env.ZRWANG_PLUGIN_STATE_DIR = join(WORK, 'state')
+const WORK = mkdtempSync(join(tmpdir(), 'dsh-zrwang-routes-'))
 process.env.DSH_HOME = join(WORK, 'home')
-
+const { setCacheRootForTests, stateRoot } = await import('../host/paths.mjs')
+setCacheRootForTests(join(WORK, 'cache'))
 const { registerRoutes } = await import('../host/routes.mjs')
 
 let failures = 0
@@ -65,7 +64,15 @@ const ctx = {
   emit() {},
 }
 const scope = { webServer, get: name => (name === 'webServer' ? webServer : undefined) }
-registerRoutes(scope, ctx, {})
+const runtime = {
+  effective: () => ({}),
+  configParams: () => ({}),
+  presence: () => ({}),
+  warnings: () => [],
+  save: async params => ({ result: { saved: true, warnings: [] }, params, present: {} }),
+  reconfigure: () => {},
+}
+registerRoutes(scope, ctx, runtime, undefined)
 
 async function call(method, path, body) {
   const chunks = body === undefined ? [] : [Buffer.from(JSON.stringify(body))]
@@ -114,11 +121,12 @@ check('组件行含 MathWorks 与 Windows MCP',
   initialComponents.map(item => item.id).join(','))
 check('工程组未开时 MathWorks 组件关闭', initialComponents.find(item => item.id === 'mathworks')?.enabled === false)
 const mathworksOn = (toggled.data.components ?? []).find(item => item.id === 'mathworks')
-check('工程技能组打开后 MathWorks 组件自动开启', mathworksOn?.enabled === true, JSON.stringify(mathworksOn))
+check('工程技能组只对 MathWorks 组件开门禁（是否可用按平台）',
+  mathworksOn?.enabled === (process.platform === 'win32'), JSON.stringify(mathworksOn))
 check('无 mcpManager 时组件标记不可用', mathworksOn?.server?.state === 'unavailable', JSON.stringify(mathworksOn?.server))
 const winToggled = await call('POST', '/dsh-zrwang-plugin/session', { sessionId: 'session-a', cwd: dirA, gates: { 'windows-mcp': true } })
-check('勾选 Windows MCP 组件后门禁生效',
-  (winToggled.data.components ?? []).find(item => item.id === 'windows-mcp')?.enabled === true)
+check('勾选 Windows MCP 组件后门禁按平台生效',
+  (winToggled.data.components ?? []).find(item => item.id === 'windows-mcp')?.enabled === (process.platform === 'win32'))
 await call('POST', '/dsh-zrwang-plugin/session', { sessionId: 'session-a', cwd: dirA, gates: { 'windows-mcp': false } })
 const health = await call('GET', '/dsh-zrwang-plugin/health')
 check('health 报告 MCP 状态', health.data?.mcp?.available === false && health.data?.ok === true)
@@ -130,7 +138,7 @@ check('同工作区会话共享同一模式与计数', presetsOf(shared.data).ac
   JSON.stringify(presetsOf(shared.data)))
 
 // ---- 3.1 /resync 只读：不改写选择态文件 ----
-const selectionFile = join(WORK, 'state', 'selection.json')
+const selectionFile = join(stateRoot(), 'selection.json')
 const selectionBefore = readFileSync(selectionFile, 'utf8')
 const resynced = await call('POST', '/dsh-zrwang-plugin/resync', { sessionId: 'session-a', cwd: dirA })
 check('resync 成功且不改写 selection.json', resynced.status === 200 && resynced.data.ok === true
@@ -146,7 +154,7 @@ check('工程组全选后本组门禁打开且有注入', bulk.status === 200 &&
 // ---- 3.3 搜索过滤下全选只改可见技能及其所在目录 ----
 await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: false })
 const filtered = await call('POST', '/dsh-zrwang-plugin/children', { sessionId: 'session-a', cwd: dirA, nodeId: 'engineering', value: true, only: ['matlab-create-live-script'] })
-const gatesFile = JSON.parse(readFileSync(join(WORK, 'state', 'gates.json'), 'utf8')).gates
+const gatesFile = JSON.parse(readFileSync(join(stateRoot(), 'gates.json'), 'utf8')).gates
 const selectionAfterFilter = JSON.parse(readFileSync(selectionFile, 'utf8')).skills
 check('过滤后全选只打开可见技能所在目录',
   filtered.status === 200
@@ -213,7 +221,7 @@ check('不存在的模式返回明确错误', missing.status === 400 && String(m
   JSON.stringify(missing.data))
 
 // ---- 9. 事件日志留下排障记录 ----
-const events = readFileSync(join(WORK, 'state', 'events.jsonl'), 'utf8').split('\n').filter(Boolean).map(line => JSON.parse(line))
+const events = readFileSync(join(stateRoot(), 'events.jsonl'), 'utf8').split('\n').filter(Boolean).map(line => JSON.parse(line))
 const presetEvents = events.filter(event => event.kind === 'presets-action')
 check('presets-action 事件有成功与失败记录', presetEvents.some(event => event.detail.ok === true) && presetEvents.some(event => event.detail.ok === false),
   String(presetEvents.length))

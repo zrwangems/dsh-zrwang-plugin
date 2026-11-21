@@ -15,7 +15,7 @@
 
 ## 功能
 
-- **三级目录树**：工程技能组 230 个（MATLAB / Simulink / MathWorks其他 三类并列）、科研技能组 52 个、办公技能组 47 个（含飞书 Lark 28 个），共 **329 个技能**，全部来自 **21 个上游 GitHub 仓库**（见下方「技能来源」）。安装后默认只展开到一级目录（工程 / 科研 / 办公 / ARS 行），各组都收起着，按需展开；用户的展开/收起状态会被记住。
+- **三级目录树**：工程技能组 230 个（MATLAB / Simulink / MathWorks其他 三类并列）、科研技能组 52 个、办公技能组 47 个（含飞书 Lark 28 个），共 **329 个技能**，全部来自 **22 个上游 GitHub 仓库**（见下方「技能来源」）。安装后默认只展开到一级目录（工程 / 科研 / 办公 / ARS 行），各组都收起着，按需展开；用户的展开/收起状态会被记住。
 - **技能选择态（按项目 + DSH 工作区）**
   - 每个项目初始只有「默认」：基础注入态，所有门禁关闭，**注入数恒为 0**；只读，不因侧栏勾选而改变。
   - 在「默认」上做任何修改（勾技能、开分组、开 ARS）会自动建立（或复用）**当前 DSH 工作区**的模式，名字就用工作区名，自动保存。
@@ -29,11 +29,11 @@
 - **MCP 组件（与 ARS 并列的两行）**：
   - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；工程组关掉即注销。
   - **Windows MCP组件**：手动勾选后注册 `windows-mcp`（桌面截图、快照、点击、窗口操作），取消即注销；用系统 PATH 里已安装的 `windows-mcp`（`uv tool install windows-mcp` 等），插件不自带运行时。
-  - 两者走 DSH `ctx.mcpManager` 动态注册，不改 profile 补丁、不用重启；参数固定、无设置项（MATLAB MCP 用包内 exe + SATK 扩展文件，Windows MCP 用系统 PATH 里已安装的 `windows-mcp`）；组件行有「启动中 / 已启动（N 个工具）/ 启动失败」标识和「重启」按钮。组件是宿主全局的，多个会话按并集保持：只要还有一个会话需要就继续注册，最后一个需要它的会话关掉后才注销，切换会话不会把别人正在用的工具撤掉。详见 [docs/mcp-components.md](docs/mcp-components.md)。
+  - 两者只在 Windows 上可用（MATLAB MCP 是 Windows 可执行文件，Windows MCP 依赖 Windows 桌面），其他平台显示不可用。两者走 DSH `ctx.mcpManager` 动态注册，不改 profile 补丁、不用重启；参数固定、无设置项（MATLAB MCP 用包内 exe + SATK 扩展文件，Windows MCP 用系统 PATH 里已安装的 `windows-mcp`）；组件行有「启动中 / 已启动（N 个工具）/ 启动失败」标识和「重启」按钮。组件是宿主全局的，多个会话按并集保持：只要还有一个会话需要就继续注册，最后一个需要它的会话关掉后才注销，切换会话不会把别人正在用的工具撤掉。详见 [docs/mcp-components.md](docs/mcp-components.md)。
 
 ## 安装
 
-需要 DSH `0.2.2-rc.2` 或更高版本（插件声明 `engines.dsh >=0.2.2-rc.2`；MCP 组件依赖该版本起提供的 `ctx.mcpManager`）。右侧栏默认使用 `dsh-better-sidebar 0.32.1+`（作为插件依赖会自动安装并启用）；**没有它也能用**：插件会退回注册一个 DSH 原生右侧栏页签「My DSH」。使用 DSH 0.2.2 的团队能力时，低于 0.32.1 的 better-sidebar 读取不到新的团队投影结构，任务页会报错，请一并升级。
+需要 DSH `0.2.2-rc.2` 或更高版本（插件声明 `engines.dsh >=0.2.2-rc.2`；MCP 组件依赖该版本起提供的 `ctx.mcpManager`）。右侧栏默认使用 `dsh-better-sidebar 0.30.x`（作为插件依赖会自动安装并启用）；**没有它也能用**：插件会退回注册一个 DSH 原生右侧栏页签「My DSH」。
 
 在 DSH 里打开「设置 → 插件 → 安装插件」，搜索并安装：
 
@@ -76,26 +76,32 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 ## 设置
 
-「设置 → 插件 → My DSH」按用途分栏（设置页本身固定中文，不提供语言切换）。插件自身的设置保存在 `~/.dsh/zrwang-plugin-config/settings.json`，运行态在同目录的 `state/` 下：
+「设置 → 插件 → My DSH」按用途分栏（设置页本身固定中文，不提供语言切换）。**所有能填的项都在这里**，没有第二个配置文件：
 
 | 栏目 | 内容 |
 | --- | --- |
-| 模型服务 | 生图模型（URL / 模型 / API Key，按 OpenAI Images 兼容协议，不再分厂商）、OCR 模型（百度 PaddleOCR-VL Token，可选；不填时 `nature-image2ppt` 退回技能内置的离线文字检测，只量位置和字号、读不出文字） |
-| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key；缓存/超时/条数已改为内部固定值，不再暴露）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE，对应主要出版社）；学校配置随包固定分发（`skills/research/nature-skills/nature-downloader/config/school.json`），无需填写；Nature 生图复用模型服务的生图模型，不再单独设置；改动自动保存 |
-| 运行环境 | 顶部一个「检查运行环境」按钮，下面一行一项：Python 解释器（下拉选择）、officecli、zotero-cli、lark-cli、draw.io、Polyspace、MATLAB、MathWorks MCP（可用性＝MATLAB 是否已 shareMATLABSession）、Windows MCP（可用性＝PATH 里是否装了 windows-mcp）；全部自动保存 |
+| 模型服务 | 生图模型（URL / 模型 / API Key，按 OpenAI Images 兼容协议）、OCR 模型（百度 PaddleOCR-VL Token，可选） |
+| 科研服务 | 可选检索（Pexels / Pixabay / OpenAlex / Firecrawl）、Nature 学术检索（PubMed / Crossref / Unpaywall 邮箱与 API Key）、Nature 文献下载凭据（Elsevier / Springer Nature / IEEE）、Nature 绘图后端（Python / R）、专利检索向量模型（智谱 / 通义 / OpenAI / 本地，可选）与 Obsidian 专利库路径 |
+| 运行环境 | Python 解释器下拉选择，以及 officecli、zotero-cli、lark-cli、draw.io、Polyspace、MATLAB、MathWorks MCP、Windows MCP 的可用性 |
 
-**所有设置项改动即自动保存**（保存后同一个 DSH 进程立即生效；注意 DSH 的 shell 工具会按变量名清洗 `KEY`/`TOKEN`/`SECRET`/`PASSWORD` 类变量，插件会生成 Python 启动钩子从配置文件补回密钥；Web 与 Desktop 是独立进程，每个运行中的实例都会监听共享的 `settings.json`，其他实例保存后约 0.3 秒内也会重新注入环境变量，不用重启）（文本框失焦、下拉选择即生效，页面没有「保存」按钮）；「运行环境」合并成一个区块：顶部「检查运行环境」按钮同时做系统 Python 检测/依赖校验、组件状态和 MCP 检查，下面按行显示各环境项状态。`settings.json` 里存有 API Key，插件在写入后和启动时都会把文件权限收紧到当前账户（Windows 用 `icacls` 去掉权限继承，其它平台 `chmod 600`），失败时保持原样。
+改动即生效：每张卡片下方有「保存」按钮；Nature 绘图、专利向量服务这类下拉选择选中即自动保存。保存后插件立即用新值重算环境变量，不需要重启 DSH。
 
-保存的设置会同步写进宿主进程环境：生图配置用插件专用 `ZRWANG_IMAGE_*`，由 ppt-master 技能内的桥接映射成 `OPENAI_*`；Nature 学术检索、Unpaywall/Crossref 邮箱、Firecrawl 等分别注入 `NCBI_EMAIL` / `UNPAYWALL_EMAIL` / `CROSSREF_MAILTO` / `FIRECRAWL_API_KEY`。Nature 生图的 `OPENROUTER_*` / `SCHEMATIC_IMAGE_API_URL` 直接复用模型服务的生图 URL/模型/Key。**技能的默认参数直接写在技能代码里**（学术检索默认值、image2ppt 后端、nature-figure 后端），设置页没填过的项不会生成任何配置文件；只有你确实填了出版社凭据或 Unpaywall 邮箱时，才会写进 `skills/research/nature-skills/nature-downloader/config/` 下的 `credentials.json` / `settings.json`（已 `.gitignore`）。`school.json` 同目录随技能分发，通过 `LIT_DL_SCHOOL_FILE` 读取。**不再读取或写入任何上游 `.env` / 旧配置文件**。
+### 配置放在哪里
+
+- **非密钥配置**只写进当前 profile 的 `cordis.patch.yml`，即 `- id: dsh-zrwang-plugin` 这一项的 `config`。没有 `settings.json`，也没有插件自己的配置目录。
+- **密钥**只写进 DSH 凭据库（`api-key` 凭据），不写 YAML、不写日志、不回显；设置页只显示「已设置 / 未设置」。因此插件包、profile 补丁和 `cache/` 里都不会出现明文密钥。
+- **运行期产物**（选择态、门禁、模式、Python 启动钩子、MCP 暂存、备份）全部在插件安装目录下的 `cache/`，卸载插件时一起删除；插件不会在 `~/.dsh` 里另建目录。
+- DSH 的 shell 会清掉名字里带 `KEY` / `TOKEN` / `SECRET` / `PASSWORD` 的环境变量，所以密钥以 `ZRWANG_*_CRED` 注入，再由插件生成的 Python 启动钩子映射回上游脚本认识的标准变量名。
+- 上游技能自己的配置文件、向导和读写代码已删除：技能只从插件注入的环境变量取参数。需要改默认值时改插件设置，不要去改技能目录。
 
 ## 系统 Python
 
 插件检测本机已有的解释器并校验依赖，由用户选择一个：
 
-- **检测来源**：PATH 上的 `python` / `python3`、Windows `py` 启动器、Conda 环境（`conda env list`）、常见安装目录（Python 官方安装、Anaconda/Miniconda）；打开设置页时自动检测（结果缓存在 `<配置目录>/state/python-candidates.json`，5 分钟内复用），点「检查运行环境」会强制重扫。
+- **检测来源**：PATH 上的 `python` / `python3`、Windows `py` 启动器、Conda 环境（`conda env list`）、常见安装目录（Python 官方安装、Anaconda/Miniconda）；打开设置页时自动检测（结果缓存在插件 `cache/state/python-candidates.json`，5 分钟内复用），点「检查运行环境」会强制重扫。
 - **选择**：设置 → 运行环境 → Python 解释器，下拉选一个（或「自动选择」用第一个可用解释器）；选完立即自动保存，没有自定义路径输入框。
 - **校验**：会读版本并逐个 import 技能需要的模块（PyYAML、jsonschema、ruamel.yaml、pypdf、defusedxml、openpyxl、requests、Pillow、python-pptx、python-docx、PyMuPDF、openai、playwright）。**缺什么只列出，不安装**，请在你选择的环境里自行补齐。
-- **生效方式**：插件把 `python` / `python3` 指向所选解释器（`<配置目录>/state/bin` 下的 shim + `BASH_ENV`），`bash` 指向 Git Bash；没有可用解释器时不动系统 PATH，技能会提示未选择。
+- **生效方式**：插件把 `python` / `python3` 指向所选解释器（插件 `cache/artifacts/bin` 下的 shim + `BASH_ENV`），`bash` 指向 Git Bash；没有可用解释器时不动系统 PATH，技能会提示未选择。
 - 插件不再随包分发 `runtime/`，也不再维护依赖清单；从本仓库安装时同样走系统 Python。
 
 ## 技能来源
@@ -160,7 +166,7 @@ dsh plugin --profile <你的profile> remove dsh-zrwang-plugin
 
 1. 先在侧栏里把已勾选的技能/分组关掉，让插件把 `<项目根>/.agents/skills/` 下的联接摘掉；
 2. 再执行上面的 remove；
-3. 需要连配置和运行态一起清掉时，把 `~/.dsh/zrwang-plugin-config/` 整个移到回收站（里面有 `settings.json`、技能密钥、选择态与事件日志）。
+3. 配置随 profile 补丁删除；密钥随 DSH 凭据库删除；运行期状态在插件目录的 `cache/` 下，卸载插件时一起消失。
 
 插件包本身（仓库目录）不会被卸载命令删除；项目里 `.agents/skills/` 这些目录如果空了，可以手动删掉。
 

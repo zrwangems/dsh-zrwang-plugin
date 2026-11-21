@@ -6,11 +6,11 @@ A publication-quality scientific figure is a visual argument, not an isolated pr
 
 Backend selection applies only to rendering or editing plotting code. Reuse a choice already established in the same task and its follow-ups; do not ask again merely because a new message omits the language. Read-only figure review and backend-independent data inspection may proceed without this choice. If the backend remains unresolved, retain the one-time Python/R question and pause only dependent plotting steps. Explicit approval requirements and backend exclusivity remain in force.
 
-For plotting tasks, first honor an explicit Python/R choice in the current request or a clearly language-specific input file/workflow. Save that backend as the user's default with `scripts/nature_figure_backend.py set python` or `scripts/nature_figure_backend.py set r`.
+For plotting tasks, first honor an explicit Python/R choice in the current request or a clearly language-specific input file/workflow. That choice applies to the task; the persisted default lives in the DSH plugin settings.
 
-If the current request does not specify a backend, first reuse the choice established in this task; otherwise check the saved preference with `scripts/nature_figure_backend.py get`. If it returns `python` or `r`, use that backend without asking again.
+If the current request does not specify a backend, first reuse the choice established in this task; otherwise read the plugin default with `scripts/nature_figure_backend.py get` and use the returned `python` or `r`.
 
-If no saved preference exists, ask one concise question: **Python or R? I will remember this as your default.** Pause dependent plotting steps and wait for the user's answer; continue independent inspection. Do not generate mock data, write scripts, create figures, or choose Python/R by default before this first preference is established. After the user answers, save it and proceed.
+Do not ask the user to pick a persisted default and do not write a preference file.
 
 Only recommend a backend when the user explicitly asks you to choose or recommend one. In that case, use `references/backend-selection.md`, state the reason, save the selected backend, and then proceed with the recommended backend.
 

@@ -6,7 +6,7 @@ description: >-
   requested AI-generated graphical abstracts and mechanism schematics. Not for
   interactive dashboards, data cleaning, or statistics-only analysis.
 ---
-> [dsh-zrwang-plugin] 绘图后端偏好写在插件配置目录（`NATURE_FIGURE_CONFIG`）；OpenRouter/生图网关的 Key、模型、接口地址不再单独设置，直接复用模型服务的生图 URL/模型/Key（插件注入 `OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`），不要写 `~/.config/nature-skills`。
+> [dsh-zrwang-plugin] 绘图后端在 DSH 插件设置里选（科研服务 → Nature 绘图 → 绘图后端，注入 `NATURE_FIGURE_BACKEND`）；生图网关的 Key、模型、接口地址复用模型服务的生图配置（`OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL` 由插件注入）。本技能不读写任何配置文件。
 # Nature Figure Making — Router
 
 ## Routing protocol
@@ -52,10 +52,10 @@ Backend selection applies only to rendering or editing plotting code. Reuse a ch
 
 Resolve the plotting backend from the current task before consulting the saved default. Decide the `backend` value in this order:
 
-1. If the current request explicitly chooses Python or R, use that backend and save it with `scripts/nature_figure_backend.py set python` or `scripts/nature_figure_backend.py set r`.
-2. If the request provides a clearly language-specific input file/workflow, use that backend and save it.
-3. Otherwise reuse a Python/R choice already established in this task. If none exists, run `scripts/nature_figure_backend.py get` and use a returned `python` or `r` preference.
-4. If neither a task choice nor a saved preference exists, ask exactly one concise question — **Python or R? I will remember this as your default.** — and pause only dependent plotting steps. After the user answers, save the answer before proceeding.
+1. If the current request explicitly chooses Python or R, use that backend for this task (the plugin setting is unchanged).
+2. If the request provides a clearly language-specific input file/workflow, use that backend for this task.
+3. Otherwise reuse a Python/R choice already established in this task. If none exists, run `scripts/nature_figure_backend.py get` and use the returned plugin default (`python` or `r`).
+4. Do not ask the user to pick a persisted default: the default lives in the DSH plugin settings (科研服务 → Nature 绘图 → 绘图后端).
 
 - `python` — matplotlib / seaborn.
 - `r` — ggplot2 / patchwork / ComplexHeatmap.

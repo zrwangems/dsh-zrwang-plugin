@@ -1,68 +1,44 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import { PUBLISHER_PROVIDERS } from "./provider-registry.mjs";
 
 const PROVIDERS = new Set(PUBLISHER_PROVIDERS);
 
-export function credentialsPathFromEnv(env = process.env) {
-  const dir = env.LIT_DL_CONFIG_DIR || path.join(os.homedir(), ".dsh", "zrwang-plugin-config", "nature-downloader");
-  return path.join(dir, "credentials.json");
-}
-
-export function loadCredentials(env = process.env) {
-  const file = credentialsPathFromEnv(env);
-  if (!fs.existsSync(file)) return {};
-  try {
-    const value = JSON.parse(fs.readFileSync(file, "utf8"));
-    return value && typeof value === "object" ? value : {};
-  } catch {
-    return {};
-  }
-}
+/**
+ * Credentials come only from the DSH plugin settings, injected as `_CRED`
+ * environment variables. The skill has no credentials file and never writes one.
+ */
+const ENV = {
+  elsevier: {
+    api_key: "ZRWANG_ELSEVIER_CRED",
+    insttoken: "ZRWANG_ELSEVIER_INST_CRED",
+    authtoken: "ZRWANG_ELSEVIER_AUTH_CRED",
+  },
+  springer_nature: {
+    fulltext_api_key: "ZRWANG_SPRINGER_FULLTEXT_CRED",
+    openaccess_api_key: "ZRWANG_SPRINGER_OA_CRED",
+    metadata_api_key: "ZRWANG_SPRINGER_METADATA_CRED",
+  },
+  ieee: {
+    api_key: "ZRWANG_IEEE_CRED",
+    fulltext_endpoint: "ZRWANG_IEEE_FULLTEXT_ENDPOINT",
+  },
+};
 
 function assertProvider(provider) {
   if (!PROVIDERS.has(provider)) throw new Error(`unsupported provider: ${provider}`);
 }
 
-function writeCredentials(value, env) {
-  const file = credentialsPathFromEnv(env);
-  fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
-  const temp = `${file}.tmp-${process.pid}`;
-  fs.writeFileSync(temp, `${JSON.stringify(value, null, 2)}\n`, { mode: 0o600 });
-  fs.chmodSync(temp, 0o600);
-  fs.renameSync(temp, file);
-  fs.chmodSync(file, 0o600);
-  return file;
-}
-
-export function saveProviderCredentials(provider, secrets, env = process.env) {
-  assertProvider(provider);
-  const clean = Object.fromEntries(
-    Object.entries(secrets || {}).filter(([, value]) => typeof value === "string" && value.trim()).map(([key, value]) => [key, value.trim()])
-  );
-  if (!clean.api_key && !(provider === "springer_nature" &&
-    ["metadata_api_key", "openaccess_api_key", "fulltext_api_key"].some((field) => clean[field]))) {
-    throw new Error("api_key or a Springer service API key is required");
-  }
-  const all = loadCredentials(env);
-  all[provider] = provider === "springer_nature" ? { ...all[provider], ...clean } : clean;
-  writeCredentials(all, env);
-  return clean;
-}
-
-export function deleteProviderCredentials(provider, env = process.env) {
-  assertProvider(provider);
-  const all = loadCredentials(env);
-  delete all[provider];
-  writeCredentials(all, env);
-}
-
 export function providerCredentials(provider, env = process.env) {
   assertProvider(provider);
-  return loadCredentials(env)[provider] || null;
+  const mapping = ENV[provider] ?? {};
+  const values = {};
+  for (const [field, name] of Object.entries(mapping)) {
+    const value = typeof env[name] === "string" ? env[name].trim() : "";
+    if (value) values[field] = value;
+  }
+  return Object.keys(values).length > 0 ? values : null;
 }
 
+/** 只用于展示：永远不会回显完整密钥。 */
 export function maskSecret(value = "") {
   const text = String(value);
   if (!text) return "";
@@ -71,9 +47,20 @@ export function maskSecret(value = "") {
 }
 
 export function maskedCredentials(env = process.env) {
-  const all = loadCredentials(env);
-  return Object.fromEntries(Object.entries(all).map(([provider, values]) => [
-    provider,
-    Object.fromEntries(Object.entries(values || {}).map(([key, value]) => [key, maskSecret(value)])),
-  ]));
+  const all = {};
+  for (const provider of PROVIDERS) {
+    const values = providerCredentials(provider, env);
+    if (values === null) continue;
+    all[provider] = Object.fromEntries(Object.entries(values).map(([key, value]) => [key, maskSecret(value)]));
+  }
+  return all;
+}
+
+/** 上游 CLI 里的写入入口：本插件不允许技能写凭据文件。 */
+export function saveProviderCredentials() {
+  throw new Error("Publisher credentials are configured in DSH plugin settings; this skill does not write credential files.");
+}
+
+export function deleteProviderCredentials() {
+  throw new Error("Publisher credentials are configured in DSH plugin settings; this skill does not write credential files.");
 }

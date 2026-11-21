@@ -2,7 +2,7 @@
 name: nature-image2ppt
 description: "Reconstruct slide images, screenshots, scanned PDFs, or image-only PPTX files as object-level editable PowerPoint. Use for 图片转可编辑PPT、截图还原PPT and diagram reconstruction; not authoring a new deck from research notes."
 ---
-> [dsh-zrwang-plugin] 配置由 DSH 插件设置写入本技能 `config.yaml`（OCR + 通用生图 URL/模型/Key），不要改 `~/.image2ppt/config.yaml`；检查用 `python cli/image2ppt/cli.py doctor`。
+> [dsh-zrwang-plugin] 配置由 DSH 插件设置注入环境变量（模型服务 → 生图模型 / OCR 模型）；本技能不读写 `config.yaml`，也不使用 `~/.image2ppt`。检查用 `python cli/image2ppt/cli.py doctor`。
 # Nature Image2PPT
 
 Use this directory as the complete runtime. Run deterministic actions only through:

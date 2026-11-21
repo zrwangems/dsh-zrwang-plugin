@@ -232,7 +232,7 @@ def generate(prompt: str,
         *key_order,
         message=(
             "No API key found. Set ARK_API_KEY (Ark) or LAS_API_KEY (LAS) "
-            "in the current environment or a .env file."
+            "in the current environment (set through the DSH plugin settings)."
         ),
     )
 

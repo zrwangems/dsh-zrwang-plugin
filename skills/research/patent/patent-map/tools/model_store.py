@@ -55,10 +55,6 @@ def global_map_dir() -> Path:
     return map_home()
 
 
-def legacy_model_dir() -> Path:
-    return Path.home() / ".patent-disclosure-skill" / "patent-map" / "models" / "bge-small-zh-v1.5"
-
-
 def default_model_dir() -> Path:
     """模型默认安装位置（各工作区共用，避免反复下载到 cwd）。"""
     env = (os.environ.get("PATENT_MAP_MODEL_DIR") or "").strip()
@@ -90,7 +86,6 @@ def lookup_dirs(vault: Path | None = None) -> list[Path]:
         ordered.append(p)
 
     add(default_model_dir())
-    add(legacy_model_dir())
     if vault is not None:
         add(cache_dir_for_vault(vault) / "models" / "bge-small-zh-v1.5")
     add(fastembed_cache_dir())

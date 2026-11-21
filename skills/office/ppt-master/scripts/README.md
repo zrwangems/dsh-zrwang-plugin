@@ -41,12 +41,6 @@ envelopes and bounded material outcomes in
 `<project_path>/validation/workflow.log`; invoke them directly, without a
 logging wrapper. The log does not copy the full console stream.
 
-Repository update:
-
-```bash
-python3 scripts/update_repo.py
-```
-
 ## Script Index
 
 | Area | Primary scripts | Documentation |
@@ -61,7 +55,6 @@ python3 scripts/update_repo.py
 | Spec review | `spec_review/server.py`, `check_spec_annotations.py` | [docs/spec_review.md](./docs/spec_review.md) |
 | Image tools | `image_gen.py`, `image_treat.py`, `analyze_images.py`, `image_ocr.py`, `image_layers.py`, `gemini_watermark_remover.py` | [docs/image.md](./docs/image.md) |
 | Maintenance smokes | Inline temporary-project commands | [advanced image and motion](./docs/advanced-image-motion-smoke.md); [mask and gradient](./docs/mask-gradient-smoke.md); [multilingual text](./docs/multilingual-text-smoke.md) |
-| Repo maintenance | `update_repo.py` | README install/update section |
 | Troubleshooting | validation, preview, export, dependency issues | [docs/troubleshooting.md](./docs/troubleshooting.md) |
 
 ## High-Frequency Commands
@@ -425,8 +418,6 @@ profile.
 Repository update:
 
 ```bash
-python3 scripts/update_repo.py
-python3 scripts/update_repo.py --skip-pip
 ```
 
 ## Recommendations

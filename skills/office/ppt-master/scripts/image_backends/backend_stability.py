@@ -151,7 +151,7 @@ def generate(prompt: str,
     _resolve_endpoint(resolved_model, base_url)
     api_key = require_api_key(
         "STABILITY_API_KEY",
-        message="No API key found. Set STABILITY_API_KEY in the current environment or a .env file.",
+        message="No API key found. Set STABILITY_API_KEY in the current environment (set through the DSH plugin settings).",
     )
 
     last_error = None

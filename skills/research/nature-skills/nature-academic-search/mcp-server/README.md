@@ -32,7 +32,7 @@
 
 这样可以避免默认搜索无意消耗 Elsevier API 配额；若本机缺少 `pybliometrics` 配置，会在返回 JSON 的 `errors` 字段中给出对应数据源错误。
 
-配置文件：`config.toml`
+配置：DSH 插件设置「科研服务 → Nature 学术检索」，环境变量注入
 
 ## 使用
 

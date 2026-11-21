@@ -3,7 +3,7 @@
 
 The CLI prefers local Codex OAuth auth when ~/.codex/auth.json is available.
 If Codex auth is missing, it falls back to OpenAI-compatible API credentials
-from the environment or the active Image2PPT config.yaml.
+from the DSH plugin settings, injected as environment variables.
 """
 
 from __future__ import annotations
@@ -50,13 +50,6 @@ GPT_IMAGE_2_MAX_RATIO = 3.0
 MAX_IMAGE_BYTES = 50 * 1024 * 1024
 DEFAULT_CODEX_AUTH_FILE = "~/.codex/auth.json"
 DEFAULT_CODEX_IMAGES_BASE_URL = "https://chatgpt.com/backend-api/codex"
-ENV_FIELDS = (
-    "OPENAI_API_KEY",
-    "OPENAI_BASE_URL",
-    "IMAGE2PPT_IMAGE_MODEL",
-    "IMAGE2PPT_IMAGE_BACKEND",
-    "IMAGE2PPT_IMAGE_USER_AGENT",
-)
 MAX_CODEX_RESPONSE_BYTES = 64 * 1024 * 1024
 MAX_CODEX_BASE64_CHARS = 64 * 1024 * 1024
 MAX_MODEL_ID_CHARS = 256
@@ -73,9 +66,7 @@ Backend selection:
   an arbitrary provider image model id. It never receives Codex OAuth credentials.
 
 Setup:
-  codex login
-  image2ppt config --api-key "your-api-key" --image-backend openai-compatible-api \
-    --base-url https://example.test/v1 --model provider-image-model
+  Configure 模型服务 → 生图模型 in the DSH plugin settings (URL / model / API key).
 
 Input image rules:
   generate creates a new image from prompt only.
@@ -150,34 +141,6 @@ def _die(message: str, code: int = 1) -> None:
 
 def _warn(message: str) -> None:
     print(f"Warning: {message}", file=sys.stderr)
-
-
-def _runtime_env_path() -> Path:
-    try:
-        from .runtime_env import config_path
-    except ImportError:
-        from runtime_env import config_path
-    return config_path()
-
-
-def _load_runtime_env() -> None:
-    path = _runtime_env_path()
-    if not path.exists():
-        return
-    try:
-        import yaml
-    except ImportError as exc:
-        _die(
-            "PyYAML is required to read the active Image2PPT config.yaml. "
-            "Reinstall image2ppt with pipx so package dependencies are installed."
-        )
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    if not isinstance(data, dict):
-        _die(f"Invalid config file: {path}")
-    for key, value in data.items():
-        if key not in ENV_FIELDS or os.getenv(key):
-            continue
-        os.environ[key] = str(value)
 
 
 def _default_model() -> str:
@@ -511,20 +474,13 @@ def _ensure_api_key(dry_run: bool) -> None:
     base_url = _api_base_url()
     model = _default_model()
     if base_url:
-        command = (
-            'image2ppt config --api-key "your-api-key" '
-            f'--base-url "{base_url}" --model {model}'
-        )
         target_hint = f"Detected third-party OpenAI-compatible API via OPENAI_BASE_URL={base_url}."
     else:
-        command = f'image2ppt config --api-key "your-api-key" --model {model}'
         target_hint = "Detected official OpenAI API mode because OPENAI_BASE_URL is not set."
     _die(
         "The selected openai-compatible-api backend requires OPENAI_API_KEY.\n"
         f"{target_hint}\n"
-        "Configure the active Image2PPT config.yaml once:\n"
-        f"  {command}\n"
-        "For a third-party endpoint, also set OPENAI_BASE_URL and the provider's model id."
+        "Configure 模型服务 → 生图模型 in the DSH plugin settings, then retry."
     )
 
 
@@ -1036,7 +992,6 @@ def _add_shared_args(
 
 
 def main() -> int:
-    _load_runtime_env()
     parser = argparse.ArgumentParser(
         prog="image2ppt image",
         description="""Unified image generation/editing backend for image2ppt.

@@ -12,10 +12,11 @@
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { ARTIFACT_DIR, PKG_DIR } from './config.mjs'
+import { MATHWORKS_DIR, PKG_DIR } from './config.mjs'
+import { isWindows } from './platform.mjs'
+import { mcpRoot } from './paths.mjs'
 
-/** MathWorks 组件目录：MATLAB MCP exe + 完整的 Simulink Agentic Toolkit 运行时。 */
-export const MATHWORKS_DIR = join(PKG_DIR, 'mathworks')
+export { MATHWORKS_DIR }
 export const MATLAB_MCP_EXE = join(MATHWORKS_DIR, 'matlab-mcp-server-windows-x64.exe')
 /** Simulink Agentic Toolkit 运行时目录（MATLAB 侧 addpath 的目标）。 */
 export const SIMULINK_TOOLKIT_DIR = join(MATHWORKS_DIR, 'simulink-agentic-toolkit')
@@ -26,7 +27,7 @@ export const SIMULINK_TOOLS_FILE = join(SIMULINK_TOOLKIT_DIR, 'tools', 'tools.js
 export const SERVER_NAMES = { mathworks: 'matlab-mcp', windows: 'windows-mcp' }
 
 /** MATLAB MCP 的运行副本目录（在配置目录下，永远在工作区之外）。 */
-export const MCP_RUNTIME_DIR = join(ARTIFACT_DIR, 'mcp')
+export const MCP_RUNTIME_DIR = mcpRoot()
 
 /** mcp-client 的关闭预算；官方默认 5000。 */
 const CLOSE_TIMEOUT_MS = 5000
@@ -42,6 +43,7 @@ const CLOSE_TIMEOUT_MS = 5000
  */
 export function stagedMatlabExe() {
   const target = join(MCP_RUNTIME_DIR, 'matlab-mcp-server-windows-x64.exe')
+  if (!isWindows) return MATLAB_MCP_EXE
   const stampFile = `${target}.stamp`
   try {
     if (!existsSync(MATLAB_MCP_EXE)) return MATLAB_MCP_EXE
@@ -76,7 +78,7 @@ export function resolveMatlabEntry() {
     transport: 'stdio',
     command: stagedMatlabExe(),
     args: ['--matlab-session-mode=existing', `--extension-file=${SIMULINK_TOOLS_FILE}`, '--disable-telemetry=true'],
-    env: { WINDIR: 'C:\\Windows' },
+    env: isWindows ? { WINDIR: process.env.SystemRoot ?? 'C:\\Windows' } : {},
     cwd: '',
     toolCallTimeoutMs: 120000,
     startupTimeoutMs: 30000,
@@ -300,8 +302,8 @@ export function createMcpController(ctx) {
  */
 export function wantOf({ engineeringInjected, gates }) {
   return {
-    mathworks: gates?.engineering === true && Number(engineeringInjected) > 0,
-    windows: gates?.['windows-mcp'] === true,
+    mathworks: isWindows && gates?.engineering === true && Number(engineeringInjected) > 0,
+    windows: isWindows && gates?.['windows-mcp'] === true,
   }
 }
 
@@ -387,7 +389,7 @@ export function componentViews({ engineeringInjected, gates, status }) {
         'auto',
         want.mathworks,
         'MATLAB MCP + Simulink 工具（14 个工具）',
-        '随工程技能组自动开关；需要 MATLAB 正在运行并已执行 shareMATLABSession()',
+        isWindows ? '随工程技能组自动开关；需要 MATLAB 正在运行并已执行 shareMATLABSession()' : '仅 Windows 可用（MATLAB MCP 服务器是 Windows 可执行文件）',
         SERVER_NAMES.mathworks,
       ),
       componentOf(
@@ -396,7 +398,7 @@ export function componentViews({ engineeringInjected, gates, status }) {
         'manual',
         want.windows,
         '桌面截图、快照、点击、窗口操作',
-        '勾选后注册 windows-mcp；会占用桌面控制权',
+        isWindows ? '勾选后注册 windows-mcp；会占用桌面控制权' : '仅 Windows 可用',
         SERVER_NAMES.windows,
       ),
     ],

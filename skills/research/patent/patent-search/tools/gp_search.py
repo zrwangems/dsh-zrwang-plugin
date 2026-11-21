@@ -67,7 +67,7 @@ def _build_parser(default_num: int) -> argparse.ArgumentParser:
     p.add_argument("--num", type=int, default=default_num, help=f"每页条数 1–100（默认 {default_num}）")
     p.add_argument("--page", type=int, default=1, help="页码，从 1 开始")
     p.add_argument("--note", default="", help="检索意图（中文原意），写入报告")
-    p.add_argument("--timeout", type=float, default=None, help="请求超时秒数（默认读 config.yaml）")
+    p.add_argument("--timeout", type=float, default=None, help="请求超时秒数（默认 20）")
     return p
 
 

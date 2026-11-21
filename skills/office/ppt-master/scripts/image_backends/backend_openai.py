@@ -834,7 +834,7 @@ def generate(prompt: str,
     """
     OpenAI-compatible image generation (or image-to-image edit) with retry.
 
-    Reads credentials from the current process environment or a `.env` file:
+    Reads credentials from the current process environment (injected by the DSH plugin):
       OPENAI_API_KEY
       OPENAI_BASE_URL
       OPENAI_MODEL (optional override)
@@ -876,7 +876,7 @@ def generate(prompt: str,
     base_url = os.environ.get("OPENAI_BASE_URL")
     if not api_key:
         raise ValueError(
-            "No API key found. Set OPENAI_API_KEY in the current environment or a .env file."
+            "No API key found. Set OPENAI_API_KEY in the current environment (set through the DSH plugin settings)."
         )
 
     last_error = None

@@ -15,12 +15,9 @@ PUB_RE = re.compile(
 )
 
 
-def persisted_vault_path() -> Path:
-    cwd = Path.cwd().resolve()
-    for parent in [cwd, *cwd.parents]:
-        if (parent / ".git").exists():
-            return parent / ".agents" / "patent" / "obsidian_vault.txt"
-    return Path.home() / ".patent-disclosure-skill" / "obsidian_vault.txt"
+def persisted_vault_path() -> Path | None:
+    """库路径只来自插件设置（PATENT_READER_OBSIDIAN_VAULT）；不再有持久化文件。"""
+    return None
 
 
 def resolve_vault(explicit: str | None = None) -> Path | None:
@@ -31,7 +28,7 @@ def resolve_vault(explicit: str | None = None) -> Path | None:
     if env:
         cands.append(Path(env).expanduser())
     persisted = persisted_vault_path()
-    if persisted.is_file():
+    if persisted is not None and persisted.is_file():
         try:
             line = persisted.read_text(encoding="utf-8").strip().strip('"')
             if line:

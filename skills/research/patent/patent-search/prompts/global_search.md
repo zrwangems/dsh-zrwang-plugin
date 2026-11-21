@@ -26,7 +26,7 @@
 | 外观 / 授权 / 申请公开 | `--type design`、`--status grant`、`--status application` |
 | 日期 | `--after` / `--before`（YYYY、YYYY-MM、YYYY-MM-DD），`--date-field priority\|filing\|publication`，默认优先权日 |
 | 最新 / 最早优先 | `--sort new` / `--sort old`（缺省按相关度） |
-| 每页条数、翻页 | `--num`（默认 10，见 `config.yaml`）、`--page 2` |
+| 每页条数、翻页 | `--num`（默认 10）、`--page 2` |
 
 美国、欧洲没有实用新型一档；用户要查实用新型也按普通专利查，不加 `--type`。
 

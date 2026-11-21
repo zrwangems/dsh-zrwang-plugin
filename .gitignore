@@ -3,6 +3,9 @@ AgentsDo/*
 !AgentsDo/upstream-adaptation-record/
 .agents/
 **/.env
+state/
+**/projects/
+cache/
 
 # 本机运行期产物：Python 缓存、依赖目录、系统杂项
 **/__pycache__/

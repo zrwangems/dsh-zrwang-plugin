@@ -16,6 +16,11 @@ import { fileURLToPath } from 'node:url'
 import { gunzipSync } from 'node:zlib'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const REMOVALS = new Set(
+  existsSync(join(ROOT, 'vendor', 'removals.json'))
+    ? (JSON.parse(readFileSync(join(ROOT, 'vendor', 'removals.json'), 'utf8')).remove ?? [])
+    : [],
+)
 const SKILLS = join(ROOT, 'skills')
 const args = process.argv.slice(2)
 const proxyArg = args.find(item => item.startsWith('--proxy='))
@@ -137,6 +142,10 @@ function main() {
       failures += 1
       continue
     }
+    if (cfg.layout === 'local-skills') {
+      rows.push({ repo: cfg.repo, id: cfg.id, skills: '-', missingSkills: 0, missingFiles: 0, extraFiles: 0, status: '本地副本', details: [] })
+      continue
+    }
     let tar
     try {
       tar = readTar(download(cfg.repo, record.sha))
@@ -173,6 +182,8 @@ function main() {
       const actual = new Set(walkFiles(dir))
       for (const path of expected.keys()) {
         if (path.length === 0) continue
+        const rel = relative(ROOT, join(dir, path)).split(sep).join('/')
+        if (REMOVALS.has(rel)) continue
         if (!actual.has(path)) {
           missingFiles += 1
           if (details.length < 12) details.push(`${skill.name}: 缺 ${path}`)

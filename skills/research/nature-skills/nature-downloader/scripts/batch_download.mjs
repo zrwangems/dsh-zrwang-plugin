@@ -72,7 +72,6 @@ import { fetchCrossrefByDoi, findCrossrefByTitle } from "./lib/metadata.mjs";
 import { downloadOpenAccessArticle } from "./lib/open-access-provider.mjs";
 import { downloadPublisherArticle } from "./lib/publisher-providers.mjs";
 import { providerCredentials } from "./lib/credentials.mjs";
-import { loadSettings } from "./lib/settings.mjs";
 import { saveFullTextResponse } from "./lib/direct-download.mjs";
 import { writeManifest } from "./lib/manifest.mjs";
 
@@ -679,10 +678,9 @@ async function main() {
   }
   fs.mkdirSync(args.out, { recursive: true });
   const schoolConfig = loadSchoolConfig();
-  const settings = loadSettings();
   const discoveryUrl = discoveryUrlFromConfig(schoolConfig);
   const cnkiUrl = cnkiUrlFromConfig(schoolConfig, args.cnkiUrl);
-  const contactEmail = args.unpaywallEmail || settings?.open_access?.contact_email || process.env.UNPAYWALL_EMAIL || "";
+  const contactEmail = args.unpaywallEmail || process.env.UNPAYWALL_EMAIL || "";
   if (args.openAccess && !args.route) args.route = "open_access";
   process.stderr.write(`[config] ${schoolSummary(schoolConfig)}; discovery=${discoveryUrl}; cnki=${cnkiUrl}\n`);
   const results = [];

@@ -18,29 +18,31 @@
 生成/注入位置：
 
 ```text
-~/.dsh/zrwang-plugin-config/
-├─ nature-academic-search/config.toml       PubMed / Crossref / arXiv / general
-├─ nature-image2ppt/config.yaml             OCR + 通用生图
-├─ nature-figure.json                       绘图后端偏好
-└─ nature-downloader/
-   ├─ credentials.json                      Elsevier / Springer Nature / IEEE
-   └─ settings.json                         Unpaywall / Crossref 联系邮箱
+profile cordis.patch.yml（- id: dsh-zrwang-plugin 的 config）
+└─ 非密钥参数：生图/OCR、学术邮箱、出版社 endpoint、Nature 绘图后端、专利向量模型
+
+DSH 凭据库
+└─ 生图 Key、OCR Token、NCBI Key、出版社 Key、可检索服务 Key、专利向量模型 Key
+
+插件进程环境（由上面的配置派生）
+└─ ZRWANG_IMAGE_*、IMAGE2PPT_IMAGE_*、NCBI_EMAIL/NCBI_API_KEY、UNPAYWALL_EMAIL、
+   CROSSREF_MAILTO、ZRWANG_*_CRED、NATURE_FIGURE_BACKEND、PATENT_EMBEDDING_* 等
 
 skills/research/nature-skills/nature-downloader/config/school.json
-                                            北航固定学校配置（随技能分发，LIT_DL_SCHOOL_FILE）
+└─ 北航固定学校配置（随技能分发，LIT_DL_SCHOOL_FILE）
 ```
 
-对应环境变量：`NCBI_EMAIL`、`NCBI_API_KEY`、`UNPAYWALL_EMAIL`、`CROSSREF_MAILTO`、`OPENALEX_API_KEY`、`FIRECRAWL_API_KEY`、`PEXELS_API_KEY`、`PIXABAY_API_KEY`、`OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`、`LIT_DL_CONFIG_DIR`、`LIT_DL_SCHOOL_FILE`、`ZRWANG_NATURE_ACADEMIC_CONFIG`、`IMAGE2PPT_CONFIG_HOME`、`NATURE_FIGURE_CONFIG`。Nature 生图的三个 OpenRouter/Images 变量由模型服务生图 URL/模型/Key 派生。
+对应环境变量：`NCBI_EMAIL`、`NCBI_API_KEY`（经 `ZRWANG_NCBI_CRED` 映射）、`UNPAYWALL_EMAIL`、`CROSSREF_MAILTO`、`ZRWANG_OPENALEX_CRED`、`ZRWANG_FIRECRAWL_CRED`、`ZRWANG_PEXELS_CRED`、`ZRWANG_PIXABAY_CRED`、`ZRWANG_IMAGE_CRED`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`、`LIT_DL_SCHOOL_FILE`、`NATURE_FIGURE_BACKEND`、`PADDLE_OCR_TOKEN`（经 `ZRWANG_OCR_CRED` 映射）。没有 `config.toml` / `config.yaml` / `nature-figure.json` / `credentials.json` / `settings.json`。
 
 ## 逐技能
 
 | 技能 | 源码中的配置面 | 插件处置 |
 | --- | --- | --- |
-| nature-academic-search | `config.toml` 的 `[pubmed]`/`[crossref]`/`[arxiv]`/`[general]`；`PUBMED_EMAIL`、`NCBI_API_KEY`；`OPENALEX_API_KEY`；MCP 的 Scopus/ScienceDirect 复用 `pybliometrics` 配置 | 前四项写入 `config.toml` 并注入环境；OpenAlex Key 在「可选检索服务」；MCP 未注册，降级为 OpenAlex CLI + web 工具；`pybliometrics` 仅可选，见下 |
+| nature-academic-search | `config.toml` 的 `[pubmed]`/`[crossref]`/`[arxiv]`/`[general]`；`PUBMED_EMAIL`、`NCBI_API_KEY`；`OPENALEX_API_KEY`；MCP 的 Scopus/ScienceDirect 复用 `pybliometrics` 配置 | 删除 `config/` 与 `install.sh`；`mcp-server/utils/config.py` 只读 `NCBI_EMAIL`/`PUBMED_EMAIL`/`NCBI_API_KEY`/`CROSSREF_MAILTO`；OpenAlex Key 在「可选检索服务」；MCP 未注册，降级为 OpenAlex CLI + web 工具；`pybliometrics` 仅可选 |
 | nature-citation | `--mailto`（Crossref）、`--ncbi-email`（NCBI）、可选 `FIRECRAWL_API_KEY` | 已打补丁让两个参数默认读 `CROSSREF_MAILTO`/`NCBI_EMAIL`；Firecrawl Key 由「可选检索服务」注入 |
 | nature-downloader | `school.json`（学校/认证/代理/数据库/发现入口，技能自带的 `config/school.json`）；`credentials.json`（Elsevier `api_key`/`insttoken`/`authtoken`，Springer `metadata_api_key`/`openaccess_api_key`/`fulltext_api_key`/`api_key`，IEEE `api_key`/`fulltext_endpoint`）；`settings.json.open_access.contact_email`；`UNPAYWALL_EMAIL` | 学校固定北航，直接随技能 `config/school.json`（`LIT_DL_SCHOOL_FILE`）；出版社凭据在「Nature 文献下载凭据」；`UNPAYWALL_EMAIL` 由学术检索的 Unpaywall 邮箱注入 |
-| nature-figure | `NATURE_FIGURE_CONFIG` 的 `backend`；`OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`、可选 `OPENROUTER_SITE_URL`/`OPENROUTER_APP_NAME` | 后端偏好仍写 `NATURE_FIGURE_CONFIG`；OpenRouter/生图变量由模型服务的生图 URL/模型/Key 派生，不单独设置；`OPENROUTER_SITE_URL`/`APP_NAME` 用代码默认 |
-| nature-image2ppt | `IMAGE2PPT_CONFIG_HOME/config.yaml`：`PADDLE_OCR_TOKEN`、`IMAGE2PPT_IMAGE_BACKEND`、`OPENAI_BASE_URL`、`IMAGE2PPT_IMAGE_MODEL`、`OPENAI_API_KEY`、可选 `IMAGE2PPT_IMAGE_USER_AGENT`/`IMAGE2PPT_CLI_PROG`；另支持 Codex OAuth 回退 | OCR 在「模型服务 → OCR 模型」，生图复用「模型服务 → 生图模型」；`USER_AGENT` 用默认，Codex 回退不使用 |
+| nature-figure | `NATURE_FIGURE_CONFIG` 的 `backend`；`OPENROUTER_API_KEY`、`OPENROUTER_IMAGE_MODEL`、`SCHEMATIC_IMAGE_API_URL`、可选 `OPENROUTER_SITE_URL`/`OPENROUTER_APP_NAME` | 删除持久化偏好与 `~/.config/nature-skills`；`scripts/nature_figure_backend.py` 只打印 `NATURE_FIGURE_BACKEND`；OpenRouter/生图变量由模型服务的生图 URL/模型/Key 派生 |
+| nature-image2ppt | `IMAGE2PPT_CONFIG_HOME/config.yaml`：`PADDLE_OCR_TOKEN`、`IMAGE2PPT_IMAGE_BACKEND`、`OPENAI_BASE_URL`、`IMAGE2PPT_IMAGE_MODEL`、`OPENAI_API_KEY`、可选 `IMAGE2PPT_IMAGE_USER_AGENT`/`IMAGE2PPT_CLI_PROG`；另支持 Codex OAuth 回退 | 删除 `runtime_env.py` 的全部配置路径/读写与 `config` 子命令、`config.example.yaml`；OCR 在「模型服务 → OCR 模型」，生图复用「模型服务 → 生图模型」，只读注入的环境变量 |
 | nature-paper-to-patent | `EPUB_WAF_MAX_WAIT_SEC`、`PLAYWRIGHT_HEADED`、`EPUB_RESULT_HTML` | 调试/爬虫可选项，有默认值，不放进设置页；需要时用环境变量覆盖 |
 | nature-ref-verifier | 可选 `pyzotero` Web 模式需要 userID + API key；本地 Zotero HTTP API 只读 | 插件已有 `zotero-cli` 本地模式；`pyzotero` Web 是可选替代，不放进设置页 |
 | nature-experiment-log | 飞书群 ID / bot 权限由 `feishu-cli-integration` 提供 | 走 lark/feishu CLI，不是 nature 专属密钥；不放进 nature 设置 |

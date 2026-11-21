@@ -1,54 +1,37 @@
 /**
- * 运行态读写：JSON 原子写、配置备份、事件日志。
- * 所有状态都在 state/ 下，不写 DSH profile，也不写用户主目录。
+ * 运行态读写：JSON 原子写、备份、事件日志。
+ *
+ * 全部落在插件的 `<插件目录>/cache/` 下，卸载插件时一起删除；
+ * 不写 DSH profile，也不写用户主目录的其它位置。
  */
 import { appendFile, copyFile, mkdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import { mkdirSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { randomUUID } from 'node:crypto'
-import { PKG_DIR, STATE_DIR } from './config.mjs'
+import { backupRoot, ensureCacheSync, stateRoot } from './paths.mjs'
 
-const BACKUP_DIR = join(STATE_DIR, 'backups')
-const EVENTS_FILE = join(STATE_DIR, 'events.jsonl')
-const EVENT_LIMIT = 512 * 1024
-/** 旧版把 state 放在包目录；首次启动时复制到配置目录，旧目录保留不删。 */
-const LEGACY_STATE_DIR = join(PKG_DIR, 'state')
-const MIGRATED_MARK = join(STATE_DIR, '.migrated-from-package')
-const writeQueues = new Map()
-let migrationDone = false
-
-/** 一次性迁移旧版包内 state 到配置目录（用户显式指定 ZRWANG_PLUGIN_STATE_DIR 时跳过）。 */
-function migrateLegacyState() {
-  if (migrationDone) return
-  migrationDone = true
-  if (typeof process.env.ZRWANG_PLUGIN_STATE_DIR === 'string' && process.env.ZRWANG_PLUGIN_STATE_DIR.length > 0) return
-  if (resolve(LEGACY_STATE_DIR) === resolve(STATE_DIR)) return
-  if (existsSync(MIGRATED_MARK)) return
-  if (!existsSync(LEGACY_STATE_DIR)) return
-  try {
-    mkdirSync(STATE_DIR, { recursive: true })
-    cpSync(LEGACY_STATE_DIR, STATE_DIR, { recursive: true, force: false, errorOnExist: false })
-    writeFileSync(MIGRATED_MARK, `${new Date().toISOString()}\n`, 'utf8')
-  } catch {
-    // 迁移失败不影响启动：继续用空状态，旧目录原样保留
-  }
+/** 事件日志路径随缓存根变化，不能在建模块时固定。 */
+function eventsFile() {
+  return join(stateRoot(), 'events.jsonl')
 }
+const EVENT_LIMIT = 512 * 1024
+const writeQueues = new Map()
 
-/** 同步确保状态目录存在（插件装配早期、写 Python 启动钩子前调用）。 */
+/** 同步确保运行期目录存在（插件装配早期、写 Python 启动钩子前调用）。 */
 export function ensureStateDirSync() {
-  migrateLegacyState()
-  mkdirSync(STATE_DIR, { recursive: true })
+  ensureCacheSync()
+  mkdirSync(stateRoot(), { recursive: true })
+  return stateRoot()
 }
 
 export async function ensureStateDir() {
   ensureStateDirSync()
-  await mkdir(STATE_DIR, { recursive: true })
+  await mkdir(stateRoot(), { recursive: true })
 }
 
 export async function readJson(file, fallback) {
   try {
-    const text = await readFile(file, 'utf8')
-    return JSON.parse(text)
+    return JSON.parse(await readFile(file, 'utf8'))
   } catch {
     return fallback
   }
@@ -66,7 +49,6 @@ export function writeJson(file, value) {
       await writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
       await rename(temp, file)
     } finally {
-      // 写入或 rename 失败时清理自己的临时文件；已成功 rename 后不存在，忽略即可。
       await unlink(temp).catch(() => {})
     }
   }
@@ -80,7 +62,7 @@ export function writeJson(file, value) {
   return next
 }
 
-/** 覆盖写之前备份原文件；返回备份路径，文件不存在时返回 undefined。 */
+/** 覆盖写之前的备份；返回备份路径，文件不存在时返回 undefined。 */
 export async function backupFile(file, label) {
   try {
     await stat(file)
@@ -88,7 +70,7 @@ export async function backupFile(file, label) {
     return undefined
   }
   const stamp = new Date().toISOString().replace(/[:.]/g, '-')
-  const dir = join(BACKUP_DIR, stamp)
+  const dir = join(backupRoot(), stamp)
   await mkdir(dir, { recursive: true })
   const target = join(dir, `${label}-${file.split(/[\\/]/).pop()}`)
   await copyFile(file, target)
@@ -100,12 +82,13 @@ export async function appendEvent(kind, detail) {
   try {
     await ensureStateDir()
     const line = `${JSON.stringify({ at: new Date().toISOString(), kind, detail })}\n`
-    await appendFile(EVENTS_FILE, line, 'utf8')
-    const info = await stat(EVENTS_FILE)
+    const file = eventsFile()
+    await appendFile(file, line, 'utf8')
+    const info = await stat(file)
     if (info.size > EVENT_LIMIT) {
-      const text = await readFile(EVENTS_FILE, 'utf8')
+      const text = await readFile(file, 'utf8')
       const tail = text.split('\n').slice(-200).join('\n')
-      await writeFile(EVENTS_FILE, tail, 'utf8')
+      await writeFile(file, tail, 'utf8')
     }
     return true
   } catch {
@@ -115,7 +98,7 @@ export async function appendEvent(kind, detail) {
 
 export async function readEvents(limit = 40) {
   try {
-    const text = await readFile(EVENTS_FILE, 'utf8')
+    const text = await readFile(eventsFile(), 'utf8')
     return text.split('\n').filter(Boolean).slice(-limit).map(line => {
       try {
         return JSON.parse(line)
@@ -129,5 +112,5 @@ export async function readEvents(limit = 40) {
 }
 
 export function stateFile(name) {
-  return join(STATE_DIR, name)
+  return join(stateRoot(), name)
 }

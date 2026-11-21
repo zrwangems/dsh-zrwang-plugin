@@ -27,13 +27,11 @@
 2. 问用户：跳过 / 推荐智谱 / 其他预设 / 自定义（URL+模型+维度+Key）  
 3. 用户提供后：  
    - `config.py skip-vector`，或  
-   - `config.py set --preset … --api-key …`（自定义则带 `--base-url --model --dimensions`）  
-4. **设置后必须自检**：`set` 默认含 `selftest`；也可 `config.py selftest`  
-5. 自检通过且需重建时，人确认后 `rebuild_vectors.py --confirm`  
+4. 向量检索是可选功能；未配置时直接用标签/字段检索，不要反复追问 Key
+5. 需要重建向量时，人确认后 `rebuild_vectors.py --confirm`  
 6. 向量超时/失败：检索回退标签（`tags_fallback`），流程不中断  
 
-配置：`{Documents}/patent-disclosure-skill/oa/embedding.config.yaml`  
-密钥：同目录 `embedding.secrets.yaml`（仅本机）
+配置与密钥：DSH 插件设置「科研服务 → 专利检索向量模型」；本技能不读写配置文件
 
 ## 草稿交付（事后摘要，不中断）
 

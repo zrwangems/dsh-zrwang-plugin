@@ -1,13 +1,14 @@
 # 审查答复案例库
 
-运行时数据优先落在操作系统**默认文档目录**（可用 `PATENT_OA_HOME` 覆盖）：
+运行时数据落在插件缓存（插件自动设置 `PATENT_OA_HOME`；在 git 项目里优先用 `<项目根>/.agents/patent/oa/`）：
 
 | 路径 | 用途 |
 |------|------|
-| `{Documents}/patent-disclosure-skill/oa/embedding.config.yaml` | 嵌入模型与 sqlite 路径（首次须用户确认） |
-| `{Documents}/patent-disclosure-skill/oa/data/oa_vectors.sqlite` | sqlite-vec 向量库 |
-| `{Documents}/patent-disclosure-skill/oa/` | 无 Obsidian 库时的 oa 回退根 |
-| 本目录 `embedding.config.yaml` | **仓库模板种子**（`config.py seed` 复制到文档目录） |
+| `<PATENT_OA_HOME>/data/oa_vectors.sqlite` | sqlite-vec 向量库 |
+| `<PATENT_OA_HOME>/cases/` | 无 Obsidian 库时的 oa 回退根 |
+| `<PATENT_OA_HOME>/embedding-state.json` 之外 | 没有 embedding.config.yaml，也没有 embedding.secrets.yaml |
+
+嵌入模型、向量维度、API Key 都在 DSH 插件设置「科研服务 → 专利检索向量模型」里；本技能只读注入的 `PATENT_EMBEDDING_*` / `ZRWANG_PATENT_EMBEDDING_CRED`。
 
 正式案例优先写入 **Obsidian**（方案 C）：
 
@@ -21,8 +22,9 @@
   drafts/          # 人审草稿
 ```
 
+`{vault}` 来自插件设置的「Obsidian 专利库路径」（`PATENT_READER_OBSIDIAN_VAULT`）。
+
 刷新：`python ../patent-oa/tools/refresh_vault.py`  
 只读统计（不写索引）：`python ../patent-oa/tools/refresh_vault.py --inventory`  
-查看实际路径：`python ../patent-oa/tools/config.py recommend`。  
 仓库源稿是 `assets/obsidian/oa.base.yaml`（部分技能市场不允许提交 `.base`）；写入库时仍为 `_OA看板.base`。  
 流程见 `../patent-oa/prompts/` 与 [SKILL.md](../SKILL.md)。

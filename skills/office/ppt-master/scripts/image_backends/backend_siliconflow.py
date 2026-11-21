@@ -157,7 +157,7 @@ def generate(prompt: str,
     _resolve_size(aspect_ratio, normalized_size)
     api_key = require_api_key(
         "SILICONFLOW_API_KEY",
-        message="No API key found. Set SILICONFLOW_API_KEY in the current environment or a .env file.",
+        message="No API key found. Set SILICONFLOW_API_KEY in the current environment (set through the DSH plugin settings).",
     )
     base_url = os.environ.get("SILICONFLOW_BASE_URL") or DEFAULT_ENDPOINT
 

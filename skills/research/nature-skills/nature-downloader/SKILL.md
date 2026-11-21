@@ -4,7 +4,7 @@ description: Use when a user needs lawful academic full text, CNKI institutional
 metadata:
   compatibility: Requires Node.js 22+ and Python 3. CNKI, Web Access, and SI routes additionally require the user's authenticated Chrome session and remote debugging. Uses only lawful OA, publisher API, and user-authorized institutional access.
 ---
-> [dsh-zrwang-plugin] 学校配置固定为北航，直接随技能放在 `config/school.json`（无需设置）；插件通过 `LIT_DL_SCHOOL_FILE` 指向它。`credentials.json`、`settings.json` 仍在插件配置目录（`LIT_DL_CONFIG_DIR`），出版社凭据由设置页「科研服务」维护；不要写 `~/.config/lit-dl`。
+> [dsh-zrwang-plugin] 学校配置固定为北航，随技能放在 `config/school.json`，插件通过 `LIT_DL_SCHOOL_FILE` 指向它；学校无需配置。出版社凭据、Unpaywall 邮箱只从 DSH 插件设置（科研服务 → Nature 文献下载凭据）注入的环境变量读取，本技能不读也不写任何配置文件或凭据文件。
 # Nature Literature Downloader
 
 This skill routes literature through lawful open-access, publisher-API, CNKI institutional, and browser-based institutional providers. `scripts/batch_download.mjs` is the orchestration entry point; school configuration, publisher credentials, metadata/OA resolution, provider downloads, content validation, and manifests are separate modules.
@@ -46,42 +46,15 @@ For every download request, first establish the paper list and ask:
 
 Do metadata lookup before this question only when needed to identify the requested papers. Do not download files until the answer is known. Configure a library only when the selected route is CNKI or Web Access. Configure a publisher API only when the selected English article belongs to Elsevier, Springer Nature, or IEEE; an OA determination is not required before trying a configured provider API.
 
-### Paid Library Resource Configuration
+### Institution Configuration
 
-Ask for the library resource URL the user actually uses:
+The distributed skill is fixed to 北京航空航天大学 (BUAA): `config/school.json` is shipped with the skill and the plugin points `LIT_DL_SCHOOL_FILE` at it. There is no school wizard and no school config file to edit.
 
-```text
-请发你平时进入图书馆电子资源/数据库的平台链接。
-可以是资源门户、数据库列表、Web of Science 入口、某个数据库详情页，
-或跳转到统一身份认证的登录链接。
-```
+- Web of Science entry comes from `discovery.web_of_science_url` in that file; without it the downloader falls back to `https://www.webofscience.com/wos/woscc/basic-search`.
+- For Chinese literature it reads `discovery.cnki_url`; without it `scripts/batch_download.mjs --title "<中文题名>"` falls back to `https://kns.cnki.net/kns8s/defaultresult/index`.
+- CNKI and Web Access still require the user's authenticated Chrome session (remote debugging); the skill never handles the login itself.
 
-Then infer the authorization route from the URL before saving config:
-
-```bash
-python3 scripts/configure_school.py infer "https://example.edu/library/resources"
-python3 scripts/configure_school.py url "https://example.edu/library/resources"
-python3 scripts/configure_school.py show
-python3 scripts/configure_school.py health --force
-```
-
-The distributed skill contains no school presets. If the user cannot provide a resource URL, ask them to locate their institution's library/database entry instead of guessing a school-specific domain.
-
-The default config path is:
-
-```text
-~/.config/lit-dl/school.json
-```
-
-For tests or isolated profiles, set:
-
-```bash
-LIT_DL_CONFIG_DIR=/path/to/configdir
-```
-
-The downloader reads this config automatically. If `discovery.web_of_science_url` is present, `scripts/batch_download.mjs` uses it as the Web of Science entry; otherwise it falls back to `https://www.webofscience.com/wos/woscc/basic-search`.
-
-For Chinese literature, the downloader also reads `discovery.cnki_url` when present. If absent, `scripts/batch_download.mjs --title "<中文题名>"` falls back to `https://kns.cnki.net/kns8s/defaultresult/index`.
+If a user needs a different school, do not edit `config/school.json`; that file ships with the plugin and is replaced on upgrade.
 
 ### API-First and Open-Access Fallback
 
@@ -103,31 +76,19 @@ For an English article, identify its publisher before deciding when to resolve a
 
 ### Publisher API Credentials
 
-Configure credentials lazily, only when the route first needs them:
+Publisher credentials live only in the DSH plugin settings (科研服务 → Nature 文献下载凭据). The skill reads them from injected environment variables and never writes a credentials file or asks for a key in chat.
 
-```bash
-python3 scripts/configure_credentials.py set elsevier
-python3 scripts/configure_credentials.py set springer_nature --service openaccess
-python3 scripts/configure_credentials.py set springer_nature --service fulltext
-python3 scripts/configure_credentials.py set springer_nature --service metadata
-python3 scripts/configure_credentials.py set ieee --fulltext-endpoint 'https://issued-endpoint.example/articles/{doi}'
-python3 scripts/configure_credentials.py set elsevier --stdin
-python3 scripts/configure_credentials.py show
-python3 scripts/configure_credentials.py validate <provider>
-python3 scripts/configure_credentials.py validate springer_nature --service openaccess
-python3 scripts/configure_credentials.py validate springer_nature --service fulltext
-python3 scripts/configure_credentials.py validate springer_nature --service metadata
-python3 scripts/configure_credentials.py delete <provider>
-python3 scripts/configure_credentials.py contact-email researcher@example.org
-```
+| Provider | Plugin setting | Used for |
+| --- | --- | --- |
+| Elsevier | Elsevier API Key / InstToken / AuthToken | ScienceDirect API |
+| Springer Nature | Full Text / OA / Metadata Key | `/xmldata`, `/openaccess`, `/meta` services |
+| IEEE | IEEE Xplore API Key + Full Text Endpoint | IEEE API (endpoint is required for full text) |
 
-Give the user the official registration link: Elsevier `https://dev.elsevier.com/`, Springer Nature `https://dev.springernature.com/docs/quick-start/api-access/`, or IEEE `https://developer.ieee.org/member/register`.
+Registration links: Elsevier `https://dev.elsevier.com/`, Springer Nature `https://dev.springernature.com/docs/quick-start/api-access/`, IEEE `https://developer.ieee.org/member/register`.
 
-Springer credentials are scoped by service: `metadata_api_key` validates against `/meta/v2/json` and cannot enable a download; `openaccess_api_key` uses `/openaccess/jats`; `fulltext_api_key` uses `/xmldata/jats` under a Full Text agreement. Configure only the services the user has activated. A key may be reused explicitly for multiple services if the account grants each service; do not assume either shared or distinct keys. For Full Text, enter the complete issued `KEY/METRIC` value in the hidden prompt or via `--stdin` when required by the account. Setting one Springer service preserves the others. The legacy `api_key` (including `set springer_nature` without `--service`) remains a Full Text credential for compatibility, never an inferred Meta or OA credential.
+Springer credentials are scoped by service: the Metadata key validates against `/meta/v2/json` but cannot download; the OA key uses `/openaccess/jats`; the Full Text key uses `/xmldata/jats` under a Full Text agreement. Configure only the services the account has activated. IEEE Metadata API access is not paid full-text access; the issued Full-Text Access endpoint/template is required.
 
-Springer downloads try the configured Full Text service first, then the configured OA service on failure. OA-only credentials go directly to the OA service. Meta-only credentials do not qualify for API-first downloading. Both full-text services retain content validation and secret-free source URLs. The existing general OA and confirmed Web Access fallbacks follow if these services fail. Validation defaults to the Full Text service; `--service metadata` and `--service openaccess` probe only the selected service and credential. Validation checks an HTTP response, leaving article entitlement unverified. Meta validation cannot prove OA or Full Text access, and even a successful full-text service probe cannot guarantee a particular article. Official service references: [Meta](https://dev.springernature.com/docs/api-endpoints/meta-api/), [OA](https://dev.springernature.com/docs/api-endpoints/open-access/), [Full Text](https://dev.springernature.com/docs/api-endpoints/fulltext-api/).
-
-Do not proactively ask the user to paste an API key into chat. If the user voluntarily sends a publisher API key, treat that as authorization to save that exact key: do not reject it, ask them to regenerate it, or repeat it back. Pass it to `configure_credentials.py set <provider> --stdin`, keep it out of command-line arguments, logs, replies, and manifests, then report only the masked confirmation and validation status. The local hidden prompt remains the preferred path when the key has not already been provided. IEEE Metadata API access is not paid full-text access; require the issued Full-Text Access endpoint/template before treating IEEE as downloadable through the API. Secrets are stored in `~/.config/lit-dl/credentials.json` with mode `0600`.
+If a user volunteers a key in chat, do not repeat it, log it, or put it in a manifest; tell them to fill it in the plugin settings and rotate it if it was exposed.
 
 ## Resource URL Triage
 
@@ -188,8 +149,8 @@ For the paid-library branch, confirm these conditions:
 
 1. The browser that holds the user's library/database login state is open on the user's machine.
 2. The school configuration exists and is valid.
-   - Run `python3 scripts/configure_school.py show`.
-   - If missing, run `python3 scripts/configure_school.py preset "<school name>"` or guide the user through `src/wizard.py`.
+   - Read `config/school.json` (shipped with the skill) to confirm the school entry.
+   - If the file is missing, the plugin installation is incomplete; ask the user to reinstall the plugin instead of editing it.
 3. The user has personally logged in to their institution/library route in that same browser, and can reach the library aggregation service, target database, or discovery entry.
 4. The browser-control path can reuse that same logged-in browser profile.
    - For Chrome CDP, ask the user to open `chrome://inspect/#remote-debugging` and enable remote debugging for the current browser instance.
@@ -315,7 +276,7 @@ If this hangs or fails:
 
 For anything beyond a single paper, run `scripts/batch_download.mjs` instead of driving the browser step-by-step. OA and publisher APIs run without CDP; CNKI, Web Access, and requested SI lazily attach to the authenticated browser. Large DOMs and file bytes remain inside the scripts.
 
-The script reads `~/.config/lit-dl/school.json` automatically. When the config contains `discovery.web_of_science_url`, that URL is used as the Web of Science entry; otherwise the script falls back to its compiled default Web of Science URL.
+The script reads the school file from `LIT_DL_SCHOOL_FILE` (shipped as `config/school.json`). When it contains `discovery.web_of_science_url`, that URL is used as the Web of Science entry; otherwise the script falls back to its compiled default Web of Science URL.
 
 ```bash
 # by topic (collects N records from Web of Science Core Collection):

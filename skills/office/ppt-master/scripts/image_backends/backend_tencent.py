@@ -211,7 +211,7 @@ def generate(prompt: str,
         "TOKENHUB_API_KEY",
         message=(
             "No API key found. Set TENCENT_API_KEY or TOKENHUB_API_KEY "
-            "in the current environment or a .env file."
+            "in the current environment (set through the DSH plugin settings)."
         ),
     )
     base_url = os.environ.get("TENCENT_BASE_URL") or DEFAULT_BASE_URL

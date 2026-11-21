@@ -304,10 +304,10 @@ function ZrSettingsView(props) {
   }
   var data = state.value
 
-  var saveCard = function (cardId) {
+  var saveCard = function (cardId, overrideValues) {
     var card = (data.cards || []).find(function (item) { return item.id === cardId })
     if (card === undefined) return
-    var body = { action: 'save', cardId: cardId, values: valuesRef.current[cardId] || {} }
+    var body = { action: 'save', cardId: cardId, values: overrideValues || valuesRef.current[cardId] || {} }
     setError(null)
     setBusy(function (count) { return count + 1 })
     zrRequest('/settings', body, ZR_TIMEOUT_SETTINGS).then(function (payload) {
@@ -342,6 +342,16 @@ function ZrSettingsView(props) {
 
   var setField = function (cardId, fieldId, next) {
     setValueLocal(cardId, fieldId, next)
+    var card = (data.cards || []).find(function (item) { return item.id === cardId })
+    var field = card === undefined ? undefined : (card.fields || []).find(function (item) { return item.id === fieldId })
+    // 下拉/开关类没有“失焦保存”的时机，标了 autoSave 的卡片选中即保存。
+    if (card !== undefined && card.autoSave === true && field !== undefined && (field.control === 'select' || field.control === 'inline-select')) {
+      var merged = {}
+      var current = valuesRef.current[cardId] || {}
+      for (var key in current) merged[key] = current[key]
+      merged[fieldId] = next
+      saveCard(cardId, merged)
+    }
   }
 
   /** 这一块的输入和已保存的值不一样就算有改动，用来决定「保存」能不能点。 */

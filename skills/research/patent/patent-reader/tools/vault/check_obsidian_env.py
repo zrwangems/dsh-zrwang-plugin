@@ -8,9 +8,8 @@
 用法：
   python skills/patent-reader/tools/vault/check_obsidian_env.py
   python skills/patent-reader/tools/vault/check_obsidian_env.py --json
-  python skills/patent-reader/tools/vault/check_obsidian_env.py --set "C:\\Users\\you\\Documents\\Obsidian Vault"
-  python skills/patent-reader/tools/vault/check_obsidian_env.py --set "D:\\Vault" --setx   # 顺便写用户级环境变量（Windows）
-  python skills/patent-reader/tools/vault/check_obsidian_env.py --auto-accept             # 唯一/当前打开库则写入持久化
+库路径由 DSH 插件设置（科研服务 → 专利检索向量模型 → Obsidian 专利库路径）指定，
+本脚本只探测，不写任何持久化配置。
 """
 from __future__ import annotations
 
@@ -25,7 +24,6 @@ if str(_PR_ROOT) not in _sys.path:
 import argparse
 import json
 import os
-import subprocess
 import sys
 from pathlib import Path
 
@@ -68,28 +66,9 @@ def _print_human(report: dict) -> None:
             print("SUGGESTED_DEFAULTS:")
             for d in defaults:
                 print(f"  - {d}")
-        print("ACTION: 请用户提供 Obsidian 库根目录，然后执行：")
-        print('  python skills/patent-reader/tools/vault/check_obsidian_env.py --set "库路径"')
-        if sys.platform == "win32":
-            print("  # 当前 PowerShell 会话：")
-            print('  $env:PATENT_READER_OBSIDIAN_VAULT = "库路径"')
-        else:
-            print('  export PATENT_READER_OBSIDIAN_VAULT="库路径"')
+        print("ACTION: 在 DSH 插件设置 → 科研服务 → 专利检索向量模型 里填写 Obsidian 专利库路径。")
     print(f"PERSISTED_CONFIG: {report.get('persisted_config')}")
     print(f"ENV_VAR: {report.get('env_var')}")
-
-
-def _set_user_env_windows(name: str, value: str) -> bool:
-    try:
-        r = subprocess.run(
-            ["setx", name, value],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        return r.returncode == 0
-    except (OSError, subprocess.TimeoutExpired):
-        return False
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -99,66 +78,11 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--json", action="store_true", help="输出 JSON 报告")
     ap.add_argument(
-        "--set",
-        default="",
-        help="将库路径写入持久化配置，并设置当前进程环境变量",
-    )
-    ap.add_argument(
-        "--setx",
-        action="store_true",
-        help="Windows 下额外 setx 到用户环境变量（新开终端生效）",
-    )
-    ap.add_argument(
-        "--auto-accept",
-        action="store_true",
-        help="若已唯一解析到库路径，写入持久化配置",
-    )
-    ap.add_argument(
         "--require-vault",
         action="store_true",
         help="无库路径时退出码 2（默认仅提示，退出 0；强制入库场景可用）",
     )
     args = ap.parse_args(argv)
-
-    if args.set.strip():
-        vault_path = Path(args.set.strip()).expanduser()
-        if not vault_path.exists():
-            print(f"警告：路径尚不存在，将创建：{vault_path}", file=sys.stderr)
-            vault_path.mkdir(parents=True, exist_ok=True)
-        cfg = write_persisted_vault(vault_path)
-        os.environ["PATENT_READER_OBSIDIAN_VAULT"] = str(vault_path.resolve())
-        print(f"OK set vault={vault_path.resolve()}")
-        print(f"PERSISTED: {cfg}")
-        print(f"ENV_SET: PATENT_READER_OBSIDIAN_VAULT={vault_path.resolve()}")
-        if args.setx and sys.platform == "win32":
-            ok = _set_user_env_windows(
-                "PATENT_READER_OBSIDIAN_VAULT", str(vault_path.resolve())
-            )
-            print(f"SETX: {'ok' if ok else 'failed'}")
-            if ok:
-                print("注意：setx 仅对新开终端生效；当前会话已用 ENV_SET。")
-        elif args.setx:
-            print("SETX: skipped (非 Windows)", file=sys.stderr)
-        report = probe_obsidian_environment()
-        if args.json:
-            print(json.dumps(report, ensure_ascii=False, indent=2))
-        return 0
-
-    if args.auto_accept:
-        resolved = resolve_obsidian_vault()
-        if resolved.get("vault") and not resolved.get("needs_user_input"):
-            cfg = write_persisted_vault(resolved["vault"])
-            os.environ["PATENT_READER_OBSIDIAN_VAULT"] = resolved["vault"]
-            print(f"OK auto-accept vault={resolved['vault']}")
-            print(f"PERSISTED: {cfg}")
-        else:
-            print("AUTO_ACCEPT: skipped (无唯一可解析库路径)", file=sys.stderr)
-            report = probe_obsidian_environment()
-            if args.json:
-                print(json.dumps(report, ensure_ascii=False, indent=2))
-            else:
-                _print_human(report)
-            return 2 if args.require_vault else 0
 
     report = probe_obsidian_environment()
     if args.json:

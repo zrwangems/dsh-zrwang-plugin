@@ -54,10 +54,9 @@ sudo apt-get install libreoffice-impress fonts-noto-cjk imagemagick
 
 ## Configuration
 
-Persistent secrets live in the active `config.yaml`: the directory selected by
-`IMAGE2PPT_CONFIG_HOME`, then the project-level Skill root, then the legacy
-`~/.image2ppt/` location. Process environment variables take precedence. Do not
-place a real token/key in a run directory, Prompt, manifest, report, or source control.
+There is no config file. The DSH plugin injects the image model and the OCR token
+as environment variables (模型服务 → 生图模型 / OCR 模型). Do not place a real
+token/key in a run directory, Prompt, manifest, report, or source control.
 
 Run the independent checks:
 

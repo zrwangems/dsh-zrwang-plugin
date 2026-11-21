@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """国知局公布公告高级查询 CLI（通用著录检索，非交底查新）。
 
-默认只翻 config.yaml 中的 max_pages（默认 3 页），不要一上来爬完全部分页。
-对话里改阈值：改 config.yaml 或传 ``--max-pages``。仅当用户明确要求穷举时才加 ``--complete``。
+默认只翻代码里的 max_pages（默认 3 页），不要一上来爬完全部分页。
+对话里改阈值：传 ``--max-pages``。仅当用户明确要求穷举时才加 ``--complete``。
 第一页若读到「共 N 页」，``--complete`` 按总页数翻完；读不到才用 ``max_pages_hard``。
 分页未完成时 ``complete=false``，禁止称为全部。采到总页数才能说「已翻完全部分页」或「还剩 x 页」。
 
@@ -182,7 +182,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--max-pages",
         type=int,
         default=None,
-        help="覆盖 config.yaml 的 max_pages；普通检索仍受 max_pages_hard 限制",
+        help="覆盖默认 max_pages；普通检索仍受 max_pages_hard 限制",
     )
     parser.add_argument(
         "--complete",
