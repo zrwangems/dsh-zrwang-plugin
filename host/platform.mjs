@@ -23,13 +23,47 @@ function read(command, args, timeout = 10_000) {
   }
 }
 
-/** PATH 里是否有一个可执行命令；返回第一个绝对路径。 */
+/** Windows 上可直接被 CreateProcess 执行的后缀（按 PATHEXT）。 */
+const EXECUTABLE_EXT = /\.(?:exe|cmd|bat|com)$/i
+
+/**
+ * PATH 里是否有一个可执行命令；返回第一个绝对路径。
+ *
+ * Windows 的 npm 全局目录同时有 `lark-cli`（给 bash 的 sh 脚本）、
+ * `lark-cli.cmd` 和 `lark-cli.ps1`，而 where.exe 会把无后缀的那个排在最前。
+ * 直接返回它会让 execFileSync 失败（不是 .exe），所以优先挑 PATHEXT 里的后缀。
+ */
 export function which(name) {
   if (typeof name !== 'string' || name.trim().length === 0) return undefined
   const command = isWindows ? 'where.exe' : 'which'
   const output = read(command, [name])
-  const first = output.split(/\r?\n/).map(line => line.trim()).find(line => line.length > 0)
+  const lines = output.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0)
+  const first = isWindows
+    ? (lines.find(line => EXECUTABLE_EXT.test(line)) ?? lines[0])
+    : lines[0]
   return first !== undefined && existsSync(first) ? first : undefined
+}
+
+function quoteCmdArgument(value) {
+  const text = String(value)
+  return /[\s"&|<>^]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+}
+
+/**
+ * 带 UTF-8 输出的同步命令调用。
+ *
+ * Windows 上 `.cmd` / `.bat` 不能交给 CreateProcess 直接执行（npm 全局装的 CLI
+ * 常常只有 .cmd），必须经 `cmd.exe /c` 转一层；`.exe` 与 POSIX 命令照常直调。
+ */
+export function execFileText(command, args = [], options = {}) {
+  const base = { encoding: 'utf8', windowsHide: true, ...options }
+  if (isWindows && /\.(?:cmd|bat)$/i.test(command)) {
+    const comspec = process.env.ComSpec ?? 'cmd.exe'
+    const line = [quoteCmdArgument(command), ...args.map(quoteCmdArgument)].join(' ')
+    // cmd /s /c 的惯例：整条命令再包一层引号（`cmd /c ""C:\a b\x.cmd" arg"`）。
+    return execFileSync(comspec, ['/d', '/s', '/c', `"${line}"`], { ...base, windowsVerbatimArguments: true })
+  }
+  return execFileSync(command, args, base)
 }
 
 /** 用系统默认程序打开一个路径；返回是否成功发起。 */
@@ -109,5 +143,3 @@ export function registryDisplayIcon(match, platform = process.platform) {
   }
   return undefined
 }
-
-/** 让 shell 文本在两种平台上都能拼：只用于展示，不用于执行。 */

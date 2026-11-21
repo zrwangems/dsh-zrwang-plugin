@@ -9,8 +9,9 @@
  * 本模块是唯一的读写入口：设置页、启动装配、技能环境注入都从这里取参数。
  */
 import { existsSync, statSync } from 'node:fs'
-import { resolve, sep } from 'node:path'
+import { resolve } from 'node:path'
 import { getPath, setPath } from './object.mjs'
+import { isInsidePath } from './path-utils.mjs'
 import { PKG_DIR } from './paths.mjs'
 
 /**
@@ -188,7 +189,7 @@ export function normalizeConfig(raw) {
       params.patent.root = ''
     } else {
       const root = resolve(params.patent.root)
-      if (root === PKG_DIR || root.startsWith(`${PKG_DIR}${sep}`)) {
+      if (isInsidePath(PKG_DIR, root)) {
         warnings.push('patent.root 不能放在插件安装目录里，已忽略')
         params.patent.root = ''
       } else if (existsSync(root) && !statSync(root).isDirectory()) {
@@ -302,7 +303,9 @@ function editorEntry(editor, ctx) {
  */
 export async function persistParams(ctx, params) {
   const normalized = normalizeConfig(configOfParams(params))
-  const config = normalized.params
+  // normalizeConfig 会从 defaultParams 起步，把未配置的字段补成空字符串/空对象。
+  // 补丁里只该留用户真的填过（或明确清空）的项，所以校验完再按 TABLE 摘一遍。
+  const config = configOfParams(normalized.params)
   const warnings = [...normalized.warnings]
   const credentials = credentialsOf(ctx)
   let secretsUpdated = 0

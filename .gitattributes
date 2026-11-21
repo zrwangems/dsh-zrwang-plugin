@@ -2,4 +2,10 @@
 # 技能实体按上游原样保存，禁止换行转换，保证可重复比对
 skills/** -text
 vendor/** -text
+# shim 是给 sh / cmd 直接执行的脚本：按仓库里的字节原样检出，避免 Windows 上
+# core.autocrlf 把 `#!/bin/sh` 变成 CRLF 后 Git Bash 找不到解释器。
+host/shim/** -text
+# ARS 运行时说明由 vendor 脚本生成并用 LF 写入，verify 会逐字比对；Windows 上
+# core.autocrlf 若把它检出成 CRLF，verify 会误报漂移，所以固定 LF。
+ars/skills/**/_shared/dsh-runtime.md text eol=lf
 lib/client.js text eol=lf

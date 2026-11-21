@@ -8,6 +8,7 @@
  */
 import { SERVER_NAMES } from './mcp.mjs'
 import { componentWant } from './session-components.mjs'
+import { appendEvent } from './state.mjs'
 
 const PREFIX = {
   [SERVER_NAMES.mathworks]: `mcp__${SERVER_NAMES.mathworks}__`,
@@ -37,32 +38,76 @@ const mcpNames = ctx => {
 }
 
 export function createToolRestrictions(ctx) {
+  /** sessionId → Map<agent 对象, { agent, dispose, signature }>：同一会话可能有多个 agent。 */
   const sessions = new Map()
+  const trace = (kind, sessionId, detail) => { void appendEvent('mcp-tools-mask', { kind, sessionId, ...detail }) }
 
-  const sync = async sessionId => {
-    const record = sessions.get(sessionId)
-    if (record === undefined) return
+  const disposeRecord = (record, sessionId) => {
+    if (record.dispose === undefined) return
+    try {
+      record.dispose()
+    } catch (error) {
+      trace('dispose-error', sessionId, { error: String(error?.message ?? error) })
+    }
+    record.dispose = undefined
+  }
+
+  const syncRecord = (record, sessionId, deny, want) => {
+    const signature = deny.join('\n')
+    if (record.signature === signature) return
+    const previous = record.signature ?? ''
+    record.signature = signature
+    const detail = { want: want === undefined ? '-' : JSON.stringify(want), count: deny.length }
+    if (record.dispose !== undefined) {
+      disposeRecord(record, sessionId)
+    }
+    if (deny.length === 0) {
+      trace('clear', sessionId, { ...detail, previous: previous.split('\n').filter(Boolean).length })
+      return
+    }
+    try {
+      const tools = toolsOf(record.agent.ctx)
+      if (typeof tools?.restrict !== 'function') {
+        trace('unavailable', sessionId, detail)
+        return
+      }
+      record.dispose = tools.restrict({ deny })
+      trace('apply', sessionId, detail)
+    } catch (error) {
+      // 工具表刚好在重连中换名：下一次 tools/change 会重来。
+      record.signature = undefined
+      trace('apply-error', sessionId, { ...detail, error: String(error?.message ?? error) })
+    }
+  }
+
+  const syncNow = async sessionId => {
+    const records = sessions.get(sessionId)
+    if (records === undefined || records.size === 0) return
     const want = await componentWant(sessionId)
-    const deny = mcpNames(ctx).filter(name => {
+    const names = mcpNames(ctx)
+    const deny = names.filter(name => {
       for (const [server, prefix] of Object.entries(PREFIX)) {
         if (!name.startsWith(prefix)) continue
         return server === SERVER_NAMES.mathworks ? want.mathworks !== true : want.windows !== true
       }
       return false
     }).sort()
-    const signature = deny.join('\n')
-    if (record.signature === signature) return
-    record.signature = signature
-    try { record.dispose?.() } catch { /* 旧限制已失效 */ }
-    record.dispose = undefined
-    if (deny.length === 0) return
-    try {
-      const tools = toolsOf(record.agent.ctx)
-      if (typeof tools?.restrict !== 'function') return
-      record.dispose = tools.restrict({ deny })
-    } catch {
-      // 工具表刚好在重连中换名：下一次 tools/change 会重来。
-    }
+    // 工具表在重连/重注册的瞬间可能是空的；这时不能把 deny 当成“全开”而去清掉
+    // 已有掩码，否则会把刚关掉的组件又放出来。等下一次 tools/change 再算。
+    const anyDisabled = want.mathworks !== true || want.windows !== true
+    if (names.length === 0 && anyDisabled) return
+    for (const record of records.values()) syncRecord(record, sessionId, deny, want)
+  }
+
+  // 同一会话的 sync 排队执行：attach 与路由刷新可能同时触发，并发时两边都会读到
+  // 旧 signature 并各调一次 restrict，后一次会覆盖前一次的 disposer，掩码就再也
+  // 解不掉了。
+  const queues = new Map()
+  const sync = sessionId => {
+    const previous = queues.get(sessionId) ?? Promise.resolve()
+    const next = previous.then(() => syncNow(sessionId), () => syncNow(sessionId))
+    queues.set(sessionId, next.catch(() => {}))
+    return next
   }
 
   const refresh = sessionId => {
@@ -78,21 +123,29 @@ export function createToolRestrictions(ctx) {
     attach(agent) {
       const sessionId = agent?.session?.id
       if (typeof sessionId !== 'string' || sessionId.length === 0) return
-      sessions.set(sessionId, { agent, dispose: undefined, signature: undefined })
+      let records = sessions.get(sessionId)
+      if (records === undefined) {
+        records = new Map()
+        sessions.set(sessionId, records)
+      }
+      if (records.has(agent)) return
+      records.set(agent, { agent, dispose: undefined, signature: undefined })
       void sync(sessionId)
     },
     detach(sessionId) {
-      const record = sessions.get(sessionId)
-      if (record === undefined) return
-      try { record.dispose?.() } catch { /* agent 卸载时已释放 */ }
+      const records = sessions.get(sessionId)
+      if (records === undefined) return
+      for (const record of records.values()) disposeRecord(record, sessionId)
       sessions.delete(sessionId)
+      queues.delete(sessionId)
     },
     refresh,
     disposeAll() {
-      for (const [sessionId, record] of sessions) {
-        try { record.dispose?.() } catch { /* ignore */ }
+      for (const [sessionId, records] of sessions) {
+        for (const record of records.values()) disposeRecord(record, sessionId)
         sessions.delete(sessionId)
       }
+      queues.clear()
     },
   }
 }

@@ -289,11 +289,43 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
   }
   restrictions.attach(agent)
   await restrictions.refresh('session-a')
-  check('未启用的 MCP 工具从会话工具表移除', calls[0]?.deny?.includes('mcp__matlab-mcp__eval') === true
-    && calls[0]?.deny?.includes('mcp__windows-mcp__click') === true
+  // session-a 开了工程组并勾了一个工程技能：MathWorks 组件随之打开，只该 deny Windows MCP。
+  check('本会话启用的组件工具保留、未启用的被移除', calls[0]?.deny?.includes('mcp__windows-mcp__click') === true
+    && calls[0]?.deny?.includes('mcp__matlab-mcp__eval') !== true
     && calls[0]?.deny?.includes('read_file') !== true,
     JSON.stringify(calls[0]))
+
+  const callsB = []
+  const agentB = {
+    session: { id: 'session-b' },
+    ctx: { get: () => ({ restrict: filter => { callsB.push(filter); return () => {} } }) },
+  }
+  restrictions.attach(agentB)
+  await restrictions.refresh('session-b')
+  // session-b 两个组件都没开：两个 MCP 工具都要从工具表移除。
+  check('两个组件都未启用时 MCP 工具全部移除', callsB[0]?.deny?.includes('mcp__matlab-mcp__eval') === true
+    && callsB[0]?.deny?.includes('mcp__windows-mcp__click') === true
+    && callsB[0]?.deny?.includes('read_file') !== true,
+    JSON.stringify(callsB[0]))
   restrictions.disposeAll()
+
+  // 并发触发（attach 的首次 sync + 路由刷新）只能注册一次掩码；否则后一次会覆盖
+  // 前一次的 disposer，掩码永远解不掉。
+  const raceCalls = []
+  const raceRestrictions = createToolRestrictions({
+    get: name => (name === 'tools' ? { definitions: () => [{ name: 'mcp__matlab-mcp__eval' }, { name: 'mcp__windows-mcp__click' }, { name: 'read_file' }] } : undefined),
+    on() {},
+  })
+  await saveSessionSelection('session-race', { skills: {} }, { engineering: false, 'windows-mcp': false })
+  const raceAgent = {
+    session: { id: 'session-race' },
+    ctx: { get: () => ({ restrict: filter => { raceCalls.push(filter); return () => {} } }) },
+  }
+  raceRestrictions.attach(raceAgent)
+  await Promise.all([raceRestrictions.refresh('session-race'), raceRestrictions.refresh('session-race')])
+  await raceRestrictions.refresh('session-race')
+  check('并发刷新只注册一次工具掩码', raceCalls.length === 1, JSON.stringify(raceCalls.map(filter => filter.deny?.length)))
+  raceRestrictions.disposeAll()
 }
 
 // ---- MCP 稳定性：重连预算与自动恢复 ----

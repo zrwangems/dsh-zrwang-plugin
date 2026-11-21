@@ -1,2 +1,2 @@
 #!/bin/sh
-exec "${ZRWANG_SKILL_BASH:?bash is not configured}" "$@"
+exec "${ZRWANG_GIT_BASH:?bash is not configured in DSH plugin settings}" "$@"

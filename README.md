@@ -103,7 +103,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 
 插件检测本机已有的解释器并校验依赖，由用户选择一个：
 
-- **检测来源**：PATH 上的 `python` / `python3`、Windows `py` 启动器、Conda 环境（`conda env list`）、常见安装目录（Python 官方安装、Anaconda/Miniconda）；打开设置页时自动检测（结果缓存在 `storages/dsh-zrwang-plugin/state/python-candidates.json`，5 分钟内复用），点「检查运行环境」会强制重扫。
+- **检测来源**：PATH 上的 `python` / `python3`、Windows `py` 启动器、Conda 环境（`conda env list`）、常见安装目录（Python 官方安装、Anaconda/Miniconda）；打开设置页先做一次只读版本的快速扫描（不 import 依赖，结果缓存在 `storages/dsh-zrwang-plugin/state/python-candidates.json`），点「检查运行环境」再做完整依赖校验。
 - **选择**：设置 → 运行环境 → Python 解释器，下拉选一个（或「自动选择」用第一个可用解释器）；选完立即自动保存，没有自定义路径输入框。
 - **校验**：会读版本并逐个 import 技能需要的模块（PyYAML、jsonschema、ruamel.yaml、pypdf、defusedxml、openpyxl、requests、Pillow、python-pptx、python-docx、PyMuPDF、openai、playwright）。**缺什么只列出，不安装**，请在你选择的环境里自行补齐。
 - **生效方式**：插件把静态的 `host/shim/python` 目录挂到 PATH 前面，`python` / `python3` 转给所选解释器；`host/shim/bash` 里的 `bash` / `sh` 转给 Git Bash 或系统 bash。没有可用解释器时不挂这个目录，技能会提示未选择。

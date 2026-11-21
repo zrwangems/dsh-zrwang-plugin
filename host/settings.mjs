@@ -4,13 +4,14 @@
  * 所有可填项都在这里定义：卡片字段是唯一来源，设置页按它渲染；
  * 密钥字段只回显“已设置/未设置”，值只从 DSH 凭据库读。
  */
-import { execFile, execFileSync } from 'node:child_process'
+import { execFile } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { join, resolve, sep } from 'node:path'
+import { join, resolve, dirname, basename } from 'node:path'
 import { promisify } from 'node:util'
 import { SKILLS_DIR } from './config.mjs'
 import { defaultPatentRoot, patentPathsOf, storageRoot } from './paths.mjs'
-import { isMac, isWindows, openPath, processIds, listeningPid, which, registryDisplayIcon } from './platform.mjs'
+import { execFileText, isMac, isWindows, openPath, processIds, listeningPid, which, registryDisplayIcon } from './platform.mjs'
+import { isInsidePath } from './path-utils.mjs'
 import { getPath, setPath, text } from './object.mjs'
 import { applySkillEnv, shellEnvValues } from './env.mjs'
 import { SECRET_REFS } from './params.mjs'
@@ -110,7 +111,7 @@ export function patentRootProblem(params) {
   if (root.length === 0) return '未设置专利数据目录（设置 → 科研服务 → 专利数据目录），专利类技能已停用'
   const resolved = resolve(root)
   const pkg = resolve(SKILLS_DIR, '..')
-  if (resolved === pkg || resolved.startsWith(`${pkg}${sep}`)) return '专利数据目录不能放在插件安装目录里'
+  if (isInsidePath(pkg, resolved)) return '专利数据目录不能放在插件安装目录里'
   if (existsSync(resolved) && !statSync(resolved).isDirectory()) return '专利数据目录指向的是文件，请改成目录'
   return undefined
 }
@@ -130,6 +131,19 @@ function firstExisting(paths) {
   return undefined
 }
 
+/**
+ * 从卸载注册表找 draw.io 主程序。
+ * 注册表里的 DisplayIcon 常指向 `Uninstall draw.io.exe`，直接用它会把用户带进
+ * 卸载程序，所以在同一个安装目录里换回 draw.io.exe。
+ */
+function drawioFromRegistry() {
+  const found = registryDisplayIcon('draw.io')
+  if (found === undefined) return undefined
+  if (/^draw\.io\.exe$/i.test(basename(found))) return found
+  const candidate = join(dirname(found), 'draw.io.exe')
+  return existsSync(candidate) ? candidate : undefined
+}
+
 /** draw.io 桌面版：Windows 注册表/LocalAppData，macOS 应用目录，Linux PATH。 */
 export function resolveDrawio() {
   const explicit = text(process.env.DRAWIO_PATH)
@@ -141,7 +155,7 @@ export function resolveDrawio() {
       local.length > 0 ? join(local, 'Programs', 'draw.io', 'draw.io.exe') : '',
       local.length > 0 ? join(local, 'draw.io', 'draw.io.exe') : '',
       join(programFiles, 'draw.io', 'draw.io.exe'),
-      registryDisplayIcon('draw.io'),
+      drawioFromRegistry(),
     ])
   }
   if (isMac) return firstExisting(['/Applications/draw.io.app/Contents/MacOS/draw.io'])
@@ -207,7 +221,7 @@ function cliStatusField(id, label, command, args) {
   const found = which(command)
   if (found === undefined) return statusField(id, label, '未找到', 'bad')
   try {
-    const output = execFileSync(found, args, { encoding: 'utf8', timeout: 15_000, windowsHide: true, shell: false }).trim()
+    const output = execFileText(found, args, { timeout: 15_000 }).trim()
     return statusField(id, label, output.split(/\r?\n/)[0] || '已安装', 'ok')
   } catch {
     return statusField(id, label, '已安装（版本未知）', 'ok')
@@ -218,7 +232,7 @@ function zoteroField() {
   const found = which('zotero-cli')
   if (found === undefined) return statusField('zotero-cli', 'zotero-cli', '未找到', 'bad')
   try {
-    const output = execFileSync(found, ['config'], { encoding: 'utf8', timeout: 15_000, windowsHide: true }).trim()
+    const output = execFileText(found, ['config'], { timeout: 15_000 }).trim()
     return /ZOTERO_LOCAL=true/.test(output)
       ? statusField('zotero-cli', 'zotero-cli', '本地 API', 'ok')
       : statusField('zotero-cli', 'zotero-cli', '配置异常（需要 ZOTERO_LOCAL=true）', 'bad')
@@ -245,10 +259,23 @@ function environmentRows(params) {
 
 function pythonOptions(params) {
   const selected = text(params?.python?.path)
-  const cached = readPythonCandidates()
+  let cached = readPythonCandidates()
+  if (cached === undefined) {
+    // 首次打开设置页先做一次“只读版本”的快速扫描（不 import 依赖），
+    // 让下拉立刻有具体解释器；依赖明细留给“检查运行环境”的完整校验。
+    try {
+      cached = detectPythons({ deps: false })
+    } catch {
+      cached = undefined
+    }
+  }
   const options = [{ value: '', label: '自动选择（第一个可用）' }]
   for (const item of cached?.candidates ?? []) {
-    const deps = item.ok === false ? '无法运行' : item.missing.length === 0 ? '依赖齐全' : `缺 ${item.missing.length} 个模块`
+    const deps = item.ok === false
+      ? '无法运行'
+      : item.depsProbed === false
+        ? '依赖未校验'
+        : item.missing.length === 0 ? '依赖齐全' : `缺 ${item.missing.length} 个模块`
     options.push({ value: item.path, label: `${item.version || '?'} · ${deps} · ${item.path}` })
   }
   if (selected.length > 0 && !options.some(option => option.value === selected)) {
@@ -599,7 +626,7 @@ export async function runSettingCheck(action, params, mcpController) {
 export function openConfigTarget(target) {
   const base = resolve(storageRoot())
   const dir = resolve(base, target === undefined || target === 'configDir' ? '' : String(target))
-  if (dir !== base && !dir.startsWith(`${base}${sep}`)) throw new Error('只能打开插件持久化目录')
+  if (!isInsidePath(base, dir)) throw new Error('只能打开插件持久化目录')
   if (!existsSync(dir)) throw new Error(`目录不存在：${dir}`)
   if (!openPath(dir)) throw new Error(`无法打开目录：${dir}`)
   return { opened: true, path: dir }

@@ -37,6 +37,25 @@ export async function readJson(file, fallback) {
   }
 }
 
+/**
+ * Windows 上杀毒/索引服务会瞬时锁住目标文件，rename 可能返回 EPERM/EBUSY；
+ * 这类失败通常几毫秒后自愈，重试几次比让整次保存失败更合理。
+ */
+async function renameWithRetry(from, to, attempts = 4) {
+  let delay = 10
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await rename(from, to)
+      return
+    } catch (error) {
+      const retryable = error?.code === 'EPERM' || error?.code === 'EACCES' || error?.code === 'EBUSY'
+      if (!retryable || attempt >= attempts) throw error
+      await new Promise(resolve => setTimeout(resolve, delay))
+      delay *= 2
+    }
+  }
+}
+
 export function writeJson(file, value) {
   // 同一进程内按目标文件排队，临时文件再按调用区分：既避免互相 rename 掉对方的
   // 临时文件，也保证调用顺序就是落盘顺序。失败不能堵死后续写入。
@@ -47,7 +66,7 @@ export function writeJson(file, value) {
     const temp = `${file}.${process.pid}.${randomUUID()}.tmp`
     try {
       await writeFile(temp, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
-      await rename(temp, file)
+      await renameWithRetry(temp, file)
     } finally {
       await unlink(temp).catch(() => {})
     }

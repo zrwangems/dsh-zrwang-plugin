@@ -22,7 +22,7 @@ import { attachArsCommands, detachArsCommands, syncArsCommands } from './ars-com
 import { createSkillGuard } from './skill-guard.mjs'
 import { installArsWriteScopeGuard } from './ars-write-scope.mjs'
 import { registerSkillProvider } from './skill-provider.mjs'
-import { installComponentGuard } from './session-components.mjs'
+import { componentWant, installComponentGuard } from './session-components.mjs'
 import { createToolRestrictions } from './tool-restrictions.mjs'
 import { ensureSessionSelection } from './session-selection.mjs'
 import { loadCatalog } from './catalog.mjs'
@@ -91,6 +91,13 @@ export function apply(ctx, config) {
     installComponentGuard(agent.ctx, sessionId)
     installArsWriteScopeGuard(agent.ctx, { sessionId, session: agent.session })
     toolRestrictions.attach(agent)
+    // 重启 DSH 后，MCP 服务器要靠会话的注册/对账才会重新拉起；打开一个已经开过
+    // 组件的会话时也走一次，避免“侧栏不打开就一直没工具”。
+    if (typeof sessionId === 'string' && sessionId.length > 0) {
+      void componentWant(sessionId)
+        .then(want => mcpController.reconcile(want, { sessionId }))
+        .catch(() => {})
+    }
   })
 
   ctx.on?.('agent/disposed', ({ agent }) => {

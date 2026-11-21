@@ -513,8 +513,9 @@ function statusLabelOf(server) {
  * 侧栏两个组件行的视图数据。
  * @param {{engineeringInjected: number, gates: object, status: object}} input
  */
-export function componentViews({ engineeringInjected, gates, status }) {
-  const want = wantOf({ engineeringInjected, gates })
+export function componentViews({ engineeringInjected, gates, status, want: wantOverride }) {
+  // 侧栏展示也用会话自己的 want（与工具掩码同源），避免一个会话的开关影响另一个会话的显示。
+  const want = wantOverride ?? wantOf({ engineeringInjected, gates })
   const servers = status?.servers ?? []
   const viewOf = (name, enabled) => {
     const server = servers.find(item => item.name === name)

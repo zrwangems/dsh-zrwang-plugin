@@ -1,14 +1,24 @@
 # dsh-zrwang-plugin 组合包补丁层。
 #
-# 只挂载本插件的一行宿主条目；MATLAB MCP 与 Simulink 工具随包放在
-# mathworks/ 下，由插件的 MathWorks组件动态注册。
+# 挂载两行宿主条目：
+#   1. dsh-better-sidebar —— 右侧栏与文件查看器（本插件「打开 SKILL.md」要用）。
+#      它作为本包的依赖随 pnpm 装进 profile；这里带守卫地补一行，让只装本插件
+#      的用户也能得到完整右侧栏。守卫：若 profile 里已经有别的行挂了
+#      dsh-better-sidebar（例如用户单独启用该 bundle，或聚合包先挂），本行让位。
+#      反过来，本行先挂时，dsh-better-sidebar 自己的 bundle 行也会自我让位，
+#      因为它的守卫同样只看 name（不看 id）。
+#   2. 本插件自身。
 #
 # 插件参数不在这里写死：非密钥设置由设置页通过 configEditor 写进当前 profile
 # 补丁的同一行程（`- id: dsh-zrwang-plugin` 的 `config:`），密钥存 DSH 凭据库
 # `$DSH_HOME/.credentials.yaml`；这里保持空 config。
-# 技能实体只在本包 skills/ 里，勾选后才以目录联接挂到 <项目根>/.agents/skills/。
+# 技能实体只在本包 skills/ 里，勾选后由 DSH 的 ctx.skills 提供方按会话注入，
+# 不会在 <项目根>/.agents/skills/ 下建目录联接。
 
 - insert:
+    - id: zrwang-better-sidebar
+      name: 'dsh-better-sidebar'
+      disabled: !!js "[...ctx.loader.entries()].some((e) => e.options?.name === 'dsh-better-sidebar' && e.options?.id !== 'zrwang-better-sidebar' && !e.disabled)"
     - id: dsh-zrwang-plugin
       name: 'dsh-zrwang-plugin'
       config: {}

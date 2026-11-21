@@ -6,10 +6,9 @@
  *   2. 逐个校验版本与技能所需第三方模块（只读检查，绝不调用 pip / uv 安装）；
  *   3. 结果缓存到 state/python-candidates.json，供设置页展示和用户选择。
  */
-import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
-import { delimiter, join } from 'node:path'
-import { isMac, isWindows, which } from './platform.mjs'
+import { basename, delimiter, dirname, join } from 'node:path'
+import { execFileText, isMac, isWindows, which } from './platform.mjs'
 import { PKG_DIR, stateRoot } from './paths.mjs'
 
 const STATE_DIR = stateRoot()
@@ -41,10 +40,8 @@ let memoryCache
 
 function run(command, args, timeout = 6000) {
   try {
-    return execFileSync(command, args, {
-      encoding: 'utf8',
+    return execFileText(command, args, {
       timeout,
-      windowsHide: true,
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim()
   } catch {
@@ -72,23 +69,73 @@ function pyLauncherEntries() {
   return entries
 }
 
-function condaEntries() {
+function condaPython(dir) {
+  return process.platform === 'win32' ? join(dir, 'python.exe') : join(dir, 'bin', 'python3')
+}
+
+/** 从 CONDA_PREFIX / CONDA_EXE / PATH 推断 conda 根目录，直接扫 envs/（比 conda CLI 快得多）。 */
+function condaRootEntries() {
+  const roots = new Set()
+  const prefix = process.env.CONDA_PREFIX
+  if (prefix !== undefined && prefix.length > 0) {
+    roots.add(/[\\/]envs[\\/][^\\/]+$/i.test(prefix) ? prefix.replace(/[\\/]envs[\\/][^\\/]+$/i, '') : prefix)
+  }
+  const exe = process.env.CONDA_EXE
+  if (exe !== undefined && exe.length > 0) roots.add(dirname(dirname(exe)))
+  for (const part of pathDirsFiltered(String(STATE_DIR).toLowerCase())) {
+    const base = basename(part).toLowerCase()
+    if (base === 'scripts' || base === 'condabin') roots.add(dirname(part))
+    else if (existsSync(condaPython(part))) roots.add(part)
+  }
+  if (isWindows) {
+    const home = process.env.USERPROFILE ?? ''
+    const programData = process.env.ProgramData ?? 'C:\\ProgramData'
+    for (const root of [
+      join(home, 'anaconda3'), join(home, 'miniconda3'),
+      join(home, 'AppData', 'Local', 'anaconda3'), join(home, 'AppData', 'Local', 'miniconda3'),
+      join(programData, 'anaconda3'), join(programData, 'miniconda3'),
+    ]) roots.add(root)
+  }
   const entries = []
-  const json = run('conda', ['env', 'list', '--json'], 10000)
-  if (json.length > 0) {
+  for (const root of roots) {
+    const envs = join(root, 'envs')
+    if (!existsSync(envs)) continue
+    let children = []
     try {
-      const parsed = JSON.parse(json)
-      for (const dir of parsed.envs ?? []) {
-        const python = process.platform === 'win32' ? join(dir, 'python.exe') : join(dir, 'bin', 'python3')
-        if (existsSync(python)) entries.push({ path: python, source: `conda: ${dir}` })
-      }
+      children = readdirSync(envs, { withFileTypes: true })
     } catch {
-      // conda 输出损坏时忽略，继续扫描常见目录
+      continue
+    }
+    for (const child of children) {
+      if (!child.isDirectory()) continue
+      const python = condaPython(join(envs, child.name))
+      if (existsSync(python)) entries.push({ path: python, source: `conda: ${join(envs, child.name)}` })
     }
   }
+  return entries
+}
+
+function condaEntries(options = {}) {
+  const entries = []
+  // CLI 会列出非标准前缀的环境，但慢（本机约 4 秒）；只在完整校验时跑。
+  if (options.cli === true) {
+    const json = run('conda', ['env', 'list', '--json'], 10000)
+    if (json.length > 0) {
+      try {
+        const parsed = JSON.parse(json)
+        for (const dir of parsed.envs ?? []) {
+          const python = condaPython(dir)
+          if (existsSync(python)) entries.push({ path: python, source: `conda: ${dir}` })
+        }
+      } catch {
+        // conda 输出损坏时忽略，继续扫描常见目录
+      }
+    }
+  }
+  entries.push(...condaRootEntries())
   const condaPrefix = process.env.CONDA_PREFIX
   if (condaPrefix !== undefined && condaPrefix.length > 0) {
-    const python = process.platform === 'win32' ? join(condaPrefix, 'python.exe') : join(condaPrefix, 'bin', 'python3')
+    const python = condaPython(condaPrefix)
     if (existsSync(python)) entries.push({ path: python, source: 'CONDA_PREFIX' })
   }
   return entries
@@ -149,11 +196,11 @@ function pathDirsFiltered(stateDir) {
   return String(process.env.PATH ?? '').split(delimiter).filter(part => part.length > 0 && !part.toLowerCase().startsWith(stateDir))
 }
 
-function collectCandidates() {
+function collectCandidates(options = {}) {
   const collected = [
     ...findCommands(['python', 'python3']),
     ...pyLauncherEntries(),
-    ...condaEntries(),
+    ...condaEntries({ cli: options.condaCli === true }),
     ...knownDirEntries(),
   ]
   const stateDir = String(STATE_DIR).toLowerCase()
@@ -170,19 +217,30 @@ function collectCandidates() {
 }
 
 /** 校验一个解释器：版本 + 依赖模块（只 import，不安装）。 */
-export function probePython(path) {
-  const code = [
-    'import importlib, json, sys',
-    'mods = json.loads(sys.argv[1])',
-    'missing = []',
-    'for item in mods:',
-    '    try:',
-    '        importlib.import_module(item)',
-    '    except Exception:',
-    '        missing.append(item)',
-    'print(json.dumps({"version": sys.version.split()[0], "executable": sys.executable, "missing": missing}))',
-  ].join('\n')
-  const output = run(path, ['-c', code, JSON.stringify(DEPENDENCIES.map(item => item.module))], PROBE_TIMEOUT_MS)
+export function probePython(path, options = {}) {
+  const deps = options.deps !== false
+  // 版本探测只 import json/sys，几毫秒到几百毫秒；依赖校验要逐个 import 13 个模块，
+  // 缺包时要等满 8 秒。设置页首次打开用前者，点“检查运行环境”再做后者。
+  const code = deps
+    ? [
+      'import importlib, json, sys',
+      'mods = json.loads(sys.argv[1])',
+      'missing = []',
+      'for item in mods:',
+      '    try:',
+      '        importlib.import_module(item)',
+      '    except Exception:',
+      '        missing.append(item)',
+      'print(json.dumps({"version": sys.version.split()[0], "executable": sys.executable, "missing": missing}))',
+    ].join('\n')
+    : [
+      'import json, sys',
+      'print(json.dumps({"version": sys.version.split()[0], "executable": sys.executable}))',
+    ].join('\n')
+  const args = deps
+    ? ['-c', code, JSON.stringify(DEPENDENCIES.map(item => item.module))]
+    : ['-c', code]
+  const output = run(path, args, deps ? PROBE_TIMEOUT_MS : 3000)
   const lines = output.split(/\r?\n/).filter(line => line.trim().length > 0)
   const last = lines.length > 0 ? lines[lines.length - 1] : ''
   try {
@@ -193,9 +251,10 @@ export function probePython(path) {
       version: String(parsed.version ?? ''),
       executable: String(parsed.executable ?? path),
       missing: Array.isArray(parsed.missing) ? parsed.missing : [],
+      depsProbed: deps,
     }
   } catch {
-    return { path, ok: false, version: '', executable: path, missing: [], error: '无法运行该解释器' }
+    return { path, ok: false, version: '', executable: path, missing: [], depsProbed: deps, error: '无法运行该解释器' }
   }
 }
 
@@ -213,27 +272,31 @@ function compareVersion(left, right) {
   return 0
 }
 
-/** 扫描并校验系统 Python；结果写缓存。 */
+/** 扫描并校验系统 Python；结果写缓存。`deps: false` 只读版本（设置页首次打开用）。 */
 export function detectPythons(options = {}) {
   const force = options.force === true
-  if (!force && memoryCache !== undefined && Date.now() - memoryCache.at < CACHE_TTL_MS) return memoryCache.value
+  const wantDeps = options.deps !== false
+  const fresh = value => value !== undefined
+    && Date.now() - new Date(value.detectedAt).getTime() < CACHE_TTL_MS
+    && (wantDeps ? (value.candidates ?? []).every(item => item.depsProbed !== false) : true)
+  if (!force && memoryCache !== undefined && fresh(memoryCache.value)) return memoryCache.value
   if (!force) {
     const cached = readPythonCandidates()
-    if (cached !== undefined && Date.now() - new Date(cached.detectedAt).getTime() < CACHE_TTL_MS) {
+    if (fresh(cached)) {
       memoryCache = { at: Date.now(), value: cached }
       return cached
     }
   }
   const candidates = []
-  for (const item of collectCandidates().slice(0, MAX_PROBES)) {
+  for (const item of collectCandidates({ condaCli: wantDeps }).slice(0, MAX_PROBES)) {
     if (isPluginShim(item.path)) continue
-    const probe = probePython(item.path)
+    const probe = probePython(item.path, { deps: wantDeps })
     candidates.push({ ...item, ...probe })
   }
   candidates.sort((left, right) => {
     if (left.ok !== right.ok) return left.ok ? -1 : 1
-    const leftReady = left.ok && left.missing.length === 0
-    const rightReady = right.ok && right.missing.length === 0
+    const leftReady = left.ok && left.depsProbed !== false && left.missing.length === 0
+    const rightReady = right.ok && right.depsProbed !== false && right.missing.length === 0
     if (leftReady !== rightReady) return leftReady ? -1 : 1
     return compareVersion(left, right)
   })

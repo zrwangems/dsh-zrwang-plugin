@@ -14,7 +14,8 @@ import { presetsPayload, loadPresets, applyMode, applyModeContent, cloneMode, de
 import { clearGates, loadGates, normalizeGates, replaceGates, setGates } from './gates.mjs'
 import { blockedSkills, openConfigTarget, presenceOf, runSettingCheck, saveSettingsCard, settingsCards } from './settings.mjs'
 import { checkArsDeps, loadArsManifest, mergeArsSkills } from './ars.mjs'
-import { componentViews, SERVER_NAMES, wantOf } from './mcp.mjs'
+import { componentViews, SERVER_NAMES } from './mcp.mjs'
+import { componentWant } from './session-components.mjs'
 import { arsUsageDoc, arsCommandCount, syncArsCommands } from './ars-commands.mjs'
 import { invalidateSkillProvider } from './skill-provider.mjs'
 import { ensureSessionSelection, readSessionSelection, saveSessionSelection } from './session-selection.mjs'
@@ -155,9 +156,12 @@ export function registerRoutes(scope, ctx, runtime, mcpController) {
     const blocked = await blockedSkills(params, catalog)
     const desired = desiredSkills(catalog, selection, gates, blocked)
     const engineeringInjected = [...desired.keys()].filter(name => groupHasSkill(catalog, 'engineering', name)).length
-    if (mcpController !== undefined) await mcpController.reconcile(wantOf({ engineeringInjected, gates }), { sessionId })
+    // MCP 服务器注册按会话取并集，而“要不要”必须和工具掩码看同一份会话快照，
+    // 不能用全局 gates：否则一个会话关掉会把另一个会话还开着的服务器注销。
+    const sessionWant = await componentWant(sessionId)
+    if (mcpController !== undefined) await mcpController.reconcile(sessionWant, { sessionId })
     const mcpStatus = mcpStatusOf()
-    const components = componentViews({ engineeringInjected, gates, status: mcpStatus })
+    const components = componentViews({ engineeringInjected, gates, status: mcpStatus, want: sessionWant })
     const ars = loadArsManifest()
     const arsEnabled = gates.ars === true
     mergeArsSkills(desired, arsEnabled)

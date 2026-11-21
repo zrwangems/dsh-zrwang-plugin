@@ -1,5 +1,6 @@
 # 本机才会有的目录：过程文件、测试实例、技能挂载联接，不入库
 .agents/
+AgentsDo/
 **/.env
 state/
 **/projects/
