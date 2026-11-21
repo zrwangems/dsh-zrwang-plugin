@@ -199,6 +199,15 @@ export function normalizeConfig(raw) {
       }
     }
   }
+  const patentEmbedding = params.patent.embedding
+  if (patentEmbedding.baseUrl.length > 0 && !isHttpUrl(patentEmbedding.baseUrl)) {
+    warnings.push('patent.embedding.baseUrl 必须是 http(s) 地址，已忽略')
+    patentEmbedding.baseUrl = ''
+  }
+  if (patentEmbedding.dimensions.length > 0 && !/^\d+$/.test(patentEmbedding.dimensions)) {
+    warnings.push('patent.embedding.dimensions 必须是整数，已忽略')
+    patentEmbedding.dimensions = ''
+  }
   if (getPath(input, ['patent', 'vault']) !== undefined) {
     warnings.push('patent.vault 已改为 patent.root（专利数据目录），Obsidian 库改为它下面的 vault/，请重新设置')
   }

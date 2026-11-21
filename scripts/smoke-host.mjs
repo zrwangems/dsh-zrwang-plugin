@@ -138,6 +138,10 @@ check('专利数据目录没有默认值', defaultParams().patent.root === '' &&
 check('相对专利目录被拒绝', normalizeConfig({ patent: { root: 'relative/patent' } }).params.patent.root === '')
 check('插件安装目录不能当专利目录', normalizeConfig({ patent: { root: join(SKILLS_DIR, '..') } }).params.patent.root === '')
 check('绝对专利目录被保留', normalizeConfig({ patent: { root: samplePatentRoot } }).params.patent.root === samplePatentRoot)
+check('专利向量 URL 与维度会被校验',
+  normalizeConfig({ patent: { embedding: { baseUrl: 'not-a-url', dimensions: 'abc' } } }).params.patent.embedding.baseUrl === ''
+  && normalizeConfig({ patent: { embedding: { baseUrl: 'not-a-url', dimensions: 'abc' } } }).params.patent.embedding.dimensions === ''
+  && normalizeConfig({ patent: { embedding: { baseUrl: 'https://api.example.com/v1', dimensions: '1536' } } }).params.patent.embedding.dimensions === '1536')
 check('MCP 自动恢复默认开启且只认 on/off',
   normalizeConfig({}).params.mcp.autoRecover === 'on'
   && normalizeConfig({ mcp: { autoRecover: 'off' } }).params.mcp.autoRecover === 'off'
