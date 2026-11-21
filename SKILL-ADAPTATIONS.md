@@ -2,7 +2,7 @@
 
 这份文档按项目记录 `dsh-zrwang-plugin` 对每个上游技能仓库做了什么改动。原则只有一条：**`skills/` 是生成物，不手工修改**；所有适配都写进 `vendor/`，重跑 `scripts/vendor-skills.mjs` 时重放，升级上游不会丢。
 
-核对时间：2026-11-21。当前收录 22 个上游项目、329 个技能树技能，加上 ARS 5 个流水线技能共 334 个；19 个 GitHub 仓库的 pin 与上游分支 HEAD 一致，3 个是本地副本。
+核对时间：2026-11-21。当前收录 22 个上游项目：21 个在技能树里共 329 个技能，ARS 单独 5 个流水线技能，合计 334 个；19 个 GitHub 仓库的 pin 与上游分支 HEAD 一致，3 个是本地副本。
 
 ## 一、所有项目共用的改动
 
@@ -159,7 +159,7 @@
     - 删除 `.env` 查找和加载；生图配置只读插件注入的 `ZRWANG_IMAGE_*`，密钥从 `ZRWANG_IMAGE_CRED` 映射为 `OPENAI_API_KEY`，`IMAGE_BACKEND=openai`；
     - `image_search`/`notes_to_audio` 去掉上游的 `.env` 依赖；
     - 各厂商 backend 保留，但默认走 OpenAI Images 兼容协议。
-  - `skill-patches.json` 2 条：`project_management/paths.py` 的 `PROJECTS_ROOT` 改为技能目录 `projects/`，`cli.py` 的默认项目根优先用它；插件把该目录联接到 `<当前项目根>/.agents/ppt-master/projects`。
+  - `skill-patches.json` 2 条：`project_management/paths.py` 的 `PROJECTS_ROOT` 改为技能目录 `projects/`，`cli.py` 的默认项目根固定用它；插件把该目录联接到 `<当前项目根>/.agents/ppt-master/projects`。
   - `headerNotes` 3 条：说明生图配置来自插件、`.env` 已禁用、项目输出目录和并发时的绝对路径建议。
   - 删除 `.env.example` 和 `scripts/update_repo.py`。
 - 验证：`python scripts/image_gen.py --list-backends` 显示 `process environment`；`project_manager.py init demo` 写到项目 `.agents`；`audit-upstreams` 1/1。
