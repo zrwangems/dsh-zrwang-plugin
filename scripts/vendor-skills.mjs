@@ -11,17 +11,18 @@
  *   - 只拷贝技能目录，不带 .git / node_modules / __pycache__；
  *   - 同名技能（frontmatter name 或目录名）出现冲突立即失败；
  *   - 旧树里的用户配置（.env、config.yaml 等）在重建前收集、重建后回填；
- *   - 旧 skills/ 不永久删除，移到 AgentsDo 的过程目录 trash/ 下。
+ *   - 旧 skills/ 不永久删除，移到系统临时目录 dsh-zrwang-plugin/vendor/trash/ 下。
  */
 import { execFileSync } from 'node:child_process'
 import {
   cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync, copyFileSync,
 } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { writeArsRuntimeNotes } from '../host/ars.mjs'
 
 const ROOT = resolve(import.meta.dirname, '..')
-const WORK = resolve(ROOT, '..', 'AgentsDo', 'skill-management-20261027')
+const WORK = join(tmpdir(), 'dsh-zrwang-plugin', 'vendor')
 const CACHE = join(WORK, 'tmp', 'tarballs')
 const EXTRACT = join(WORK, 'tmp', 'extract')
 const STAGE = join(WORK, 'tmp', 'skills-stage')

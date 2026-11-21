@@ -517,12 +517,12 @@
   },
   "components": [
     {
-      "name": "设置页与 settings.json",
+      "name": "设置页 + profile 补丁 config + DSH 凭据库",
       "status": "configured",
       "modules": [
         "settings"
       ],
-      "note": "模型服务（生图/OCR）、科研服务（可选检索 + Nature 学术检索，自动保存）、运行环境（仅组件状态）。",
+      "note": "模型服务（生图/OCR）、科研服务（可选检索、Nature 学术检索、Nature 文献下载凭据，自动保存）、运行环境（Python 组件状态）；配置只在 profile 补丁 config，密钥只在凭据库，不写 settings.json。",
       "check": "GET/POST /dsh-zrwang-plugin/settings"
     },
     {
@@ -541,8 +541,8 @@
         "ars",
         "python"
       ],
-      "note": "5 技能 + 16 命令；Python 统一用插件自带 runtime/python；跨模型验证为可选配置。",
-      "check": "checkArsDeps 直接调用插件 Python"
+      "note": "5 技能 + 16 命令；Python 用设置页选择的系统解释器（ZRWANG_SKILL_PYTHON）；引用校验缓存写 <state>/ars/verification.db；跨模型验证为可选配置。",
+      "check": "checkArsDeps 调用所选解释器；configEnv 的 ARS_VERIFICATION_CACHE_PATH"
     },
     {
       "name": "officecli",
@@ -550,7 +550,7 @@
       "modules": [
         "officecli"
       ],
-      "note": "本机 1.0.157；缺命令时侧栏置灰。",
+      "note": "本机外部安装的 officecli（插件不捆绑；上游最新 1.0.163）；缺命令时侧栏置灰。",
       "check": "officecli --version"
     },
     {
@@ -577,8 +577,8 @@
       "modules": [
         "windows-mcp"
       ],
-      "note": "Windows MCP组件手动勾选后注册 windows-mcp（桌面截图、快照、点击、窗口操作）；命令默认 %USERPROFILE%\\.local\\bin\\windows-mcp.exe。",
-      "check": "设置 → MCP配置 → 检查配置；勾选组件后调用 mcp__windows-mcp__snapshot"
+      "note": "Windows MCP 组件手动勾选后注册 windows-mcp（桌面截图、快照、点击、窗口操作）；命令是 PATH 里的 windows-mcp serve，插件不捆绑、不固定版本。",
+      "check": "勾选组件后调用 mcp__windows-mcp__snapshot"
     },
     {
       "name": "Polyspace MCP",
@@ -606,7 +606,7 @@
         "python",
         "projects"
       ],
-      "note": "通用生图 + 插件 Python + 项目目录补丁；config.py 禁用上游 .env；不写 ~/.ppt-master/.env。",
+      "note": "通用生图 + 设置页选择的系统 Python + 项目目录补丁；config.py 禁用上游 .env；不写 ~/.ppt-master/.env。",
       "check": "image_gen.py --list-backends"
     },
     {
@@ -618,7 +618,7 @@
         "academic",
         "school"
       ],
-      "note": "config.toml/config.yaml/school.json/nature-figure.json 全部在插件配置目录；academic MCP 降级。",
+      "note": "配置只有插件设置一个来源：参数注入进程环境、密钥走凭据库；学校固定北航随技能；academic MCP 降级。不写 config.toml/config.yaml/nature-figure.json/credentials.json。",
       "check": "image2ppt doctor / preflight"
     },
     {
@@ -627,8 +627,8 @@
       "modules": [
         "patent-home"
       ],
-      "note": "工作目录项目内；Obsidian/embedding 按需。",
-      "check": "各工具 --help"
+      "note": "设置页「专利数据目录」必填、无默认值；oa/patent-map/patent-reader 只认 PATENT_* 环境变量；未设置时 9 个技能置灰。",
+      "check": "oa_home()/map_home()/resolve_vault()"
     },
     {
       "name": "archify 运行时",
@@ -636,17 +636,17 @@
       "modules": [
         "archify"
       ],
-      "note": "本地副本；关闭自动更新缓存（ARCHIFY_UPDATE_CHECK_DISABLED=1）。",
+      "note": "本地副本 v3.2.0；注入 ARCHIFY_UPDATE_CHECK_DISABLED=1（Node 侧识别 DSH_ 前缀），不联网检查更新、不写用户缓存配置。",
       "check": "archify 渲染自检"
     },
     {
-      "name": "插件自带 Python 运行时",
+      "name": "系统 Python 运行时",
       "status": "configured",
       "modules": [
         "python"
       ],
-      "note": "runtime/python 由 install-python-runtime.mjs 安装；python/python3/bash 由插件 shim 统一指向，不读系统 Python。",
-      "check": "node scripts/install-python-runtime.mjs"
+      "note": "插件不自带、不安装；设置页从本机解释器里选择，python/python3/bash shim 指向它；缺包只提示。",
+      "check": "设置 → 运行环境 → Python 解释器；python --version"
     },
     {
       "name": "DSH 端到端实测",

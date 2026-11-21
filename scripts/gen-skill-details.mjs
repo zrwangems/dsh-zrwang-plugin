@@ -9,7 +9,7 @@
  *   - 单条超长时按句子切块分别翻译再拼接；
  *   - 走 translate.googleapis.com 的免费接口，需要代理时用 --proxy 指定（默认读
  *     DSH_GT_PROXY，为空则直连）；
- *   - 结果逐条缓存到 AgentsDo/gt-cache/，中断后重跑只补缺失的。
+ *   - 结果逐条缓存到系统临时目录 dsh-zrwang-plugin/gt-cache/，中断后重跑只补缺失的。
  *
  * 用法：
  *   node scripts/gen-skill-details.mjs --proxy=http://127.0.0.1:7897
@@ -17,6 +17,7 @@
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { frontValue } from '../host/skill-md.mjs'
@@ -25,7 +26,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const SKILLS = join(ROOT, 'skills')
 const CATALOG = join(ROOT, 'catalog', 'catalog.json')
 const DETAILS = join(ROOT, 'catalog', 'skill-details.zh.json')
-const CACHE = resolve(ROOT, '..', 'AgentsDo', 'gt-cache')
+const CACHE = join(tmpdir(), 'dsh-zrwang-plugin', 'gt-cache')
 
 const args = process.argv.slice(2)
 const proxyArg = args.find(arg => arg.startsWith('--proxy='))

@@ -2,7 +2,7 @@
 /**
  * 技能配置接入审计。
  *
- * 以 catalog/catalog.json 的 301 个技能为准，逐技能扫描：
+ * 以 catalog/catalog.json 的 329 个技能为准，逐技能扫描：
  *   - C 盘/用户目录/技能目录配置文件；
  *   - 环境变量与 API Key/Token；
  *   - 外部 CLI、宿主专用工具名、Windows 不兼容命令；
@@ -11,20 +11,23 @@
  * 按 vendor/skill-config-rules.json 的 profile 与逐技能处置判定状态：
  *   no-config / configured / optional / unavailable / needs-fix
  *
- * 输出 AgentsDo/upstream-adaptation-record/skill-config-matrix.{md,json}；
+ * 默认只打印汇总；`--markdown`/`--json` 把逐技能矩阵打到 stdout，不落盘。
  * --check 时若有 needs-fix 或未处置的命中，返回非零。
  *
  * 用法：
  *   node scripts/audit-skill-config.mjs
  *   node scripts/audit-skill-config.mjs --check
+ *   node scripts/audit-skill-config.mjs --markdown
+ *   node scripts/audit-skill-config.mjs --json
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, extname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const RECORD_DIR = join(ROOT, 'AgentsDo', 'upstream-adaptation-record')
 const CHECK = process.argv.includes('--check')
+const MARKDOWN_OUT = process.argv.includes('--markdown')
+const JSON_OUT = process.argv.includes('--json')
 const NL = String.fromCharCode(10)
 
 const SCAN_EXTS = new Set([
@@ -194,9 +197,6 @@ function main() {
     components,
   }
 
-  mkdirSync(RECORD_DIR, { recursive: true })
-  if (!CHECK) writeFileSync(join(RECORD_DIR, 'skill-config-matrix.json'), `${JSON.stringify(json, null, 2)}${NL}`, 'utf8')
-
   const md = []
   md.push('# 技能与组件配置覆盖矩阵')
   md.push('')
@@ -231,10 +231,13 @@ function main() {
     md.push(`| ${row.name} | \`${row.dir}\` | ${row.modules.join('、') || '-'} | ${STATUS_LABELS[row.status] ?? row.status} | ${hitText} | ${note.replaceAll('|', '/')} | ${row.check.replaceAll('|', '/')} |`)
   }
   md.push('')
-  if (!CHECK) writeFileSync(join(RECORD_DIR, 'skill-config-matrix.md'), `${md.join(NL)}${NL}`, 'utf8')
+  const skillSummary = {}
+  for (const row of rows) skillSummary[row.status] = (skillSummary[row.status] ?? 0) + 1
+  const componentSummary = {}
+  for (const item of components) componentSummary[item.status] = (componentSummary[item.status] ?? 0) + 1
 
-  console.log(`技能 ${rows.length} 个，组件 ${components.length} 个`)
-  console.log(Object.entries(summary).map(([status, count]) => `${STATUS_LABELS[status] ?? status}=${count}`).join('  '))
+  console.log(`技能 ${rows.length} 个：${Object.entries(skillSummary).map(([status, count]) => `${STATUS_LABELS[status] ?? status}=${count}`).join('  ')}`)
+  console.log(`组件 ${components.length} 个：${Object.entries(componentSummary).map(([status, count]) => `${STATUS_LABELS[status] ?? status}=${count}`).join('  ')}`)
   if (unresolved.length > 0) {
     console.log(`\n待处置/需修复 ${unresolved.length} 个：`)
     for (const name of unresolved) {
@@ -243,7 +246,8 @@ function main() {
       console.log(`  - ${name} [${row.profile}] ${keys}`)
     }
   }
-  if (!CHECK) console.log(`\n已写入 ${relative(ROOT, join(RECORD_DIR, 'skill-config-matrix.md'))}`)
+  if (MARKDOWN_OUT) console.log(`${NL}${md.join(NL)}`)
+  if (JSON_OUT) console.log(JSON.stringify(json, null, 2))
   if (CHECK && unresolved.length > 0) process.exit(1)
 }
 

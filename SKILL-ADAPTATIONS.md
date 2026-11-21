@@ -239,19 +239,21 @@
 1. 在 `vendor/upstreams.json` 加仓库、pin、落盘路径和需要的 `rewrite`/`headerNotes` 等规则。
 2. 需要小范围字面替换的，写进 `vendor/skill-patches.json`；需要整文件改的，放 `vendor/overrides/`；要删的上游文件登记到 `vendor/removals.json`；没有仓库形态的做 `vendor/local/` 副本。
 3. 跑 `node scripts/vendor-skills.mjs --only=<id>`，再跑 `npm run catalog`、`npm run build`。
-4. 更新本文件对应项目、`upstream-modifications.md`、`records.json` 和 `verification-log.md`。
+4. 更新本文件对应项目；每个项目的完整 pin 在 `vendor/upstreams.lock.json`，不另存记录文件。
 5. 跑完整检查：
 
 ```text
 npm run verify
 npm run smoke
 node scripts/smoke-routes.mjs
-node scripts/audit-skill-config.mjs --check
+node scripts/audit-skill-config.mjs --check   # 只校验，不写文件
 node scripts/audit-upstreams.mjs
 node scripts/smoke-ars-guard.mjs
 ```
 
-当前结果：`verify` 81 项、`smoke` 82 项、路由 smoke 全过、配置审计 329 技能/16 组件待处置 0、上游完整性缺技能 0 缺文件 0、ARS 护栏 25 项、ARS 对齐 975 文件中原样 657/已知适配 318。
+需要逐技能明细时用 `node scripts/audit-skill-config.mjs --markdown`（或 `--json`）打到 stdout，不再生成矩阵文件。
+
+当前结果：`verify` 81 项、`smoke` 82 项、路由 smoke 全过、配置审计技能 329 个（270 已接入 / 35 无需配置 / 20 不可用 / 4 可选）且待处置 0、组件 16 个（13 已接入 / 2 不可用 / 1 可选）、上游完整性缺技能 0 缺文件 0、ARS 护栏 25 项、ARS 对齐 975 文件中原样 657/已知适配 318。
 
 ## 五、为什么很多上游文件看起来没改
 
@@ -259,9 +261,97 @@ node scripts/smoke-ars-guard.mjs
 
 `audit-upstreams` 会按 lock SHA 重新下载每个上游，逐个技能对比文件清单：少文件才算不完整，多文件允许（`_shared`、脚本闭包、运行说明、补丁产物）。ARS 的 975 个文件里 657 个原样保留，318 个是有记录的适配，说明“没改”和“改了”都有账可查。
 
-## 六、已知限制
+## 六、组件状态
+
+| 组件 | 状态 | 模块/依赖 | 处置 | 验证 |
+| --- | --- | --- | --- | --- |
+| 设置页 + profile 补丁 config + DSH 凭据库 | 已接入设置 | settings | 模型服务（生图/OCR）、科研服务（可选检索、Nature 学术检索、Nature 文献下载凭据，自动保存）、运行环境（Python 组件状态）；配置只在 profile 补丁 config，密钥只在凭据库，不写 settings.json。 | GET/POST /dsh-zrwang-plugin/settings |
+| 技能注入与目录联接（farm） | 已接入设置 | inject | 按项目勾选建立 .agents/skills 联接；ppt-master projects 链接。 | smoke-host / smoke-routes |
+| ARS 功能区块 | 已接入设置 | ars、python | 5 技能 + 16 命令；Python 用设置页选择的系统解释器（ZRWANG_SKILL_PYTHON）；引用校验缓存写 <state>/ars/verification.db；跨模型验证为可选配置。 | checkArsDeps 调用所选解释器；configEnv 的 ARS_VERIFICATION_CACHE_PATH |
+| officecli | 已接入设置 | officecli | 本机外部安装的 officecli（插件不捆绑；上游最新 1.0.163）；缺命令时侧栏置灰。 | officecli --version |
+| zotero-cli | 已接入设置 | zotero | ZOTERO_LOCAL=true；Zotero 桌面版需运行。 | zotero-cli config |
+| MATLAB MCP | 已接入设置 | matlab-mcp | 插件 MathWorks组件随工程技能组自动注册 matlab-mcp（5 个 MATLAB 工具 + 9 个 Simulink 工具）；exe 与 simulink-tools.json 在包内 mathworks/；existing 模式需 MATLAB 运行并 shareMATLABSession()。 | 设置 → MCP配置 → 检查配置；会话中调用 mcp__matlab-mcp__detect_matlab_toolboxes |
+| Windows MCP | 已接入设置 | windows-mcp | Windows MCP 组件手动勾选后注册 windows-mcp（桌面截图、快照、点击、窗口操作）；命令是 PATH 里的 windows-mcp serve，插件不捆绑、不固定版本。 | 勾选组件后调用 mcp__windows-mcp__snapshot |
+| Polyspace MCP | 不可用 | polyspace-mcp | 本机未安装 Polyspace，未注册 MCP；19 个技能置灰。 | - |
+| draw.io | 不可用 | drawio | 本机未安装 draw.io；drawio-reconstruction 置灰。 | - |
+| ppt-master 运行时 | 已接入设置 | image、python、projects | 通用生图 + 设置页选择的系统 Python + 项目目录补丁；config.py 禁用上游 .env；不写 ~/.ppt-master/.env。 | image_gen.py --list-backends |
+| nature 运行时 | 已接入设置 | image、ocr、academic、school | 配置只有插件设置一个来源：参数注入进程环境、密钥走凭据库；学校固定北航随技能；academic MCP 降级。不写 config.toml/config.yaml/nature-figure.json/credentials.json。 | image2ppt doctor / preflight |
+| patent 运行时 | 已接入设置 | patent-home | 设置页「专利数据目录」必填、无默认值；oa/patent-map/patent-reader 只认 PATENT_* 环境变量；未设置时 9 个技能置灰。 | oa_home()/map_home()/resolve_vault() |
+| archify 运行时 | 已接入设置 | archify | 本地副本 v3.2.0；注入 ARCHIFY_UPDATE_CHECK_DISABLED=1（Node 侧识别 DSH_ 前缀），不联网检查更新、不写用户缓存配置。 | archify 渲染自检 |
+| 系统 Python 运行时 | 已接入设置 | python | 插件不自带、不安装；设置页从本机解释器里选择，python/python3/bash shim 指向它；缺包只提示。 | 设置 → 运行环境 → Python 解释器；python --version |
+| DSH 端到端实测 | 可选配置 | dsh-test | 需用户同意后用临时 DSH_HOME/profile 起 dsh web 验证；不装 Desktop。 | - |
+| 飞书 Lark（lark-cli） | 已接入设置 | lark-cli | 28 个技能收在办公组 office/lark；lark-cli 已装（@larksuite/cli）；四个基础技能默认勾选。 | lark-cli --version；dsh web 侧栏办公 → 飞书 Lark |
+
+组件合计：13 个已接入、2 个不可用（Polyspace MCP、draw.io）、1 个可选（DSH 端到端实测）。MCP 的版本与参数见上一节；外部命令的版本由本机安装决定。
+
+## 七、技能配置审计
+
+审计脚本按 `vendor/skill-config-rules.json` 的 profile 和逐技能处置，扫描 329 个技能里的配置文件、用户主目录、环境变量/密钥、外部 CLI、Windows 路径和仓库根相对路径。当前没有 `needs-fix` 或 `unreviewed`。
+
+| 项目目录 | 技能 | 已接入设置 | 无需配置 | 可选 | 不可用 |
+| --- | --- | --- | --- | --- | --- |
+| `engineering/matlab` | 157 | 148 | 6 | 3 | 0 |
+| `engineering/playground` | 4 | 4 | 0 | 0 | 0 |
+| `engineering/polyspace` | 19 | 0 | 0 | 0 | 19 |
+| `engineering/simulink` | 50 | 47 | 3 | 0 | 0 |
+| `office/archify` | 1 | 1 | 0 | 0 | 0 |
+| `office/frontend-slides` | 1 | 0 | 1 | 0 | 0 |
+| `office/guizang-ppt-skill` | 1 | 0 | 1 | 0 | 0 |
+| `office/html-ppt` | 1 | 0 | 1 | 0 | 0 |
+| `office/lark` | 28 | 28 | 0 | 0 | 0 |
+| `office/lieflat-charts` | 1 | 0 | 1 | 0 | 0 |
+| `office/lieflat-gongwen` | 1 | 0 | 1 | 0 | 0 |
+| `office/officecli` | 11 | 11 | 0 | 0 | 0 |
+| `office/ppt-master` | 1 | 1 | 0 | 0 | 0 |
+| `office/writing-dna-skill` | 1 | 0 | 1 | 0 | 0 |
+| `research/academic-humanizer` | 1 | 0 | 1 | 0 | 0 |
+| `research/lieflat-less-ai-tone` | 1 | 0 | 1 | 0 | 0 |
+| `research/nature-skills` | 24 | 21 | 2 | 1 | 0 |
+| `research/nsfc` | 4 | 0 | 4 | 0 | 0 |
+| `research/patent` | 9 | 8 | 1 | 0 | 0 |
+| `research/supervisor-skills` | 12 | 0 | 11 | 0 | 1 |
+| `research/zotero-cli` | 1 | 1 | 0 | 0 | 0 |
+
+不可用的 20 个技能：`drawio-reconstruction`（未装 draw.io）和 19 个 Polyspace 技能（未装 Polyspace / Polyspace MCP）。可选的 4 个技能：`matlab-access-datafeed`、`matlab-connect-databricks`、`matlab-use-package-manager`（第三方 token，可选）、`nature-figure`（生图可选）；另有 Nature 生图组件标为可选。其余 270 个已接入插件设置，35 个是文档/写作流程类、无外部配置。
+
+逐技能明细可随时用 `node scripts/audit-skill-config.mjs --markdown` 重新生成；矩阵不再作为单独文件维护。
+
+## 八、Nature 配置面
+
+科研服务有 3 张卡：
+
+1. 可选检索服务：Pexels、Pixabay、OpenAlex、Firecrawl；
+2. Nature 学术检索：PubMed 邮箱/API Key、Unpaywall 邮箱、Crossref 邮箱、缓存 TTL、arXiv 超时、默认/最大返回条数；
+3. Nature 文献下载凭据：Elsevier API Key / InstToken / AuthToken、Springer Nature Full Text/OA/Metadata Key、IEEE API Key / Full Text Endpoint。
+
+学校固定北航，`school.json` 随技能放在 `skills/research/nature-skills/nature-downloader/config/school.json`，用 `LIT_DL_SCHOOL_FILE` 读取；Nature 生图复用模型服务的 URL/模型/Key，不单独设置。
+
+24 个 nature 技能里，有配置面的是 5 个：`nature-academic-search`（学术检索，MCP 降级）、`nature-citation`（Crossref/NCBI 邮箱、Firecrawl 可选）、`nature-downloader`（学校 + 出版社凭据 + Unpaywall）、`nature-figure`（绘图后端 + 生图复用）、`nature-image2ppt`（OCR + 生图）；其余 19 个不需要 API Key。所有参数最终都落在进程环境变量（`NCBI_EMAIL`、`NCBI_API_KEY`、`CROSSREF_MAILTO`、`UNPAYWALL_EMAIL`、`ZRWANG_*_CRED`、`NATURE_FIGURE_BACKEND`、`IMAGE2PPT_IMAGE_*` 等），没有 `config.toml`、`config.yaml`、`nature-figure.json`、`credentials.json`、`settings.json`。
+
+没有放进设置页的项都是可选/调试/替代通道：
+
+- `pybliometrics.cfg`：只服务未注册的 academic-search MCP 的 Scopus/ScienceDirect；当前降级为 OpenAlex + `web_search`/`web_fetch`，不生成。
+- `pyzotero` Web 的 userID/API key：`nature-ref-verifier` 的可选写入通道；本插件用 `zotero-cli` 本地模式。
+- 飞书群 ID / bot 权限：`nature-experiment-log` 走 lark-cli，不属于 nature 配置。
+- `OPENROUTER_SITE_URL` / `OPENROUTER_APP_NAME`、`IMAGE2PPT_IMAGE_USER_AGENT` / `IMAGE2PPT_CLI_PROG`、`EPUB_WAF_MAX_WAIT_SEC` / `PLAYWRIGHT_HEADED` / `EPUB_RESULT_HTML`：有默认值的请求头或调试项。
+- `CODEX_AUTH_FILE` / `CODEX_IMAGES_BASE_URL`：Codex OAuth 回退；本插件固定用 OpenAI Images 兼容 API。
+
+## 九、验证记录
+
+- 2026-11-13 基线：确认技能按对话注入、配置集中到 profile、上游 `.env`/`config.*` 不再生效；随后把设置拆成模型服务/科研服务/运行环境，并加上技能配置审计。
+- 2026-11-21 配置单一来源改造：运行数据迁到 `$DSH_HOME/storages/dsh-zrwang-plugin/`，专利数据目录改为必填且无默认值，设置项只剩 URL/模型/Key/维度。
+- 2026-11-21 上游对齐：8 个落后仓库更新到分支 HEAD，Simulink 运行时更新到 2026.11.c，MATLAB MCP 更新到 v0.16.1，19 个 GitHub 上游全部对齐；同时修正失效补丁和工具名。
+- 当前：`verify` 81 项、`smoke` 82 项、`smoke-routes` 全过、`audit-skill-config --check` 待处置 0、`audit-upstreams` 缺技能 0 缺文件 0、`smoke-ars-guard` 25 项、`audit-ars-alignment --strict` 975 文件（原样 657 / 已知适配 318）。
+
+## 十、已知限制
 
 - 没有在真实 Windows + MATLAB 上跑 Simulink 的 `.p` 工具和 MCP 连接，只核对了版本、文件结构和工具清单；最终要在用户的 MATLAB 会话里验证。
+- MATLAB MCP 是 existing 模式，必须由用户先启动 MATLAB 并 `shareMATLABSession()`；插件不会自动拉起 MATLAB。若 profile 里还留着旧的静态 `mcp-matlab` 行，要先删除，否则注册冲突。
+- 两个 MCP 组件只在 Web/桌面端 profile 生效；headless/sdk profile 没有 `ctx.mcpManager`，组件行显示「当前 profile 不支持」。
+- `nature-academic-search` 的多源 MCP 未注册，降级为 OpenAlex CLI + `web_search`/`web_fetch`；Scopus/ScienceDirect 的 `pybliometrics` 配置因此不生成。
+- `zotero-cli` 只走 Zotero 桌面版本地 API，不引入 `pyzotero` Web 凭据；Zotero 未运行或未开本地 API 时由技能如实提示。
+- Playwright Chromium 不随插件安装；需要浏览器自动化的技能使用所选系统 Python 里已装的 Playwright 与浏览器缓存。
 - `officecli`、`lark-cli`、`windows-mcp`、draw.io、Polyspace 的版本由用户机器决定，插件只检测、不升级。
-- 专利向量接口没有在真实服务上调用过，只验证了配置解析和请求构造；文本嵌入即可，不需要多模态。
+- 真实生图/OCR/专利向量接口没有在验收中调用，只验证配置解析、后端选择和请求构造，避免产生费用；专利向量用普通文本嵌入即可，不需要多模态。
+- ppt-master 的 `projects` 目录联接是全局的，多项目并发时以最近一次同步为准，命令应优先传绝对路径。
 - 上游默认分支会继续移动；本文件记录的是 2026-11-21 的 pin，升级时以 `vendor/upstreams.lock.json` 为准。
