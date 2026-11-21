@@ -31,7 +31,8 @@ const { applySkillEnv, restoreSkillEnv, configEnv } = await import('../host/env.
 const { registerSkillProvider } = await import('../host/skill-provider.mjs')
 const { loadPresets, ensureEditableMode } = await import('../host/presets.mjs')
 const { resolveWorkspaceByPath } = await import('../host/workspaces.mjs')
-const { saveSessionSelection } = await import('../host/session-selection.mjs')
+const { saveSessionSelection, listSessionSelections, pruneSessionSelections } = await import('../host/session-selection.mjs')
+const { runArsCommand } = await import('../host/ars-commands.mjs')
 const { installComponentGuard } = await import('../host/session-components.mjs')
 const { createToolRestrictions } = await import('../host/tool-restrictions.mjs')
 const { createMcpController, RECOVER_DELAYS_MS, RECONNECT_POLICY, componentViews, resolveMatlabEntry } = await import('../host/mcp.mjs')
@@ -348,10 +349,11 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
   }
   let statusHandler
   const registered = []
+  const released = []
   const restarted = []
   const events = []
   const manager = {
-    register(name) { registered.push(name); return () => {} },
+    register(name) { registered.push(name); return () => { released.push(name) } },
     async restart(name) { restarted.push(name) },
     list() { return [] },
   }
@@ -367,6 +369,9 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
 
   await controller.reconcile({ mathworks: true }, { sessionId: 'mcp-a' })
   check('勾选后注册 MATLAB MCP', registered.includes('matlab-mcp'), JSON.stringify(registered))
+  await controller.reconcile({ mathworks: false }, { sessionId: 'mcp-a' })
+  await new Promise(resolve => setTimeout(resolve, 20))
+  check('会话关掉后服务器保持（宿主级）', !released.includes('matlab-mcp'))
 
   statusHandler('matlab-mcp', { state: 'failed', reason: 'gave-up', attempt: 30, lastError: 'matlab gone' })
   check('预算耗尽后排队自动恢复', scheduled.length === 1 && scheduled[0].ms === RECOVER_DELAYS_MS[0], JSON.stringify(scheduled.map(item => item.ms)))
@@ -409,6 +414,23 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
     },
   }).components[0]
   check('失败但自愈中的组件行显示自动恢复', view.recovering === true && view.statusLabel.includes('自动恢复'), view.statusLabel)
+}
+
+// ---- ARS 命令按会话开关 ----
+{
+  await saveSessionSelection('ars-off-session', {}, { ars: false })
+  const denied = await runArsCommand({ name: 'ars-plan' }, { session: { id: 'ars-off-session' } }, '')
+  check('ARS 命令在未开启的会话被拒绝', denied.kind === 'error' && denied.text.includes('本会话'), denied.text)
+}
+
+// ---- 会话快照上限 ----
+{
+  await saveSessionSelection('prune-a', {}, {})
+  await saveSessionSelection('prune-b', {}, {})
+  await saveSessionSelection('prune-c', {}, {})
+  const removed = await pruneSessionSelections(2)
+  const remaining = await listSessionSelections()
+  check('会话快照按上限清理', removed.length >= 1 && remaining.length === 2, `removed=${removed.length} remaining=${remaining.length}`)
 }
 
 // ---- 状态文件 ----

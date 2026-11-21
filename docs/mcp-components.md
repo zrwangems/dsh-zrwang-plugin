@@ -1,10 +1,10 @@
 # MCP 组件（MathWorks / Windows MCP）
 
-插件把两个外部 MCP 服务器收进自己的生命周期：在侧栏勾选组件才注册，取消即注销，不需要改 profile 补丁、不用重启 DSH。注册走 DSH 0.2.2-rc.2 起提供的 `ctx.mcpManager`（`@deepseek-ai/dsh-mcp-manager`）。两个组件所需的文件都随包分发或在插件自带运行时里安装，**不依赖任何作者本机路径**。
+插件把两个外部 MCP 服务器收进自己的生命周期：DSH 启动时按上次保存的会话选择自动拉起，之后随进程保持、由插件自愈守护；侧栏组件开关只控制当前对话能不能看到工具。不需要改 profile 补丁、不用重启 DSH。注册走 DSH 0.2.2-rc.2 起提供的 `ctx.mcpManager`（`@deepseek-ai/dsh-mcp-manager`）。两个组件所需的文件都随包分发或在插件自带运行时里安装，**不依赖任何作者本机路径**。
 
 ## MathWorks组件
 
-- 触发条件：**工程技能组门禁打开，且确有工程技能注入**（被配置原因置灰的不算）。关掉工程组、或工程组一个技能都没注入时自动注销。
+- 触发条件：**工程技能组门禁打开，且确有工程技能注入**（被配置原因置灰的不算）。关掉工程组、或工程组一个技能都没注入时，本会话看不到这些工具；服务器随 DSH 保持，不会因此注销。
 - 注册的服务器：`matlab-mcp`（stdio），工具前缀 `mcp__matlab-mcp__*`，一次提供 14 个工具：
   - MATLAB 基础 5 个：`check_matlab_code`、`detect_matlab_toolboxes`、`evaluate_matlab_code`、`run_matlab_file`、`run_matlab_test_file`；
   - Simulink 9 个（扩展文件 `mathworks/simulink-agentic-toolkit/tools/tools.json`）：`model_overview`、`model_read`、`model_query_params`、`model_resolve_params`、`model_edit`、`model_read_diagnostics`、`model_check`、`model_scan`、`model_test`。
@@ -23,7 +23,7 @@
 
 ## Windows MCP组件
 
-- 手动勾选才注册 `windows-mcp`（stdio），工具前缀 `mcp__windows-mcp__*`；取消即注销。与工程技能组无关。
+- 手动勾选才注册 `windows-mcp`（stdio），工具前缀 `mcp__windows-mcp__*`；取消只影响本会话工具可见性，服务器随 DSH 保持。与工程技能组无关。
 - 直接用**系统已安装的 `windows-mcp`**（`uv tool install windows-mcp` 等，需在 PATH 里；本机为 0.8.x）。插件**不再自带** Windows MCP 运行时，包内没有 `runtime/windows-mcp`。
 - 默认参数 `serve`，默认环境变量 `ANONYMIZED_TELEMETRY=false`、`WINDOWS_MCP_SCREENSHOT_SCALE=0.5`。
 - 它会占用桌面控制权；不勾选时这些工具不会出现在模型上下文里。
@@ -70,7 +70,7 @@ MCP 的连接参数全部固定，保证开箱即用；设置页只有一个「�
 ## 边界
 
 - 只在 Web / 桌面端 profile 有效：headless、sdk profile 没有 `ctx.mcpManager`，组件行显示「当前 profile 不支持」，不影响其它功能。
-- 组件开关按会话保存，DSH 的 MCP 服务器注册仍是宿主全局的：多个会话的组件需求取并集，只要还有一个近期会话需要，注册就保持，最后一个需要它的会话关掉后才注销。为了做到“每个对话只用自己勾选的组件”，插件在每个 agent 作用域调用 DSH 官方的 `ctx.tools.restrict({ deny })`：本会话没启用的 `mcp__matlab-mcp__*` / `mcp__windows-mcp__*` 会从该会话的工具列表、提示词上下文和执行里一起移除，别的会话不受影响。工具表因 MCP 重连变化时会重新计算限制。
+- 组件开关按会话保存。DSH 启动时插件把已保存会话的组件需求取并集，直接把需要的服务器拉起来（不用先打开对话）；服务器一旦启动就随本进程保持，由插件守护状态，侧栏关掉只影响对应会话的工具可见性。为了做到“每个对话只用自己勾选的组件”，插件在每个 agent 作用域调用 DSH 官方的 `ctx.tools.restrict({ deny })`：本会话没启用的 `mcp__matlab-mcp__*` / `mcp__windows-mcp__*` 会从该会话的工具列表、提示词上下文和执行里一起移除，别的会话不受影响。工具表因 MCP 重连变化时会重新计算限制。要彻底停掉服务器，重启 DSH。
 - `serverName` 固定为 `matlab-mcp` / `windows-mcp`。如果 profile 的 `cordis.patch.yml` 里还留着同名的静态 MCP 行（例如旧的 `mcp-matlab` / `mcp-windows`），注册会报冲突，组件行会显示原因；装到该 profile 前先删掉静态行。
 - 服务器名与工具前缀变化会影响按名字引用工具的说明文字：旧文档里的 `mcp__matlab__*` 现在应写作 `mcp__matlab-mcp__*`。
 - MATLAB 本体（R2023a 及以上）仍需用户自己安装；这是 MathWorks 服务器本身的运行前提，不是插件的本机依赖。

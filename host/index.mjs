@@ -24,7 +24,7 @@ import { installArsWriteScopeGuard } from './ars-write-scope.mjs'
 import { registerSkillProvider } from './skill-provider.mjs'
 import { componentWant, installComponentGuard } from './session-components.mjs'
 import { createToolRestrictions } from './tool-restrictions.mjs'
-import { ensureSessionSelection } from './session-selection.mjs'
+import { ensureSessionSelection, listSessionSelections, pruneSessionSelections } from './session-selection.mjs'
 import { loadCatalog } from './catalog.mjs'
 import { loadSelection } from './selection.mjs'
 import { loadGates } from './gates.mjs'
@@ -69,6 +69,27 @@ export function apply(ctx, config) {
   effect(ctx, () => () => mcpController.disposeAll(), 'dsh-zrwang-plugin: mcp registrations')
   const toolRestrictions = createToolRestrictions(ctx)
   effect(ctx, () => () => toolRestrictions.disposeAll(), 'dsh-zrwang-plugin: mcp tool restrictions')
+
+  // DSH 启动即按上次保存的会话选择把 MCP 服务器拉起来，不需要先打开对话；
+  // 服务器随本进程保持，侧栏开关只控制“本会话工具表里有没有这些工具”。
+  void (async () => {
+    try {
+      const removed = await pruneSessionSelections(300)
+      if (removed.length > 0) await appendEvent('session-snapshots-pruned', { count: removed.length })
+      const want = { mathworks: false, windows: false }
+      for (const item of await listSessionSelections()) {
+        const sessionWant = await componentWant(item.sessionId)
+        if (sessionWant.mathworks === true) want.mathworks = true
+        if (sessionWant.windows === true) want.windows = true
+      }
+      if (want.mathworks || want.windows) {
+        await mcpController.reconcile(want, {})
+        await appendEvent('mcp-boot', { mathworks: want.mathworks, windows: want.windows })
+      }
+    } catch (error) {
+      await appendEvent('mcp-boot-failed', { error: String(error?.message ?? error) })
+    }
+  })()
 
   // 官方扩展点：把本插件的配置作为每次 shell 调用的 DSH_* 事实注入。
   ctx.inject?.(['shellEnv'], scope => {

@@ -11,6 +11,7 @@ import { join } from 'node:path'
 import { PKG_DIR } from './config.mjs'
 import { loadArsManifest } from './ars.mjs'
 import { loadGates } from './gates.mjs'
+import { readSessionSelection } from './session-selection.mjs'
 
 const cache = new Map()
 let registered = 0
@@ -141,9 +142,15 @@ export function commandInput(command) {
 /** 执行一条 ARS 命令：开关检查 + Agent Team 检查 + 把指令投递给模型。可单测。 */
 export async function runArsCommand(command, agent, rawInput) {
   try {
-    const gates = await loadGates()
+    // 命令是宿主级注册的，但“能不能用”必须看当前会话的开关；
+    // 否则 A 会话开了 ARS，B 会话也能执行却没有 ARS 技能。
+    const sessionId = agent?.session?.id
+    const snapshot = typeof sessionId === 'string' && sessionId.length > 0
+      ? await readSessionSelection(sessionId)
+      : undefined
+    const gates = snapshot?.gates ?? await loadGates()
     if (gates.ars !== true) {
-      return { kind: 'error', text: 'ARS 已在右侧栏关闭，先勾选「学术研究（ARS）」再执行命令。' }
+      return { kind: 'error', text: '本会话没有开启「学术研究（ARS）」，先到右侧栏勾选再执行命令。' }
     }
     let teamReady = true
     let teamToggled = false

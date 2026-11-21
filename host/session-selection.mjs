@@ -43,6 +43,28 @@ export async function saveSessionSelection(sessionId, selection, gates) {
   return store.sessions[sessionId]
 }
 
+/** 所有已有快照的 sessionId，按 updatedAt 从新到旧。 */
+export async function listSessionSelections() {
+  const store = await load()
+  return Object.entries(store.sessions)
+    .map(([sessionId, snapshot]) => ({ sessionId, updatedAt: String(snapshot?.updatedAt ?? '') }))
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+}
+
+/**
+ * 只保留最近 limit 条快照，返回被删掉的 sessionId。
+ * 会话删除不会回调插件，快照只能靠上限兜底，否则会无限增长。
+ */
+export async function pruneSessionSelections(limit = 300) {
+  const entries = await listSessionSelections()
+  if (entries.length <= limit) return []
+  const store = await load()
+  const removed = entries.slice(limit).map(item => item.sessionId)
+  for (const sessionId of removed) delete store.sessions[sessionId]
+  await writeJson(FILE, store)
+  return removed
+}
+
 /** 会话首次出现时用当前选择初始化；已有快照则不动。 */
 export async function ensureSessionSelection(sessionId, selection, gates) {
   const existing = await readSessionSelection(sessionId)

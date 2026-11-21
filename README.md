@@ -29,10 +29,10 @@ DSH 默认从 `<项目根>/.agents/skills/` 发现技能，一个项目装几十
 - **写操作护栏**：模型用 `write` / `edit` / `apply_patch` / `str_replace_editor` 改插件内 `skills/`、`ars/` 一律拒绝，避免跑任务时改坏技能。
 - **ARS 学术研究（独立功能区块）**：目录 `ars/`，不进 `skills/`、不计入 329 个技能；默认关闭，勾选后注入 5 个流水线技能（35 个模式）并提供 16 个 `/ars-*` 命令；多角色流程会在执行前自动打开 DSH 的「智能体团队协作」。技能与命令对齐上游 **v3.24.4**（`00315df`），复制后只做 DSH 路径/工具名/语言适配，逐文件对照、Claude hooks 对照与写作用域护栏见 [docs/ars-alignment.md](docs/ars-alignment.md)、[docs/ars-write-scope.md](docs/ars-write-scope.md)。
 - **MCP 组件（与 ARS 并列的两行）**：
-  - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；工程组关掉即注销。
-  - **Windows MCP组件**：手动勾选后注册 `windows-mcp`（桌面截图、快照、点击、窗口操作），取消即注销；用系统 PATH 里已安装的 `windows-mcp`（`uv tool install windows-mcp` 等），插件不自带运行时。
+  - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；关掉工程组后本会话看不到这些工具，服务器随 DSH 保持。
+  - **Windows MCP组件**：手动勾选后注册 `windows-mcp`（桌面截图、快照、点击、窗口操作），取消只影响本会话的工具可见性；用系统 PATH 里已安装的 `windows-mcp`（`uv tool install windows-mcp` 等），插件不自带运行时。
   - 两者只在 Windows 上可用（MATLAB MCP 是 Windows 可执行文件，Windows MCP 依赖 Windows 桌面），其他平台显示不可用。两者走 DSH `ctx.mcpManager` 动态注册，不改 profile 补丁、不用重启；连接参数固定（MATLAB MCP 用包内 exe + SATK 扩展文件，Windows MCP 用系统 PATH 里已安装的 `windows-mcp`），设置页只有一个「断线自动恢复」开关；组件行有「启动中 / 已启动（N 个工具）/ 重连中（第 N 次，X 秒后重试）/ 连接失败，X 秒后自动恢复」标识和「重启」按钮。
-  - 组件选择按对话保存。两个服务器仍由 `ctx.mcpManager` 在宿主级启动/保持（多个会话取并集），但插件用官方的 `ctx.tools.restrict({ deny })` 在每个 agent 作用域把本对话没启用的 `mcp__*` 工具从工具列表、提示词上下文和执行里一起移除；不是等模型调用时才拒绝，而是这个对话根本看不到、也不会注入。别的对话勾了就在它自己的工具表里出现。详见 [docs/mcp-components.md](docs/mcp-components.md)。
+  - **服务器随 DSH 启动**：DSH 一起来，插件就按上次保存的会话选择把需要的 MCP 服务器拉起，不用先打开对话；之后服务器随本进程保持、由插件自愈守护。侧栏组件开关只决定“本对话的工具表里有没有这些工具”，关掉不会注销服务器；要彻底停掉，重启 DSH 即可。工具掩码仍用官方 `ctx.tools.restrict({ deny })` 在每个 agent 作用域把本对话没启用的 `mcp__*` 从工具列表、提示词上下文和执行里一起移除。详见 [docs/mcp-components.md](docs/mcp-components.md)。
   - 稳定性用 DSH 官方两层：mcp-client 按 30 次/10s 封顶自动重连；预算用完（`failed: gave-up`）后插件订阅 `mcp-manager/status`，按 15s/30s/1m/2m/5m 退避自动 `restart()` 重建实例，MATLAB 重开、共享会话恢复后自动接上，连上即停。设置 → 运行环境 → MCP 组件稳定性可以关掉自动恢复。
 
 ## 安装
@@ -76,7 +76,7 @@ dsh plugin --profile <你的profile> add dsh-zrwang-plugin
 4. 在侧栏底部切换选择态；右键模式可基于此新建、重命名或删除，工作区模式改名后升级为项目级。
 5. 技能行「详情」展开中文说明，「打开」在右侧栏查看 SKILL.md，「↗」在浏览器打开上游项目。
 
-「ARS」功能区块与三个技能组排在一起：默认不勾选，勾选后注入 5 个论文流水线技能，并提供 `/ars-plan`、`/ars-full`、`/ars-lit-review`、`/ars-reviewer`、`/ars-revision` 等 16 个命令。多角色命令会在执行前自动打开 DSH 的「智能体团队协作」并投递授权说明；只有在无法改动该开关时（例如在子会话里调用）才会提示手动开启。
+「ARS」功能区块与三个技能组排在一起：默认不勾选，勾选后注入 5 个论文流水线技能，并提供 `/ars-plan`、`/ars-full`、`/ars-lit-review`、`/ars-reviewer`、`/ars-revision` 等 16 个命令。命令是宿主级注册的，但执行时按**当前会话**的开关判断：没勾 ARS 的会话执行会提示先勾选，不会用别的会话的选择跑。多角色命令会在执行前自动打开 DSH 的「智能体团队协作」并投递授权说明；只有在无法改动该开关时（例如在子会话里调用）才会提示手动开启。
 
 ## 设置
 

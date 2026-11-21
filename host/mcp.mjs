@@ -122,6 +122,11 @@ export function createMcpController(ctx, options = {}) {
    */
   const wants = new Map()
   const WANT_LIMIT = 50
+  /**
+   * 宿主级保持位：组件一旦随 DSH 启动/被勾选过，就保持到进程结束。
+   * 侧栏开关只决定“本会话工具表里有没有”，不再注销服务器；服务器状态由插件守护。
+   */
+  const held = { mathworks: false, windows: false }
   let queue = Promise.resolve()
   const timers = options.timers ?? {
     setTimeout: (fn, ms) => setTimeout(fn, ms),
@@ -145,7 +150,7 @@ export function createMcpController(ctx, options = {}) {
   }
 
   const unionWant = () => {
-    const merged = { mathworks: false, windows: false }
+    const merged = { mathworks: held.mathworks, windows: held.windows }
     for (const want of wants.values()) {
       if (want.mathworks === true) merged.mathworks = true
       if (want.windows === true) merged.windows = true
@@ -342,6 +347,10 @@ export function createMcpController(ctx, options = {}) {
      */
     reconcile(next, options = {}) {
       const key = typeof options.sessionId === 'string' && options.sessionId.length > 0 ? options.sessionId : '(全局)'
+      // 一旦需要过就保持到进程结束：这样“关掉本会话”只隐藏工具，不会把别的会话
+      // 正在用的服务器（或 DSH 起来时已经拉起的服务器）注销掉。
+      if (next?.mathworks === true) held.mathworks = true
+      if (next?.windows === true) held.windows = true
       wants.set(key, {
         mathworks: next?.mathworks === true,
         windows: next?.windows === true,
