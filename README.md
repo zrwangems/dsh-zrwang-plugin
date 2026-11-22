@@ -31,7 +31,7 @@ DSH 默认从 `<项目根>/.agents/skills/` 发现技能，一个项目装几十
 - **MCP 组件（与 ARS 并列的两行）**：
   - **MathWorks组件**：随工程技能组自动开关，注册 `matlab-mcp`（插件自带 exe + 完整的 Simulink Agentic Toolkit 运行时，共 14 个 MATLAB/Simulink 工具）；关掉工程组后本会话看不到这些工具，服务器随 DSH 保持。
   - **Windows MCP组件**：手动勾选后注册 `windows-mcp`（桌面截图、快照、点击、窗口操作），取消只影响本会话的工具可见性；用系统 PATH 里已安装的 `windows-mcp`（`uv tool install windows-mcp` 等），插件不自带运行时。
-  - 两者只在 Windows 上可用（MATLAB MCP 是 Windows 可执行文件，Windows MCP 依赖 Windows 桌面），其他平台显示不可用。两者走 DSH `ctx.mcpManager` 动态注册，不改 profile 补丁、不用重启；连接参数固定（MATLAB MCP 用包内 exe + SATK 扩展文件，Windows MCP 用系统 PATH 里已安装的 `windows-mcp`），设置页只有一个「断线自动恢复」开关；组件行有「启动中 / 已启动（N 个工具）/ 重连中（第 N 次，X 秒后重试）/ 连接失败，X 秒后自动恢复」标识和「重启」按钮。
+  - 两者只在 Windows 上可用（MATLAB MCP 是 Windows 可执行文件，Windows MCP 依赖 Windows 桌面），其他平台显示不可用。两者走 DSH `ctx.mcpManager` 动态注册，不改 profile 补丁、不用重启；连接参数固定（MATLAB MCP 用包内 exe + SATK 扩展文件，Windows MCP 用系统 PATH 里已安装的 `windows-mcp`），设置页只有一个「断线自动恢复」开关；组件行有「启动中 / 已启动（N 个工具）/ 重连中（第 N 次，X 秒后重试）/ 连接失败，X 秒后自动恢复」标识和「重启」按钮。Windows MCP 还会用只读的 `ControlStatus` 做**控制健康检查**：连接正常但桌面控制后端挂了时显示「已启动 · 控制不可用」，你正在操作电脑时显示「已启动 · 你正在操作」，鼠标悬停能看到原因和恢复建议。
   - **服务器随 DSH 启动**：DSH 一起来，插件就按上次保存的会话选择把需要的 MCP 服务器拉起，不用先打开对话；之后服务器随本进程保持、由插件自愈守护。侧栏组件开关只决定“本对话的工具表里有没有这些工具”，关掉不会注销服务器；要彻底停掉，重启 DSH 即可。工具掩码仍用官方 `ctx.tools.restrict({ deny })` 在每个 agent 作用域把本对话没启用的 `mcp__*` 从工具列表、提示词上下文和执行里一起移除。详见 [docs/mcp-components.md](docs/mcp-components.md)。
   - 稳定性用 DSH 官方两层：mcp-client 按 30 次/10s 封顶自动重连；预算用完（`failed: gave-up`）后插件订阅 `mcp-manager/status`，按 15s/30s/1m/2m/5m 退避自动 `restart()` 重建实例，MATLAB 重开、共享会话恢复后自动接上，连上即停。设置 → 运行环境 → MCP 组件稳定性可以关掉自动恢复。
 

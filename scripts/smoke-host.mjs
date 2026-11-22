@@ -414,6 +414,17 @@ check('保存断线自动恢复开关', savedMcp.mcp.autoRecover === 'off')
     },
   }).components[0]
   check('失败但自愈中的组件行显示自动恢复', view.recovering === true && view.statusLabel.includes('自动恢复'), view.statusLabel)
+
+  const controlView = componentViews({
+    engineeringInjected: 3,
+    gates: { engineering: true, 'windows-mcp': true },
+    status: {
+      available: true,
+      servers: [{ name: 'windows-mcp', state: 'connected', toolCount: 21, control: { state: 'unavailable', error: 'CONTROL_UNAVAILABLE' } }],
+    },
+    want: { mathworks: false, windows: true },
+  }).components.find(item => item.id === 'windows-mcp')
+  check('组件视图透传控制健康状态', controlView?.control?.state === 'unavailable' && controlView.control.error === 'CONTROL_UNAVAILABLE', JSON.stringify(controlView?.control))
 }
 
 // ---- ARS 命令按会话开关 ----

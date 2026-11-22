@@ -158,6 +158,74 @@ export function createMcpController(ctx, options = {}) {
     return merged
   }
 
+  /**
+   * 控制健康检查：MCP 连接还在，但 windows-mcp 内部的桌面控制后端可能已经挂了。
+   * 用只读的 ControlStatus 探一下，把 ready / user / unavailable 显示到侧栏。
+   */
+  const CONTROL_TTL_MS = 15000
+  const controlChecks = new Map()
+  const controlToolName = `mcp__${SERVER_NAMES.windows}__ControlStatus`
+  const probeControl = async () => {
+    const tools = typeof ctx.get === 'function' ? ctx.get('tools') : undefined
+    const definition = typeof tools?.executable === 'function' ? tools.executable(controlToolName) : undefined
+    if (definition === undefined || typeof definition.execute !== 'function') {
+      return { state: 'unknown', error: '未找到 ControlStatus 工具', at: Date.now() }
+    }
+    const controller = new AbortController()
+    const timer = timers.setTimeout(() => controller.abort(), 5000)
+    try {
+      const raw = await definition.execute({}, { signal: controller.signal })
+      const structured = raw?.structuredContent
+      const text = Array.isArray(raw?.content)
+        ? raw.content.filter(item => item?.type === 'text').map(item => item.text).join('\n').trim()
+        : ''
+      let parsed = structured
+      if (parsed === undefined) {
+        try { parsed = JSON.parse(text) } catch { parsed = undefined }
+      }
+      const state = typeof parsed?.state === 'string' ? parsed.state : 'unknown'
+      const view = { state, at: Date.now() }
+      if (parsed?.generation !== undefined) view.generation = parsed.generation
+      if (parsed?.wait_seconds !== undefined) view.waitSeconds = parsed.wait_seconds
+      return view
+    } catch (error) {
+      const aborted = controller.signal.aborted
+      return {
+        state: aborted ? 'timeout' : 'unavailable',
+        error: aborted ? 'ControlStatus 超时' : String(error?.message ?? error),
+        at: Date.now(),
+      }
+    } finally {
+      timers.clearTimeout(timer)
+    }
+  }
+  const controlOf = () => {
+    const cache = controlChecks.get(SERVER_NAMES.windows)
+    const now = Date.now()
+    if (cache?.value !== undefined && now - cache.at < CONTROL_TTL_MS) return cache.value
+    if (cache?.pending === undefined) {
+      const entry = cache ?? {}
+      entry.pending = probeControl()
+        .then(value => {
+          const previous = entry.value
+          entry.value = value
+          entry.at = Date.now()
+          if (previous?.state !== value.state) emit('mcp-control', { state: value.state, generation: value.generation })
+          return value
+        })
+        .catch(error => {
+          // 探测本身失败（工具表还没挂上/执行抛错）时降级为不可用，不能让健康检查拖垮 /health。
+          entry.value = { state: 'unavailable', error: String(error?.message ?? error), at: Date.now() }
+          entry.at = Date.now()
+          emit('mcp-control', { state: 'unavailable' })
+          return entry.value
+        })
+        .finally(() => { entry.pending = undefined })
+      controlChecks.set(SERVER_NAMES.windows, entry)
+    }
+    return cache?.value ?? { state: 'checking', at: now }
+  }
+
   const pruneWants = () => {
     if (wants.size <= WANT_LIMIT) return
     const ordered = [...wants.entries()].sort((a, b) => a[1].at - b[1].at)
@@ -380,12 +448,15 @@ export function createMcpController(ctx, options = {}) {
       } catch (error) {
         return { available: true, servers: [], error: String(error?.message ?? error) }
       }
+      const withControl = server => (server.name === SERVER_NAMES.windows && server.state === 'connected'
+        ? { ...server, control: controlOf() }
+        : server)
       const servers = views
         .filter(view => componentKeyOf(view.name) !== undefined)
-        .map(view => statusViewOf(view.name, view.status ?? {}))
+        .map(view => withControl(statusViewOf(view.name, view.status ?? {})))
       for (const name of [...disposers.keys()]) {
         if (!servers.some(server => server.name === name)) {
-          servers.push(statusViewOf(name, statuses.get(name) ?? { state: 'unknown', attempt: 0 }))
+          servers.push(withControl(statusViewOf(name, statuses.get(name) ?? { state: 'unknown', attempt: 0 })))
         }
       }
       return { available: true, servers }
@@ -541,6 +612,7 @@ export function componentViews({ engineeringInjected, gates, status, want: wantO
       ...(server?.nextRetryAtMs === undefined ? {} : { nextRetryAtMs: server.nextRetryAtMs }),
       ...(server?.connectedAt === undefined ? {} : { connectedAt: server.connectedAt }),
       ...(server?.recover === undefined ? {} : { recover: server.recover }),
+      ...(server?.control === undefined ? {} : { control: server.control }),
     }
   }
   const componentOf = (id, label, kind, enabled, desc, hint, serverName) => {
@@ -562,6 +634,7 @@ export function componentViews({ engineeringInjected, gates, status, want: wantO
       globallyActive: enabled !== true && (server.state === 'connected' || server.state === 'connecting' || server.state === 'reconnecting'),
       statusLabel: statusLabelOf(server),
       stateLabel: STATE_LABELS[server.state] ?? '状态未知',
+      ...(server.control === undefined ? {} : { control: server.control }),
       restartable: enabled && phase !== 'unavailable' && phase !== 'idle',
       server,
     }
