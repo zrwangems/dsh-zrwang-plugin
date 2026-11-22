@@ -183,7 +183,10 @@ export function createMcpController(ctx, options = {}) {
       if (parsed === undefined) {
         try { parsed = JSON.parse(text) } catch { parsed = undefined }
       }
-      const state = typeof parsed?.state === 'string' ? parsed.state : 'unknown'
+      let state = typeof parsed?.state === 'string' ? parsed.state : 'unknown'
+      if (state === 'unknown' && /CONTROL_UNAVAILABLE|state=unavailable|control (?:backend )?unavailable/i.test(text)) {
+        state = 'unavailable'
+      }
       const view = { state, at: Date.now() }
       if (parsed?.generation !== undefined) view.generation = parsed.generation
       if (parsed?.wait_seconds !== undefined) view.waitSeconds = parsed.wait_seconds
